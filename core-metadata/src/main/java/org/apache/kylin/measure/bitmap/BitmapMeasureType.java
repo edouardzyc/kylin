@@ -21,6 +21,7 @@ package org.apache.kylin.measure.bitmap;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.apache.kylin.metadata.datatype.DataTypeSerializer;
 import org.apache.kylin.metadata.model.FunctionDesc;
 import org.apache.kylin.metadata.model.MeasureDesc;
 import org.apache.kylin.metadata.model.TblColRef;
+import org.apache.kylin.metadata.realization.CapabilityResult;
 import org.apache.kylin.metadata.realization.SQLDigest;
 import org.apache.kylin.metadata.realization.SQLDigest.SQLCall;
 
@@ -165,9 +167,8 @@ public class BitmapMeasureType extends MeasureType<BitmapCounter> {
         return true;
     }
 
-    static final Map<String, Class<?>> UDAF_MAP = ImmutableMap.of(
-            FUNC_COUNT_DISTINCT, BitmapDistinctCountAggFunc.class,
-            FUNC_INTERSECT_COUNT_DISTINCT, BitmapIntersectDistinctCountAggFunc.class);
+    static final Map<String, Class<?>> UDAF_MAP = ImmutableMap.<String, Class<?>> of(
+            FUNC_COUNT_DISTINCT, BitmapDistinctCountAggFunc.class);
 
     @Override
     public Map<String, Class<?>> getRewriteCalciteAggrFunctions() {
@@ -183,5 +184,42 @@ public class BitmapMeasureType extends MeasureType<BitmapCounter> {
                     sqlDigest.groupbyColumns.add(col);
             }
         }
+    }
+
+
+    public CapabilityResult.CapabilityInfluence influenceCapabilityCheck(Collection<TblColRef> unmatchedDimensions,
+                                                                         Collection<FunctionDesc> unmatchedAggregations, SQLDigest digest, final MeasureDesc bitmap) {
+        if (unmatchedAggregations.size() == 0) {
+            return null;
+        }
+        boolean chosed = false;
+        FunctionDesc chosedFunction = null;
+        for (FunctionDesc functionDesc : unmatchedAggregations) {
+            if (functionDesc.getExpression().equals(FUNC_INTERSECT_COUNT_DISTINCT)) {
+                List<TblColRef> colRefs = functionDesc.getParameter().getColRefs();
+                TblColRef countDistinctCol = colRefs.get(0);
+                boolean equals = bitmap.getFunction().getParameter().getColRefs().get(0).equals(countDistinctCol);
+                if (equals) {
+                    chosed = true;
+                    chosedFunction = functionDesc;
+
+                }
+            }
+        }
+        if (chosed) {
+            unmatchedAggregations.remove(chosedFunction);
+            return new CapabilityResult.CapabilityInfluence() {
+                @Override
+                public double suggestCostMultiplier() {
+                    return 0.9;
+                }
+
+                @Override
+                public MeasureDesc getInvolvedMeasure() {
+                    return bitmap;
+                }
+            };
+        }
+        return null;
     }
 }

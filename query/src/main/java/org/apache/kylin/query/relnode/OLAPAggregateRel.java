@@ -376,6 +376,13 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
             if (aggFunc.equals(m.getFunction()))
                 return m.getFunction();
         }
+        if (aggFunc.getExpression().equalsIgnoreCase("intersect_count")) {
+            for (MeasureDesc m : measures) {
+                if (m.getFunction().getReturnType().equals("bitmap")
+                        && aggFunc.getParameter().equals(m.getFunction().getParameter()))
+                    return m.getFunction();
+            }
+        }
         return null;
     }
 

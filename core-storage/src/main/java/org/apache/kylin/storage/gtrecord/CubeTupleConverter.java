@@ -57,7 +57,7 @@ public class CubeTupleConverter implements ITupleConverter {
     private static final Logger logger = LoggerFactory.getLogger(CubeTupleConverter.class);
 
     final CubeSegment cubeSeg;
-    final Cuboid cuboid;
+    public final Cuboid cuboid;
     final TupleInfo tupleInfo;
     public final List<IDerivedColumnFiller> derivedColFillers;
 
@@ -71,7 +71,8 @@ public class CubeTupleConverter implements ITupleConverter {
     public final int nSelectedDims;
 
     public CubeTupleConverter(CubeSegment cubeSeg, Cuboid cuboid, //
-            Set<TblColRef> selectedDimensions, Set<FunctionDesc> selectedMetrics, int[] gtColIdx, TupleInfo returnTupleInfo) {
+            Set<TblColRef> selectedDimensions, Set<FunctionDesc> selectedMetrics, int[] gtColIdx,
+            TupleInfo returnTupleInfo) {
         this.cubeSeg = cubeSeg;
         this.cuboid = cuboid;
         this.gtColIdx = gtColIdx;
@@ -109,7 +110,8 @@ public class CubeTupleConverter implements ITupleConverter {
 
             MeasureType<?> measureType = metric.getMeasureType();
             if (measureType.needAdvancedTupleFilling()) {
-                Map<TblColRef, Dictionary<String>> dictionaryMap = buildDictionaryMap(measureType.getColumnsNeedDictionary(metric));
+                Map<TblColRef, Dictionary<String>> dictionaryMap = buildDictionaryMap(
+                        measureType.getColumnsNeedDictionary(metric));
                 advMeasureFillers.add(measureType.getAdvancedTupleFiller(metric, returnTupleInfo, dictionaryMap));
                 advMeasureIndexInGTValues.add(i);
             } else {
@@ -120,7 +122,8 @@ public class CubeTupleConverter implements ITupleConverter {
         }
 
         // prepare derived columns and filler
-        Map<Array<TblColRef>, List<DeriveInfo>> hostToDerivedInfo = cuboid.getCubeDesc().getHostToDerivedInfo(cuboid.getColumns(), null);
+        Map<Array<TblColRef>, List<DeriveInfo>> hostToDerivedInfo = cuboid.getCubeDesc()
+                .getHostToDerivedInfo(cuboid.getColumns(), null);
         for (Entry<Array<TblColRef>, List<DeriveInfo>> entry : hostToDerivedInfo.entrySet()) {
             TblColRef[] hostCols = entry.getKey().data;
             for (DeriveInfo deriveInfo : entry.getValue()) {
@@ -133,7 +136,7 @@ public class CubeTupleConverter implements ITupleConverter {
     }
 
     // load only needed dictionaries
-    private Map<TblColRef, Dictionary<String>> buildDictionaryMap(List<TblColRef> columnsNeedDictionary) {
+    protected Map<TblColRef, Dictionary<String>> buildDictionaryMap(List<TblColRef> columnsNeedDictionary) {
         Map<TblColRef, Dictionary<String>> result = Maps.newHashMap();
         for (TblColRef col : columnsNeedDictionary) {
             result.put(col, cubeSeg.getDictionary(col));
@@ -273,22 +276,27 @@ public class CubeTupleConverter implements ITupleConverter {
         String[] pkCols = join.getPrimaryKey();
         String snapshotResPath = cubeSegment.getSnapshotResPath(tableName);
         if (snapshotResPath == null)
-            throw new IllegalStateException("No snaphot for table '" + tableName + "' found on cube segment" + cubeSegment.getCubeInstance().getName() + "/" + cubeSegment);
+            throw new IllegalStateException("No snaphot for table '" + tableName + "' found on cube segment"
+                    + cubeSegment.getCubeInstance().getName() + "/" + cubeSegment);
 
         try {
             SnapshotTable snapshot = snapshotMgr.getSnapshotTable(snapshotResPath);
             TableDesc tableDesc = metaMgr.getTableDesc(tableName, cubeSegment.getProject());
-            EnhancedStringLookupTable enhancedStringLookupTable = new EnhancedStringLookupTable(tableDesc, pkCols, snapshot);
-            logger.info("Time to get lookup up table for {} is {} ", join.getPKSide().getTableName(), (System.currentTimeMillis() - ts));
+            EnhancedStringLookupTable enhancedStringLookupTable = new EnhancedStringLookupTable(tableDesc, pkCols,
+                    snapshot);
+            logger.info("Time to get lookup up table for {} is {} ", join.getPKSide().getTableName(),
+                    (System.currentTimeMillis() - ts));
             return enhancedStringLookupTable;
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to load lookup table " + tableName + " from snapshot " + snapshotResPath, e);
+            throw new IllegalStateException(
+                    "Failed to load lookup table " + tableName + " from snapshot " + snapshotResPath, e);
         }
     }
 
     public static class EnhancedStringLookupTable extends LookupStringTable {
 
-        public EnhancedStringLookupTable(TableDesc tableDesc, String[] keyColumns, IReadableTable table) throws IOException {
+        public EnhancedStringLookupTable(TableDesc tableDesc, String[] keyColumns, IReadableTable table)
+                throws IOException {
             super(tableDesc, keyColumns, table);
         }
 

@@ -51,6 +51,7 @@ import org.apache.kylin.storage.StorageContext;
 import org.apache.kylin.storage.hybrid.HybridInstance;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  */
@@ -164,12 +165,13 @@ public class OLAPContext {
 
     public SQLDigest getSQLDigest() {
         if (sqlDigest == null)
-            sqlDigest = new SQLDigest(firstTableScan.getTableName(), allColumns, joins, // model
-                    groupByColumns, subqueryJoinParticipants, // group by
-                    metricsColumns, aggregations, aggrSqlCalls, // aggregation
-                    filterColumns, filter, havingFilter, // filter
-                    sortColumns, sortOrders, limitPrecedesAggr, // sort & limit
-                    involvedMeasure);
+            sqlDigest = new SQLDigest(firstTableScan.getTableName(), Sets.newHashSet(allColumns),
+                    Lists.newLinkedList(joins), // model
+                    Lists.newArrayList(groupByColumns), Sets.newHashSet(subqueryJoinParticipants), // group by
+                    Sets.newHashSet(metricsColumns), Lists.newArrayList(aggregations), Lists.newArrayList(aggrSqlCalls), // aggregation
+                    Sets.newHashSet(filterColumns), filter, havingFilter, // filter
+                    Lists.newArrayList(sortColumns), Lists.newArrayList(sortOrders), limitPrecedesAggr, // sort & limit
+                    Sets.newHashSet(involvedMeasure));
         return sqlDigest;
     }
 
@@ -228,6 +230,7 @@ public class OLAPContext {
         }
         fixedModel = false;
     }
+
     public void bindVariable(DataContext dataContext) {
         bindVariable(this.filter, dataContext);
     }

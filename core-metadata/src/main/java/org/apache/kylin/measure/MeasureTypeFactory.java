@@ -25,6 +25,7 @@ import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.KylinConfigCannotInitException;
 import org.apache.kylin.measure.basic.BasicMeasureType;
 import org.apache.kylin.measure.bitmap.BitmapMeasureType;
+import org.apache.kylin.measure.bitmap.intersect.IntersectMeasureType;
 import org.apache.kylin.measure.dim.DimCountDistinctMeasureType;
 import org.apache.kylin.measure.extendedcolumn.ExtendedColumnMeasureType;
 import org.apache.kylin.measure.hllc.HLLCMeasureType;
@@ -42,10 +43,10 @@ import com.google.common.collect.Maps;
 
 /**
  * Factory for MeasureType.
- * 
+ *
  * The factory registers itself by claiming the aggregation function and data type it supports,
  * to match a measure descriptor in cube definition.
- * 
+ *
  * E.g. HyperLogLog measure type claims "COUNT_DISCINT" as function and "hllc" as data type to
  * match measure descriptor:
  * <pre>
@@ -62,7 +63,7 @@ import com.google.common.collect.Maps;
     }
   }
 </pre>
- * 
+ *
  * @param <T> the Java type of aggregation data object, e.g. HLLCounter
  */
 abstract public class MeasureTypeFactory<T> {
@@ -71,7 +72,7 @@ abstract public class MeasureTypeFactory<T> {
 
     /**
      * Create a measure type with specified aggregation function and data type.
-     * 
+     *
      * @param funcName should always match this factory's claim <code>getAggrFunctionName()</code>
      * @param dataType should always match this factory's claim <code>getAggrDataTypeName()</code>
      */
@@ -106,6 +107,7 @@ abstract public class MeasureTypeFactory<T> {
 
         // five built-in advanced measure types
         factoryInsts.add(new HLLCMeasureType.Factory());
+        factoryInsts.add(new IntersectMeasureType.Factory());
         factoryInsts.add(new BitmapMeasureType.Factory());
         factoryInsts.add(new TopNMeasureType.Factory());
         factoryInsts.add(new RawMeasureType.Factory());

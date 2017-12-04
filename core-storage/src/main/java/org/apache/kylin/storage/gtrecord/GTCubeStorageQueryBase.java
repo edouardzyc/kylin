@@ -115,6 +115,7 @@ public abstract class GTCubeStorageQueryBase implements IStorageQuery {
         RawQueryLastHacker.hackNoAggregations(sqlDigest, cubeDesc, returnTupleInfo);
 
         // Customized measure taking effect: e.g. allow custom measures to help raw queries
+        //  this maybe change the OLAPContext
         notifyBeforeStorageQuery(sqlDigest);
 
         Collection<TblColRef> groups = sqlDigest.groupbyColumns;

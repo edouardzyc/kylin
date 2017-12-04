@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.kylin.common.util.ByteArray;
 import org.apache.kylin.common.util.Bytes;
 import org.apache.kylin.common.util.Dictionary;
+import org.apache.kylin.dimension.DimensionEncodingInfo;
 import org.apache.kylin.measure.MeasureAggregator;
 import org.apache.kylin.measure.MeasureIngester;
 import org.apache.kylin.measure.MeasureType;
@@ -114,7 +115,8 @@ public class ExtendedColumnMeasureType extends MeasureType<ByteArray> {
     }
 
     @Override
-    public CapabilityResult.CapabilityInfluence influenceCapabilityCheck(Collection<TblColRef> unmatchedDimensions, Collection<FunctionDesc> unmatchedAggregations, SQLDigest digest, final MeasureDesc measureDesc) {
+    public CapabilityResult.CapabilityInfluence influenceCapabilityCheck(Collection<TblColRef> unmatchedDimensions,
+            Collection<FunctionDesc> unmatchedAggregations, SQLDigest digest, final MeasureDesc measureDesc) {
         TblColRef extendedCol = getExtendedColumn(measureDesc.getFunction());
 
         if (!unmatchedDimensions.contains(extendedCol)) {
@@ -144,9 +146,12 @@ public class ExtendedColumnMeasureType extends MeasureType<ByteArray> {
         return true;
     }
 
-    public IAdvMeasureFiller getAdvancedTupleFiller(FunctionDesc function, TupleInfo returnTupleInfo, Map<TblColRef, Dictionary<String>> dictionaryMap) {
+    public IAdvMeasureFiller getAdvancedTupleFiller(FunctionDesc function, TupleInfo returnTupleInfo,
+            Map<TblColRef, Dictionary<String>> dictionaryMap) {
         final TblColRef extended = getExtendedColumn(function);
-        final int extendedColumnInTupleIdx = returnTupleInfo.hasColumn(extended) ? returnTupleInfo.getColumnIndex(extended) : -1;
+        final int extendedColumnInTupleIdx = returnTupleInfo.hasColumn(extended)
+                ? returnTupleInfo.getColumnIndex(extended)
+                : -1;
 
         if (extendedColumnInTupleIdx == -1) {
             throw new RuntimeException("Extended column is not required in returnTupleInfo");
@@ -176,6 +181,27 @@ public class ExtendedColumnMeasureType extends MeasureType<ByteArray> {
             public void fillTuple(Tuple tuple, int row) {
                 tuple.setDimensionValue(extendedColumnInTupleIdx, value);
             }
+
+            @Override
+            public int[] getDimensionIndexs() {
+                return new int[] { extendedColumnInTupleIdx };
+            }
+
+            @Override
+            public TblColRef[] getDimensionColumns() {
+                return new TblColRef[]{extended};
+            }
+
+            @Override
+            public int[] getMeasures() {
+                return new int[0];
+            }
+
+            @Override
+            public DimensionEncodingInfo[] getDimensionEncodingInfos() {
+                return new DimensionEncodingInfo[0];
+            }
+
         };
     }
 
@@ -216,7 +242,8 @@ public class ExtendedColumnMeasureType extends MeasureType<ByteArray> {
             }
 
             @Override
-            public ByteArray valueOf(String[] values, MeasureDesc measureDesc, Map<TblColRef, Dictionary<String>> dictionaryMap) {
+            public ByteArray valueOf(String[] values, MeasureDesc measureDesc,
+                    Map<TblColRef, Dictionary<String>> dictionaryMap) {
                 if (values.length <= 1)
                     throw new IllegalArgumentException();
 

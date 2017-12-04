@@ -246,7 +246,7 @@ public class ITKylinQueryTest extends KylinTestBase {
 
     @Test
     public void testTimeStampAdd() throws Exception {
-        execAndCompQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_timestamp", null, true);
+        execAndCompQuery(getQueryFolderPrefix() + "src/test/resources/query/temp", null, true);
     }
 
     @Test

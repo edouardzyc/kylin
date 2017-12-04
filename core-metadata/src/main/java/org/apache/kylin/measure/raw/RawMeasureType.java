@@ -28,6 +28,8 @@ import java.util.Map;
 import org.apache.kylin.common.util.ByteArray;
 import org.apache.kylin.common.util.BytesUtil;
 import org.apache.kylin.common.util.Dictionary;
+import org.apache.kylin.dimension.DictionaryDimEnc;
+import org.apache.kylin.dimension.DimensionEncodingInfo;
 import org.apache.kylin.measure.MeasureAggregator;
 import org.apache.kylin.measure.MeasureIngester;
 import org.apache.kylin.measure.MeasureType;
@@ -108,7 +110,8 @@ public class RawMeasureType extends MeasureType<List<ByteArray>> {
 
             //encode measure value to dictionary
             @Override
-            public List<ByteArray> valueOf(String[] values, MeasureDesc measureDesc, Map<TblColRef, Dictionary<String>> dictionaryMap) {
+            public List<ByteArray> valueOf(String[] values, MeasureDesc measureDesc,
+                    Map<TblColRef, Dictionary<String>> dictionaryMap) {
                 if (values.length != 1)
                     throw new IllegalArgumentException();
 
@@ -129,7 +132,8 @@ public class RawMeasureType extends MeasureType<List<ByteArray>> {
 
             //merge measure dictionary
             @Override
-            public List<ByteArray> reEncodeDictionary(List<ByteArray> value, MeasureDesc measureDesc, Map<TblColRef, Dictionary<String>> oldDicts, Map<TblColRef, Dictionary<String>> newDicts) {
+            public List<ByteArray> reEncodeDictionary(List<ByteArray> value, MeasureDesc measureDesc,
+                    Map<TblColRef, Dictionary<String>> oldDicts, Map<TblColRef, Dictionary<String>> newDicts) {
                 TblColRef colRef = getRawColumn(measureDesc.getFunction());
                 Dictionary<String> sourceDict = oldDicts.get(colRef);
                 Dictionary<String> mergedDict = newDicts.get(colRef);
@@ -167,7 +171,8 @@ public class RawMeasureType extends MeasureType<List<ByteArray>> {
         return Collections.singletonList(literalCol);
     }
 
-    public CapabilityResult.CapabilityInfluence influenceCapabilityCheck(Collection<TblColRef> unmatchedDimensions, Collection<FunctionDesc> unmatchedAggregations, SQLDigest digest, final MeasureDesc measureDesc) {
+    public CapabilityResult.CapabilityInfluence influenceCapabilityCheck(Collection<TblColRef> unmatchedDimensions,
+            Collection<FunctionDesc> unmatchedAggregations, SQLDigest digest, final MeasureDesc measureDesc) {
         //is raw query
         if (!digest.isRawQuery)
             return null;
@@ -236,9 +241,11 @@ public class RawMeasureType extends MeasureType<List<ByteArray>> {
     }
 
     @Override
-    public IAdvMeasureFiller getAdvancedTupleFiller(FunctionDesc function, TupleInfo tupleInfo, Map<TblColRef, Dictionary<String>> dictionaryMap) {
+    public IAdvMeasureFiller getAdvancedTupleFiller(FunctionDesc function, TupleInfo tupleInfo,
+            Map<TblColRef, Dictionary<String>> dictionaryMap) {
         final TblColRef literalCol = getRawColumn(function);
         final Dictionary<String> rawColDict = dictionaryMap.get(literalCol);
+        final DictionaryDimEnc dictionaryDimEnc = new DictionaryDimEnc(rawColDict);
         final int literalTupleIdx = tupleInfo.hasColumn(literalCol) ? tupleInfo.getColumnIndex(literalCol) : -1;
 
         return new IAdvMeasureFiller() {
@@ -265,10 +272,31 @@ public class RawMeasureType extends MeasureType<List<ByteArray>> {
                     throw new IllegalStateException();
 
                 ByteArray raw = rawIterator.next();
-                int key = BytesUtil.readUnsigned(raw.array(), raw.offset(), raw.length());
-                String colValue = rawColDict.getValueFromId(key);
+                String colValue = dictionaryDimEnc.decode(raw.array(), raw.offset(), raw.length());
                 tuple.setDimensionValue(literalTupleIdx, colValue);
             }
+
+            @Override
+            public int[] getDimensionIndexs() {
+                return new int[] { literalTupleIdx };
+            }
+
+            @Override
+            public TblColRef[] getDimensionColumns() {
+                return new TblColRef[]{literalCol};
+            }
+
+            @Override
+            public int[] getMeasures() {
+                return new int[0];
+            }
+
+            @Override
+            public DimensionEncodingInfo[] getDimensionEncodingInfos() {
+                return new DimensionEncodingInfo[] {
+                        new DimensionEncodingInfo(DictionaryDimEnc.ENCODING_NAME, null, 0) };
+            }
+
         };
     }
 

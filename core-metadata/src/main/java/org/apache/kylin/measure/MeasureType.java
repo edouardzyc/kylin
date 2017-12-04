@@ -25,6 +25,7 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 import org.apache.kylin.common.util.Dictionary;
+import org.apache.kylin.dimension.DimensionEncodingInfo;
 import org.apache.kylin.metadata.model.FunctionDesc;
 import org.apache.kylin.metadata.model.MeasureDesc;
 import org.apache.kylin.metadata.model.TblColRef;
@@ -167,5 +168,13 @@ abstract public class MeasureType<T> implements java.io.Serializable {
 
         /** Fill in specified row into tuple. */
         void fillTuple(Tuple tuple, int row);
+
+        int[] getDimensionIndexs();
+
+        TblColRef[] getDimensionColumns();
+
+        int[] getMeasures();
+
+        DimensionEncodingInfo[] getDimensionEncodingInfos();
     }
 }
