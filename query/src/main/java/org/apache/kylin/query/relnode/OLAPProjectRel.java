@@ -59,6 +59,7 @@ import org.apache.kylin.metadata.model.TblColRef.InnerDataTypeEnum;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  */
@@ -151,20 +152,18 @@ public class OLAPProjectRel extends Project implements OLAPRel {
 
     TblColRef translateRexNode(RexNode rexNode, ColumnRowType inputColumnRowType, String fieldName,
             Set<TblColRef> sourceCollector) {
-        TblColRef column = null;
         if (rexNode instanceof RexInputRef) {
             RexInputRef inputRef = (RexInputRef) rexNode;
-            column = translateRexInputRef(inputRef, inputColumnRowType, fieldName, sourceCollector);
+            return translateRexInputRef(inputRef, inputColumnRowType, fieldName, sourceCollector);
         } else if (rexNode instanceof RexLiteral) {
             RexLiteral literal = (RexLiteral) rexNode;
-            column = translateRexLiteral(literal);
+            return translateRexLiteral(literal);
         } else if (rexNode instanceof RexCall) {
             RexCall call = (RexCall) rexNode;
-            column = translateRexCall(call, inputColumnRowType, fieldName, sourceCollector);
+            return translateRexCall(call, inputColumnRowType, fieldName, sourceCollector);
         } else {
             throw new IllegalStateException("Unsupported RexNode " + rexNode);
         }
-        return column;
     }
 
     TblColRef translateFirstRexInputRef(RexCall call, ColumnRowType inputColumnRowType, String fieldName,
@@ -224,11 +223,30 @@ public class OLAPProjectRel extends Project implements OLAPRel {
         }
 
         List<RexNode> children = limitTranslateScope(call.getOperands(), operator);
-
+        Map<RexNode, TblColRef> nodeAndTblColMap = Maps.newHashMap();
+        List<TblColRef> tblColRefs = Lists.newArrayList();
         for (RexNode operand : children) {
-            translateRexNode(operand, inputColumnRowType, fieldName, sourceCollector);
+            nodeAndTblColMap.put(operand, translateRexNode(operand, inputColumnRowType, fieldName, sourceCollector));
+            tblColRefs.add(nodeAndTblColMap.get(operand));
         }
-        return TblColRef.newInnerColumn(fieldName, InnerDataTypeEnum.LITERAL, call.toString());
+
+        return TblColRef.newInnerColumn(fieldName, InnerDataTypeEnum.LITERAL, createInnerColumn(call, nodeAndTblColMap),
+                operator, tblColRefs);
+    }
+
+    private String createInnerColumn(RexCall call, Map<RexNode, TblColRef> nodeAndTblColMap) {
+        if (SqlStdOperatorTable.MULTIPLY.equals(call.getOperator())) {
+            String parserDescription = call.toString();
+            for (RexNode rexNode : call.getOperands()) {
+                if (nodeAndTblColMap.get(rexNode) == null) {
+                    continue;
+                }
+                parserDescription = parserDescription.replace(rexNode.toString(),
+                        nodeAndTblColMap.get(rexNode).toString());
+            }
+            return parserDescription;
+        }
+        return call.toString();
     }
 
     //in most cases it will return children itself

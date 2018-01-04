@@ -58,7 +58,7 @@ public class FunctionRule implements IValidatorRule<CubeDesc> {
      */
     @Override
     public void validate(CubeDesc cube, ValidateContext context) {
-        List<MeasureDesc> measures = cube.getMeasures();
+        List<MeasureDesc> measures = cube.getOuterMeasures();
 
         if (validateMeasureNamesDuplicated(measures, context)) {
             return;

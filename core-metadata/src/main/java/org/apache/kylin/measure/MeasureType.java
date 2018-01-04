@@ -18,6 +18,12 @@
 
 package org.apache.kylin.measure;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import com.google.common.collect.Lists;
 import org.apache.kylin.common.util.Dictionary;
 import org.apache.kylin.metadata.model.FunctionDesc;
 import org.apache.kylin.metadata.model.MeasureDesc;
@@ -26,11 +32,6 @@ import org.apache.kylin.metadata.realization.CapabilityResult.CapabilityInfluenc
 import org.apache.kylin.metadata.realization.SQLDigest;
 import org.apache.kylin.metadata.tuple.Tuple;
 import org.apache.kylin.metadata.tuple.TupleInfo;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * MeasureType captures how a kind of aggregation is defined, how it is calculated 
@@ -48,6 +49,14 @@ abstract public class MeasureType<T> implements java.io.Serializable {
     /** Validates a user defined FunctionDesc has expected parameter etc. Throw IllegalArgumentException if anything wrong. */
     public void validate(FunctionDesc functionDesc) throws IllegalArgumentException {
         return;
+    }
+
+    /**
+     * A user defined measure (outer measure) could translate into one or more internal measures which are the
+     * actual measures get computed and stored in cube.
+     */
+    public List<FunctionDesc> convertToInternalMeasures(FunctionDesc functionDesc) {
+        return Lists.newArrayList(functionDesc);
     }
 
     /** Although most aggregated object takes only 8 bytes like long or double, 
@@ -95,7 +104,8 @@ abstract public class MeasureType<T> implements java.io.Serializable {
      * be modified to drop the satisfied dimension or measure, and a CapabilityInfluence object
      * must be returned to mark the contribution of this measure type.
      */
-    public CapabilityInfluence influenceCapabilityCheck(Collection<TblColRef> unmatchedDimensions, Collection<FunctionDesc> unmatchedAggregations, SQLDigest digest, MeasureDesc measureDesc) {
+    public CapabilityInfluence influenceCapabilityCheck(Collection<TblColRef> unmatchedDimensions,
+            Collection<FunctionDesc> unmatchedAggregations, SQLDigest digest, MeasureDesc measureDesc) {
         return null;
     }
 
@@ -142,7 +152,8 @@ abstract public class MeasureType<T> implements java.io.Serializable {
     }
 
     /** The advanced filling mode, multiple tuples per storage record. */
-    public IAdvMeasureFiller getAdvancedTupleFiller(FunctionDesc function, TupleInfo returnTupleInfo, Map<TblColRef, Dictionary<String>> dictionaryMap) {
+    public IAdvMeasureFiller getAdvancedTupleFiller(FunctionDesc function, TupleInfo returnTupleInfo,
+            Map<TblColRef, Dictionary<String>> dictionaryMap) {
         throw new UnsupportedOperationException();
     }
 

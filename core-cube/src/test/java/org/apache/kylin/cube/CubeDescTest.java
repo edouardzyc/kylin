@@ -34,7 +34,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.google.common.collect.Lists;
 import org.apache.kylin.common.util.Array;
 import org.apache.kylin.common.util.JsonUtil;
 import org.apache.kylin.common.util.LocalFileMetadataTestCase;
@@ -56,6 +55,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
@@ -168,6 +168,9 @@ public class CubeDescTest extends LocalFileMetadataTestCase {
     public void testGoodInit() throws Exception {
         CubeDesc cubeDesc = CubeDescManager.getInstance(getTestConfig()).getCubeDesc(CUBE_WITH_SLR_DESC);
         cubeDesc.init(getTestConfig());
+
+        //forward compatible
+        assertArrayEquals(cubeDesc.getMeasures().toArray(), cubeDesc.getOuterMeasures().toArray());
     }
 
     @Test
@@ -377,14 +380,15 @@ public class CubeDescTest extends LocalFileMetadataTestCase {
         metaFile.renameTo(new File(path.substring(0, path.length() - 4)));
 
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Too many rowkeys (78) in CubeDesc, please try to reduce dimension number or adopt derived dimensions");
+        thrown.expectMessage(
+                "Too many rowkeys (78) in CubeDesc, please try to reduce dimension number or adopt derived dimensions");
         getTestConfig().clearManagers();
         CubeDesc cubeDesc = CubeDescManager.getInstance(getTestConfig()).getCubeDesc("ut_78_rowkeys");
         cubeDesc.init(getTestConfig());
     }
 
     @Test
-    public void testValidateNotifyList() throws Exception{
+    public void testValidateNotifyList() throws Exception {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Email [test] is not validation.");
 
@@ -493,5 +497,4 @@ public class CubeDescTest extends LocalFileMetadataTestCase {
         Assert.assertNotNull(lc);
         Assert.assertTrue(lc.getAllCuboids().size() > 0);
     }
-
 }

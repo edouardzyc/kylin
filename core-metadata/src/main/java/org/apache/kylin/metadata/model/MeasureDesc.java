@@ -19,12 +19,14 @@
 package org.apache.kylin.metadata.model;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Lists;
 
 /**
  */
@@ -41,6 +43,24 @@ public class MeasureDesc implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Deprecated
     private String dependentMeasureRef;
+
+    public List<MeasureDesc> getInternalMeasure(DataModelDesc model) {
+        List<MeasureDesc> implementMeasures = Lists.newArrayList();
+        List<FunctionDesc> functionDescs = function.getMeasureType().convertToInternalMeasures(function);
+        if (functionDescs.size() == 1) {
+            return Lists.newArrayList(this);
+        }
+
+        int i = 0;
+        for (FunctionDesc functionDesc : functionDescs) {
+            MeasureDesc desc = new MeasureDesc();
+            desc.setFunction(functionDesc);
+            desc.setName(name + "_" + i++);
+            desc.setDependentMeasureRef(dependentMeasureRef);
+            implementMeasures.add(desc);
+        }
+        return implementMeasures;
+    }
 
     public String getName() {
         return name;
@@ -85,7 +105,8 @@ public class MeasureDesc implements Serializable {
         if (!function.equals(that.getFunction()))
             return false;
 
-        if (dependentMeasureRef != null && that.getDependentMeasureRef() == null || dependentMeasureRef == null && that.getDependentMeasureRef() != null)
+        if (dependentMeasureRef != null && that.getDependentMeasureRef() == null
+                || dependentMeasureRef == null && that.getDependentMeasureRef() != null)
             return false;
 
         if (dependentMeasureRef == null && that.getDependentMeasureRef() == null)

@@ -73,6 +73,7 @@ public class FunctionDesc implements Serializable {
 
     public static final String PARAMETER_TYPE_CONSTANT = "constant";
     public static final String PARAMETER_TYPE_COLUMN = "column";
+    public static final String PARAMETER_TYPE_MATH_EXPRESSION = "math_expression";
 
     @JsonProperty("expression")
     private String expression;
@@ -158,6 +159,9 @@ public class FunctionDesc implements Serializable {
             if (isMax() || isMin()) {
                 return parameter.getColRefs().get(0).getType();
             } else if (isSum()) {
+                if (parameter.isMathExpressionType())
+                    return returnDataType;
+
                 return parameter.getColRefs().get(0).getType();
             } else if (isCount()) {
                 return DataType.getType("bigint");
@@ -205,9 +209,14 @@ public class FunctionDesc implements Serializable {
     public String getFullExpression() {
         StringBuilder sb = new StringBuilder(expression);
         sb.append("(");
-        if (parameter != null) {
-            sb.append(parameter.getValue());
+        ParameterDesc desc = parameter;
+        while (desc != null) {
+            sb.append(desc.getValue());
+            desc = desc.getNextParameter();
+            if (desc != null)
+                sb.append(",");
         }
+
         sb.append(")");
         return sb.toString();
     }
@@ -249,7 +258,7 @@ public class FunctionDesc implements Serializable {
     public void setExpression(String expression) {
         this.expression = expression;
     }
-    
+
     public ParameterDesc getParameter() {
         return parameter;
     }
@@ -314,6 +323,13 @@ public class FunctionDesc implements Serializable {
             } else {
                 return parameter.equalInArbitraryOrder(other.parameter);
             }
+        } else if (isSum()) {
+            if (parameter == null) {
+                if (other.parameter != null)
+                    return false;
+            } else {
+                return parameter.equalSum(other.parameter);
+            }
         } else if (!isCount()) { // NOTE: don't check the parameter of count()
             if (parameter == null) {
                 if (other.parameter != null)
@@ -332,5 +348,4 @@ public class FunctionDesc implements Serializable {
         return "FunctionDesc [expression=" + expression + ", parameter=" + parameter + ", returnType=" + returnType
                 + "]";
     }
-
 }

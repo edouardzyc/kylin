@@ -445,7 +445,7 @@ public class CubeDescCreator {
         desc.setDescription("");
         desc.setLastModified(0L);
         desc.setDimensions(dimensionDescList);
-        desc.setMeasures(measureDescList);
+        desc.setOuterMeasures(measureDescList);
         desc.setRowkey(rowKeyDesc);
         desc.setHbaseMapping(hBaseMapping);
         desc.setNotifyList(Lists.<String> newArrayList());

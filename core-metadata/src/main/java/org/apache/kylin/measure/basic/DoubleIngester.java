@@ -22,13 +22,20 @@ import java.util.Map;
 
 import org.apache.kylin.common.util.Dictionary;
 import org.apache.kylin.measure.MeasureIngester;
+import org.apache.kylin.metadata.model.FunctionDesc;
 import org.apache.kylin.metadata.model.MeasureDesc;
+import org.apache.kylin.metadata.model.ParameterDesc;
 import org.apache.kylin.metadata.model.TblColRef;
 
 public class DoubleIngester extends MeasureIngester<Double> {
 
     @Override
     public Double valueOf(String[] values, MeasureDesc measureDesc, Map<TblColRef, Dictionary<String>> dictionaryMap) {
+        ParameterDesc param = measureDesc.getFunction().getParameter();
+        if (FunctionDesc.PARAMETER_TYPE_MATH_EXPRESSION.equals(param.getType())) {
+            return param.getExpressionParam().getValueOf(values).doubleValue();
+        }
+
         if (values.length > 1)
             throw new IllegalArgumentException();
 

@@ -195,11 +195,15 @@ public class CubeCapabilityChecker {
                 continue;
             }
             List<TblColRef> neededCols = parameterDesc.getColRefs();
-            if (neededCols.size() > 0 && dimCols.containsAll(neededCols)
-                    && FunctionDesc.BUILT_IN_AGGREGATIONS.contains(functionDesc.getExpression())) {
-                result.influences.add(new CapabilityResult.DimensionAsMeasure(functionDesc));
-                it.remove();
-                continue;
+            if (neededCols.size() > 0 && dimCols.containsAll(neededCols)) {
+                if (FunctionDesc.FUNC_SUM.equals(functionDesc.getExpression()) && parameterDesc.isMathExpressionType())
+                    continue;
+
+                if (FunctionDesc.BUILT_IN_AGGREGATIONS.contains(functionDesc.getExpression())) {
+                    result.influences.add(new CapabilityResult.DimensionAsMeasure(functionDesc));
+                    it.remove();
+                    continue;
+                }
             }
         }
     }

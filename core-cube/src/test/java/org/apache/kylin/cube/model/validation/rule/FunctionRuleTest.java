@@ -18,6 +18,7 @@
 
 package org.apache.kylin.cube.model.validation.rule;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -63,16 +64,20 @@ public class FunctionRuleTest extends LocalFileMetadataTestCase {
         assertTrue(vContext.getResults().length == 0);
     }
 
-    @Test(expected = IllegalStateException.class)
+    /**
+     * duplicated Measures will be removed when expanding outer measures to internal measures
+     */
+    @Test
     public void testValidateMeasureNamesDuplicated() throws IOException {
         File f = new File(LocalFileMetadataTestCase.LOCALMETA_TEST_DATA + "/cube_desc/ssb.json");
         CubeDesc desc = JsonUtil.readValue(new FileInputStream(f), CubeDesc.class);
 
-        MeasureDesc measureDescDuplicated = desc.getMeasures().get(1);
-        List<MeasureDesc> newMeasures = Lists.newArrayList(desc.getMeasures());
+        MeasureDesc measureDescDuplicated = desc.getOuterMeasures().get(1);
+        List<MeasureDesc> newMeasures = Lists.newArrayList(desc.getOuterMeasures());
         newMeasures.add(measureDescDuplicated);
-        desc.setMeasures(newMeasures);
+        desc.setOuterMeasures(newMeasures);
 
         desc.init(config);
+        assertEquals(4, desc.getMeasures().size());
     }
 }

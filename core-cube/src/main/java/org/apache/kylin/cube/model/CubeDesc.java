@@ -131,7 +131,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
         }
 
     }
-    
+
     // ============================================================================
 
     private KylinConfigExt config;
@@ -213,13 +213,16 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
 
     private Map<TblColRef, DeriveInfo> extendedColumnToHosts = Maps.newHashMap();
 
+    //used for computing and cube storage
+    private List<MeasureDesc> internalMeasures;
+
     transient volatile private CuboidScheduler cuboidScheduler = null;
 
     @Override
     public String resourceName() {
         return name;
     }
-    
+
     public boolean isEnableSharding() {
         //in the future may extend to other storage that is shard-able
         return storageType != IStorageAware.ID_HBASE && storageType != IStorageAware.ID_HYBRID;
@@ -271,7 +274,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
      */
     public List<FunctionDesc> listAllFunctions() {
         List<FunctionDesc> functions = new ArrayList<FunctionDesc>();
-        for (MeasureDesc m : measures) {
+        for (MeasureDesc m : internalMeasures) {
             functions.add(m.getFunction());
         }
         return functions;
@@ -401,11 +404,16 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
         this.dimensions = dimensions;
     }
 
-    public List<MeasureDesc> getMeasures() {
+    public List<MeasureDesc> getOuterMeasures() {
         return measures == null ? null : Collections.unmodifiableList(measures);
     }
 
-    public void setMeasures(List<MeasureDesc> measures) {
+    public List<MeasureDesc> getMeasures() {
+        return internalMeasures == null ? null
+                : Collections.unmodifiableList(Lists.<MeasureDesc> newArrayList(internalMeasures));
+    }
+
+    public void setOuterMeasures(List<MeasureDesc> measures) {
         this.measures = measures;
     }
 
@@ -635,6 +643,9 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
         initDimensionColumns();
         initMeasureColumns();
 
+        //convert some complex measures, like CORR, to one or more normal measures
+        expandInternalMeasures();
+
         rowkey.init(this);
 
         for (AggregationGroup agg : this.aggregationGroups) {
@@ -650,7 +661,8 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
                 Class<?> hbaseMappingAdapterClass = Class.forName(hbaseMappingAdapterName);
                 Method initMethod = hbaseMappingAdapterClass.getMethod("initHBaseMapping", CubeDesc.class);
                 initMethod.invoke(null, this);
-                Method initMeasureReferenceToColumnFamilyMethod = hbaseMappingAdapterClass.getMethod("initMeasureReferenceToColumnFamilyWithChecking", CubeDesc.class);
+                Method initMeasureReferenceToColumnFamilyMethod = hbaseMappingAdapterClass
+                        .getMethod("initMeasureReferenceToColumnFamilyWithChecking", CubeDesc.class);
                 initMeasureReferenceToColumnFamilyMethod.invoke(null, this);
             } catch (Exception e) {
                 logger.error("Wrong configuration for kylin.metadata.hbasemapping-adapter: class "
@@ -836,7 +848,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
         List<String> notifyList = getNotifyList();
         if (notifyList != null && !notifyList.isEmpty()) {
             EmailValidator emailValidator = EmailValidator.getInstance();
-            for (String email: notifyList) {
+            for (String email : notifyList) {
                 if (!emailValidator.isValid(email)) {
                     throw new IllegalArgumentException("Email [" + email + "] is not validation.");
                 }
@@ -1081,15 +1093,15 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
     }
 
     public void initMeasureReferenceToColumnFamily() {
-        if (measures == null || measures.size() == 0)
+        if (internalMeasures == null || internalMeasures.size() == 0)
             return;
 
         Map<String, MeasureDesc> measureLookup = new HashMap<String, MeasureDesc>();
-        for (MeasureDesc m : measures)
+        for (MeasureDesc m : internalMeasures)
             measureLookup.put(m.getName(), m);
         Map<String, Integer> measureIndexLookup = new HashMap<String, Integer>();
-        for (int i = 0; i < measures.size(); i++)
-            measureIndexLookup.put(measures.get(i).getName(), i);
+        for (int i = 0; i < internalMeasures.size(); i++)
+            measureIndexLookup.put(internalMeasures.get(i).getName(), i);
 
         BitSet checkEachMeasureExist = new BitSet();
         Set<String> measureSet = Sets.newHashSet();
@@ -1122,9 +1134,9 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
             }
         }
 
-        for (int i = 0; i < measures.size(); i++) {
+        for (int i = 0; i < internalMeasures.size(); i++) {
             checkState(checkEachMeasureExist.get(i),
-                    "measure (%s) does not exist in column family, or measure duplicates", measures.get(i));
+                    "measure (%s) does not exist in column family, or measure duplicates", internalMeasures.get(i));
         }
 
     }
@@ -1147,7 +1159,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
     }
 
     public boolean hasMemoryHungryMeasures() {
-        for (MeasureDesc measure : measures) {
+        for (MeasureDesc measure : internalMeasures) {
             if (measure.getFunction().getMeasureType().isMemoryHungry()) {
                 return true;
             }
@@ -1207,7 +1219,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
     public void setAutoMergeTimeRanges(long[] autoMergeTimeRanges) {
         this.autoMergeTimeRanges = autoMergeTimeRanges;
     }
-    
+
     public boolean isBroken() {
         return !errors.isEmpty();
     }
@@ -1312,7 +1324,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
         }
 
         // dictionaries in measures
-        for (MeasureDesc measure : measures) {
+        for (MeasureDesc measure : internalMeasures) {
             MeasureType<?> aggrType = measure.getFunction().getMeasureType();
             result.addAll(aggrType.getColumnsNeedDictionary(measure.getFunction()));
         }
@@ -1410,7 +1422,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
         }
         return null;
     }
-    
+
     public List<TblColRef> getAllGlobalDictColumns() {
         List<TblColRef> globalDictCols = new ArrayList<TblColRef>();
         List<DictionaryDesc> dictionaryDescList = getDictionaries();
@@ -1421,12 +1433,13 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
 
         for (DictionaryDesc dictionaryDesc : dictionaryDescList) {
             String cls = dictionaryDesc.getBuilderClass();
-            if (GlobalDictionaryBuilder.class.getName().equals(cls) || SegmentAppendTrieDictBuilder.class.getName().equals(cls))
+            if (GlobalDictionaryBuilder.class.getName().equals(cls)
+                    || SegmentAppendTrieDictBuilder.class.getName().equals(cls))
                 globalDictCols.add(dictionaryDesc.getColumnRef());
         }
         return globalDictCols;
     }
-    
+
     // UHC (ultra high cardinality column): contain the ShardByColumns and the GlobalDictionaryColumns
     public List<TblColRef> getAllUHCColumns() {
         List<TblColRef> uhcColumns = new ArrayList<TblColRef>();
@@ -1434,7 +1447,6 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
         uhcColumns.addAll(getShardByColumns());
         return uhcColumns;
     }
-
 
     public String getProject() {
         return getModel().getProject();
@@ -1448,7 +1460,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
         newCubeDesc.setDescription(cubeDesc.getDescription());
         newCubeDesc.setNullStrings(cubeDesc.getNullStrings());
         newCubeDesc.setDimensions(cubeDesc.getDimensions());
-        newCubeDesc.setMeasures(cubeDesc.getMeasures());
+        newCubeDesc.setOuterMeasures(cubeDesc.getOuterMeasures());
         newCubeDesc.setDictionaries(cubeDesc.getDictionaries());
         newCubeDesc.setRowkey(cubeDesc.getRowkey());
         newCubeDesc.setHbaseMapping(cubeDesc.getHbaseMapping());
@@ -1470,6 +1482,21 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
         newCubeDesc.setParentForward(cubeDesc.getParentForward());
         newCubeDesc.updateRandomUuid();
         return newCubeDesc;
+    }
+
+    public void expandInternalMeasures() {
+        if (internalMeasures == null)
+            internalMeasures = Lists.newArrayList();
+        if (CollectionUtils.isEmpty(measures)) {
+            return;
+        }
+
+        Set<MeasureDesc> descs = Sets.newLinkedHashSet();
+        descs.addAll(this.internalMeasures);
+        for (MeasureDesc measureDesc : measures) {
+            descs.addAll(measureDesc.getInternalMeasure(model));
+        }
+        this.internalMeasures = Lists.newArrayList(descs);
     }
 
     private Collection ensureOrder(Collection c) {

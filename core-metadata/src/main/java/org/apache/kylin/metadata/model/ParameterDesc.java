@@ -20,15 +20,20 @@ package org.apache.kylin.metadata.model;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.calcite.sql.SqlOperator;
+import org.apache.calcite.sql.fun.SqlStdOperatorTable;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -36,6 +41,62 @@ import com.google.common.collect.Sets;
 @SuppressWarnings("serial")
 @JsonAutoDetect(fieldVisibility = Visibility.NONE, getterVisibility = Visibility.NONE, isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
 public class ParameterDesc implements Serializable {
+
+    public static class ExpressionParam {
+        public static final String[] OPERATIONAL_SYMBOLS = new String[] { "+", "-", "*", "/" };
+        public static final String ADDITION = "+";
+        public static final String SUBSTRACTION = "-";
+        public static final String MULTIPLICATION = "*";
+        public static final String DIVISION = "/";
+
+        private String operator;
+        //operand is ordered or not will affect the result
+        private boolean needOrderedPram;
+
+        public ExpressionParam(String operator, boolean order) {
+            this.operator = operator;
+            this.needOrderedPram = order;
+        }
+
+        public ExpressionParam(SqlOperator operator, boolean order) {
+            this.operator = operator.getName();
+            this.needOrderedPram = order;
+        }
+
+        public String getOperator() {
+            return operator;
+        }
+
+        public void setOperator(String operator) {
+            this.operator = operator;
+        }
+
+        public static boolean isSupportOperation(String symbol) {
+            return Lists.newArrayList(OPERATIONAL_SYMBOLS).contains(symbol);
+        }
+
+        public boolean isOrder() {
+            return needOrderedPram;
+        }
+
+        public BigDecimal getValueOf(String[] operators) {
+            if (operators.length < 3 || operators[1] == null || operators[2] == null)
+                return new BigDecimal(0);
+            switch (operator) {
+            case ADDITION:
+                return new BigDecimal(operators[1]).add(new BigDecimal(operators[2]));
+            case SUBSTRACTION:
+                return new BigDecimal(operators[1]).subtract(new BigDecimal(operators[2]));
+
+            case MULTIPLICATION:
+                return new BigDecimal(operators[1]).multiply(new BigDecimal(operators[2]));
+            case DIVISION:
+                return new BigDecimal(operators[1]).divide(new BigDecimal(operators[2]));
+            default:
+                throw new IllegalArgumentException();
+            }
+        }
+    }
 
     public static ParameterDesc newInstance(Object... objs) {
         if (objs.length == 0)
@@ -46,9 +107,16 @@ public class ParameterDesc implements Serializable {
         Object obj = objs[0];
         if (obj instanceof TblColRef) {
             TblColRef col = (TblColRef) obj;
+            if (TblColRef.InnerDataTypeEnum.LITERAL.getDataType().equals(col.getType().getName())) {
+                return convertToParameterList(col);
+            }
             r.type = FunctionDesc.PARAMETER_TYPE_COLUMN;
             r.value = col.getIdentity();
             r.colRef = col;
+        } else if (obj instanceof ExpressionParam) {
+            r.type = FunctionDesc.PARAMETER_TYPE_MATH_EXPRESSION;
+            r.expressionParam = (ExpressionParam) obj;
+            r.value = ((ExpressionParam) obj).getOperator();
         } else {
             r.type = FunctionDesc.PARAMETER_TYPE_CONSTANT;
             r.value = (String) obj;
@@ -73,12 +141,23 @@ public class ParameterDesc implements Serializable {
     private List<TblColRef> allColRefsIncludingNexts = null;
     private Set<PlainParameter> plainParameters = null;
 
+    private ExpressionParam expressionParam;
+
     // Lazy evaluation
     public Set<PlainParameter> getPlainParameters() {
         if (plainParameters == null) {
             plainParameters = PlainParameter.createFromParameterDesc(this);
         }
         return plainParameters;
+    }
+
+    public ParameterDesc getCopyOf() {
+        ParameterDesc parameterDesc = new ParameterDesc();
+        parameterDesc.setNextParameter(this.nextParameter);
+        parameterDesc.setColRef(this.colRef);
+        parameterDesc.setValue(this.value);
+        parameterDesc.setType(this.type);
+        return parameterDesc;
     }
 
     public String getType() {
@@ -109,6 +188,10 @@ public class ParameterDesc implements Serializable {
         this.colRef = colRef;
     }
 
+    public ExpressionParam getExpressionParam() {
+        return expressionParam;
+    }
+
     public List<TblColRef> getColRefs() {
         if (allColRefsIncludingNexts == null) {
             List<TblColRef> all = new ArrayList<>(2);
@@ -128,8 +211,16 @@ public class ParameterDesc implements Serializable {
         return nextParameter;
     }
 
+    public void setNextParameter(ParameterDesc nextParameter) {
+        this.nextParameter = nextParameter;
+    }
+
     public boolean isColumnType() {
         return FunctionDesc.PARAMETER_TYPE_COLUMN.equals(type);
+    }
+
+    public boolean isMathExpressionType() {
+        return FunctionDesc.PARAMETER_TYPE_MATH_EXPRESSION.equals(type);
     }
 
     @Override
@@ -162,6 +253,20 @@ public class ParameterDesc implements Serializable {
         return p == null && q == null;
     }
 
+    public boolean equalSum(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        if (FunctionDesc.PARAMETER_TYPE_MATH_EXPRESSION.equals(this.getType())
+                && !this.getExpressionParam().isOrder()) {
+            return equalInArbitraryOrder(o);
+        } else {
+            return equals(o);
+        }
+    }
+
     public boolean equalInArbitraryOrder(Object o) {
         if (this == o)
             return true;
@@ -174,6 +279,19 @@ public class ParameterDesc implements Serializable {
         Set<PlainParameter> thatPlainParams = that.getPlainParameters();
 
         return thisPlainParams.containsAll(thatPlainParams) && thatPlainParams.containsAll(thisPlainParams);
+    }
+
+    private static ParameterDesc convertToParameterList(TblColRef col) {
+        if (SqlStdOperatorTable.MULTIPLY.equals(col.getOperator())) {
+            ExpressionParam param = new ExpressionParam(col.getOperator().getName(), false);
+            return newInstance(param, col.getOpreand().get(0), col.getOpreand().get(1));
+        } else {
+            ParameterDesc r = new ParameterDesc();
+            r.type = FunctionDesc.PARAMETER_TYPE_COLUMN;
+            r.value = col.getIdentity();
+            r.colRef = col;
+            return r;
+        }
     }
 
     @Override
