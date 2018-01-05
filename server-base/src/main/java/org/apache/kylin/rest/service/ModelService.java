@@ -140,7 +140,7 @@ public class ModelService extends BasicService {
         if (getDataModelManager().getDataModelDesc(desc.getName()) != null) {
             throw new BadRequestException(String.format(msg.getDUPLICATE_MODEL_NAME(), desc.getName()));
         }
-        
+
         DataModelDesc createdDesc = null;
         String owner = SecurityContextHolder.getContext().getAuthentication().getName();
         createdDesc = getDataModelManager().createDataModelDesc(desc, projectName, owner);
@@ -415,7 +415,7 @@ public class ModelService extends BasicService {
             RootPersistentEntity e = d.getEntity();
             if (e instanceof DataModelDesc) {
                 DataModelDesc m = (DataModelDesc) e;
-                if (modelName == null || modelName.equals(m.getName()))
+                if (StringUtils.isEmpty(modelName) || modelName.equals(m.getName()))
                     result.add(d);
             }
         }
