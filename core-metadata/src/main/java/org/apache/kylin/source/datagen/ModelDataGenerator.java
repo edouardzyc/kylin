@@ -64,11 +64,11 @@ public class ModelDataGenerator {
         this(model, nRows, ResourceStore.getStore(model.getConfig()));
     }
 
-    private ModelDataGenerator(DataModelDesc model, int nRows, ResourceStore outputStore) {
+    public ModelDataGenerator(DataModelDesc model, int nRows, ResourceStore outputStore) {
         this(model, nRows, outputStore, "/data");
     }
     
-    private ModelDataGenerator(DataModelDesc model, int nRows, ResourceStore outputStore, String outputPath) {
+    public ModelDataGenerator(DataModelDesc model, int nRows, ResourceStore outputStore, String outputPath) {
         this.model = model;
         this.targetRows = nRows;
         this.outputStore = outputStore;
@@ -76,6 +76,10 @@ public class ModelDataGenerator {
     }
 
     public void generate() throws IOException {
+        generate(true);
+    }
+
+    public void generate(boolean includeFact) throws IOException {
         Set<TableDesc> generated = new HashSet<>();
         Set<TableDesc> allTableDesc = new LinkedHashSet<>();
 
@@ -87,11 +91,15 @@ public class ModelDataGenerator {
             if (generated.contains(table))
                 continue;
 
-            logger.info(String.format("generating data for %s", table));
-            boolean gen = generateTable(table);
+            if (i == -1 && includeFact == false) { //skip fact table
+                logger.info(String.format("skipping fact table %s", table));
+            } else {
+                logger.info(String.format("generating data for %s", table));
+                boolean gen = generateTable(table);
 
-            if (gen)
-                generated.add(table);
+                if (gen)
+                    generated.add(table);
+            }
         }
 
         generateDDL(allTableDesc);
@@ -99,8 +107,10 @@ public class ModelDataGenerator {
 
     private boolean generateTable(TableDesc table) throws IOException {
         TableGenConfig config = new TableGenConfig(table, this);
-        if (!config.needGen)
+        if (!config.needGen) {
+            logger.info("Skip generation for table " + table.getIdentity());
             return false;
+        }
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         PrintWriter pout = new PrintWriter(new OutputStreamWriter(bout, "UTF-8"));
