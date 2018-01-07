@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -53,14 +52,9 @@ public class ParameterDesc implements Serializable {
         //operand is ordered or not will affect the result
         private boolean needOrderedPram;
 
-        public ExpressionParam(String operator, boolean order) {
+        public ExpressionParam(String operator, boolean needOrderedPram) {
             this.operator = operator;
-            this.needOrderedPram = order;
-        }
-
-        public ExpressionParam(SqlOperator operator, boolean order) {
-            this.operator = operator.getName();
-            this.needOrderedPram = order;
+            this.needOrderedPram = needOrderedPram;
         }
 
         public String getOperator() {
