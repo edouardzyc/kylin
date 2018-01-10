@@ -55,6 +55,8 @@ import org.apache.kylin.metadata.model.TblColRef;
 import org.apache.kylin.metadata.realization.SQLDigest;
 import org.apache.kylin.metadata.tuple.ITupleIterator;
 import org.apache.kylin.metadata.tuple.TupleInfo;
+import org.apache.kylin.shaded.htrace.org.apache.htrace.Span;
+import org.apache.kylin.shaded.htrace.org.apache.htrace.Trace;
 import org.apache.kylin.storage.IStorageQuery;
 import org.apache.kylin.storage.StorageContext;
 import org.apache.kylin.storage.translate.DerivedFilterTranslator;
@@ -82,7 +84,9 @@ public abstract class GTCubeStorageQueryBase implements IStorageQuery {
         GTCubeStorageQueryRequest request = getStorageQueryRequest(context, sqlDigest, returnTupleInfo);
 
         List<CubeSegmentScanner> scanners = Lists.newArrayList();
+        Span span = Trace.currentSpan();
         for (CubeSegment cubeSeg : cubeInstance.getSegments(SegmentStatusEnum.READY)) {
+            Trace.continueSpan(span);
             CubeSegmentScanner scanner;
 
             if (cubeDesc.getConfig().isSkippingEmptySegments() && cubeSeg.getInputRecords() == 0) {
@@ -95,7 +99,7 @@ public abstract class GTCubeStorageQueryBase implements IStorageQuery {
             if (!scanner.isSegmentSkipped())
                 scanners.add(scanner);
         }
-
+        Trace.continueSpan(span);
         if (scanners.isEmpty())
             return ITupleIterator.EMPTY_TUPLE_ITERATOR;
 
