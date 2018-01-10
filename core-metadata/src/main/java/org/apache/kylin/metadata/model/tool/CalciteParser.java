@@ -89,6 +89,15 @@ public class CalciteParser {
         sqlNode.accept(sqlVisitor);
     }
 
+    public static boolean hasAliasInExpr(String expr) {
+        try {
+            ensureNoAliasInExpr(expr);
+            return false;
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
     public static String insertAliasInExpr(String expr, String alias) {
         String prefix = "select ";
         String suffix = " from t";
