@@ -1014,11 +1014,6 @@
                     <version>2.5.3</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.7.8</version>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>2.17</version>
@@ -1256,7 +1251,7 @@
                         </configuration>
                         <executions>
                             <execution>
-                                <id>pre-test</id>
+                                <id>pre-unit-test</id>
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
@@ -1265,11 +1260,15 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>post-test</id>
+                                <id>post-unit-test</id>
                                 <phase>test</phase>
                                 <goals>
                                     <goal>report</goal>
                                 </goals>
+                                <configuration>
+                                    <dataFile>${sonar.jacoco.reportPath}</dataFile>
+                                    <outputDirectory>${project.reporting.outputDirectory}/jacoco-ut</outputDirectory>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -1362,7 +1361,7 @@
                         </configuration>
                         <executions>
                             <execution>
-                                <id>pre-test</id>
+                                <id>pre-unit-test</id>
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
@@ -1371,11 +1370,15 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>post-test</id>
+                                <id>post-unit-test</id>
                                 <phase>test</phase>
                                 <goals>
                                     <goal>report</goal>
                                 </goals>
+                                <configuration>
+                                    <dataFile>${sonar.jacoco.reportPath}</dataFile>
+                                    <outputDirectory>${project.reporting.outputDirectory}/jacoco-ut</outputDirectory>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
