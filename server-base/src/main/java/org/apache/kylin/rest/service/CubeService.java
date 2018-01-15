@@ -68,7 +68,6 @@ import org.apache.kylin.rest.response.CuboidTreeResponse;
 import org.apache.kylin.rest.response.CuboidTreeResponse.NodeInfo;
 import org.apache.kylin.rest.response.HBaseResponse;
 import org.apache.kylin.rest.response.MetricsResponse;
-import org.apache.kylin.rest.security.AclPermission;
 import org.apache.kylin.rest.util.AclEvaluate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,10 +99,6 @@ public class CubeService extends BasicService implements InitializingBean {
             .toCharArray();
 
     protected Cache<String, HBaseResponse> htableInfoCache = CacheBuilder.newBuilder().build();
-
-    @Autowired
-    @Qualifier("accessService")
-    private AccessService accessService;
 
     @Autowired
     @Qualifier("projectService")
@@ -215,10 +210,6 @@ public class CubeService extends BasicService implements InitializingBean {
         logger.info("New cube " + cubeName + " has " + cuboidCount + " cuboids");
 
         createdCube = getCubeManager().createCube(cubeName, project.getName(), createdDesc, owner);
-        accessService.init(createdCube, AclPermission.ADMINISTRATION);
-
-        accessService.inherit(createdCube, project);
-
         return createdCube;
     }
 
@@ -288,8 +279,6 @@ public class CubeService extends BasicService implements InitializingBean {
             String owner = SecurityContextHolder.getContext().getAuthentication().getName();
             ProjectInstance newProject = projectManager.moveRealizationToProject(RealizationType.CUBE, cube.getName(),
                     newProjectName, owner);
-
-            accessService.inherit(cube, newProject);
         }
 
         return updatedCubeDesc;
@@ -314,7 +303,6 @@ public class CubeService extends BasicService implements InitializingBean {
 
         int cubeNum = getCubeManager().getCubesByDesc(cube.getDescriptor().getName()).size();
         getCubeManager().dropCube(cube.getName(), cubeNum == 1);//only delete cube desc when no other cube is using it
-        accessService.clean(cube, true);
     }
 
     /**

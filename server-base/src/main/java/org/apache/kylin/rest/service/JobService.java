@@ -75,7 +75,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -98,10 +97,6 @@ public class JobService extends BasicService implements InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(JobService.class);
 
     private JobLock jobLock;
-
-    @Autowired
-    @Qualifier("accessService")
-    private AccessService accessService;
 
     @Autowired
     private AclEvaluate aclEvaluate;
@@ -218,9 +213,6 @@ public class JobService extends BasicService implements InitializingBean {
         JobInstance jobInstance = submitJobInternal(cube, tsRange, segRange, sourcePartitionOffsetStart,
                 sourcePartitionOffsetEnd, buildType, force, submitter);
 
-        accessService.init(jobInstance, null);
-        accessService.inherit(jobInstance, cube);
-
         return jobInstance;
     }
 
@@ -287,13 +279,6 @@ public class JobService extends BasicService implements InitializingBean {
             String submitter) throws IOException, JobException {
 
         Pair<JobInstance, List<JobInstance>> result = submitOptimizeJobInternal(cube, cuboidsRecommend, submitter);
-        accessService.init(result.getFirst(), null);
-        accessService.inherit(result.getFirst(), cube);
-        for (JobInstance jobInstance : result.getSecond()) {
-            accessService.init(jobInstance, null);
-            accessService.inherit(jobInstance, cube);
-        }
-
         return result;
     }
 
@@ -396,8 +381,6 @@ public class JobService extends BasicService implements InitializingBean {
         getExecutableManager().addJob(optimizeJob);
 
         JobInstance optimizeJobInstance = getSingleJobInstance(optimizeJob);
-        accessService.init(optimizeJobInstance, null);
-        accessService.inherit(optimizeJobInstance, cubeInstance);
 
         /** Update the checkpoint job */
         checkpointExecutable.getSubTasksForCheck().set(checkpointExecutable.getSubTasksForCheck().indexOf(toBeReplaced),
