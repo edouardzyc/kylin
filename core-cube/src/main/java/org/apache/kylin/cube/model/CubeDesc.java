@@ -236,7 +236,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
      * @return all columns this cube can support, including derived
      */
     public Set<TblColRef> listAllColumns() {
-        return allColumns == null ? null : Collections.unmodifiableSet(allColumns);
+        return allColumns == null ? Sets.<TblColRef> newHashSet() : Collections.unmodifiableSet(allColumns);
     }
 
     public Set<ColumnDesc> listAllColumnDescs() {
@@ -397,7 +397,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
     }
 
     public List<DimensionDesc> getDimensions() {
-        return dimensions == null ? null : Collections.unmodifiableList(dimensions);
+        return dimensions == null ? Lists.<DimensionDesc> newArrayList() : Collections.unmodifiableList(dimensions);
     }
 
     public void setDimensions(List<DimensionDesc> dimensions) {
@@ -405,11 +405,11 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
     }
 
     public List<MeasureDesc> getOuterMeasures() {
-        return measures == null ? null : Collections.unmodifiableList(measures);
+        return measures == null ? Lists.<MeasureDesc> newArrayList() : Collections.unmodifiableList(measures);
     }
 
     public List<MeasureDesc> getMeasures() {
-        return internalMeasures == null ? null
+        return internalMeasures == null ? Lists.<MeasureDesc> newArrayList()
                 : Collections.unmodifiableList(Lists.<MeasureDesc> newArrayList(internalMeasures));
     }
 
@@ -434,7 +434,8 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
     }
 
     public List<AggregationGroup> getAggregationGroups() {
-        return aggregationGroups == null ? null : Collections.unmodifiableList(aggregationGroups);
+        return aggregationGroups == null ? Lists.<AggregationGroup> newArrayList()
+                : Collections.unmodifiableList(aggregationGroups);
     }
 
     public void setAggregationGroups(List<AggregationGroup> aggregationGroups) {
@@ -458,7 +459,8 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
     }
 
     public List<String> getStatusNeedNotify() {
-        return statusNeedNotify == null ? null : Collections.unmodifiableList(statusNeedNotify);
+        return statusNeedNotify == null ? Lists.<String> newArrayList()
+                : Collections.unmodifiableList(statusNeedNotify);
     }
 
     public void setStatusNeedNotify(List<String> statusNeedNotify) {
@@ -645,7 +647,6 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
 
         //convert some complex measures, like CORR, to one or more normal measures
         expandInternalMeasures();
-
         rowkey.init(this);
 
         for (AggregationGroup agg : this.aggregationGroups) {
@@ -656,6 +657,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
 
         String hbaseMappingAdapterName = config.getHBaseMappingAdapter();
 
+        initColFamilyWithInternalMeasures();
         if (hbaseMappingAdapterName != null) {
             try {
                 Class<?> hbaseMappingAdapterClass = Class.forName(hbaseMappingAdapterName);
@@ -1497,6 +1499,44 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
             descs.addAll(measureDesc.getInternalMeasure(model));
         }
         this.internalMeasures = Lists.newArrayList(descs);
+    }
+
+    private void initColFamilyWithInternalMeasures() {
+        if (getHbaseMapping() == null || hbaseMapping.getColumnFamily() == null)
+            return;
+        if (measures == null || measures.size() == 0)
+            return;
+
+        Map<String, MeasureDesc> measureLookup = new HashMap<String, MeasureDesc>();
+        for (MeasureDesc m : measures)
+            measureLookup.put(m.getName(), m);
+        Map<String, MeasureDesc> internalMeasureLookup = new HashMap<String, MeasureDesc>();
+        for (MeasureDesc m : internalMeasures)
+            internalMeasureLookup.put(m.getName(), m);
+
+        Set<MeasureDesc> existedMeasures = Sets.newHashSet();
+        for (HBaseColumnFamilyDesc cf : getHbaseMapping().getColumnFamily()) {
+            for (HBaseColumnDesc c : cf.getColumns()) {
+                List<MeasureDesc> internalMeasures = Lists.newArrayList();
+                for (String measureName : c.getMeasureRefs()) {
+                    if (measureLookup.get(measureName.toUpperCase()) == null) {
+                        internalMeasures.add(internalMeasureLookup.get(measureName.toUpperCase()));
+                        continue;
+                    }
+                    List<MeasureDesc> interMeasures = measureLookup.get(measureName.toUpperCase())
+                            .getInternalMeasure(model);
+                    interMeasures.removeAll(existedMeasures);
+                    internalMeasures.addAll(interMeasures);
+                }
+
+                List<String> internalMeasuresNames = Lists.newArrayList();
+                for (MeasureDesc desc : internalMeasures)
+                    internalMeasuresNames.add(desc.getName());
+
+                existedMeasures.addAll(internalMeasures);
+                c.setMeasureRefs(internalMeasuresNames.toArray(new String[internalMeasuresNames.size()]));
+            }
+        }
     }
 
     private Collection ensureOrder(Collection c) {

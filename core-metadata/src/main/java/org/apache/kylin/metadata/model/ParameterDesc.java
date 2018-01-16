@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
+import org.apache.kylin.metadata.datatype.DataType;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -89,6 +90,41 @@ public class ParameterDesc implements Serializable {
             default:
                 throw new IllegalArgumentException();
             }
+        }
+
+        /**
+         * derived return type of MathExpression Parameter according to the operator and the the types of operands
+         */
+        public static DataType deriveReturnType(String operator, String operandType1, String operandType2) {
+            // for easily extend later, but now their return type are same
+            switch (operator) {
+            case ADDITION:
+                return derivedMultiplyReturnType(operandType1, operandType2);
+            case SUBSTRACTION:
+                return derivedMultiplyReturnType(operandType1, operandType2);
+
+            case MULTIPLICATION:
+                return derivedMultiplyReturnType(operandType1, operandType2);
+            case DIVISION:
+                return derivedMultiplyReturnType(operandType1, operandType2);
+            default:
+                throw new IllegalArgumentException();
+            }
+        }
+
+        private static DataType derivedMultiplyReturnType(String operandType1, String operandType2) {
+            //get max precision data type
+            DataType dataType1 = DataType.getType(operandType1);
+            DataType dataType2 = DataType.getType(operandType2);
+            if (dataType1.isDecimal() || dataType2.isDecimal()) {
+                return new DataType("decimal", Math.max(dataType1.getPrecision(), dataType2.getPrecision()),
+                        Math.max(dataType1.getScale(), dataType2.getScale()));
+            }
+
+            if (dataType1.isIntegerFamily() && dataType2.isIntegerFamily())
+                return DataType.getType("bigint");
+
+            return DataType.getType("double");
         }
     }
 
