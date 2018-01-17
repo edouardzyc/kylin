@@ -276,17 +276,17 @@ public class CubeManager implements IRealizationProvider {
             return updateCube(update);
         }
     }
-    
+
     public CubeInstance updateCubeSegStatus(CubeSegment seg, SegmentStatusEnum status) throws IOException {
         try (AutoLock lock = cubeMapLock.lockForWrite()) {
             CubeInstance cube = seg.getCubeInstance().latestCopyForWrite();
             seg = cube.getSegmentById(seg.getUuid());
-            
+
             CubeUpdate update = new CubeUpdate(cube);
             seg.setStatus(status);
             update.setToUpdateSegs(seg);
             return updateCube(update);
-        }        
+        }
     }
 
     private CubeInstance updateCubeWithRetry(CubeUpdate update, int retry) throws IOException {
@@ -523,7 +523,7 @@ public class CubeManager implements IRealizationProvider {
             return segAssist.optimizeSegments(cube, cuboidsRecommend);
         }
     }
-    
+
     public CubeSegment mergeSegments(CubeInstance cube, TSRange tsRange, SegmentRange segRange, boolean force)
             throws IOException {
         try (AutoLock lock = cubeMapLock.lockForWrite()) {
@@ -547,9 +547,9 @@ public class CubeManager implements IRealizationProvider {
             CubeSegment... optimizedSegments) throws IOException {
         try (AutoLock lock = cubeMapLock.lockForWrite()) {
             segAssist.promoteCheckpointOptimizeSegments(cube, recommendCuboids, optimizedSegments);
-        }        
+        }
     }
-    
+
     public List<CubeSegment> calculateHoles(String cubeName) {
         return segAssist.calculateHoles(cubeName);
     }
@@ -683,6 +683,14 @@ public class CubeManager implements IRealizationProvider {
                 tsRange = null;
                 Preconditions.checkArgument(segRange != null);
             } else {
+                /**In case of non-streaming segment,
+                 * tsRange is the same as segRange,
+                 * either could fulfill the merge job,
+                 * so it needs to convert segRange to tsRange if tsRange is null.
+                 **/
+                if (tsRange == null) {
+                    tsRange = new TSRange((Long) segRange.start.v, (Long) segRange.end.v);
+                }
                 segRange = null;
                 Preconditions.checkArgument(tsRange != null);
             }
@@ -830,10 +838,11 @@ public class CubeManager implements IRealizationProvider {
             updateCube(update);
         }
 
-        public void promoteNewlyOptimizeSegments(CubeInstance cube, CubeSegment... optimizedSegments) throws IOException {
+        public void promoteNewlyOptimizeSegments(CubeInstance cube, CubeSegment... optimizedSegments)
+                throws IOException {
             CubeInstance cubeCopy = cube.latestCopyForWrite();
             CubeSegment[] segCopy = cube.regetSegments(optimizedSegments);
-            
+
             for (CubeSegment seg : segCopy) {
                 seg.setStatus(SegmentStatusEnum.READY_PENDING);
             }
@@ -847,12 +856,12 @@ public class CubeManager implements IRealizationProvider {
                 CubeSegment... optimizedSegments) throws IOException {
             CubeInstance cubeCopy = cube.latestCopyForWrite();
             CubeSegment[] optSegCopy = cubeCopy.regetSegments(optimizedSegments);
-            
+
             if (cubeCopy.getSegments().size() != optSegCopy.length * 2) {
                 throw new IllegalStateException("For cube " + cubeCopy
                         + ", every READY segment should be optimized and all segments should be READY before optimizing");
             }
-            
+
             CubeSegment[] originalSegments = new CubeSegment[optSegCopy.length];
             int i = 0;
             for (CubeSegment seg : optSegCopy) {
@@ -863,7 +872,8 @@ public class CubeManager implements IRealizationProvider {
                             "For cube " + cubeCopy + ", segment " + seg + " missing StorageLocationIdentifier");
 
                 if (StringUtils.isBlank(seg.getLastBuildJobID()))
-                    throw new IllegalStateException("For cube " + cubeCopy + ", segment " + seg + " missing LastBuildJobID");
+                    throw new IllegalStateException(
+                            "For cube " + cubeCopy + ", segment " + seg + " missing LastBuildJobID");
 
                 seg.setStatus(SegmentStatusEnum.READY);
             }
