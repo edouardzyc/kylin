@@ -6,15 +6,15 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 package org.apache.kylin.rest.controller;
 
@@ -94,7 +94,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -184,7 +183,6 @@ public class CubeController extends BasicController {
         return cube;
     }
 
-
     /**
      * Get SQL of a Cube
      *
@@ -192,8 +190,7 @@ public class CubeController extends BasicController {
      * @return
      * @throws IOException
      */
-    @RequestMapping(value = "/{cubeName}/sql", method = { RequestMethod.GET }, produces = {
-            "application/json" })
+    @RequestMapping(value = "/{cubeName}/sql", method = { RequestMethod.GET }, produces = { "application/json" })
     @ResponseBody
     public GeneralResponse getSql(@PathVariable String cubeName) {
         CubeInstance cube = cubeService.getCubeManager().getCube(cubeName);
@@ -212,7 +209,7 @@ public class CubeController extends BasicController {
     /**
      * Get SQL of a Cube segment
      *
-     * @param cubeName Cube Name
+     * @param cubeName    Cube Name
      * @param segmentName Segment Name
      * @return
      * @throws IOException
@@ -322,7 +319,9 @@ public class CubeController extends BasicController {
         }
     }
 
-    /** Build/Rebuild a cube segment */
+    /**
+     * Build/Rebuild a cube segment
+     */
     @RequestMapping(value = "/{cubeName}/build", method = { RequestMethod.PUT }, produces = { "application/json" })
     @ResponseBody
     public JobInstance build(@PathVariable String cubeName, @RequestBody JobBuildRequest req) {
@@ -331,7 +330,9 @@ public class CubeController extends BasicController {
 
     /** Build/Rebuild a cube segment */
 
-    /** Build/Rebuild a cube segment */
+    /**
+     * Build/Rebuild a cube segment
+     */
     @RequestMapping(value = "/{cubeName}/rebuild", method = { RequestMethod.PUT }, produces = { "application/json" })
     @ResponseBody
     public JobInstance rebuild(@PathVariable String cubeName, @RequestBody JobBuildRequest req) {
@@ -339,7 +340,9 @@ public class CubeController extends BasicController {
                 req.getBuildType(), req.isForce() || req.isForceMergeEmptySegment());
     }
 
-    /** Build/Rebuild a cube segment by source offset */
+    /**
+     * Build/Rebuild a cube segment by source offset
+     */
     @RequestMapping(value = "/{cubeName}/build2", method = { RequestMethod.PUT }, produces = { "application/json" })
     @ResponseBody
     public JobInstance build2(@PathVariable String cubeName, @RequestBody JobBuildRequest2 req) {
@@ -358,7 +361,9 @@ public class CubeController extends BasicController {
         return rebuild2(cubeName, req);
     }
 
-    /** Build/Rebuild a cube segment by source offset */
+    /**
+     * Build/Rebuild a cube segment by source offset
+     */
     @RequestMapping(value = "/{cubeName}/rebuild2", method = { RequestMethod.PUT }, produces = { "application/json" })
     @ResponseBody
     public JobInstance rebuild2(@PathVariable String cubeName, @RequestBody JobBuildRequest2 req) {
@@ -418,7 +423,7 @@ public class CubeController extends BasicController {
     /**
      * Send a optimize cube segment job
      *
-     * @param cubeName Cube ID
+     * @param cubeName  Cube ID
      * @param segmentID for segment to be optimized
      */
     @RequestMapping(value = "/{cubeName}/recover_segment_optimize/{segmentID}", method = { RequestMethod.PUT })
@@ -662,8 +667,8 @@ public class CubeController extends BasicController {
             throw new InternalErrorException("Failed to deal with the request: " + e.getLocalizedMessage());
         }
 
-        if (!desc.getError().isEmpty()) {
-            updateRequest(cubeRequest, false, Joiner.on("\n").join(desc.getError()));
+        if (desc.isBroken()) {
+            updateRequest(cubeRequest, false, desc.getErrorsAsString());
             return cubeRequest;
         }
 
@@ -958,6 +963,7 @@ public class CubeController extends BasicController {
     /**
      * Initiate the very beginning of a streaming cube. Will seek the latest offests of each partition from streaming
      * source (kafka) and record in the cube descriptor; In the first build job, it will use these offests as the start point.
+     *
      * @param cubeName
      * @return
      */
