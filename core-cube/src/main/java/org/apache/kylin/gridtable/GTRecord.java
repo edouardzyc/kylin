@@ -18,6 +18,8 @@
 
 package org.apache.kylin.gridtable;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -215,6 +217,15 @@ public class GTRecord implements Comparable<GTRecord> {
         return buf;
     }
 
+    /** write data to given stream, like serialize */
+    public void exportColumns(ImmutableBitSet selectedCols, OutputStream outputStream) throws IOException {
+        for (int i = 0; i < selectedCols.trueBitCount(); i++) {
+            int c = selectedCols.trueBitAt(i);
+            Preconditions.checkNotNull(cols[c].array());
+            outputStream.write(cols[c].array(), cols[c].offset(), cols[c].length());
+        }
+    }
+
     /** write data to given buffer, like serialize */
     public void exportColumns(ImmutableBitSet selectedCols, ByteArray buf) {
         int pos = 0;
@@ -270,7 +281,6 @@ public class GTRecord implements Comparable<GTRecord> {
             buf.position(pos);
         }
     }
-
 
     /** change pointers to point to data in given buffer, this
      *  method allows to defined specific column to load */
