@@ -46,8 +46,7 @@ public class PushDownRunnerJdbcImpl implements IPushDownRunner {
     }
 
     @Override
-    public void executeQuery(String query, List<List<String>> results, List<SelectedColumnMeta> columnMetas)
-            throws Exception {
+    public void executeQuery(String query, List<List<String>> results, List<SelectedColumnMeta> columnMetas) {
         Statement statement = null;
         Connection connection = manager.getConnection();
         ResultSet resultSet = null;
@@ -70,6 +69,8 @@ public class PushDownRunnerJdbcImpl implements IPushDownRunner {
                         metaData.getPrecision(i), metaData.getScale(i), toSqlType(metaData.getColumnTypeName(i)),
                         metaData.getColumnTypeName(i), metaData.isReadOnly(i), false, false));
             }
+        } catch (Exception e) {
+            throw new RuntimeException("executeQuery failed", e);
         } finally {
             DBUtils.closeQuietly(resultSet);
             DBUtils.closeQuietly(statement);
@@ -120,13 +121,16 @@ public class PushDownRunnerJdbcImpl implements IPushDownRunner {
     }
 
     @Override
-    public void executeUpdate(String sql) throws Exception {
+    public void executeUpdate(String sql) {
         Statement statement = null;
         Connection connection = manager.getConnection();
 
         try {
             statement = connection.createStatement();
             statement.execute(sql);
+        } catch (Exception e) {
+            throw new RuntimeException("executeUpdate failed", e);
+
         } finally {
             DBUtils.closeQuietly(statement);
             manager.close(connection);

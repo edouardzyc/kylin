@@ -72,7 +72,7 @@ public class PushDownUtil {
     }
 
     private static Pair<List<List<String>>, List<SelectedColumnMeta>> tryPushDownQuery(String project, String sql,
-            String defaultSchema, SQLException sqlException, boolean isSelect, boolean isPrepare) throws Exception {
+            String defaultSchema, SQLException sqlException, boolean isSelect, boolean isPrepare) {
 
         KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
 

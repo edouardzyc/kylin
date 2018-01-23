@@ -35,8 +35,7 @@ public interface IPushDownRunner {
      * @param returnColumnMeta      an empty list to collect metadata of returning columns
      * @throws Exception if running pushdown query fails
      */
-    void executeQuery(String query, List<List<String>> returnRows, List<SelectedColumnMeta> returnColumnMeta) throws Exception;
-
+    void executeQuery(String query, List<List<String>> returnRows, List<SelectedColumnMeta> returnColumnMeta);
 
     /**
      * Run an pushdown non-query sql
@@ -45,8 +44,7 @@ public interface IPushDownRunner {
      *
      * @return whether the SQL is executed successfully
      *
-     * @throws Exception if running pushdown fails
      */
-    void executeUpdate(String sql) throws Exception;
+    void executeUpdate(String sql);
 
 }
