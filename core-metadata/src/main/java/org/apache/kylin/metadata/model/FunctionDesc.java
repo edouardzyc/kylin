@@ -61,11 +61,14 @@ public class FunctionDesc implements Serializable {
     public static final String FUNC_COUNT_DISTINCT = "COUNT_DISTINCT";
     public static final String FUNC_PERCENTILE = "PERCENTILE_APPROX";
     public static final Set<String> BUILT_IN_AGGREGATIONS = Sets.newHashSet();
+    public static final Set<String> DIMENSION_AS_MEASURES = Sets.newHashSet();
 
     static {
+        DIMENSION_AS_MEASURES.add(FUNC_MAX);
+        DIMENSION_AS_MEASURES.add(FUNC_MIN);
+
+        BUILT_IN_AGGREGATIONS.addAll(DIMENSION_AS_MEASURES);
         BUILT_IN_AGGREGATIONS.add(FUNC_COUNT);
-        BUILT_IN_AGGREGATIONS.add(FUNC_MAX);
-        BUILT_IN_AGGREGATIONS.add(FUNC_MIN);
         BUILT_IN_AGGREGATIONS.add(FUNC_SUM);
         BUILT_IN_AGGREGATIONS.add(FUNC_COUNT_DISTINCT);
         BUILT_IN_AGGREGATIONS.add(FUNC_PERCENTILE);
