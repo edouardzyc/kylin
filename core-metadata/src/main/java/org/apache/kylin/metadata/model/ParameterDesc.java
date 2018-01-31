@@ -249,6 +249,10 @@ public class ParameterDesc implements Serializable {
         return FunctionDesc.PARAMETER_TYPE_COLUMN.equals(type);
     }
 
+    public boolean isConstant() {
+        return FunctionDesc.PARAMETER_TYPE_CONSTANT.equals(type.toLowerCase());
+    }
+
     public boolean isMathExpressionType() {
         return FunctionDesc.PARAMETER_TYPE_MATH_EXPRESSION.equals(type);
     }

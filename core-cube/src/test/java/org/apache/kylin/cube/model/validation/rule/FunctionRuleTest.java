@@ -26,16 +26,18 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.JsonUtil;
 import org.apache.kylin.common.util.LocalFileMetadataTestCase;
 import org.apache.kylin.cube.model.CubeDesc;
 import org.apache.kylin.cube.model.validation.ValidateContext;
+import org.apache.kylin.metadata.model.FunctionDesc;
 import org.apache.kylin.metadata.model.MeasureDesc;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.Lists;
 
 public class FunctionRuleTest extends LocalFileMetadataTestCase {
     private static KylinConfig config;
@@ -79,5 +81,33 @@ public class FunctionRuleTest extends LocalFileMetadataTestCase {
 
         desc.init(config);
         assertEquals(4, desc.getMeasures().size());
+    }
+
+    @Test
+    public void testMultiCountMeasure() throws IOException {
+        File f = new File(LocalFileMetadataTestCase.LOCALMETA_TEST_DATA + "/cube_desc/ssb.json");
+        CubeDesc desc = JsonUtil.readValue(new FileInputStream(f), CubeDesc.class);
+
+        MeasureDesc measureDescDuplicated = desc.getOuterMeasures().get(1);
+
+        MeasureDesc newMeasure = new MeasureDesc();
+        newMeasure.setName("count_2");
+        newMeasure.setFunction(
+                FunctionDesc.newInstance("COUNT", measureDescDuplicated.getFunction().getParameter(), "bigint"));
+        List<MeasureDesc> newMeasures = Lists.newArrayList(desc.getOuterMeasures());
+        newMeasures.add(newMeasure);
+        desc.setOuterMeasures(newMeasures);
+
+        String[] measuresRefs = desc.getHbaseMapping().getColumnFamily()[0].getColumns()[0].getMeasureRefs();
+        String[] newMeasuresRefs = new String[measuresRefs.length + 1];
+        System.arraycopy(measuresRefs, 0, newMeasuresRefs, 0, measuresRefs.length);
+        newMeasuresRefs[measuresRefs.length] = "COUNT_2";
+        desc.getHbaseMapping().getColumnFamily()[0].getColumns()[0].setMeasureRefs(newMeasuresRefs);
+        desc.init(config);
+
+        ValidateContext vContext = new ValidateContext();
+        new FunctionRule().validate(desc, vContext);
+        vContext.print(System.out);
+        assertTrue(vContext.getResults().length == 0);
     }
 }

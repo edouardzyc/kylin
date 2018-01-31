@@ -145,8 +145,8 @@ public class FunctionDesc implements Serializable {
     }
 
     public String getRewriteFieldName() {
-        if (isCount()) {
-            return "_KY_" + "COUNT__"; // ignores parameter, count(*), count(1), count(col) are all the same
+        if (isCount() && !isCountOnColumn()) {
+            return "_KY_" + "COUNT__"; // ignores parameter, count(*) and count(1) are the same
         } else if (isCountDistinct()) {
             return "_KY_" + getFullExpressionInAlphabetOrder().replaceAll("[(),. ]", "_");
         } else {
@@ -197,6 +197,10 @@ public class FunctionDesc implements Serializable {
 
     public boolean isCount() {
         return FUNC_COUNT.equalsIgnoreCase(expression);
+    }
+
+    public boolean isCountOnColumn() {
+        return FUNC_COUNT.equalsIgnoreCase(expression) && parameter != null && parameter.isColumnType();
     }
 
     public boolean isCountDistinct() {
@@ -330,7 +334,7 @@ public class FunctionDesc implements Serializable {
             } else {
                 return parameter.equalSum(other.parameter);
             }
-        } else if (!isCount()) { // NOTE: don't check the parameter of count()
+        } else {
             if (parameter == null) {
                 if (other.parameter != null)
                     return false;
