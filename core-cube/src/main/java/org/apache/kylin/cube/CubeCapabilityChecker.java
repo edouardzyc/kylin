@@ -72,7 +72,7 @@ public class CubeCapabilityChecker {
 
             if (!unmatchedAggregations.isEmpty()) {
                 tryDimensionAsMeasures(unmatchedAggregations, result,
-                        cube.getDescriptor().listDimensionColumnsIncludingDerived(), true);
+                        cube.getDescriptor().listDimensionColumnsIncludingDerived());
             }
         } else {
             //for non query-on-facttable
@@ -91,7 +91,7 @@ public class CubeCapabilityChecker {
                         }
                     }
                 }
-                tryDimensionAsMeasures(Lists.newArrayList(aggrFunctions), result, dimCols, false);
+                tryDimensionAsMeasures(Lists.newArrayList(aggrFunctions), result, dimCols);
 
                 //2. more "dimensions" contributed by snapshot
                 if (!unmatchedDimensions.isEmpty()) {
@@ -190,31 +190,32 @@ public class CubeCapabilityChecker {
         return result;
     }
 
-    static void tryDimensionAsMeasures(Collection<FunctionDesc> unmatchedAggregations, CapabilityResult result,
-            Set<TblColRef> dimCols, boolean queryOnFactTable) {
+    private static void tryDimensionAsMeasures(Collection<FunctionDesc> unmatchedAggregations, CapabilityResult result,
+            Set<TblColRef> dimCols) {
 
         Iterator<FunctionDesc> it = unmatchedAggregations.iterator();
         while (it.hasNext()) {
             FunctionDesc functionDesc = it.next();
 
-            if (!queryOnFactTable && functionDesc.isCount()) {
-                it.remove();
+            // let calcite handle count
+            if (functionDesc.isCount()) {
+                if (functionDesc.getParameter() == null)
+                    it.remove();
+
                 continue;
             }
 
             // calcite can do aggregation from columns on-the-fly
             ParameterDesc parameterDesc = functionDesc.getParameter();
-            if (parameterDesc == null)
+            if (parameterDesc == null) {
                 continue;
-
-            Set<String> buildAggregations = queryOnFactTable ? FunctionDesc.DIMENSION_AS_MEASURES
-                    : FunctionDesc.BUILT_IN_AGGREGATIONS;
+            }
             List<TblColRef> neededCols = parameterDesc.getColRefs();
             if (neededCols.size() > 0 && dimCols.containsAll(neededCols)) {
                 if (FunctionDesc.FUNC_SUM.equals(functionDesc.getExpression()) && parameterDesc.isMathExpressionType())
                     continue;
 
-                if (buildAggregations.contains(functionDesc.getExpression())) {
+                if (FunctionDesc.BUILT_IN_AGGREGATIONS.contains(functionDesc.getExpression())) {
                     result.influences.add(new CapabilityResult.DimensionAsMeasure(functionDesc));
                     it.remove();
                     continue;
