@@ -1210,10 +1210,6 @@ abstract public class KylinConfigBase implements Serializable {
         return Lists.newArrayList(rules.split(","));
     }
 
-    public boolean isReplaceColCountWithCountStar() {
-        return Boolean.valueOf(getOptional("kylin.query.replace-count-column-with-count-star", "true"));
-    }
-
     //check KYLIN-1684, in most cases keep the default value
     public boolean isSkippingEmptySegments() {
         return Boolean.valueOf(getOptional("kylin.query.skip-empty-segments", "true"));

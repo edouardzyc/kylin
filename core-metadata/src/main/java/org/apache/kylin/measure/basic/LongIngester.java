@@ -26,11 +26,8 @@ import org.apache.kylin.metadata.model.FunctionDesc;
 import org.apache.kylin.metadata.model.MeasureDesc;
 import org.apache.kylin.metadata.model.ParameterDesc;
 import org.apache.kylin.metadata.model.TblColRef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LongIngester extends MeasureIngester<Long> {
-    private Logger logger = LoggerFactory.getLogger(LongIngester.class);
 
     @Override
     public Long valueOf(String[] values, MeasureDesc measureDesc, Map<TblColRef, Dictionary<String>> dictionaryMap) {
@@ -38,15 +35,8 @@ public class LongIngester extends MeasureIngester<Long> {
         if (FunctionDesc.PARAMETER_TYPE_MATH_EXPRESSION.equals(param.getType())) {
             return param.getExpressionParam().getValueOf(values).longValue();
         }
-
         if (values.length > 1)
             throw new IllegalArgumentException();
-
-        if (measureDesc.getFunction().isCount()) {
-            logger.info(values[0]);
-            logger.info(values[0] == null ? "null" : values[0]);
-            return (param.isConstant() || values[0] != null) ? new Long(1L) : new Long(0L);
-        }
 
         if (values[0] == null || values[0].length() == 0)
             return new Long(0L);

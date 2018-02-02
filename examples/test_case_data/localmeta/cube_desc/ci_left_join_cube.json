@@ -143,28 +143,6 @@
       }
     },
     {
-      "name": "SELLER_ID_COUNT",
-      "function": {
-        "expression": "COUNT",
-        "parameter": {
-          "type": "column",
-          "value": "TEST_KYLIN_FACT.SELLER_ID"
-        },
-        "returntype": "bigint"
-      }
-    },
-    {
-      "name": "CAL_DT_COUNT",
-      "function": {
-        "expression": "COUNT",
-        "parameter": {
-          "type": "column",
-          "value": "TEST_CAL_DT.CAL_DT"
-        },
-        "returntype": "bigint"
-      }
-    },
-    {
       "name": "ITEM_COUNT_SUM",
       "function": {
         "expression": "SUM",
@@ -184,17 +162,6 @@
           "value": "TEST_KYLIN_FACT.PRICE"
         },
         "returntype": "decimal(19,4)"
-      }
-    },
-    {
-      "name": "GMV_COUNT",
-      "function": {
-        "expression": "COUNT",
-        "parameter": {
-          "type": "column",
-          "value": "TEST_KYLIN_FACT.PRICE"
-        },
-        "returntype": "bigint"
       }
     },
     {
@@ -470,11 +437,8 @@
             "qualifier": "m",
             "measure_refs": [
               "TRANS_CNT",
-              "SELLER_ID_COUNT",
-              "CAL_DT_COUNT",
               "ITEM_COUNT_SUM",
               "GMV_SUM",
-              "GMV_COUNT",
               "GMV_MIN",
               "GMV_MAX"
             ]

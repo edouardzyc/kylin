@@ -168,7 +168,10 @@ class ProjectL2Cache {
     }
 
     private boolean belongToTable(FunctionDesc func, String table, DataModelDesc model) {
-        return model.getRootFactTable().getTableIdentity().equals(table);
+        // measure belong to the first column parameter's table
+        List<TblColRef> cols = func.getParameter().getColRefs();
+        String belongTo = cols.isEmpty() ? model.getRootFactTable().getTableIdentity() : cols.get(0).getTable();
+        return belongTo.equals(table);
     }
 
     // ============================================================================
@@ -209,8 +212,7 @@ class ProjectL2Cache {
             if (filterDesc != null) {
                 projectCache.extFilters.put(extFilterName, filterDesc);
             } else {
-                logger.warn(
-                        "External Filter '" + extFilterName + "' defined under project '" + project + "' is not found");
+                logger.warn("External Filter '" + extFilterName + "' defined under project '" + project + "' is not found");
             }
         }
 
@@ -257,17 +259,14 @@ class ProjectL2Cache {
         for (TblColRef col : allColumns) {
             TableDesc table = metaMgr.getTableDesc(col.getTable(), prjCache.project);
             if (table == null) {
-                logger.error("Realization '" + realization.getCanonicalName() + "' reports column '"
-                        + col.getCanonicalName() + "', but its table is not found by MetadataManager");
+                logger.error("Realization '" + realization.getCanonicalName() + "' reports column '" + col.getCanonicalName() + "', but its table is not found by MetadataManager");
                 return false;
             }
 
             if (!col.getColumnDesc().isComputedColumn()) {
                 ColumnDesc foundCol = table.findColumnByName(col.getName());
                 if (col.getColumnDesc().equals(foundCol) == false) {
-                    logger.error("Realization '" + realization.getCanonicalName() + "' reports column '"
-                            + col.getCanonicalName() + "', but it is not equal to '" + foundCol
-                            + "' according to MetadataManager");
+                    logger.error("Realization '" + realization.getCanonicalName() + "' reports column '" + col.getCanonicalName() + "', but it is not equal to '" + foundCol + "' according to MetadataManager");
                     return false;
                 }
             } else {
@@ -277,9 +276,7 @@ class ProjectL2Cache {
             // auto-define table required by realization for some legacy test case
             if (prjCache.tables.get(table.getIdentity()) == null) {
                 prjCache.tables.put(table.getIdentity(), new TableCache(table));
-                logger.warn(
-                        "Realization '" + realization.getCanonicalName() + "' reports column '" + col.getCanonicalName()
-                                + "' whose table is not defined in project '" + prjCache.project + "'");
+                logger.warn("Realization '" + realization.getCanonicalName() + "' reports column '" + col.getCanonicalName() + "' whose table is not defined in project '" + prjCache.project + "'");
             }
         }
 

@@ -60,9 +60,8 @@ public class BaseCuboidBuilder implements java.io.Serializable {
 
     protected KylinConfig kylinConfig;
 
-    public BaseCuboidBuilder(KylinConfig kylinConfig, CubeDesc cubeDesc, CubeSegment cubeSegment,
-            CubeJoinedFlatTableEnrich intermediateTableDesc, AbstractRowKeyEncoder rowKeyEncoder,
-            MeasureIngester<?>[] aggrIngesters, Map<TblColRef, Dictionary<String>> dictionaryMap) {
+    public BaseCuboidBuilder(KylinConfig kylinConfig, CubeDesc cubeDesc, CubeSegment cubeSegment, CubeJoinedFlatTableEnrich intermediateTableDesc,
+                             AbstractRowKeyEncoder rowKeyEncoder, MeasureIngester<?>[] aggrIngesters, Map<TblColRef, Dictionary<String>> dictionaryMap) {
         this.kylinConfig = kylinConfig;
         this.cubeDesc = cubeDesc;
         this.cubeSegment = cubeSegment;
@@ -75,8 +74,7 @@ public class BaseCuboidBuilder implements java.io.Serializable {
         measureCodec = new BufferedMeasureCodec(cubeDesc.getMeasures());
     }
 
-    public BaseCuboidBuilder(KylinConfig kylinConfig, CubeDesc cubeDesc, CubeSegment cubeSegment,
-            CubeJoinedFlatTableEnrich intermediateTableDesc) {
+    public BaseCuboidBuilder(KylinConfig kylinConfig, CubeDesc cubeDesc, CubeSegment cubeSegment, CubeJoinedFlatTableEnrich intermediateTableDesc) {
         this.kylinConfig = kylinConfig;
         this.cubeDesc = cubeDesc;
         this.cubeSegment = cubeSegment;
@@ -152,7 +150,9 @@ public class BaseCuboidBuilder implements java.io.Serializable {
         int colParamIdx = 0; // index among parameters of column type
         for (int i = 0; i < paramCount; i++, param = param.getNextParameter()) {
             String value;
-            if (param.isColumnType()) {
+            if (function.isCount()) {
+                value = "1";
+            } else if (param.isColumnType()) {
                 value = getCell(colIdxOnFlatTable[colParamIdx++], flatRow);
             } else {
                 value = param.getValue();
