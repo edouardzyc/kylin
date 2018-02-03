@@ -145,8 +145,8 @@ public class FunctionDesc implements Serializable {
     }
 
     public String getRewriteFieldName() {
-        if (isCount()) {
-            return "_KY_" + "COUNT__"; // ignores parameter, count(*), count(1), count(col) are all the same
+        if (isCountConstant()) {
+            return "_KY_" + "COUNT__"; // ignores parameter, count(*) and count(1) are the same
         } else if (isCountDistinct()) {
             return "_KY_" + getFullExpressionInAlphabetOrder().replaceAll("[(),. ]", "_");
         } else {
@@ -197,6 +197,14 @@ public class FunctionDesc implements Serializable {
 
     public boolean isCount() {
         return FUNC_COUNT.equalsIgnoreCase(expression);
+    }
+
+    public boolean isCountOnColumn() {
+        return FUNC_COUNT.equalsIgnoreCase(expression) && parameter != null && parameter.isColumnType();
+    }
+
+    public boolean isCountConstant() {//count(*) and count(1)
+        return FUNC_COUNT.equalsIgnoreCase(expression) && (parameter == null || parameter.isConstant());
     }
 
     public boolean isCountDistinct() {
@@ -323,14 +331,9 @@ public class FunctionDesc implements Serializable {
             } else {
                 return parameter.equalInArbitraryOrder(other.parameter);
             }
-        } else if (isSum()) {
-            if (parameter == null) {
-                if (other.parameter != null)
-                    return false;
-            } else {
-                return parameter.equalSum(other.parameter);
-            }
-        } else if (!isCount()) { // NOTE: don't check the parameter of count()
+        } else if (isCountConstant() && ((FunctionDesc) obj).isCountConstant()) { //count(*) and count(1) are equals
+            return true;
+        } else {
             if (parameter == null) {
                 if (other.parameter != null)
                     return false;

@@ -137,7 +137,8 @@ public class ParameterDesc implements Serializable {
         Object obj = objs[0];
         if (obj instanceof TblColRef) {
             TblColRef col = (TblColRef) obj;
-            if (TblColRef.InnerDataTypeEnum.LITERAL.getDataType().equals(col.getType().getName())) {
+            if (col.getType() != null
+                    && TblColRef.InnerDataTypeEnum.LITERAL.getDataType().equals(col.getType().getName())) {
                 return convertToParameterList(col);
             }
             r.type = FunctionDesc.PARAMETER_TYPE_COLUMN;
@@ -247,6 +248,10 @@ public class ParameterDesc implements Serializable {
 
     public boolean isColumnType() {
         return FunctionDesc.PARAMETER_TYPE_COLUMN.equals(type);
+    }
+
+    public boolean isConstant() {
+        return FunctionDesc.PARAMETER_TYPE_CONSTANT.equals(type.toLowerCase());
     }
 
     public boolean isMathExpressionType() {

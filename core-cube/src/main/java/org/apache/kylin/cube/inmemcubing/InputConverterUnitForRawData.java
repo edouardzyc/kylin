@@ -134,9 +134,7 @@ public class InputConverterUnitForRawData implements InputConverterUnit<String[]
         int paramColIdx = 0; // index among parameters of column type
         for (int i = 0; i < paramCount; i++, param = param.getNextParameter()) {
             String value;
-            if (function.isCount()) {
-                value = "1";
-            } else if (param.isColumnType()) {
+            if (param.isColumnType()) {
                 value = row[colIdxOnFlatTable[paramColIdx++]];
             } else {
                 value = param.getValue();

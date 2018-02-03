@@ -352,7 +352,15 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
             List<MeasureDesc> measures = this.context.realization.getMeasures();
             List<FunctionDesc> newAggrs = Lists.newArrayList();
             for (FunctionDesc aggFunc : this.aggregations) {
-                newAggrs.add(findInMeasures(aggFunc, measures));
+                FunctionDesc newAgg = findInMeasures(aggFunc, measures);
+                if (newAgg == null && aggFunc.isCount()
+                        && this.context.realization.getConfig().isReplaceColCountWithCountStar()) {
+                    newAgg = FunctionDesc.newInstance(FunctionDesc.FUNC_COUNT, ParameterDesc.newInstance("1"),
+                            "bigint");
+                } else if (newAgg == null) {
+                    newAgg = aggFunc;
+                }
+                newAggrs.add(newAgg);
             }
             this.aggregations.clear();
             this.aggregations.addAll(newAggrs);
@@ -363,12 +371,12 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
         }
     }
 
-    FunctionDesc findInMeasures(FunctionDesc aggFunc, List<MeasureDesc> measures) {
+    private FunctionDesc findInMeasures(FunctionDesc aggFunc, List<MeasureDesc> measures) {
         for (MeasureDesc m : measures) {
             if (aggFunc.equals(m.getFunction()))
                 return m.getFunction();
         }
-        return aggFunc;
+        return null;
     }
 
     void buildRewriteFieldsAndMetricsColumns() {
@@ -421,7 +429,7 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
         String callName = getSqlFuncName(aggCall);
         RelDataType fieldType = aggCall.getType();
         SqlAggFunction newAgg = aggCall.getAggregation();
-        
+
         Map<String, Class<?>> udafMap = func.getMeasureType().getRewriteCalciteAggrFunctions();
         if (func.isCount()) {
             newAgg = SqlStdOperatorTable.SUM0;

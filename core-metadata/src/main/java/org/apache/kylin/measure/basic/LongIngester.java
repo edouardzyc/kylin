@@ -35,8 +35,13 @@ public class LongIngester extends MeasureIngester<Long> {
         if (FunctionDesc.PARAMETER_TYPE_MATH_EXPRESSION.equals(param.getType())) {
             return param.getExpressionParam().getValueOf(values).longValue();
         }
+
         if (values.length > 1)
             throw new IllegalArgumentException();
+
+        if (measureDesc.getFunction().isCount()) {
+            return (param.isConstant() || values[0] != null) ? new Long(1L) : new Long(0L);
+        }
 
         if (values[0] == null || values[0].length() == 0)
             return new Long(0L);
