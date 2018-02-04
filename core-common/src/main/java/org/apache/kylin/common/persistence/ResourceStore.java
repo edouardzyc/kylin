@@ -77,6 +77,7 @@ abstract public class ResourceStore {
     public static final String BAD_QUERY_RESOURCE_ROOT = "/bad_query";
     public static final String DRAFT_RESOURCE_ROOT = "/draft";
     public static final String USER_ROOT = "/user";
+    public static final String ROW_ACL_RESOURCE_ROOT = "/row_acl";
 
     public static final String METASTORE_UUID_TAG = "/UUID";
 
@@ -129,13 +130,21 @@ abstract public class ResourceStore {
      */
     final public NavigableSet<String> listResources(String folderPath) throws IOException {
         String path = norm(folderPath);
-        return listResourcesImpl(path);
+        return listResourcesImpl(path, false);
+    }
+
+    /**
+     * List resources and its full path, only support HBase now.
+     */
+    final public NavigableSet<String> listResourcesRecursively(String folderPath) throws IOException {
+        String path = norm(folderPath);
+        return listResourcesImpl(path, true);
     }
 
     /**
      * return null if given path is not a folder or not exists
      */
-    abstract protected NavigableSet<String> listResourcesImpl(String folderPath) throws IOException;
+    abstract protected NavigableSet<String> listResourcesImpl(String folderPath, boolean recursive) throws IOException;
 
     protected String createMetaStoreUUID() throws IOException {
         return UUID.randomUUID().toString();
