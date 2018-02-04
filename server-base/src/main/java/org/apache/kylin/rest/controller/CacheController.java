@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -64,6 +65,16 @@ public class CacheController extends BasicController {
     @RequestMapping(value = "/{entity}/{cacheKey}/{event}", method = { RequestMethod.PUT }, produces = { "application/json" })
     @ResponseBody
     public void wipeCache(@PathVariable String entity, @PathVariable String event, @PathVariable String cacheKey) throws IOException {
+        cacheService.notifyMetadataChange(entity, Broadcaster.Event.getEvent(event), cacheKey);
+    }
+
+    /**
+     * If cacheKey has "/", will lead to this method.
+     */
+    @RequestMapping(value = "/{entity}/{event}", method = { RequestMethod.PUT }, produces = { "application/json" })
+    @ResponseBody
+    public void wipeCacheWithRequestBody(@PathVariable String entity, @PathVariable String event,
+            @RequestBody String cacheKey) throws IOException {
         cacheService.notifyMetadataChange(entity, Broadcaster.Event.getEvent(event), cacheKey);
     }
 
