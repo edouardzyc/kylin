@@ -68,7 +68,6 @@ import org.apache.kylin.common.util.DBUtils;
 import org.apache.kylin.common.util.JsonUtil;
 import org.apache.kylin.common.util.Pair;
 import org.apache.kylin.common.util.SetThreadName;
-import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.cube.cuboid.Cuboid;
 import org.apache.kylin.metadata.badquery.BadQueryEntry;
@@ -78,13 +77,11 @@ import org.apache.kylin.metadata.model.JoinTableDesc;
 import org.apache.kylin.metadata.model.ModelDimensionDesc;
 import org.apache.kylin.metadata.model.TableRef;
 import org.apache.kylin.metadata.project.ProjectInstance;
-import org.apache.kylin.metadata.project.RealizationEntry;
 import org.apache.kylin.metadata.querymeta.ColumnMeta;
 import org.apache.kylin.metadata.querymeta.ColumnMetaWithType;
 import org.apache.kylin.metadata.querymeta.SelectedColumnMeta;
 import org.apache.kylin.metadata.querymeta.TableMeta;
 import org.apache.kylin.metadata.querymeta.TableMetaWithType;
-import org.apache.kylin.metadata.realization.RealizationType;
 import org.apache.kylin.query.QueryConnection;
 import org.apache.kylin.query.relnode.OLAPContext;
 import org.apache.kylin.query.util.PushDownUtil;
@@ -108,21 +105,16 @@ import org.apache.kylin.rest.util.TableauInterceptor;
 import org.apache.kylin.shaded.htrace.org.apache.htrace.Sampler;
 import org.apache.kylin.shaded.htrace.org.apache.htrace.Trace;
 import org.apache.kylin.shaded.htrace.org.apache.htrace.TraceScope;
-import org.apache.kylin.storage.hybrid.HybridInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import net.sf.ehcache.Cache;
@@ -325,65 +317,10 @@ public class QueryService extends BasicService {
         logger.info(stringBuilder.toString());
     }
 
-    public void checkAuthorization(SQLResponse sqlResponse, String project) throws AccessDeniedException {
-
-        //project 
-        ProjectInstance projectInstance = getProjectManager().getProject(project);
-        try {
-            if (aclEvaluate.hasProjectReadPermission(projectInstance)) {
-                return;
-            }
-        } catch (AccessDeniedException e) {
-            logger.warn(
-                    "Current user {} has no READ permission on current project {}, please ask Administrator for permission granting.");
-            //just continue
-        }
-
-        String realizationsStr = sqlResponse.getCube();//CUBE[name=abc],HYBRID[name=xyz]
-
-        if (StringUtils.isEmpty(realizationsStr)) {
-            throw new AccessDeniedException(
-                    "Query pushdown requires having READ permission on project, please ask Administrator to grant you permissions");
-        }
-
-        String[] splits = StringUtils.split(realizationsStr, ",");
-
-        for (String split : splits) {
-
-            Iterable<String> parts = Splitter.on(CharMatcher.anyOf("[]=,")).split(split);
-            String[] partsStr = Iterables.toArray(parts, String.class);
-
-            if (RealizationType.HYBRID.toString().equals(partsStr[0])) {
-                // special care for hybrid
-                HybridInstance hybridInstance = getHybridManager().getHybridInstance(partsStr[2]);
-                Preconditions.checkNotNull(hybridInstance);
-                checkHybridAuthorization(hybridInstance);
-            } else {
-                CubeInstance cubeInstance = getCubeManager().getCube(partsStr[2]);
-                checkCubeAuthorization(cubeInstance);
-            }
-        }
-    }
-
-    private void checkCubeAuthorization(CubeInstance cube) throws AccessDeniedException {
-        Preconditions.checkState(aclEvaluate.hasCubeReadPermission(cube));
-    }
-
-    private void checkHybridAuthorization(HybridInstance hybridInstance) throws AccessDeniedException {
-        List<RealizationEntry> realizationEntries = hybridInstance.getRealizationEntries();
-        for (RealizationEntry realizationEntry : realizationEntries) {
-            String reName = realizationEntry.getRealization();
-            if (RealizationType.CUBE == realizationEntry.getType()) {
-                CubeInstance cubeInstance = getCubeManager().getCube(reName);
-                checkCubeAuthorization(cubeInstance);
-            } else if (RealizationType.HYBRID == realizationEntry.getType()) {
-                HybridInstance innerHybridInstance = getHybridManager().getHybridInstance(reName);
-                checkHybridAuthorization(innerHybridInstance);
-            }
-        }
-    }
-
     public SQLResponse doQueryWithCache(SQLRequest sqlRequest) {
+        long t = System.currentTimeMillis();
+        aclEvaluate.checkProjectReadPermission(sqlRequest.getProject());
+        logger.info("Check query permission in " + (System.currentTimeMillis() - t) + " ms.");
         return doQueryWithCache(sqlRequest, false);
     }
 
@@ -453,11 +390,6 @@ public class QueryService extends BasicService {
             } else {
                 Trace.addTimelineAnnotation("response without real execution");
             }
-
-            // check authorization before return, since the response may come from cache
-            if (!sqlResponse.getIsException())
-                checkQueryAuth(sqlResponse, project);
-
             sqlResponse.setDuration(System.currentTimeMillis() - startTime);
             sqlResponse.setTraceUrl(traceUrl);
             logQuery(sqlRequest, sqlResponse);
@@ -603,12 +535,6 @@ public class QueryService extends BasicService {
         }
 
         return response;
-    }
-
-    protected void checkQueryAuth(SQLResponse sqlResponse, String project) throws AccessDeniedException {
-        if (!sqlResponse.getIsException() && KylinConfig.getInstanceFromEnv().isQuerySecureEnabled()) {
-            checkAuthorization(sqlResponse, project);
-        }
     }
 
     private SQLResponse queryWithSqlMassage(SQLRequest sqlRequest) throws Exception {
