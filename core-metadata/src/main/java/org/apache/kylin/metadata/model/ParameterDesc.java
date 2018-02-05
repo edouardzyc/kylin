@@ -265,6 +265,11 @@ public class ParameterDesc implements Serializable {
         if (o == null || getClass() != o.getClass())
             return false;
 
+        if (FunctionDesc.PARAMETER_TYPE_MATH_EXPRESSION.equals(this.getType())
+                && !this.getExpressionParam().isOrder()) {
+            return equalInArbitraryOrder(o);
+        }
+
         ParameterDesc that = (ParameterDesc) o;
 
         if (type != null ? !type.equals(that.type) : that.type != null)
@@ -286,20 +291,6 @@ public class ParameterDesc implements Serializable {
         }
 
         return p == null && q == null;
-    }
-
-    public boolean equalSum(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-
-        if (FunctionDesc.PARAMETER_TYPE_MATH_EXPRESSION.equals(this.getType())
-                && !this.getExpressionParam().isOrder()) {
-            return equalInArbitraryOrder(o);
-        } else {
-            return equals(o);
-        }
     }
 
     public boolean equalInArbitraryOrder(Object o) {
