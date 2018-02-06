@@ -32,8 +32,10 @@ import org.apache.kylin.metadata.model.ColumnDesc;
 import org.apache.kylin.metadata.model.TableDesc;
 import org.apache.kylin.metadata.project.ProjectInstance;
 import org.apache.kylin.rest.service.AccessService;
+import org.apache.kylin.rest.service.IUserGroupService;
 import org.apache.kylin.rest.service.ProjectService;
 import org.apache.kylin.rest.service.TableService;
+import org.apache.kylin.rest.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
@@ -60,11 +62,29 @@ public class ValidateUtil {
     @Qualifier("accessService")
     private AccessService accessService;
 
+    @Autowired
+    @Qualifier("userService")
+    private UserService userService;
+
+    @Autowired
+    @Qualifier("userGroupService")
+    private IUserGroupService userGroupService;
+
+
+    public void checkIdentifiersExists(String name, boolean isPrincipal) throws IOException {
+        if (isPrincipal && !userService.userExists(name)) {
+            throw new RuntimeException("Operation failed, user:" + name + " not exists, please add first.");
+        }
+        if (!isPrincipal && !userGroupService.exists(name)) {
+            throw new RuntimeException("Operation failed, group:" + name + " not exists, please add first.");
+        }
+    }
+
     //Identifiers may be user or user authority(you may call role or group)
     public void validateIdentifiers(String prj, String name, String type) throws IOException {
         Set<String> allIdentifiers = getAllIdentifiersInPrj(prj, type);
         if (!allIdentifiers.contains(name)) {
-            throw new RuntimeException("Operation failed, identifiers:" + name + " not exists");
+            throw new RuntimeException("Operation failed, " + type + ":" + name + " not exists in project.");
         }
     }
 

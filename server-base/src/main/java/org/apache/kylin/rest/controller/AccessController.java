@@ -36,6 +36,7 @@ import org.apache.kylin.rest.service.ProjectService;
 import org.apache.kylin.rest.service.TableACLService;
 import org.apache.kylin.rest.service.UserService;
 import org.apache.kylin.rest.util.AclPermissionUtil;
+import org.apache.kylin.rest.util.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.acls.domain.PrincipalSid;
@@ -73,6 +74,10 @@ public class AccessController extends BasicController {
     @Autowired
     @Qualifier("userService")
     private UserService userService;
+
+    @Autowired
+    @Qualifier("validateUtil")
+    private ValidateUtil validateUtil;
 
     /**
      * Get current user's permission in the project
@@ -130,9 +135,13 @@ public class AccessController extends BasicController {
      */
     @RequestMapping(value = "/{type}/{uuid}", method = { RequestMethod.POST }, produces = { "application/json" })
     @ResponseBody
-    public List<AccessEntryResponse> grant(@PathVariable String type, @PathVariable String uuid, @RequestBody AccessRequest accessRequest) {
+    public List<AccessEntryResponse> grant(@PathVariable String type, @PathVariable String uuid, @RequestBody AccessRequest accessRequest) throws IOException {
+        boolean isPrincipal = accessRequest.isPrincipal();
+        String name = accessRequest.getSid();
+        validateUtil.checkIdentifiersExists(name, isPrincipal);
+
         AclEntity ae = accessService.getAclEntity(type, uuid);
-        Sid sid = accessService.getSid(accessRequest.getSid(), accessRequest.isPrincipal());
+        Sid sid = accessService.getSid(name, isPrincipal);
         Permission permission = AclPermissionFactory.getPermission(accessRequest.getPermission());
         Acl acl = accessService.grant(ae, permission, sid);
 
