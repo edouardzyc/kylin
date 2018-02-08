@@ -155,7 +155,9 @@ public class Broadcaster {
         if (StringUtils.isEmpty(clzName)) {
             clzName = DefaultSyncErrorHandler.class.getName();
         }
-        return (SyncErrorHandler) ClassUtil.newInstance(clzName);
+        SyncErrorHandler handler = (SyncErrorHandler) ClassUtil.newInstance(clzName);
+        handler.init(this);
+        return handler;
     }
 
     public KylinConfig getConfig() {
