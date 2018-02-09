@@ -54,6 +54,7 @@ public class AdminServiceTest extends ServiceTestBase {
                 "kylin.web.timezone=GMT+8\n" +
                 "kylin.server.external-acl-provider=\n" +
                 "kylin.storage.default=2\n" +
+                "kylin.source.default=0\n" +
                 "kylin.web.help=\n" +
                 "kylin.web.export-allow-other=true\n" +
                 "kylin.web.link-hadoop=\n" +
