@@ -175,16 +175,15 @@ public class DefaultSchedulerTest extends BaseSchedulerTest {
     }
 
     @Test
-    @Ignore("It is not stable in IT, fix it later!")
-    public void tesMetaStoreRecover() throws Exception {
-        logger.info("tesMetaStoreRecover");
+    public void testMetaStoreRecover() throws Exception {
+        logger.info("testMetaStoreRecover");
         NoErrorStatusExecutable job = new NoErrorStatusExecutable();
         ErrorTestExecutable task = new ErrorTestExecutable();
         job.addTask(task);
         execMgr.addJob(job);
         Thread.sleep(2000);
         runningJobToError(job.getId());
-        Thread.sleep(2000);
+        waitForJobFinish(job.getId(), 10000);
         Assert.assertEquals(ExecutableState.ERROR, execMgr.getOutput(job.getId()).getState());
     }
 
