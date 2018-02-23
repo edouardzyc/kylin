@@ -132,7 +132,7 @@ public abstract class AbstractExecutable implements Executable, Idempotent {
                     exception = e;
                 }
                 retry++;
-            } while (needRetry(result, exception));
+            } while (needRetry(this.retry, exception)); //exception in ExecuteResult should handle by user itself.
 
             //check exception in result to avoid retry on ChainedExecutable(only need retry on subtask actually)
             if (exception != null || result.getThrowable() != null) {
@@ -171,13 +171,6 @@ public abstract class AbstractExecutable implements Executable, Idempotent {
                 return true;
             }
             t = t.getCause();
-        }
-        return false;
-    }
-
-    private boolean isRetryableExecutionResult(ExecuteResult result) {
-        if (result != null && result.getThrowable() != null && isRetrableException(result.getThrowable())) {
-            return true;
         }
         return false;
     }
@@ -422,26 +415,20 @@ public abstract class AbstractExecutable implements Executable, Idempotent {
         return status == ExecutableState.STOPPED;
     }
 
-    protected boolean isRetrableException(Throwable t) {
-        return ArrayUtils.contains(KylinConfig.getInstanceFromEnv().getJobRetryExceptions(), t.getClass().getName());
-    }
-
     // Retry will happen in below cases:
     // 1) if property "kylin.job.retry-exception-classes" is not set or is null, all jobs with exceptions will retry according to the retry times.
     // 2) if property "kylin.job.retry-exception-classes" is set and is not null, only jobs with the specified exceptions will retry according to the retry times.
-    protected boolean needRetry(ExecuteResult result, Throwable e) {
-        if (this.retry > KylinConfig.getInstanceFromEnv().getJobRetry()) {
+    public static boolean needRetry(int retry, Throwable t) {
+        if (retry > KylinConfig.getInstanceFromEnv().getJobRetry() || t == null) {
             return false;
+        } else {
+            return isRetryableException(t.getClass().getName());
         }
-        String[] retryableEx = KylinConfig.getInstanceFromEnv().getJobRetryExceptions();
-        if (retryableEx == null || retryableEx.length == 0) {
-            return true;
-        }
-        if ((result != null && isRetryableExecutionResult(result))
-                || e != null && isRetrableException(e)) {
-            return true;
-        }
-        return false;
+    }
+
+    private static boolean isRetryableException(String exceptionName) {
+        String[] jobRetryExceptions = KylinConfig.getInstanceFromEnv().getJobRetryExceptions();
+        return ArrayUtils.isEmpty(jobRetryExceptions) || ArrayUtils.contains(jobRetryExceptions, exceptionName);
     }
 
     @Override
