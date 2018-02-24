@@ -18,13 +18,6 @@
 
 package org.apache.kylin.rest.controller;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.kylin.job.JobInstance;
 import org.apache.kylin.job.constant.JobStatusEnum;
 import org.apache.kylin.job.constant.JobTimeFilterEnum;
@@ -40,6 +33,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping(value = "jobs")
@@ -60,7 +59,7 @@ public class JobController extends BasicController {
     @ResponseBody
     public List<JobInstance> list(JobListRequest jobRequest) {
 
-        List<JobInstance> jobInstanceList = Collections.emptyList();
+        List<JobInstance> jobInstanceList;
         List<JobStatusEnum> statusList = new ArrayList<JobStatusEnum>();
 
         if (null != jobRequest.getStatus()) {
@@ -74,9 +73,14 @@ public class JobController extends BasicController {
             timeFilter = JobTimeFilterEnum.getByCode(jobRequest.getTimeFilter());
         }
 
+        JobService.JobSearchMode jobSearchMode = JobService.JobSearchMode.CUBING_ONLY;
+        if (null != jobRequest.getJobSearchMode()) {
+            jobSearchMode = JobService.JobSearchMode.valueOf(jobRequest.getJobSearchMode());
+        }
+
         try {
             jobInstanceList = jobService.searchJobs(jobRequest.getCubeName(), jobRequest.getProjectName(), statusList,
-                    jobRequest.getLimit(), jobRequest.getOffset(), timeFilter);
+                    jobRequest.getLimit(), jobRequest.getOffset(), timeFilter, jobSearchMode);
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
             throw new InternalErrorException(e);
