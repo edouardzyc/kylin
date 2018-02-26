@@ -75,7 +75,11 @@ public class JobController extends BasicController {
 
         JobService.JobSearchMode jobSearchMode = JobService.JobSearchMode.CUBING_ONLY;
         if (null != jobRequest.getJobSearchMode()) {
-            jobSearchMode = JobService.JobSearchMode.valueOf(jobRequest.getJobSearchMode());
+            try {
+                jobSearchMode = JobService.JobSearchMode.valueOf(jobRequest.getJobSearchMode());
+            } catch (IllegalArgumentException e) {
+                logger.error("Invalid value for JobSearchMode: '" + jobRequest.getJobSearchMode() + "', skip it.", e);
+            }
         }
 
         try {
