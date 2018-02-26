@@ -147,7 +147,7 @@ public class BuildCubeWithEngine {
 
     private static boolean isFastBuildMode() {
         String fastModeStr = System.getProperty("fastBuildMode");
-        if (fastModeStr == null)
+        if (fastModeStr == null || fastModeStr.isEmpty())
             fastModeStr = System.getenv("KYLIN_CI_FASTBUILD");
         
         return "true".equalsIgnoreCase(fastModeStr);
