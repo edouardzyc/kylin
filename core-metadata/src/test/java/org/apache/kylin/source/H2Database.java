@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-package org.apache.kylin.query;
+package org.apache.kylin.source;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -78,6 +78,17 @@ public class H2Database {
         }
     }
 
+    public void dropAll() throws SQLException {
+        try (Statement stmt = h2Connection.createStatement()) {
+            StringBuilder sqlBuilder = new StringBuilder();
+            for (String tblName : ALL_TABLES)
+                sqlBuilder.append("DROP TABLE ").append(tblName).append(";\n");
+            sqlBuilder.append("DROP SCHEMA DEFAULT;\nDROP SCHEMA EDW;\n");
+
+            stmt.executeUpdate(sqlBuilder.toString());
+        }
+    }
+
     private void loadH2Table(String tableName) throws SQLException {
         TableMetadataManager metaMgr = TableMetadataManager.getInstance(config);
         TableDesc tableDesc = metaMgr.getTableDesc(tableName.toUpperCase(), project);
@@ -99,21 +110,20 @@ public class H2Database {
         }
 
         String cvsFilePath = tempFile.getPath();
-        Statement stmt = h2Connection.createStatement();
+        try (Statement stmt = h2Connection.createStatement()) {
+            String createDBSql = "CREATE SCHEMA IF NOT EXISTS DEFAULT;\nCREATE SCHEMA IF NOT EXISTS EDW;\nSET SCHEMA DEFAULT;\n";
+            stmt.executeUpdate(createDBSql);
 
-        String createDBSql = "CREATE SCHEMA IF NOT EXISTS DEFAULT;\nCREATE SCHEMA IF NOT EXISTS EDW;\nSET SCHEMA DEFAULT;\n";
-        stmt.executeUpdate(createDBSql);
+            String sql = generateCreateH2TableSql(tableDesc, cvsFilePath);
+            stmt.executeUpdate(sql);
 
-        String sql = generateCreateH2TableSql(tableDesc, cvsFilePath);
-        stmt.executeUpdate(sql);
-
-        List<String> createIndexStatements = generateCreateH2IndexSql(tableDesc);
-        for (String indexSql : createIndexStatements) {
-            stmt.executeUpdate(indexSql);
+            List<String> createIndexStatements = generateCreateH2IndexSql(tableDesc);
+            for (String indexSql : createIndexStatements) {
+                stmt.executeUpdate(indexSql);
+            }
         }
 
-        if (tempFile != null)
-            tempFile.delete();
+        tempFile.delete();
     }
 
     private String path(TableDesc tableDesc) {
@@ -140,7 +150,8 @@ public class H2Database {
             csvColumns.append(col.getName());
         }
         ddl.append(")" + "\n");
-        ddl.append("AS SELECT * FROM CSVREAD('" + csvFilePath + "', '" + csvColumns + "', 'charset=UTF-8 fieldSeparator=,');");
+        ddl.append("AS SELECT * FROM CSVREAD('" + csvFilePath + "', '" + csvColumns
+                + "', 'charset=UTF-8 fieldSeparator=,');");
 
         return ddl.toString();
     }
@@ -151,7 +162,8 @@ public class H2Database {
         for (ColumnDesc col : tableDesc.getColumns()) {
             if ("T".equalsIgnoreCase(col.getIndex())) {
                 StringBuilder ddl = new StringBuilder();
-                ddl.append("CREATE INDEX IDX_" + tableDesc.getName() + "_" + x + " ON " + tableDesc.getIdentity() + "(" + col.getName() + ")");
+                ddl.append("CREATE INDEX IDX_" + tableDesc.getName() + "_" + x + " ON " + tableDesc.getIdentity() + "("
+                        + col.getName() + ")");
                 ddl.append("\n");
                 result.add(ddl.toString());
                 x++;

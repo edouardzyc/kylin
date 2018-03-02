@@ -166,7 +166,7 @@ public class CubeJoinedFlatTableDesc implements IJoinedFlatTableDesc, Serializab
 
     @Override
     public SegmentRange getSegRange() {
-        return cubeSegment.getSegRange();
+        return cubeSegment == null ? null : cubeSegment.getSegRange();
     }
 
     @Override

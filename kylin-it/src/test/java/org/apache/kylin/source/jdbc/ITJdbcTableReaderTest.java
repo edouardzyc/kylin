@@ -24,10 +24,10 @@ import java.sql.SQLException;
 
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.LocalFileMetadataTestCase;
-import org.apache.kylin.metadata.model.ISourceAware;
 import org.apache.kylin.metadata.model.DataModelManager;
+import org.apache.kylin.metadata.model.ISourceAware;
 import org.apache.kylin.metadata.project.ProjectInstance;
-import org.apache.kylin.query.H2Database;
+import org.apache.kylin.source.H2Database;
 import org.apache.kylin.source.datagen.ModelDataGenerator;
 import org.junit.After;
 import org.junit.Assert;

@@ -69,7 +69,7 @@ public class ImplementationSwitch<I> {
                 result = (I) ClassUtil.newInstance(clzName);
                 instances[id] = result;
             } catch (Exception ex) {
-                logger.warn("Implementation missing " + clzName + " - " + ex);
+                logger.warn("Implementation missing " + clzName + " - ", ex);
             }
         }
 

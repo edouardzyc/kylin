@@ -106,7 +106,6 @@ public class JdbcExplorer implements ISourceMetadataExplorer, ISampleDataDeploye
             DBUtils.closeQuietly(con);
         }
 
-
         TableExtDesc tableExtDesc = new TableExtDesc();
         tableExtDesc.setIdentity(tableDesc.getIdentity());
         tableExtDesc.setUuid(UUID.randomUUID().toString());
@@ -237,7 +236,8 @@ public class JdbcExplorer implements ISourceMetadataExplorer, ISampleDataDeploye
 
         KylinConfig config = KylinConfig.getInstanceFromEnv();
         String tmpDatabase = config.getHiveDatabaseForIntermediateTable();
-        String tmpView = tmpDatabase + ".kylin_eval_query_" + UUID.nameUUIDFromBytes(query.getBytes()).toString().replaceAll("-", "");
+        String tmpView = tmpDatabase + ".kylin_eval_query_"
+                + UUID.nameUUIDFromBytes(query.getBytes()).toString().replaceAll("-", "");
 
         String dropViewSql = "DROP VIEW IF EXISTS " + tmpView;
         String evalViewSql = "CREATE VIEW " + tmpView + " as " + query;
@@ -265,6 +265,11 @@ public class JdbcExplorer implements ISourceMetadataExplorer, ISampleDataDeploye
                 logger.warn("Cannot drop temp view of query: {}", query, e);
             }
         }
+    }
+
+    @Override
+    public void validateSQL(String query) throws Exception {
+        executeSQL(query);
     }
 
     private ColumnDesc[] extractColumnFromMeta(ResultSet meta) throws SQLException {

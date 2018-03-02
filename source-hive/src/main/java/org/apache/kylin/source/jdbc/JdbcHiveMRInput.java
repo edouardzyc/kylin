@@ -50,8 +50,8 @@ public class JdbcHiveMRInput extends HiveMRInput {
         public BatchCubingInputSide(IJoinedFlatTableDesc flatDesc) {
             super(flatDesc);
         }
-        
-        private KylinConfig getConfig() {
+
+        protected KylinConfig getConfig() {
             return flatDesc.getDataModel().getConfig();
         }
 
@@ -86,9 +86,10 @@ public class JdbcHiveMRInput extends HiveMRInput {
          * 4. Prefer Higher cardinality column
          * 5. Prefer numeric column
          * 6. Pick a column at first glance
+         *
          * @return A column reference <code>TblColRef</code>for sqoop split-by
          */
-        private TblColRef determineSplitColumn() {
+        protected TblColRef determineSplitColumn() {
             if (null != flatDesc.getClusterBy()) {
                 return flatDesc.getClusterBy();
             }
@@ -107,6 +108,8 @@ public class JdbcHiveMRInput extends HiveMRInput {
                 List<ColumnStats> columnStatses = tableExtDesc.getColumnStats();
                 if (!columnStatses.isEmpty()) {
                     for (TblColRef colRef : tableRef.getColumns()) {
+                        if (colRef.getColumnDesc().isComputedColumn())
+                            continue;
                         long cardinality = columnStatses.get(colRef.getColumnDesc().getZeroBasedIndex())
                                 .getCardinality();
                         splitColumn = cardinality > maxCardinality ? colRef : splitColumn;
@@ -114,18 +117,22 @@ public class JdbcHiveMRInput extends HiveMRInput {
                 }
             }
             if (null == splitColumn) {
+                TblColRef bakColRef = null;
                 for (TblColRef colRef : flatDesc.getAllColumns()) {
-                    if (colRef.getType().isIntegerFamily()) {
+                    if (colRef.getType().isIntegerFamily() && !colRef.getColumnDesc().isComputedColumn()) {
                         return colRef;
                     }
+
+                    if (!colRef.getColumnDesc().isComputedColumn())
+                        bakColRef = colRef;
                 }
-                splitColumn = flatDesc.getAllColumns().get(0);
+                splitColumn = bakColRef;
             }
 
             return splitColumn;
         }
 
-        private AbstractExecutable createSqoopToFlatHiveStep(String jobWorkingDir, String cubeName) {
+        protected AbstractExecutable createSqoopToFlatHiveStep(String jobWorkingDir, String cubeName) {
             KylinConfig config = getConfig();
             PartitionDesc partitionDesc = flatDesc.getDataModel().getPartitionDesc();
             String partCol = null;
@@ -162,14 +169,14 @@ public class JdbcHiveMRInput extends HiveMRInput {
                 bquery += " WHERE " + partitionString;
             }
 
-            String cmd = String.format(String.format(
-                    "%s/sqoop import -Dorg.apache.sqoop.splitter.allow_text_splitter=true "
-                            + "--connect \"%s\" --driver %s --username %s --password %s --query \"%s AND \\$CONDITIONS\" "
-                            + "--target-dir %s/%s --split-by %s.%s --boundary-query \"%s\" --null-string '' "
-                            + "--fields-terminated-by '%s' --num-mappers %d",
-                    sqoopHome, connectionUrl, driverClass, jdbcUser, jdbcPass, selectSql, jobWorkingDir, hiveTable,
-                    splitTable, splitColumn, bquery, filedDelimiter, mapperNum));
-            logger.debug(String.format("sqoop cmd:%s", cmd));
+            String cmd = String.format("%s/sqoop import -Dorg.apache.sqoop.splitter.allow_text_splitter=true "
+                    + "--connect \"%s\" --driver %s --username %s --password %s --query \"%s AND \\$CONDITIONS\" "
+                    + "--target-dir %s/%s --split-by %s.%s --boundary-query \"%s\" --null-string '' "
+                    + "--fields-terminated-by '%s' --num-mappers %d", sqoopHome, connectionUrl, driverClass, jdbcUser,
+                    jdbcPass, selectSql, jobWorkingDir, hiveTable, splitTable, splitColumn, bquery, filedDelimiter,
+                    mapperNum);
+            logger.debug("sqoop cmd: {}", cmd);
+            
             CmdStep step = new CmdStep();
             step.setCmd(cmd);
             step.setName(ExecutableConstants.STEP_NAME_SQOOP_TO_FLAT_HIVE_TABLE);

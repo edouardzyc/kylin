@@ -35,12 +35,14 @@ public class SqlUtilTest {
     @Test
     public void testIsPrecisionApplicable() {
         Assert.assertFalse(SqlUtil.isPrecisionApplicable("boolean"));
+        Assert.assertFalse(SqlUtil.isScaleApplicable("double"));
         Assert.assertTrue(SqlUtil.isPrecisionApplicable("varchar"));
     }
 
     @Test
     public void testIsScaleApplicable() {
         Assert.assertFalse(SqlUtil.isScaleApplicable("varchar"));
+        Assert.assertFalse(SqlUtil.isScaleApplicable("double"));
         Assert.assertTrue(SqlUtil.isScaleApplicable("decimal"));
     }
 }

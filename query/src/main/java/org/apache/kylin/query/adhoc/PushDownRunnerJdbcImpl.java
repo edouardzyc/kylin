@@ -30,9 +30,9 @@ import java.util.List;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.DBUtils;
 import org.apache.kylin.metadata.querymeta.SelectedColumnMeta;
-import org.apache.kylin.source.adhocquery.IPushDownRunner;
+import org.apache.kylin.source.adhocquery.AbstractPushdownRunner;
 
-public class PushDownRunnerJdbcImpl implements IPushDownRunner {
+public class PushDownRunnerJdbcImpl extends AbstractPushdownRunner {
 
     private JdbcPushDownConnectionManager manager = null;
 
@@ -66,7 +66,8 @@ public class PushDownRunnerJdbcImpl implements IPushDownRunner {
                 columnMetas.add(new SelectedColumnMeta(metaData.isAutoIncrement(i), metaData.isCaseSensitive(i), false,
                         metaData.isCurrency(i), metaData.isNullable(i), false, metaData.getColumnDisplaySize(i),
                         metaData.getColumnLabel(i), metaData.getColumnName(i), null, null, null,
-                        metaData.getPrecision(i), metaData.getScale(i), toSqlType(metaData.getColumnTypeName(i)),
+                        metaData.getPrecision(i), metaData.getScale(i),
+                        toSqlType(metaData.getColumnTypeName(i), metaData.getColumnType(i)),
                         metaData.getColumnTypeName(i), metaData.isReadOnly(i), false, false));
             }
         } catch (Exception e) {
@@ -79,7 +80,7 @@ public class PushDownRunnerJdbcImpl implements IPushDownRunner {
     }
 
     // calcite does not understand all java SqlTypes, for example LONGNVARCHAR -16, thus need this mapping (KYLIN-2966)
-    public static int toSqlType(String type) throws SQLException {
+    public static int toSqlType(String type, int typeId) throws SQLException {
         if ("string".equalsIgnoreCase(type)) {
             return Types.VARCHAR;
         } else if ("varchar".equalsIgnoreCase(type)) {
@@ -98,7 +99,7 @@ public class PushDownRunnerJdbcImpl implements IPushDownRunner {
             return Types.TINYINT;
         } else if ("smallint".equalsIgnoreCase(type)) {
             return Types.SMALLINT;
-        } else if ("int".equalsIgnoreCase(type)) {
+        } else if ("int".equalsIgnoreCase(type) || "integer".equalsIgnoreCase(type)) {
             return Types.INTEGER;
         } else if ("bigint".equalsIgnoreCase(type)) {
             return Types.BIGINT;
@@ -116,8 +117,12 @@ public class PushDownRunnerJdbcImpl implements IPushDownRunner {
             return Types.ARRAY;
         } else if ("struct".equalsIgnoreCase(type)) {
             return Types.STRUCT;
+        } else if ("numeric".equalsIgnoreCase(type)) {
+            return Types.NUMERIC;
         }
-        throw new SQLException("Unrecognized column type: " + type);
+
+        // for original type, will throw exceptions from calcite if unsupported
+        return typeId;
     }
 
     @Override

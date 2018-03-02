@@ -28,12 +28,14 @@ import org.apache.kylin.metadata.model.TableExtDesc;
 public interface ISourceMetadataExplorer {
 
     List<String> listDatabases() throws Exception;
-    
+
     List<String> listTables(String database) throws Exception;
-    
+
     Pair<TableDesc, TableExtDesc> loadTableMetadata(String database, String table, String prj) throws Exception;
-    
+
     List<String> getRelatedKylinResources(TableDesc table);
-    
+
     ColumnDesc[] evalQueryMetadata(String query);
+
+    void validateSQL(String query) throws Exception;
 }

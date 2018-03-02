@@ -144,7 +144,7 @@ public class KafkaSource implements ISource {
     private void checkSourceOffsets(SourcePartition src) {
         if (src.getSegRange() == null)
             return;
-        
+
         long startOffset = (Long) src.getSegRange().start.v;
         long endOffset = (Long) src.getSegRange().end.v;
         final Map<Integer, Long> sourcePartitionOffsetStart = src.getSourcePartitionOffsetStart();
@@ -213,6 +213,11 @@ public class KafkaSource implements ISource {
 
             @Override
             public ColumnDesc[] evalQueryMetadata(String query) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void validateSQL(String query) throws Exception {
                 throw new UnsupportedOperationException();
             }
         };
