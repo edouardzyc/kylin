@@ -53,6 +53,7 @@ public class QueryContext {
     private Set<String> groups;
     private AtomicLong scannedRows = new AtomicLong();
     private AtomicLong scannedBytes = new AtomicLong();
+    private Object calcitePlan;
 
     private List<RPCStatistics> rpcStatisticsList = Lists.newCopyOnWriteArrayList();
     private Map<Integer, CubeSegmentStatisticsResult> cubeSegmentStatisticsResultMap = Maps.newConcurrentMap();
@@ -103,6 +104,14 @@ public class QueryContext {
 
     public void setGroups(Set<String> groups) {
         this.groups = groups;
+    }
+
+    public Object getCalcitePlan() {
+        return calcitePlan;
+    }
+
+    public void setCalcitePlan(Object calcitePlan) {
+        this.calcitePlan = calcitePlan;
     }
 
     public long getScannedRows() {

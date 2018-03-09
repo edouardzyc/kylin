@@ -1609,4 +1609,8 @@ abstract public class KylinConfigBase implements Serializable {
     public Boolean isEnumerableRulesEnabled() {
         return Boolean.parseBoolean(getOptional("kylin.query.calcite.enumerable-rules-enabled", "false"));
     }
+
+    public boolean isReduceExpressionsRulesEnabled() {
+        return Boolean.parseBoolean(getOptional("kylin.query.calcite.reduce-rules-enabled", "true"));
+    }
 }
