@@ -1605,4 +1605,8 @@ abstract public class KylinConfigBase implements Serializable {
         return getOptional("kylin.metrics.subject-query-rpc", "METRICS_QUERY_RPC") + "_"
                 + getKylinMetricsSubjectSuffix();
     }
+
+    public Boolean isEnumerableRulesEnabled() {
+        return Boolean.parseBoolean(getOptional("kylin.query.calcite.enumerable-rules-enabled", "false"));
+    }
 }
