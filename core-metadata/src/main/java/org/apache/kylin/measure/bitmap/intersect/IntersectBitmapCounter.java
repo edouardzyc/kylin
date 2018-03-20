@@ -92,7 +92,7 @@ public class IntersectBitmapCounter {
     }
 
 
-    public void meger(IntersectBitmapCounter other){
+    public void merge(IntersectBitmapCounter other){
         Map<Object, BitmapCounter> otherMap = other.getMap();
        for(String key: keyList){
            if(map.containsKey(key) && otherMap.containsKey(key)){

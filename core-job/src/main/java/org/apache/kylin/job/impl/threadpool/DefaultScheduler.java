@@ -33,6 +33,7 @@ import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.kylin.common.util.Pair;
 import org.apache.kylin.common.util.SetThreadName;
+import org.apache.kylin.dict.project.ProjectDictionaryManager;
 import org.apache.kylin.job.Scheduler;
 import org.apache.kylin.job.engine.JobEngineConfig;
 import org.apache.kylin.job.exception.ExecuteException;
@@ -376,6 +377,7 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
     @Override
     public void shutdown() throws SchedulerException {
         logger.info("Shutting down DefaultScheduler ....");
+        ProjectDictionaryManager.getInstance().releaseAll();
         jobLock.unlockJobEngine();
         initialized = false;
         hasStarted = false;

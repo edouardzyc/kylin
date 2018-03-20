@@ -1151,7 +1151,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
     private void initDictionaryDesc() {
         if (dictionaries != null) {
             for (DictionaryDesc dictDesc : dictionaries) {
-                dictDesc.init(this);
+                dictDesc.init(this.getModel());
                 allColumns.add(dictDesc.getColumnRef());
                 if (dictDesc.getResuseColumnRef() != null) {
                     allColumns.add(dictDesc.getResuseColumnRef());
@@ -1357,7 +1357,39 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
 
         return result;
     }
+    /**
+     * Get columns that need dictionary built on it. Note the result remove reuse dictionary
+     */
+    public Set<TblColRef> getAllColumnsNeedDictionaryExcludeReuseBuilt() {
+        Set<TblColRef> result = getAllColumnsHaveDictionary();
 
+        // remove columns that reuse other's dictionary
+        if (dictionaries != null) {
+            for (DictionaryDesc dictDesc : dictionaries) {
+                if (dictDesc.getResuseColumnRef() != null) {
+                    result.remove(dictDesc.getColumnRef());
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Get columns that need dictionary built on it. Note the result remove reuse dictionary
+     */
+    public Set<TblColRef> getAllReuseColumnsNeedDictionaryBuilt() {
+        Set<TblColRef> result = getAllColumnsHaveDictionary();
+
+        // remove columns that reuse other's dictionary
+        if (dictionaries != null) {
+            for (DictionaryDesc dictDesc : dictionaries) {
+                if (dictDesc.getResuseColumnRef() != null) {
+                    result.remove(dictDesc.getColumnRef());
+                }
+            }
+        }
+        return result;
+    }
     /**
      * A column may reuse dictionary of another column, find the dict column, return same col if there's no reuse column
      */

@@ -97,7 +97,7 @@ public class IntegerDimEncTest {
             byte[] buf = new byte[enc.getLengthOfEncoding()];
             enc.encode(null, buf, 0);
             Assert.assertTrue(DimensionEncoding.isNull(buf, 0, buf.length));
-            String decode = enc.decode(buf, 0, buf.length);
+            String decode = (String) enc.decode(buf, 0, buf.length);
             Assert.assertEquals(null, decode);
 
             buf = new byte[enc.getLengthOfEncoding()];
@@ -132,7 +132,7 @@ public class IntegerDimEncTest {
         String valueStr = "" + value;
         byte[] buf = new byte[enc.getLengthOfEncoding()];
         enc.encode(valueStr, buf, 0);
-        String decode = enc.decode(buf, 0, buf.length);
+        String decode = (String) enc.decode(buf, 0, buf.length);
         Assert.assertEquals(valueStr, decode);
     }
 

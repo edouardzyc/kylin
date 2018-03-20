@@ -18,9 +18,11 @@
 
 package org.apache.kylin.cube;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.common.collect.Sets;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.util.Dictionary;
@@ -36,6 +39,7 @@ import org.apache.kylin.cube.cuboid.CuboidScheduler;
 import org.apache.kylin.cube.kv.CubeDimEncMap;
 import org.apache.kylin.cube.kv.RowConstants;
 import org.apache.kylin.cube.model.CubeDesc;
+import org.apache.kylin.dict.project.SegmentProjectDictDesc;
 import org.apache.kylin.metadata.model.DataModelDesc;
 import org.apache.kylin.metadata.model.IBuildable;
 import org.apache.kylin.metadata.model.ISegment;
@@ -101,6 +105,10 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
 
     @JsonProperty("dictionaries")
     private ConcurrentHashMap<String, String> dictionaries; // table/column ==> dictionary resource path
+
+    @JsonProperty("global_dictionaries")
+    private ConcurrentHashMap<String, SegmentProjectDictDesc> globalDictionaries; // table/column ==> dictionary resource path
+
     @JsonProperty("snapshots")
     private ConcurrentHashMap<String, String> snapshots; // table name ==> snapshot resource path
 
@@ -120,6 +128,10 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
     private Map<String, String> additionalInfo = new LinkedHashMap<String, String>();
 
     private Map<Long, Short> cuboidBaseShards = Maps.newConcurrentMap(); // cuboid id ==> base(starting) shard for this cuboid
+
+    @JsonProperty("ProDict")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Map<String, SegmentProjectDictDesc> projectDictDescs = Maps.newHashMap();
 
     // lazy init
     transient volatile ISegmentAdvisor advisor = null;
@@ -299,6 +311,13 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
         }
 
         return r;
+    }
+
+    public SegmentProjectDictDesc getProjectDictDesc(TblColRef col) {
+        SegmentProjectDictDesc desc;
+        String dictKey = col.getIdentity();
+        desc = getProjectDictDesc(dictKey);
+        return desc;
     }
 
     public void putDictResPath(TblColRef col, String dictResPath) {
@@ -574,5 +593,22 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
 
     public void setSourcePartitionOffsetStart(Map<Integer, Long> sourcePartitionOffsetStart) {
         this.sourcePartitionOffsetStart = sourcePartitionOffsetStart;
+    }
+
+    public void putProjectDictDesc(String key, SegmentProjectDictDesc segmentProjectDictDesc) {
+        projectDictDescs.put(key, segmentProjectDictDesc);
+    }
+
+    public SegmentProjectDictDesc getProjectDictDesc(String key) {
+        return projectDictDescs.get(key);
+    }
+
+    public Collection<String> getProjectDictionaryPaths() throws IOException {
+        CubeManager cubeMgr = CubeManager.getInstance(this.getCubeInstance().getConfig());
+        HashSet<String> paths = Sets.newHashSet();
+        for (SegmentProjectDictDesc segmentProjectDictDesc : projectDictDescs.values()) {
+                 paths.addAll(cubeMgr.getProDictResourcePaths(segmentProjectDictDesc));
+        }
+        return paths;
     }
 }

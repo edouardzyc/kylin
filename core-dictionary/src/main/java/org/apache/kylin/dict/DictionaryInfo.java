@@ -33,21 +33,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DictionaryInfo extends RootPersistentEntity {
 
     @JsonProperty("source_table")
-    private String sourceTable;
+    protected String sourceTable;
     @JsonProperty("source_column")
-    private String sourceColumn;
+    protected String sourceColumn;
     @JsonProperty("source_column_index")
-    private int sourceColumnIndex; // 0 based
+    protected int sourceColumnIndex; // 0 based
     @JsonProperty("data_type")
-    private String dataType;
+    protected String dataType;
     @JsonProperty("input")
-    private TableSignature input;
+    protected TableSignature input;
     @JsonProperty("dictionary_class")
-    private String dictionaryClass;
+    protected String dictionaryClass;
     @JsonProperty("cardinality")
-    private int cardinality;
+    protected int cardinality;
 
-    transient Dictionary<String> dictionaryObject;
+    protected transient Dictionary<String> dictionaryObject;
 
     public DictionaryInfo() {
     }

@@ -56,14 +56,14 @@ public class IntDimEncTest {
             byte[] buf = new byte[enc.getLengthOfEncoding()];
             enc.encode(null, buf, 0);
             Assert.assertTrue(DimensionEncoding.isNull(buf, 0, buf.length));
-            String decode = enc.decode(buf, 0, buf.length);
+            Object decode = enc.decode(buf, 0, buf.length);
             Assert.assertEquals(null, decode);
 
             buf = new byte[enc.getLengthOfEncoding()];
             DataTypeSerializer<Object> ser = enc.asDataTypeSerializer();
             ser.serialize(null, ByteBuffer.wrap(buf));
             Assert.assertTrue(DimensionEncoding.isNull(buf, 0, buf.length));
-            decode = (String) ser.deserialize(ByteBuffer.wrap(buf));
+            decode = ser.deserialize(ByteBuffer.wrap(buf));
             Assert.assertEquals(null, decode);
         }
     }
@@ -93,7 +93,7 @@ public class IntDimEncTest {
         byte[] buf = new byte[enc.getLengthOfEncoding()];
         String valueStr = "" + value;
         enc.encode(valueStr, buf, 0);
-        String decode = enc.decode(buf, 0, buf.length);
+        String decode = (String) enc.decode(buf, 0, buf.length);
         Assert.assertEquals(valueStr, decode);
     }
 

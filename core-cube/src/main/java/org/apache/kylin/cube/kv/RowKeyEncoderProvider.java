@@ -29,17 +29,29 @@ public class RowKeyEncoderProvider implements java.io.Serializable {
 
     private CubeSegment cubeSegment;
     private HashMap<Long, RowKeyEncoder> rowKeyEncoders;
+    private CubeDimEncMap cubeDimEncMap;
 
     public RowKeyEncoderProvider(CubeSegment cubeSegment) {
         this.cubeSegment = cubeSegment;
         this.rowKeyEncoders = Maps.newHashMap();
     }
 
+    public RowKeyEncoderProvider(CubeSegment cubeSegment, CubeDimEncMap cubeDimEncMap) {
+        this.cubeSegment = cubeSegment;
+        this.rowKeyEncoders = Maps.newHashMap();
+        this.cubeDimEncMap = cubeDimEncMap;
+    }
+
     public RowKeyEncoder getRowkeyEncoder(Cuboid cuboid) {
         RowKeyEncoder rowKeyEncoder = rowKeyEncoders.get(cuboid.getId());
         if (rowKeyEncoder == null) {
-            rowKeyEncoder = new RowKeyEncoder(cubeSegment, cuboid);
-            rowKeyEncoders.put(cuboid.getId(), rowKeyEncoder);
+            if (cubeDimEncMap == null) {
+                rowKeyEncoder = new RowKeyEncoder(cubeSegment, cuboid);
+                rowKeyEncoders.put(cuboid.getId(), rowKeyEncoder);
+            } else {
+                rowKeyEncoder = new RowKeyEncoder(cubeSegment, cuboid, cubeDimEncMap);
+                rowKeyEncoders.put(cuboid.getId(), rowKeyEncoder);
+            }
         }
         return rowKeyEncoder;
     }

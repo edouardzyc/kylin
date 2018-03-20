@@ -32,6 +32,9 @@ import org.apache.kylin.cube.CubeUpdate;
 import org.apache.kylin.cube.model.CubeDesc;
 import org.apache.kylin.dict.DictionaryInfo;
 import org.apache.kylin.dict.DictionaryManager;
+import org.apache.kylin.dict.project.ProjectDictionaryVersionInfo;
+import org.apache.kylin.dict.project.ProjectDictionaryManager;
+import org.apache.kylin.dict.project.SegmentProjectDictDesc;
 import org.apache.kylin.job.exception.ExecuteException;
 import org.apache.kylin.job.execution.AbstractExecutable;
 import org.apache.kylin.job.execution.ExecutableContext;
@@ -66,8 +69,9 @@ public class MergeDictionaryStep extends AbstractExecutable {
             // work on copy instead of cached objects
             CubeInstance cubeCopy = cube.latestCopyForWrite();
             CubeSegment newSegCopy = cubeCopy.getSegmentById(newSegment.getUuid());
-            
+
             makeDictForNewSegment(conf, cubeCopy, newSegCopy, mergingSegments);
+            makeProDictForNewSegment(conf, cubeCopy, newSegCopy, mergingSegments);
             makeSnapshotForNewSegment(cubeCopy, newSegCopy, mergingSegments);
 
             CubeUpdate update = new CubeUpdate(cubeCopy);
@@ -101,7 +105,8 @@ public class MergeDictionaryStep extends AbstractExecutable {
      * @param newSeg
      * @throws IOException
      */
-    private void makeDictForNewSegment(KylinConfig conf, CubeInstance cube, CubeSegment newSeg, List<CubeSegment> mergingSegments) throws IOException {
+    private void makeDictForNewSegment(KylinConfig conf, CubeInstance cube, CubeSegment newSeg,
+            List<CubeSegment> mergingSegments) throws IOException {
         DictionaryManager dictMgr = DictionaryManager.getInstance(conf);
         CubeDesc cubeDesc = cube.getDescriptor();
 
@@ -123,12 +128,31 @@ public class MergeDictionaryStep extends AbstractExecutable {
         }
     }
 
-    private DictionaryInfo mergeDictionaries(DictionaryManager dictMgr, CubeSegment cubeSeg, List<DictionaryInfo> dicts, TblColRef col) throws IOException {
+    private DictionaryInfo mergeDictionaries(DictionaryManager dictMgr, CubeSegment cubeSeg, List<DictionaryInfo> dicts,
+            TblColRef col) throws IOException {
         DictionaryInfo dictInfo = dictMgr.mergeDictionary(dicts);
         if (dictInfo != null)
             cubeSeg.putDictResPath(col, dictInfo.getResourcePath());
 
         return dictInfo;
+    }
+
+    private void makeProDictForNewSegment(KylinConfig conf, CubeInstance cube, CubeSegment newSeg,
+                                          List<CubeSegment> mergingSegments) {
+        CubeDesc cubeDesc = cube.getDescriptor();
+        ProjectDictionaryManager projectDictionaryManager = ProjectDictionaryManager.getInstance();
+
+        for (TblColRef col : cubeDesc.getAllColumnsNeedDictionaryExcludeReuseBuilt()) {
+            for (CubeSegment cubeSegment : mergingSegments) {
+                SegmentProjectDictDesc projectDictDesc = cubeSegment.getProjectDictDesc(col);
+                if (projectDictDesc != null) {
+                    ProjectDictionaryVersionInfo mvdVersion = projectDictionaryManager.getMaxVersion(projectDictDesc);
+                    long maxVersion = mvdVersion.getMaxVersion();
+                    newSeg.putProjectDictDesc(col.getIdentity(), new SegmentProjectDictDesc(projectDictDesc.getSourceIdentify(), maxVersion, mvdVersion.getIdLength()));
+                    break;
+                }
+            }
+        }
     }
 
     /**

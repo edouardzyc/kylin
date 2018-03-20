@@ -231,7 +231,7 @@ public class TopNMeasureType extends MeasureType<TopNCounter<ByteArray>> {
                     int innerBuffOffset = 0;
                     for (int i = 0; i < dimensionEncodings.length; i++) {
                         String dimValue = dimensionEncodings[i].decode(c.getItem().array(), offset,
-                                dimensionEncodings[i].getLengthOfEncoding());
+                                dimensionEncodings[i].getLengthOfEncoding()).toString();
                         newDimensionEncodings[i].encode(dimValue, newIdBuf, bufOffset + innerBuffOffset);
                         innerBuffOffset += newDimensionEncodings[i].getLengthOfEncoding();
                         offset += dimensionEncodings[i].getLengthOfEncoding();
@@ -458,7 +458,7 @@ public class TopNMeasureType extends MeasureType<TopNCounter<ByteArray>> {
                 Counter<ByteArray> counter = topNCounterIterator.next();
                 int offset = counter.getItem().offset();
                 for (int i = 0; i < dimensionEncodings.length; i++) {
-                    String colValue = dimensionEncodings[i].decode(counter.getItem().array(), offset,
+                    Object colValue = dimensionEncodings[i].decode(counter.getItem().array(), offset,
                             dimensionEncodings[i].getLengthOfEncoding());
                     tuple.setDimensionValue(literalTupleIdx[i], colValue);
                     offset += dimensionEncodings[i].getLengthOfEncoding();
@@ -518,9 +518,10 @@ public class TopNMeasureType extends MeasureType<TopNCounter<ByteArray>> {
 
                 encodingArgs = DateDimEnc.replaceEncodingArgs(encoding, encodingArgs, encodingName,
                         literalCols.get(i).getType());
-
-                dimensionEncodings[i] = DimensionEncodingFactory.create(encodingName, encodingArgs, encodingVersion);
                 dimensionEncodingInfos[i] = new DimensionEncodingInfo(encodingName, encodingArgs, encodingVersion);
+                String[] newArgs = Arrays.copyOf(encodingArgs, encodingArgs.length + 1);
+                newArgs[newArgs.length - 1] = colRef.getType().getName();
+                dimensionEncodings[i] = DimensionEncodingFactory.create(encodingName, newArgs, encodingVersion);
             }
         }
 

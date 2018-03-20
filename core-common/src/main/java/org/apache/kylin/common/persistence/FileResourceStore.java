@@ -208,7 +208,7 @@ public class FileResourceStore extends ResourceStore {
     }
 
     private File file(String resPath) {
-        if (resPath.equals("/"))
+         if (resPath.equals("/"))
             return root;
         else
             return new File(root, resPath);

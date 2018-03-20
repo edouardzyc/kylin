@@ -98,6 +98,19 @@ public class Tuple implements ITuple {
         setDimensionValue(info.getFieldIndex(fieldName), fieldValue);
     }
 
+    public void setDimensionValue(String fieldName, Object fieldValue) {
+        values[info.getFieldIndex(fieldName)] = fieldValue;
+    }
+
+    public void setDimensionValue(int idx, Object fieldValue) {
+        if (fieldValue instanceof Number) {
+            values[idx] = fieldValue;
+        } else {
+            Object objectValue = convertOptiqCellValue(String.valueOf(fieldValue), getDataTypeName(idx));
+            values[idx] = objectValue;
+        }
+    }
+
     public void setDimensionValue(int idx, String fieldValue) {
         Object objectValue = convertOptiqCellValue(fieldValue, getDataTypeName(idx));
         values[idx] = objectValue;

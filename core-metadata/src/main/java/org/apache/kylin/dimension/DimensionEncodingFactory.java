@@ -55,7 +55,6 @@ public abstract class DimensionEncodingFactory {
     public static DimensionEncoding create(String encodingName, String[] args, int version) {
         if (factoryMap == null)
             initFactoryMap();
-
         DimensionEncodingFactory factory = factoryMap.get(Pair.newPair(encodingName, version));
         if (factory == null) {
             throw new IllegalArgumentException("Unknown dimension encoding name " + encodingName //

@@ -62,6 +62,24 @@ public class RowKeyEncoder extends AbstractRowKeyEncoder implements java.io.Seri
         }
     }
 
+    public RowKeyEncoder(CubeSegment cubeSeg, Cuboid cuboid, CubeDimEncMap cubeDimEncMap) {
+        super(cubeSeg, cuboid);
+        enableSharding = cubeSeg.isEnableSharding();
+        headerLength = cubeSeg.getRowKeyPreambleSize();
+        Set<TblColRef> shardByColumns = cubeSeg.getCubeDesc().getShardByColumns();
+        if (shardByColumns.size() > 1) {
+            throw new IllegalStateException("Does not support multiple UHC now");
+        }
+        colIO = new RowKeyColumnIO(cubeDimEncMap);
+        for (TblColRef column : cuboid.getColumns()) {
+            if (shardByColumns.contains(column)) {
+                uhcOffset = bodyLength;
+                uhcLength = colIO.getColumnLength(column);
+            }
+            bodyLength += colIO.getColumnLength(column);
+        }
+    }
+
     public int getHeaderLength() {
         return headerLength;
     }

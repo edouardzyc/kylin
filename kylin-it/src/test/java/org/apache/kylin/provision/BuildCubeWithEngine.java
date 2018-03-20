@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 package org.apache.kylin.provision;
 
@@ -103,7 +103,7 @@ public class BuildCubeWithEngine {
     public static void beforeClass() throws Exception {
         beforeClass(HBaseMetadataTestCase.SANDBOX_TEST_DATA);
     }
-    
+
     public static void beforeClass(String confDir) throws Exception {
         logger.info("Adding to classpath: " + new File(confDir).getAbsolutePath());
         ClassUtil.addClasspath(new File(confDir).getAbsolutePath());
@@ -149,7 +149,7 @@ public class BuildCubeWithEngine {
         String fastModeStr = System.getProperty("fastBuildMode");
         if (fastModeStr == null || fastModeStr.isEmpty())
             fastModeStr = System.getenv("KYLIN_CI_FASTBUILD");
-        
+
         return "true".equalsIgnoreCase(fastModeStr);
     }
 
@@ -276,7 +276,7 @@ public class BuildCubeWithEngine {
     private boolean testLeftJoinCube() throws Exception {
         String cubeName = "ci_left_join_cube";
         clearSegment(cubeName);
-        
+
         // NOTE: ci_left_join_cube has percentile which isn't supported by Spark engine now
 
         return doBuildAndMergeOnCube(cubeName);
@@ -294,7 +294,7 @@ public class BuildCubeWithEngine {
 
         if (fastBuildMode)
             return buildSegment(cubeName, date1, date4);
-        
+
         if (!buildSegment(cubeName, date1, date2))
             return false;
         if (!buildSegment(cubeName, date2, date3))
@@ -310,7 +310,7 @@ public class BuildCubeWithEngine {
             return false;
         if (!mergeSegment(cubeName, date2, date5)) // merge normal and empty
             return false;
-        
+
         // now have 2 normal segments [date1, date2) [date2, date5) and 1 empty segment [date5, date6)
         return true;
     }
@@ -321,7 +321,7 @@ public class BuildCubeWithEngine {
 
         String cubeName = "ci_inner_join_cube";
         clearSegment(cubeName);
-        
+
         return doBuildAndMergeOnCube(cubeName);
     }
 

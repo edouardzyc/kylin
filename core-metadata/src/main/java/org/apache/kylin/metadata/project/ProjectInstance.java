@@ -113,6 +113,9 @@ public class ProjectInstance extends RootPersistentEntity implements ISourceAwar
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private LinkedHashMap<String, String> overrideKylinProps;
 
+    @JsonProperty("project_dictionaries")
+    private List<String> projectDictionaries;
+
     public void init() {
         if (name == null)
             name = ProjectInstance.DEFAULT_PROJECT_NAME;

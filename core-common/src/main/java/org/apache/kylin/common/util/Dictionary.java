@@ -95,7 +95,7 @@ abstract public class Dictionary<T> implements Serializable {
      *             if value is not found in dictionary and rounding is off;
      *             or if rounding cannot find a smaller or bigger ID
      */
-    final public int getIdFromValue(T value, int roundingFlag) throws IllegalArgumentException {
+     public int getIdFromValue(T value, int roundingFlag) throws IllegalArgumentException {
         if (isNullObjectForm(value))
             return nullId();
 
@@ -131,7 +131,7 @@ abstract public class Dictionary<T> implements Serializable {
      * @throws IllegalArgumentException
      *             if ID is not found in dictionary
      */
-    final public T getValueFromId(int id) throws IllegalArgumentException {
+     public T getValueFromId(int id) throws IllegalArgumentException {
         if (isNullId(id))
             return null;
         else

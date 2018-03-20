@@ -26,13 +26,15 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.kylin.common.exceptions.TooBigDictionaryException;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.persistence.RootPersistentEntity;
+import org.apache.kylin.common.util.DateFormat;
 import org.apache.kylin.common.util.Dictionary;
 import org.apache.kylin.dict.StringBytesConverter;
 import org.apache.kylin.dict.TrieDictionary;
@@ -44,6 +46,7 @@ import org.apache.kylin.source.IReadableTable;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Strings;
 
 /**
  * @author yangli9
@@ -167,6 +170,47 @@ public class SnapshotTable extends RootPersistentEntity implements IReadableTabl
         };
     }
 
+
+    public ObjectTableReader toObjectRead(Map<Integer, Dictionary<String>> dictIndex, Set<Integer> dateIndex) {
+        return new ObjectTableReader(dictIndex, dateIndex);
+    }
+
+    public class ObjectTableReader {
+        Map<Integer, Dictionary<String>> dictIndex;
+        Set<Integer> dateIndex;
+        int i = -1;
+
+        public ObjectTableReader(Map<Integer, Dictionary<String>> dictIndex, Set<Integer> dateIndex) {
+            this.dictIndex = dictIndex;
+            this.dateIndex = dateIndex;
+        }
+
+        public boolean next() throws IOException {
+            i++;
+            return i < rowIndices.size();
+        }
+
+        public Object[] getRow() {
+            int[] rowIndex = rowIndices.get(i);
+            Object[] row = new Object[rowIndex.length];
+            for (int x = 0; x < row.length; x++) {
+                Object valueFromId = dict.getValueFromId(rowIndex[x]);
+
+                if (dictIndex.containsKey(x)) {
+                    Object idFromValue = dictIndex.get(x).getIdFromValue(valueFromId.toString());
+                    row[x] = idFromValue;
+                } else if (dateIndex.contains(x)) {
+                    row[x] = (Object)((DateFormat.stringToMillis(valueFromId.toString())) / 1000);
+                } else {
+                    row[x] = valueFromId;
+                }
+            }
+            return row;
+        }
+
+        public void close() throws IOException {
+        }
+    }
     @Override
     public TableSignature getSignature() throws IOException {
         return signature;

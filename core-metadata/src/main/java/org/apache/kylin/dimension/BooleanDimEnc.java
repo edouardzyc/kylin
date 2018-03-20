@@ -49,6 +49,9 @@ public class BooleanDimEnc extends DimensionEncoding implements Serializable{
             map.put(ALLOWED_VALUES[i], i);
         }
     }
+    private boolean isBooleanType = false;
+
+
 
     public static class Factory extends DimensionEncodingFactory {
         @Override
@@ -58,6 +61,9 @@ public class BooleanDimEnc extends DimensionEncoding implements Serializable{
 
         @Override
         public DimensionEncoding createDimensionEncoding(String encodingName, String[] args) {
+            if(args != null && args.length >0){
+                return new BooleanDimEnc(args[0]);
+            }
             return new BooleanDimEnc();
         }
     };
@@ -70,6 +76,11 @@ public class BooleanDimEnc extends DimensionEncoding implements Serializable{
     public BooleanDimEnc() {
     }
 
+    private BooleanDimEnc(String type) {
+        if ("boolean".equals(type)) {
+            isBooleanType = true;
+        }
+    }
     @Override
     public int getLengthOfEncoding() {
         return fixedLen;
@@ -91,7 +102,7 @@ public class BooleanDimEnc extends DimensionEncoding implements Serializable{
     }
 
     @Override
-    public String decode(byte[] bytes, int offset, int len) {
+    public Object decode(byte[] bytes, int offset, int len) {
         if (isNull(bytes, offset, len)) {
             return null;
         }
@@ -100,8 +111,11 @@ public class BooleanDimEnc extends DimensionEncoding implements Serializable{
         if (x >= ALLOWED_VALUES.length) {
             throw new IllegalStateException();
         }
-
-        return ALLOWED_VALUES[x];
+        String allowedValue = ALLOWED_VALUES[x];
+        if (isBooleanType) {
+            return Boolean.parseBoolean(allowedValue) || "1".equals(allowedValue);
+        }
+        return allowedValue;
     }
 
     @Override

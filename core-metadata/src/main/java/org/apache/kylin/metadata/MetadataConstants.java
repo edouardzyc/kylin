@@ -28,6 +28,7 @@ public interface MetadataConstants {
     //Identifier Type, user or group
     public static final String TYPE_USER = "user";
     public static final String TYPE_GROUP = "group";
+    public static final String TYPE_VERSION = ".version";
 
     // Extended attribute keys
     public static final String TABLE_EXD_STATUS_KEY = "EXD_STATUS";

@@ -95,6 +95,8 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
             .hasArg().isRequired(true).withDescription("Cube segment name").create(BatchConstants.ARG_SEGMENT_NAME);
     protected static final Option OPTION_SEGMENT_ID = OptionBuilder.withArgName(BatchConstants.ARG_SEGMENT_ID).hasArg()
             .isRequired(true).withDescription("Cube segment id").create(BatchConstants.ARG_SEGMENT_ID);
+    protected static final Option OPTION_MERGE_SEGMENT_ID = OptionBuilder.withArgName(BatchConstants.ARG_MERGE_SEGMENT_ID).hasArg()
+            .isRequired(true).withDescription("Cube segment id").create(BatchConstants.ARG_MERGE_SEGMENT_ID);
     protected static final Option OPTION_INPUT_PATH = OptionBuilder.withArgName(BatchConstants.ARG_INPUT).hasArg()
             .isRequired(true).withDescription("Input path").create(BatchConstants.ARG_INPUT);
     protected static final Option OPTION_INPUT_FORMAT = OptionBuilder.withArgName(BatchConstants.ARG_INPUT_FORMAT)
@@ -457,6 +459,9 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
     }
 
     public static KylinConfig loadKylinPropsAndMetadata() throws IOException {
+        if("true".equals(System.getProperty("mr.local"))) {
+            return KylinConfig.getInstanceFromEnv();
+        }
         File metaDir = new File("meta");
         if (!metaDir.getAbsolutePath().equals(System.getProperty(KylinConfig.KYLIN_CONF))) {
             System.setProperty(KylinConfig.KYLIN_CONF, metaDir.getAbsolutePath());
@@ -517,18 +522,22 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
     }
 
     protected void attachCubeMetadataWithDict(CubeInstance cube, Configuration conf) throws IOException {
-        Set<String> dumpList = new LinkedHashSet<>();
-        dumpList.addAll(collectCubeMetadata(cube));
-        for (CubeSegment segment : cube.getSegments()) {
-            dumpList.addAll(segment.getDictionaryPaths());
-        }
+        Set<String> dumpList = new LinkedHashSet<>(collectCubeMetadata(cube));
+        attachSegmentDict(cube.getSegments(), dumpList);
         dumpKylinPropsAndMetadata(cube.getProject(), dumpList, cube.getConfig(), conf);
     }
 
+    private void attachSegmentDict(List<CubeSegment> segments, Set<String> dumpList) throws IOException {
+        for (CubeSegment segment : segments) {
+            dumpList.addAll(segment.getDictionaryPaths());
+            // if system.getProperty(dict.debug.enabled)  will put dictionary source
+            dumpList.addAll(segment.getProjectDictionaryPaths());
+        }
+    }
+
     protected void attachSegmentsMetadataWithDict(List<CubeSegment> segments, Configuration conf) throws IOException {
-        Set<String> dumpList = new LinkedHashSet<>();
         CubeInstance cube = segments.get(0).getCubeInstance();
-        dumpList.addAll(collectCubeMetadata(cube));
+        Set<String> dumpList = new LinkedHashSet<>(collectCubeMetadata(cube));
         for (CubeSegment segment : segments) {
             dumpList.addAll(segment.getDictionaryPaths());
         }

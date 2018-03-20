@@ -123,7 +123,8 @@ public class SparkCubingByLayer extends AbstractApplication implements Serializa
         String outputPath = optionsHelper.getOptionValue(OPTION_OUTPUT_PATH);
 
         Class[] kryoClassArray = new Class[] { org.apache.hadoop.io.Text.class,
-                Class.forName("scala.reflect.ClassTag$$anon$1"), java.lang.Class.class };
+                Class.forName("scala.reflect.ClassTag$$anon$1"), java.lang.Class.class,
+                Class.forName("org.apache.spark.internal.io.FileCommitProtocol$TaskCommitMessage") };
 
         SparkConf conf = new SparkConf().setAppName("Cubing for:" + cubeName + " segment " + segmentId);
         //serialization conf
@@ -178,7 +179,8 @@ public class SparkCubingByLayer extends AbstractApplication implements Serializa
             totalCount = encodedBaseRDD.count();
         }
 
-        final BaseCuboidReducerFunction2 baseCuboidReducerFunction = new BaseCuboidReducerFunction2(cubeName, metaUrl, sConf);
+        final BaseCuboidReducerFunction2 baseCuboidReducerFunction = new BaseCuboidReducerFunction2(cubeName, metaUrl,
+                sConf);
         BaseCuboidReducerFunction2 reducerFunction2 = baseCuboidReducerFunction;
         if (allNormalMeasure == false) {
             reducerFunction2 = new CuboidReducerFunction2(cubeName, metaUrl, sConf, needAggr);
@@ -367,7 +369,8 @@ public class SparkCubingByLayer extends AbstractApplication implements Serializa
     static public class CuboidReducerFunction2 extends BaseCuboidReducerFunction2 {
         private boolean[] needAggr;
 
-        public CuboidReducerFunction2(String cubeName, String metaUrl, SerializableConfiguration conf, boolean[] needAggr) {
+        public CuboidReducerFunction2(String cubeName, String metaUrl, SerializableConfiguration conf,
+                boolean[] needAggr) {
             super(cubeName, metaUrl, conf);
             this.needAggr = needAggr;
         }

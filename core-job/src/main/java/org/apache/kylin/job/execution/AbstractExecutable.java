@@ -127,6 +127,7 @@ public abstract class AbstractExecutable implements Executable, Idempotent {
                 result = null;
                 try {
                     result = doWork(executableContext);
+
                 } catch (Throwable e) {
                     logger.error("error running Executable: " + this.toString());
                     exception = e;

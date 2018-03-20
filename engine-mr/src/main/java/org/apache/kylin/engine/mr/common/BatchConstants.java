@@ -86,6 +86,7 @@ public interface BatchConstants {
     String ARG_II_NAME = "iiname";
     String ARG_SEGMENT_NAME = "segmentname";
     String ARG_SEGMENT_ID = "segmentid";
+    String ARG_MERGE_SEGMENT_ID = "mergeSegmentid";
     String ARG_PARTITION = "partitions";
     String ARG_STATS_ENABLED = "statisticsenabled";
     String ARG_STATS_OUTPUT = "statisticsoutput";

@@ -32,6 +32,7 @@ import org.apache.kylin.metadata.model.TblColRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Map;
 
 public class CubeDimEncMap implements IDimensionEncodingMap, java.io.Serializable {
@@ -70,8 +71,10 @@ public class CubeDimEncMap implements IDimensionEncodingMap, java.io.Serializabl
                     result = new DictionaryDimEnc(dict);
                 }
             } else {
+                String[] newArgs = Arrays.copyOf(colDesc.getEncodingArgs(), colDesc.getEncodingArgs().length + 1);
+                newArgs[newArgs.length - 1] = col.getType().getName();
                 // normal case
-                result = DimensionEncodingFactory.create(colDesc.getEncodingName(), colDesc.getEncodingArgs(), colDesc.getEncodingVersion());
+                result = DimensionEncodingFactory.create(colDesc.getEncodingName(), newArgs, colDesc.getEncodingVersion());
             }
             encMap.put(col, result);
         }

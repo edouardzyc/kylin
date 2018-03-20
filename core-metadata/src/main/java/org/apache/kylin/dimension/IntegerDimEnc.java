@@ -37,14 +37,17 @@ import org.slf4j.LoggerFactory;
  * -2^(8*N-1) is not supported because the slot is reserved for null values.
  * -2^(8*N-1) will be encoded with warn, and its output will be null
  */
-public class IntegerDimEnc extends DimensionEncoding implements Serializable{
+public class IntegerDimEnc extends DimensionEncoding implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private static Logger logger = LoggerFactory.getLogger(IntegerDimEnc.class);
 
-    private static final long[] CAP = { 0, 0x7fL, 0x7fffL, 0x7fffffL, 0x7fffffffL, 0x7fffffffffL, 0x7fffffffffffL, 0x7fffffffffffffL, 0x7fffffffffffffffL };
-    private static final long[] MASK = { 0, 0xffL, 0xffffL, 0xffffffL, 0xffffffffL, 0xffffffffffL, 0xffffffffffffL, 0xffffffffffffffL, 0xffffffffffffffffL };
-    private static final long[] TAIL = { 0, 0x80L, 0x8000L, 0x800000L, 0x80000000L, 0x8000000000L, 0x800000000000L, 0x80000000000000L, 0x8000000000000000L };
+    private static final long[] CAP = { 0, 0x7fL, 0x7fffL, 0x7fffffL, 0x7fffffffL, 0x7fffffffffL, 0x7fffffffffffL,
+            0x7fffffffffffffL, 0x7fffffffffffffffL };
+    private static final long[] MASK = { 0, 0xffL, 0xffffL, 0xffffffL, 0xffffffffL, 0xffffffffffL, 0xffffffffffffL,
+            0xffffffffffffffL, 0xffffffffffffffffL };
+    private static final long[] TAIL = { 0, 0x80L, 0x8000L, 0x800000L, 0x80000000L, 0x8000000000L, 0x800000000000L,
+            0x80000000000000L, 0x8000000000000000L };
     static {
         for (int i = 1; i < TAIL.length; ++i) {
             long head = ~MASK[i];
@@ -62,9 +65,13 @@ public class IntegerDimEnc extends DimensionEncoding implements Serializable{
 
         @Override
         public DimensionEncoding createDimensionEncoding(String encodingName, String[] args) {
+            if (args.length > 1) {
+                return new IntegerDimEnc(Integer.parseInt(args[0]), args[1]);
+            }
             return new IntegerDimEnc(Integer.parseInt(args[0]));
+
         }
-    };
+    }
 
     // ============================================================================
 
@@ -73,8 +80,12 @@ public class IntegerDimEnc extends DimensionEncoding implements Serializable{
     transient private int avoidVerbose = 0;
     transient private int avoidVerbose2 = 0;
 
+    private ValueConvert valueConvert;
+    private String dataType;
+
     //no-arg constructor is required for Externalizable
     public IntegerDimEnc() {
+        initCovert();
     }
 
     public IntegerDimEnc(int len) {
@@ -82,6 +93,64 @@ public class IntegerDimEnc extends DimensionEncoding implements Serializable{
             throw new IllegalArgumentException();
 
         this.fixedLen = len;
+        this.valueConvert = new ValueConvert() {
+            @Override
+            public Object convert(long value) {
+                return String.valueOf(value);
+            }
+        };
+    }
+
+    public IntegerDimEnc(int len, String dataType) {
+        if (len <= 0 || len >= CAP.length)
+            throw new IllegalArgumentException();
+        this.dataType = dataType;
+        initCovert();
+    }
+
+    private void initCovert() {
+        switch (this.dataType) {
+        case "integer":
+            this.valueConvert = new ValueConvert() {
+                @Override
+                public Object convert(long value) {
+                    return (int) value;
+                }
+            };
+            break;
+        case "bigint":
+            this.valueConvert = new ValueConvert() {
+                @Override
+                public Object convert(long value) {
+                    return value;
+                }
+            };
+            break;
+        case "smallint":
+            this.valueConvert = new ValueConvert() {
+                @Override
+                public Object convert(long value) {
+                    return (short) value;
+                }
+            };
+            break;
+        case "tinyint":
+            this.valueConvert = new ValueConvert() {
+                @Override
+                public Object convert(long value) {
+                    return (byte) value;
+                }
+            };
+            break;
+        default:
+            this.valueConvert = new ValueConvert() {
+                @Override
+                public Object convert(long value) {
+                    return String.valueOf(value);
+                }
+            };
+            break;
+        }
     }
 
     @Override
@@ -99,7 +168,8 @@ public class IntegerDimEnc extends DimensionEncoding implements Serializable{
         long integer = Long.parseLong(valueStr);
         if (integer > CAP[fixedLen] || integer < TAIL[fixedLen]) {
             if (avoidVerbose++ % 10000 == 0) {
-                logger.warn("Expect at most " + fixedLen + " bytes, but got " + valueStr + ", will truncate, hit times:" + avoidVerbose);
+                logger.warn("Expect at most " + fixedLen + " bytes, but got " + valueStr + ", will truncate, hit times:"
+                        + avoidVerbose);
             }
         }
 
@@ -113,11 +183,14 @@ public class IntegerDimEnc extends DimensionEncoding implements Serializable{
     }
 
     @Override
-    public String decode(byte[] bytes, int offset, int len) {
+    public Object decode(byte[] bytes, int offset, int len) {
         if (isNull(bytes, offset, len)) {
             return null;
         }
+        return valueConvert.convert(doDecode(bytes, offset, len));
+    }
 
+    private long doDecode(byte[] bytes, int offset, int len) {
         long integer = BytesUtil.readLong(bytes, offset, len) - CAP[fixedLen];
 
         //only take useful bytes
@@ -126,8 +199,7 @@ public class IntegerDimEnc extends DimensionEncoding implements Serializable{
         if (!positive) {
             integer |= (~MASK[fixedLen]);
         }
-
-        return String.valueOf(integer);
+        return integer;
     }
 
     @Override
@@ -185,11 +257,14 @@ public class IntegerDimEnc extends DimensionEncoding implements Serializable{
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeShort(fixedLen);
+        out.writeUTF(dataType);
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         fixedLen = in.readShort();
+        dataType = in.readUTF();
+        initCovert();
     }
 
     @Override
@@ -208,5 +283,9 @@ public class IntegerDimEnc extends DimensionEncoding implements Serializable{
     @Override
     public int hashCode() {
         return fixedLen;
+    }
+
+    interface ValueConvert extends Serializable {
+        Object convert(long value);
     }
 }

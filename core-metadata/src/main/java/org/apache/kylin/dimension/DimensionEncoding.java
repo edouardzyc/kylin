@@ -70,7 +70,7 @@ public abstract class DimensionEncoding implements Externalizable {
     abstract public void encode(String value, byte[] output, int outputOffset);
 
     /** decode given bytes to value string, note the NULL convention */
-    abstract public String decode(byte[] bytes, int offset, int len);
+    abstract public Object decode(byte[] bytes, int offset, int len);
 
     /** return a DataTypeSerializer that does the same encoding/decoding on ByteBuffer */
     abstract public DataTypeSerializer<Object> asDataTypeSerializer();

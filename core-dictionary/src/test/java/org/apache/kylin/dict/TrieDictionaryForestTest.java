@@ -39,10 +39,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.TreeSet;
 
+import org.apache.kylin.dict.utils.RandomStrings;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -171,7 +171,7 @@ public class TrieDictionaryForestTest {
         System.out.println("tree num:" + dict.getTrees().size());
         //check
         for (Map.Entry<String, Integer> entry : idMap.entrySet()) {
-            //System.out.println("my id:"+dict.getIdFromValue(entry.getKey())+" right id:"+entry.getValue());
+            //System.out.println("my id:"+dict.getIdFromValue(entry.getSourceIdentify())+" right id:"+entry.getValue());
             assertEquals(0, dict.getIdFromValue(entry.getKey()) - entry.getValue());
             assertEquals(entry.getKey(), dict.getValueFromId(entry.getValue()));
         }
@@ -955,58 +955,6 @@ public class TrieDictionaryForestTest {
         return b;
     }
 
-    private static class RandomStrings implements Iterable<String> {
-        final private int size;
-
-        public RandomStrings(int size) {
-            this.size = size;
-            //System.out.println("size = " + size);
-        }
-
-        @Override
-        public Iterator<String> iterator() {
-            return new Iterator<String>() {
-                Random rand = new Random(System.currentTimeMillis());
-                int i = 0;
-
-                @Override
-                public boolean hasNext() {
-                    return i < size;
-                }
-
-                @Override
-                public String next() {
-                    if (hasNext() == false)
-                        throw new NoSuchElementException();
-
-                    i++;
-                    //if (i % 1000000 == 0)
-                    //System.out.println(i);
-
-                    return nextString();
-                }
-
-                private String nextString() {
-                    StringBuffer buf = new StringBuffer();
-                    for (int i = 0; i < 64; i++) {
-                        int v = rand.nextInt(16);
-                        char c;
-                        if (v >= 0 && v <= 9)
-                            c = (char) ('0' + v);
-                        else
-                            c = (char) ('a' + v - 10);
-                        buf.append(c);
-                    }
-                    return buf.toString();
-                }
-
-                @Override
-                public void remove() {
-                    throw new UnsupportedOperationException();
-                }
-            };
-        }
-    }
 
     private static ArrayList<String> loadStrings(InputStream is) throws Exception {
         ArrayList<String> r = new ArrayList<String>();
