@@ -138,4 +138,8 @@ public class KylinUserManager {
             return userMap.containsKey(username);
         }
     }
+
+    public void reloadAll() throws IOException {
+        crud.reloadAll();
+    }
 }
