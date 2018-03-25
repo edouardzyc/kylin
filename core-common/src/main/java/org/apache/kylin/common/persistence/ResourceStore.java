@@ -277,14 +277,16 @@ abstract public class ResourceStore {
     /**
      * check & set, overwrite a resource
      */
-    final public <T extends RootPersistentEntity> long putResource(String resPath, T obj, Serializer<T> serializer) throws IOException {
+    final public <T extends RootPersistentEntity> long putResource(String resPath, T obj, Serializer<T> serializer)
+            throws IOException, WriteConflictException {
         return putResource(resPath, obj, System.currentTimeMillis(), serializer);
     }
 
     /**
      * check & set, overwrite a resource
      */
-    final public <T extends RootPersistentEntity> long putResource(String resPath, T obj, long newTS, Serializer<T> serializer) throws IOException {
+    final public <T extends RootPersistentEntity> long putResource(String resPath, T obj, long newTS,
+            Serializer<T> serializer) throws IOException, WriteConflictException {
         resPath = norm(resPath);
         //logger.debug("Saving resource " + resPath + " (Store " + kylinConfig.getMetadataUrl() + ")");
 
@@ -310,7 +312,8 @@ abstract public class ResourceStore {
         }
     }
 
-    private long checkAndPutResourceCheckpoint(String resPath, byte[] content, long oldTS, long newTS) throws IOException {
+    private long checkAndPutResourceCheckpoint(String resPath, byte[] content, long oldTS, long newTS)
+            throws IOException, WriteConflictException {
         beforeChange(resPath);
         return checkAndPutResourceImpl(resPath, content, oldTS, newTS);
     }
@@ -318,7 +321,8 @@ abstract public class ResourceStore {
     /**
      * checks old timestamp when overwriting existing
      */
-    abstract protected long checkAndPutResourceImpl(String resPath, byte[] content, long oldTS, long newTS) throws IOException, IllegalStateException;
+    abstract protected long checkAndPutResourceImpl(String resPath, byte[] content, long oldTS, long newTS)
+            throws IOException, WriteConflictException;
 
     /**
      * delete a resource, does nothing on a folder
