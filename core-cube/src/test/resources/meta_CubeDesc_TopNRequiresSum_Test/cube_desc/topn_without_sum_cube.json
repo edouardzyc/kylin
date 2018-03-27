@@ -1,0 +1,104 @@
+{
+  "uuid": "aaaaad72-3929-4dff-b59d-cd89a01238af",
+  "name": "topn_without_sum_cube",
+  "model_name": "ci_inner_join_model",
+  "description": null,
+  "dimensions": [
+    {
+      "name": "ORDER_ID",
+      "table": "TEST_KYLIN_FACT",
+      "column": "ORDER_ID"
+    }
+  ],
+  "measures": [
+    {
+      "name": "TRANS_CNT",
+      "function": {
+        "expression": "COUNT",
+        "parameter": {
+          "type": "constant",
+          "value": "1"
+        },
+        "returntype": "bigint"
+      }
+    },
+    {
+      "name": "TOP_SELLER",
+      "function": {
+        "expression": "TOP_N",
+        "parameter": {
+          "type": "column",
+          "value": "TEST_KYLIN_FACT.PRICE",
+          "next_parameter": {
+            "type": "column",
+            "value": "TEST_KYLIN_FACT.SELLER_ID"
+          }
+        },
+        "returntype": "topn(100, 4)",
+        "configuration": {
+          "topn.encoding.TEST_KYLIN_FACT.SELLER_ID": "int:4"
+        }
+      }
+    }
+  ],
+  "rowkey": {
+    "rowkey_columns": [
+      {
+        "column": "TEST_KYLIN_FACT.ORDER_ID",
+        "encoding": "int:4"
+      }
+    ]
+  },
+  "signature": null,
+  "last_modified": 1448959801311,
+  "null_string": null,
+  "hbase_mapping": {
+    "column_family": [
+      {
+        "name": "f1",
+        "columns": [
+          {
+            "qualifier": "m",
+            "measure_refs": [
+              "TRANS_CNT"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "f2",
+        "columns": [
+          {
+            "qualifier": "m",
+            "measure_refs": [
+              "TOP_SELLER"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "aggregation_groups": [
+    {
+      "includes": [
+        "TEST_KYLIN_FACT.ORDER_ID"
+      ],
+      "select_rule": {
+        "hierarchy_dims": [],
+        "mandatory_dims": [],
+        "joint_dims": [],
+        "dim_cap": 5
+      }
+    }
+  ],
+  "notify_list": null,
+  "status_need_notify": [],
+  "auto_merge_time_ranges": null,
+  "retention_range": 0,
+  "engine_type": 4,
+  "storage_type": 2,
+  "override_kylin_properties": {
+    "kylin.cube.algorithm": "LAYER"
+  },
+  "partition_date_start": 0
+}

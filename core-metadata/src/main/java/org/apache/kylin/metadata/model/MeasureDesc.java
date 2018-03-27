@@ -19,6 +19,7 @@
 package org.apache.kylin.metadata.model;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,13 +45,26 @@ public class MeasureDesc implements Serializable {
     @Deprecated
     private String dependentMeasureRef;
 
-    public List<MeasureDesc> getInternalMeasure(DataModelDesc model) {
-        List<MeasureDesc> implementMeasures = Lists.newArrayList();
+    public List<MeasureDesc> getInternalMeasure(List<MeasureDesc> outerMeasures) {
         List<FunctionDesc> functionDescs = function.getMeasureType().convertToInternalMeasures(function);
-        if (functionDescs.size() == 1) {
+        
+        // remove dup with known outer measures
+        Iterator<FunctionDesc> it = functionDescs.iterator();
+        while (it.hasNext()) {
+            FunctionDesc internal = it.next();
+            for (MeasureDesc outer : outerMeasures) {
+                if (outer != this && outer.function.equals(internal)) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+        
+        if (functionDescs.size() == 1 && this.function.equals(functionDescs.get(0))) {
             return Lists.newArrayList(this);
         }
 
+        List<MeasureDesc> implementMeasures = Lists.newArrayList();
         int i = 0;
         for (FunctionDesc functionDesc : functionDescs) {
             MeasureDesc desc = new MeasureDesc();

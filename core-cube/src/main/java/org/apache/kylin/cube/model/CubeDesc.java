@@ -646,19 +646,36 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
         initDimensionColumns();
         initMeasureColumns();
 
-        //convert some complex measures, like CORR, to one or more normal measures
-        expandInternalMeasures();
         rowkey.init(this);
-
+        
         for (AggregationGroup agg : this.aggregationGroups) {
             agg.init(this, rowkey);
         }
         validateAggregationGroups(); // check if aggregation group is valid
         validateAggregationGroupsCombination();
+        
+        initMeasuresAndCF();
+
+        // check all dimension columns are presented on rowkey
+        List<TblColRef> dimCols = listDimensionColumnsExcludingDerived(true);
+        checkState(rowkey.getRowKeyColumns().length == dimCols.size(),
+                "RowKey columns count (%s) doesn't match dimensions columns count (%s)",
+                rowkey.getRowKeyColumns().length, dimCols.size());
+
+        initDictionaryDesc();
+        amendAllColumns();
+
+        // initialize mandatory cuboids based on mandatoryDimensionSetList
+        initMandatoryCuboids();
+    }
+
+    private void initMeasuresAndCF() {
+        // convert some complex measures, to one or more normal measures
+        expandInternalMeasures();
+        
+        initColFamilyWithInternalMeasures();
 
         String hbaseMappingAdapterName = config.getHBaseMappingAdapter();
-
-        initColFamilyWithInternalMeasures();
         if (hbaseMappingAdapterName != null) {
             try {
                 Class<?> hbaseMappingAdapterClass = Class.forName(hbaseMappingAdapterName);
@@ -677,18 +694,6 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
                 initMeasureReferenceToColumnFamily();
             }
         }
-
-        // check all dimension columns are presented on rowkey
-        List<TblColRef> dimCols = listDimensionColumnsExcludingDerived(true);
-        checkState(rowkey.getRowKeyColumns().length == dimCols.size(),
-                "RowKey columns count (%s) doesn't match dimensions columns count (%s)",
-                rowkey.getRowKeyColumns().length, dimCols.size());
-
-        initDictionaryDesc();
-        amendAllColumns();
-
-        // initialize mandatory cuboids based on mandatoryDimensionSetList
-        initMandatoryCuboids();
     }
 
     private void initMandatoryCuboids() {
@@ -1489,7 +1494,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
         Set<MeasureDesc> descs = Sets.newLinkedHashSet();
         descs.addAll(this.internalMeasures);
         for (MeasureDesc measureDesc : measures) {
-            descs.addAll(measureDesc.getInternalMeasure(model));
+            descs.addAll(measureDesc.getInternalMeasure(getOuterMeasures()));
         }
         this.internalMeasures = Lists.newArrayList(descs);
     }
@@ -1517,7 +1522,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
                         continue;
                     }
                     List<MeasureDesc> interMeasures = measureLookup.get(measureName.toUpperCase())
-                            .getInternalMeasure(model);
+                            .getInternalMeasure(getOuterMeasures());
                     interMeasures.removeAll(existedMeasures);
                     internalMeasures.addAll(interMeasures);
                 }

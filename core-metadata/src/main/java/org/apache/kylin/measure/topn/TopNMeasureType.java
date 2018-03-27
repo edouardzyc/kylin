@@ -18,6 +18,8 @@
 
 package org.apache.kylin.measure.topn;
 
+import static org.apache.kylin.metadata.model.FunctionDesc.FUNC_SUM;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -51,6 +53,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
+@SuppressWarnings("serial")
 public class TopNMeasureType extends MeasureType<TopNCounter<ByteArray>> {
 
     private static final Logger logger = LoggerFactory.getLogger(TopNMeasureType.class);
@@ -108,6 +111,24 @@ public class TopNMeasureType extends MeasureType<TopNCounter<ByteArray>> {
 
         if (dataType.getPrecision() < 1 || dataType.getPrecision() > 10000)
             throw new IllegalArgumentException();
+    }
+
+    // TopN requires a Sum to work
+    @Override
+    public List<FunctionDesc> convertToInternalMeasures(FunctionDesc topN) {
+        TblColRef sumCol = topN.getParameter().getColRef();
+        FunctionDesc sum = FunctionDesc.newInstance(FUNC_SUM, ParameterDesc.newInstance(sumCol), sumReturnType(sumCol));
+        return Lists.newArrayList(topN, sum);
+    }
+    
+    private String sumReturnType(TblColRef sumCol) {
+        if (sumCol.getType().isIntegerFamily()) {
+            return "bigint";
+        } else if (sumCol.getType().isDecimal()) {
+            return sumCol.getDatatype();
+        } else {
+            return "double";
+        }
     }
 
     @Override
@@ -407,7 +428,6 @@ public class TopNMeasureType extends MeasureType<TopNCounter<ByteArray>> {
             private Iterator<Counter<ByteArray>> topNCounterIterator;
             private int expectRow = 0;
 
-            @SuppressWarnings("unchecked")
             @Override
             public void reload(Object measureValue) {
                 this.topNCounter = (TopNCounter<ByteArray>) measureValue;
