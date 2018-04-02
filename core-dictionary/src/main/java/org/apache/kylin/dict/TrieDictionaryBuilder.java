@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
 
+import org.apache.kylin.common.exceptions.TooBigDictionaryException;
 import org.apache.kylin.common.util.BytesUtil;
 
 /**
@@ -427,10 +428,9 @@ public class TrieDictionaryBuilder<T> {
         int sizeNoValuesBeneath = stats.mbpn_sizeNoValueBeneath;
         int sizeChildOffset = stats.mbpn_sizeChildOffset;
 
-        if (stats.mbpn_footprint <= 0) // must never happen, but let us be cautious
-            throw new IllegalStateException("Too big dictionary, dictionary cannot be bigger than 2GB");
-        if (stats.mbpn_footprint > _2GB)
-            throw new RuntimeException("Too big dictionary, dictionary cannot be bigger than 2GB");
+        if (stats.mbpn_footprint <= 0 || stats.mbpn_footprint > _2GB)
+            // must never happen, but let us be cautious
+            throw new TooBigDictionaryException("Too big dictionary, dictionary cannot be bigger than 2GB");
 
         // write head
         byte[] head;

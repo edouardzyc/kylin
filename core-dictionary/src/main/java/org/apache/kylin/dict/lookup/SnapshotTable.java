@@ -30,6 +30,7 @@ import java.util.List;
 import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.kylin.common.exceptions.TooBigDictionaryException;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.persistence.RootPersistentEntity;
 import org.apache.kylin.common.util.Dictionary;
@@ -95,7 +96,14 @@ public class SnapshotTable extends RootPersistentEntity implements IReadableTabl
             IOUtils.closeQuietly(reader);
         }
 
-        this.dict = b.build(0);
+        try {
+            this.dict = b.build(0);
+        } catch (Exception e) {
+            if (e instanceof TooBigDictionaryException)
+                throw new TooBigDictionaryException("The dictionary of '" + tableDesc + "' is bigger then 2GB", e);
+            else
+                throw e;
+        }
 
         ArrayList<int[]> allRowIndices = new ArrayList<int[]>();
         reader = table.getReader();

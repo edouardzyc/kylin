@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.exceptions.TooBigDictionaryException;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.util.ClassUtil;
 import org.apache.kylin.common.util.Dictionary;
@@ -284,8 +285,14 @@ public class DictionaryManager {
         logger.info("Building dictionary object " + JsonUtil.writeValueAsString(dictInfo));
 
         Dictionary<String> dictionary;
-        dictionary = buildDictFromReadableTable(inpTable, dictInfo, builderClass, col);
-        return trySaveNewDict(dictionary, dictInfo);
+        try {
+            dictionary = buildDictFromReadableTable(inpTable, dictInfo, builderClass, col);
+            return trySaveNewDict(dictionary, dictInfo);
+        } catch (Exception e) {
+            if (e instanceof TooBigDictionaryException)
+                throw new TooBigDictionaryException("The dictionary of '" + col.getName() + "' is too big to build.", e);
+            else throw e;
+        }
     }
 
     private Dictionary<String> buildDictFromReadableTable(IReadableTable inpTable, DictionaryInfo dictInfo, String builderClass, TblColRef col) throws IOException {

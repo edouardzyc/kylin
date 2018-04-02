@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.kylin.common.exceptions.TooBigDictionaryException;
 import org.apache.kylin.common.util.ByteArray;
 import org.apache.kylin.common.util.Bytes;
 import org.apache.kylin.common.util.BytesUtil;
@@ -189,6 +190,10 @@ public class TrieDictionaryForest<T> extends CacheDictionary<T> {
         //write tree size
         headOut.writeInt(trees.size());
         headOut.close();
+        //if byteBuf is bigger then 2GB,index will be negative
+        if (byteBuf.size() <= 0) {
+            throw new TooBigDictionaryException("Too big dictionary, dictionary cannot be bigger than 2GB");
+        }
         byte[] head = byteBuf.toByteArray();
         //output
         out.writeInt(head.length);

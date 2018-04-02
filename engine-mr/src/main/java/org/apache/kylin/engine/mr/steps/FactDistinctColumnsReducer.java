@@ -34,6 +34,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.exceptions.TooBigDictionaryException;
 import org.apache.kylin.common.util.Bytes;
 import org.apache.kylin.common.util.DateFormat;
 import org.apache.kylin.common.util.Dictionary;
@@ -102,7 +103,7 @@ public class FactDistinctColumnsReducer extends KylinReducer<SelfDefineSortableK
 
         reducerMapping = new FactDistinctColumnsReducerMapping(cube,
                 conf.getInt(BatchConstants.CFG_HLL_REDUCER_NUM, 1));
-        
+
         logger.info("reducer no " + taskId + ", role play " + reducerMapping.getRolePlayOfReducer(taskId));
 
         if (reducerMapping.isCuboidRowCounterReducer(taskId)) {
@@ -145,7 +146,8 @@ public class FactDistinctColumnsReducer extends KylinReducer<SelfDefineSortableK
     }
 
     @Override
-    public void doReduce(SelfDefineSortableKey skey, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+    public void doReduce(SelfDefineSortableKey skey, Iterable<Text> values, Context context)
+            throws IOException, InterruptedException {
         Text key = skey.getText();
         if (isStatistics) {
             // for hll
@@ -213,8 +215,18 @@ public class FactDistinctColumnsReducer extends KylinReducer<SelfDefineSortableK
         } else {
             // normal col
             if (buildDictInReducer) {
-                Dictionary<String> dict = builder.build();
-                outputDict(col, dict);
+                try {
+                    Dictionary<String> dict = builder.build();
+                    outputDict(col, dict);
+                } catch (Exception e) {
+                    //TireDictionaryForest.writeHead() and TrieDictionaryBuilder.buildTrieBytes() will throw this message.
+                    if (e instanceof TooBigDictionaryException)
+                        throw new TooBigDictionaryException(
+                                "The Dictionary of column '" + col.getName() + "' is too big to build.", e);
+                    else
+                        throw e;
+
+                }
             }
         }
 
@@ -226,9 +238,12 @@ public class FactDistinctColumnsReducer extends KylinReducer<SelfDefineSortableK
             // output written to baseDir/colName/colName.pci-r-00000 (etc)
             String partitionFileName = col.getIdentity() + "/" + col.getName() + PARTITION_COL_INFO_FILE_POSTFIX;
 
-            mos.write(BatchConstants.CFG_OUTPUT_PARTITION, NullWritable.get(), new LongWritable(timeMinValue), partitionFileName);
-            mos.write(BatchConstants.CFG_OUTPUT_PARTITION, NullWritable.get(), new LongWritable(timeMaxValue), partitionFileName);
-            logger.info("write partition info for col : " + col.getName() + "  minValue:" + timeMinValue + " maxValue:" + timeMaxValue);
+            mos.write(BatchConstants.CFG_OUTPUT_PARTITION, NullWritable.get(), new LongWritable(timeMinValue),
+                    partitionFileName);
+            mos.write(BatchConstants.CFG_OUTPUT_PARTITION, NullWritable.get(), new LongWritable(timeMaxValue),
+                    partitionFileName);
+            logger.info("write partition info for col : " + col.getName() + "  minValue:" + timeMinValue + " maxValue:"
+                    + timeMaxValue);
         }
     }
 
@@ -236,11 +251,13 @@ public class FactDistinctColumnsReducer extends KylinReducer<SelfDefineSortableK
         // output written to baseDir/colName/colName.rldict-r-00000 (etc)
         String dictFileName = col.getIdentity() + "/" + col.getName() + DICT_FILE_POSTFIX;
 
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); DataOutputStream outputStream = new DataOutputStream(baos);) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                DataOutputStream outputStream = new DataOutputStream(baos);) {
             outputStream.writeUTF(dict.getClass().getName());
             dict.write(outputStream);
 
-            mos.write(BatchConstants.CFG_OUTPUT_DICT, NullWritable.get(), new ArrayPrimitiveWritable(baos.toByteArray()), dictFileName);
+            mos.write(BatchConstants.CFG_OUTPUT_DICT, NullWritable.get(),
+                    new ArrayPrimitiveWritable(baos.toByteArray()), dictFileName);
         }
     }
 
@@ -256,19 +273,23 @@ public class FactDistinctColumnsReducer extends KylinReducer<SelfDefineSortableK
             grandTotal += hll.getCountEstimate();
         }
         double mapperOverlapRatio = grandTotal == 0 ? 0 : (double) totalRowsBeforeMerge / grandTotal;
-        mos.write(BatchConstants.CFG_OUTPUT_STATISTICS, new LongWritable(-1), new BytesWritable(Bytes.toBytes(mapperOverlapRatio)), statisticsFileName);
+        mos.write(BatchConstants.CFG_OUTPUT_STATISTICS, new LongWritable(-1),
+                new BytesWritable(Bytes.toBytes(mapperOverlapRatio)), statisticsFileName);
 
         // mapper number at key -2
-        mos.write(BatchConstants.CFG_OUTPUT_STATISTICS, new LongWritable(-2), new BytesWritable(Bytes.toBytes(baseCuboidRowCountInMappers.size())), statisticsFileName);
+        mos.write(BatchConstants.CFG_OUTPUT_STATISTICS, new LongWritable(-2),
+                new BytesWritable(Bytes.toBytes(baseCuboidRowCountInMappers.size())), statisticsFileName);
 
         // sampling percentage at key 0
-        mos.write(BatchConstants.CFG_OUTPUT_STATISTICS, new LongWritable(0L), new BytesWritable(Bytes.toBytes(samplingPercentage)), statisticsFileName);
+        mos.write(BatchConstants.CFG_OUTPUT_STATISTICS, new LongWritable(0L),
+                new BytesWritable(Bytes.toBytes(samplingPercentage)), statisticsFileName);
 
         for (long i : allCuboids) {
             valueBuf.clear();
             cuboidHLLMap.get(i).writeRegisters(valueBuf);
             valueBuf.flip();
-            mos.write(BatchConstants.CFG_OUTPUT_STATISTICS, new LongWritable(i), new BytesWritable(valueBuf.array(), valueBuf.limit()), statisticsFileName);
+            mos.write(BatchConstants.CFG_OUTPUT_STATISTICS, new LongWritable(i),
+                    new BytesWritable(valueBuf.array(), valueBuf.limit()), statisticsFileName);
         }
     }
 
