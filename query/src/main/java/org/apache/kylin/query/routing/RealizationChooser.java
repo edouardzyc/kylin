@@ -37,6 +37,7 @@ import org.apache.kylin.metadata.realization.IRealization;
 import org.apache.kylin.metadata.realization.NoRealizationFoundException;
 import org.apache.kylin.query.relnode.OLAPContext;
 import org.apache.kylin.query.routing.rules.RemoveBlackoutRealizationsRule;
+import org.apache.kylin.util.JoinsGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,16 +122,18 @@ public class RealizationChooser {
     }
 
     private static Map<String, String> matches(DataModelDesc model, OLAPContext ctx) {
-        Map<String, String> result = Maps.newHashMap();
+        //        Map<String, String> result = Maps.newHashMap();
 
         TableRef firstTable = ctx.firstTableScan.getTableRef();
 
-        Map<String, String> matchUp = null;
+        Map<String, String> matchUp = Maps.newHashMap();
+        boolean matched;
 
         if (ctx.joins.isEmpty() && model.isLookupTable(firstTable.getTableIdentity())) {
             // one lookup table
             String modelAlias = model.findFirstTable(firstTable.getTableIdentity()).getAlias();
             matchUp = ImmutableMap.of(firstTable.getAlias(), modelAlias);
+            matched = true;
         } else if (ctx.joins.size() != ctx.allTableScans.size() - 1) {
             // has hanging tables
             ctx.realizationCheck.addModelIncapableReason(model,
@@ -138,31 +141,32 @@ public class RealizationChooser {
             throw new IllegalStateException("Please adjust the sequence of join tables. " + toErrorMsg(ctx));
         } else {
             // normal big joins
+            if (ctx.joinsGraph == null) {
+                ctx.joinsGraph = new JoinsGraph(firstTable, ctx.joins);
+            }
             if (ctx.joinsTree == null) {
                 ctx.joinsTree = new JoinsTree(firstTable, ctx.joins);
             }
-            matchUp = ctx.joinsTree.matches(model.getJoinsTree(), result);
+            matched = JoinsGraph.match(ctx.joinsGraph, model.getJoinsGraph(), matchUp);
         }
 
-        if (matchUp == null) {
+        if (!matched) {
             ctx.realizationCheck.addModelIncapableReason(model,
                     RealizationCheck.IncapableReason.create(RealizationCheck.IncapableType.MODEL_UNMATCHED_JOIN));
             return null;
         }
 
-        result.putAll(matchUp);
-
-        ctx.realizationCheck.addCapableModel(model, result);
-        return result;
+        ctx.realizationCheck.addCapableModel(model, matchUp);
+        return matchUp;
     }
 
     private static Map<DataModelDesc, Set<IRealization>> makeOrderedModelMap(OLAPContext context) {
         OLAPContext first = context;
         KylinConfig kylinConfig = first.olapSchema.getConfig();
         String projectName = first.olapSchema.getProjectName();
-        String factTableName = first.firstTableScan.getOlapTable().getTableName();
+        String tableName = first.firstTableScan.getOlapTable().getTableName();
         Set<IRealization> realizations = ProjectManager.getInstance(kylinConfig).getRealizationsByTable(projectName,
-                factTableName);
+                tableName);
 
         final Map<DataModelDesc, Set<IRealization>> models = Maps.newHashMap();
         final Map<DataModelDesc, RealizationCost> costs = Maps.newHashMap();

@@ -45,8 +45,8 @@ import com.google.common.base.Preconditions;
 public class OLAPUnionRel extends Union implements OLAPRel {
 
     final boolean localAll ; // avoid same name in parent class
-    ColumnRowType columnRowType;
-    OLAPContext context;
+    protected ColumnRowType columnRowType;
+    protected OLAPContext context;
 
     public OLAPUnionRel(RelOptCluster cluster, RelTraitSet traitSet, List<RelNode> inputs, boolean all) {
         super(cluster, traitSet, inputs, all);
@@ -94,7 +94,7 @@ public class OLAPUnionRel extends Union implements OLAPRel {
     /**
      * Fake ColumnRowType for Union, all the columns are inner columns.
      */
-    private ColumnRowType buildColumnRowType() {
+    protected ColumnRowType buildColumnRowType() {
         ColumnRowType inputColumnRowType = ((OLAPRel) getInput(0)).getColumnRowType();
         List<TblColRef> columns = new ArrayList<>();
         List<Set<TblColRef>> sourceColumns = new ArrayList<>();

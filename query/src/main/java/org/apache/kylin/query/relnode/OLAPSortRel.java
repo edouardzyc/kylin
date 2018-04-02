@@ -45,8 +45,8 @@ import com.google.common.base.Preconditions;
  */
 public class OLAPSortRel extends Sort implements OLAPRel {
 
-    ColumnRowType columnRowType;
-    OLAPContext context;
+    protected ColumnRowType columnRowType;
+    protected OLAPContext context;
 
     public OLAPSortRel(RelOptCluster cluster, RelTraitSet traitSet, RelNode child, RelCollation collation,
             RexNode offset, RexNode fetch) {
@@ -75,7 +75,7 @@ public class OLAPSortRel extends Sort implements OLAPRel {
         this.columnRowType = buildColumnRowType();
     }
 
-    ColumnRowType buildColumnRowType() {
+    protected ColumnRowType buildColumnRowType() {
         OLAPRel olapChild = (OLAPRel) getInput();
         ColumnRowType inputColumnRowType = olapChild.getColumnRowType();
         return inputColumnRowType;
@@ -103,7 +103,7 @@ public class OLAPSortRel extends Sort implements OLAPRel {
         this.columnRowType = buildColumnRowType();
     }
 
-    SQLDigest.OrderEnum getOrderEnum(RelFieldCollation.Direction direction) {
+    protected SQLDigest.OrderEnum getOrderEnum(RelFieldCollation.Direction direction) {
         if (direction == RelFieldCollation.Direction.DESCENDING) {
             return SQLDigest.OrderEnum.DESCENDING;
         } else {

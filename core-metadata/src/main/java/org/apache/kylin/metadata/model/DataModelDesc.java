@@ -39,6 +39,7 @@ import org.apache.kylin.metadata.MetadataConstants;
 import org.apache.kylin.metadata.model.JoinsTree.Chain;
 import org.apache.kylin.metadata.project.ProjectInstance;
 import org.apache.kylin.metadata.project.ProjectManager;
+import org.apache.kylin.util.JoinsGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,6 +112,7 @@ public class DataModelDesc extends RootPersistentEntity {
     private Map<String, TableRef> aliasMap = Maps.newHashMap(); // alias => TableRef, a table has exactly one alias
     private Map<String, TableRef> tableNameMap = Maps.newHashMap(); // name => TableRef, a table maybe referenced by multiple names
     private JoinsTree joinsTree;
+    private JoinsGraph joinsGraph;
 
     /**
      * Error messages during resolving json metadata
@@ -205,6 +207,10 @@ public class DataModelDesc extends RootPersistentEntity {
 
     public JoinsTree getJoinsTree() {
         return joinsTree;
+    }
+
+    public JoinsGraph getJoinsGraph() {
+        return joinsGraph;
     }
 
     @Deprecated
@@ -355,6 +361,7 @@ public class DataModelDesc extends RootPersistentEntity {
         initJoinColumns();
         reorderJoins(tables);
         initJoinsTree();
+        initJoinsGraph();
         initDimensionsAndMetrics();
         initPartitionDesc();
         initFilterCondition();
@@ -567,6 +574,14 @@ public class DataModelDesc extends RootPersistentEntity {
             joins.add(joinTable.getJoin());
         }
         joinsTree = new JoinsTree(rootFactTableRef, joins);
+    }
+
+    private void initJoinsGraph() {
+        List<JoinDesc> joins = new ArrayList<>();
+        for (JoinTableDesc joinTable : joinTables) {
+            joins.add(joinTable.getJoin());
+        }
+        joinsGraph = new JoinsGraph(rootFactTableRef, joins);
     }
 
     private void reorderJoins(Map<String, TableDesc> tables) {

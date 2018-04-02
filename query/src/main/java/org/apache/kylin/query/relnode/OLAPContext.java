@@ -49,6 +49,7 @@ import org.apache.kylin.query.routing.RealizationCheck;
 import org.apache.kylin.query.schema.OLAPSchema;
 import org.apache.kylin.storage.StorageContext;
 import org.apache.kylin.storage.hybrid.HybridInstance;
+import org.apache.kylin.util.JoinsGraph;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -117,6 +118,7 @@ public class OLAPContext {
     // query info
     public OLAPSchema olapSchema = null;
     public OLAPTableScan firstTableScan = null; // to be fact table scan except "select * from lookupTable"
+    public OLAPRel topNode = null; // the context's toppest node
     public Set<OLAPTableScan> allTableScans = new HashSet<>();
     public Set<OLAPJoinRel> allOlapJoins = new HashSet<>();
     public Set<MeasureDesc> involvedMeasure = new HashSet<>();
@@ -128,6 +130,7 @@ public class OLAPContext {
     public boolean afterJoin = false;
     public boolean hasJoin = false;
     public boolean hasWindow = false;
+    public boolean metProject = false;
 
     // cube metadata
     public IRealization realization;
@@ -146,6 +149,7 @@ public class OLAPContext {
     public TupleFilter havingFilter;
     public List<JoinDesc> joins = new LinkedList<>();
     public JoinsTree joinsTree;
+    public JoinsGraph joinsGraph;
     List<TblColRef> sortColumns;
     List<SQLDigest.OrderEnum> sortOrders;
 

@@ -43,8 +43,8 @@ public class OLAPLimitRel extends SingleRel implements OLAPRel {
 
     public final RexNode localOffset; // avoid same name in parent class
     public final RexNode localFetch; // avoid same name in parent class
-    ColumnRowType columnRowType;
-    OLAPContext context;
+    protected ColumnRowType columnRowType;
+    protected OLAPContext context;
 
     public OLAPLimitRel(RelOptCluster cluster, RelTraitSet traitSet, RelNode child, RexNode offset, RexNode fetch) {
         super(cluster, traitSet, child);
@@ -98,7 +98,7 @@ public class OLAPLimitRel extends SingleRel implements OLAPRel {
         }
     }
 
-    ColumnRowType buildColumnRowType() {
+    protected ColumnRowType buildColumnRowType() {
         OLAPRel olapChild = (OLAPRel) getInput();
         ColumnRowType inputColumnRowType = olapChild.getColumnRowType();
         return inputColumnRowType;

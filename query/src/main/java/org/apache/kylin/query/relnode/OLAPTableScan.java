@@ -322,7 +322,7 @@ public class OLAPTableScan extends TableScan implements OLAPRel, EnumerableRel {
      *      * OLAPProjectRel -> skip column collection
      *      * OLAPToEnumerableConverter and OLAPUnionRel -> require column collection
      */
-    private boolean needCollectionColumns(OLAPImplementor implementor) {
+    protected boolean needCollectionColumns(OLAPImplementor implementor) {
         Stack<RelNode> allParents = implementor.getParentNodeStack();
         int index = allParents.size() - 1;
 
@@ -351,7 +351,7 @@ public class OLAPTableScan extends TableScan implements OLAPRel, EnumerableRel {
         return alias;
     }
 
-    private ColumnRowType buildColumnRowType() {
+    protected ColumnRowType buildColumnRowType() {
         this.alias = context.allTableScans.size() + "_" + Integer.toHexString(System.identityHashCode(this));
         TableRef tableRef = TblColRef.tableForUnknownModel(this.alias, olapTable.getSourceTable());
 

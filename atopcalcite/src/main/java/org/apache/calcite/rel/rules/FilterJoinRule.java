@@ -127,6 +127,11 @@ public abstract class FilterJoinRule extends RelOptRule {
         final List<RexNode> joinFilters = RelOptUtil.conjunctions(join.getCondition());
         final List<RexNode> origJoinFilters = ImmutableList.copyOf(joinFilters);
 
+        // HACK POINT
+        if (join.getJoinType() != JoinRelType.INNER) {
+            return;
+        }
+
         // If there is only the joinRel,
         // make sure it does not match a cartesian product joinRel
         // (with "true" condition), otherwise this rule will be applied
@@ -278,8 +283,7 @@ public abstract class FilterJoinRule extends RelOptRule {
         @Override
         public void onMatch(RelOptRuleCall call) {
             Join join = call.rel(0);
-            // HACK POINT
-//            perform(call, null, join);
+            perform(call, null, join);
         }
     }
 
@@ -301,8 +305,7 @@ public abstract class FilterJoinRule extends RelOptRule {
         public void onMatch(RelOptRuleCall call) {
             Filter filter = call.rel(0);
             Join join = call.rel(1);
-            // HACK POINT
-//            perform(call, filter, join);
+            perform(call, filter, join);
         }
     }
 

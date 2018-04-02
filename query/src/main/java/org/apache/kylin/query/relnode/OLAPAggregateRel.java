@@ -117,12 +117,12 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
         return funcName;
     }
 
-    OLAPContext context;
-    ColumnRowType columnRowType;
-    private boolean afterAggregate;
-    private List<AggregateCall> rewriteAggCalls;
-    private List<TblColRef> groups;
-    private List<FunctionDesc> aggregations;
+    protected OLAPContext context;
+    protected ColumnRowType columnRowType;
+    protected boolean afterAggregate;
+    protected List<AggregateCall> rewriteAggCalls;
+    protected List<TblColRef> groups;
+    protected List<FunctionDesc> aggregations;
 
     public OLAPAggregateRel(RelOptCluster cluster, RelTraitSet traits, RelNode child, boolean indicator,
             ImmutableBitSet groupSet, List<ImmutableBitSet> groupSets, List<AggregateCall> aggCalls)
@@ -190,7 +190,7 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
         }
     }
 
-    ColumnRowType buildColumnRowType() {
+    protected ColumnRowType buildColumnRowType() {
         buildGroups();
         buildAggregations();
 
@@ -334,7 +334,7 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
 
     }
 
-    SQLCall toSqlCall(AggregateCall aggCall) {
+    protected SQLCall toSqlCall(AggregateCall aggCall) {
         ColumnRowType inputColumnRowType = ((OLAPRel) getInput()).getColumnRowType();
 
         String function = getSqlFuncName(aggCall);
@@ -346,7 +346,7 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
         return new SQLCall(function, args);
     }
 
-    void translateAggregation() {
+    protected void translateAggregation() {
         if (!noPrecaculatedFieldsAvailable()) {
             // now the realization is known, replace aggregations with what's defined on MeasureDesc
             List<MeasureDesc> measures = this.context.realization.getMeasures();
@@ -386,7 +386,7 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
         return null;
     }
 
-    void buildRewriteFieldsAndMetricsColumns() {
+    protected void buildRewriteFieldsAndMetricsColumns() {
         ColumnRowType inputColumnRowType = ((OLAPRel) getInput()).getColumnRowType();
         RelDataTypeFactory typeFactory = getCluster().getTypeFactory();
         for (int i = 0; i < this.aggregations.size(); i++) {
@@ -419,7 +419,7 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
         }
     }
 
-    void addToContextGroupBy(List<TblColRef> colRefs) {
+    protected void addToContextGroupBy(List<TblColRef> colRefs) {
         for (TblColRef col : colRefs) {
             if (col.isInnerColumn() == false && this.context.belongToContextTables(col))
                 this.context.groupByColumns.add(col);
@@ -431,7 +431,7 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
     }
 
     @SuppressWarnings("deprecation")
-    private AggregateCall rewriteAggregateCall(AggregateCall aggCall, FunctionDesc func) {
+    protected AggregateCall rewriteAggregateCall(AggregateCall aggCall, FunctionDesc func) {
         // rebuild function
         String callName = getSqlFuncName(aggCall);
         RelDataType fieldType = aggCall.getType();

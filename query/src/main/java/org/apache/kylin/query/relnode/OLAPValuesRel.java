@@ -47,7 +47,7 @@ import com.google.common.collect.ImmutableList;
 import org.apache.kylin.metadata.model.TblColRef;
 
 public class OLAPValuesRel extends Values implements OLAPRel {
-    OLAPContext context;
+    protected OLAPContext context;
     public OLAPValuesRel(RelOptCluster cluster, RelDataType rowType, ImmutableList<ImmutableList<RexLiteral>> tuples,
             RelTraitSet traitSet) {
         super(cluster, rowType, tuples, traitSet);

@@ -66,14 +66,14 @@ import com.google.common.collect.Maps;
  */
 public class OLAPProjectRel extends Project implements OLAPRel {
 
-    OLAPContext context;
+    protected OLAPContext context;
     public List<RexNode> rewriteProjects;
-    boolean rewriting;
-    ColumnRowType columnRowType;
-    boolean hasJoin;
-    boolean afterJoin;
-    boolean afterAggregate;
-    boolean isMerelyPermutation = false;//project additionally added by OLAPJoinPushThroughJoinRule
+    protected boolean rewriting;
+    protected ColumnRowType columnRowType;
+    protected boolean hasJoin;
+    protected boolean afterJoin;
+    protected boolean afterAggregate;
+    protected boolean isMerelyPermutation = false;//project additionally added by OLAPJoinPushThroughJoinRule
     private int caseCount = 0;
 
     public OLAPProjectRel(RelOptCluster cluster, RelTraitSet traitSet, RelNode child, List<RexNode> exps,
@@ -138,7 +138,7 @@ public class OLAPProjectRel extends Project implements OLAPRel {
         this.columnRowType = buildColumnRowType();
     }
 
-    ColumnRowType buildColumnRowType() {
+    protected ColumnRowType buildColumnRowType() {
         List<TblColRef> columns = new ArrayList<TblColRef>();
         List<Set<TblColRef>> sourceColumns = new ArrayList<Set<TblColRef>>();
         OLAPRel olapChild = (OLAPRel) getInput();
@@ -189,7 +189,7 @@ public class OLAPProjectRel extends Project implements OLAPRel {
         return null;
     }
 
-    TblColRef translateRexInputRef(RexInputRef inputRef, ColumnRowType inputColumnRowType, String fieldName,
+    protected TblColRef translateRexInputRef(RexInputRef inputRef, ColumnRowType inputColumnRowType, String fieldName,
             Set<TblColRef> sourceCollector) {
         int index = inputRef.getIndex();
         // check it for rewrite count

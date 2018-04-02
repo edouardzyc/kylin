@@ -43,8 +43,8 @@ import com.google.common.base.Preconditions;
 /**
  */
 public class OLAPWindowRel extends Window implements OLAPRel {
-    ColumnRowType columnRowType;
-    OLAPContext context;
+    protected ColumnRowType columnRowType;
+    protected OLAPContext context;
 
     public OLAPWindowRel(RelOptCluster cluster, RelTraitSet traitSet, RelNode input, List<RexLiteral> constants,
             RelDataType rowType, List<Group> groups) {
@@ -83,7 +83,7 @@ public class OLAPWindowRel extends Window implements OLAPRel {
         this.context.hasWindow = true;
     }
 
-    ColumnRowType buildColumnRowType() {
+    protected ColumnRowType buildColumnRowType() {
         OLAPRel olapChild = (OLAPRel) getInput(0);
         ColumnRowType inputColumnRowType = olapChild.getColumnRowType();
 
