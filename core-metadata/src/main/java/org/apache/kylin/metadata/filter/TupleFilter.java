@@ -133,7 +133,6 @@ public abstract class TupleFilter {
     }
 
     private TupleFilter removeNotInternal(TupleFilter filter) {
-        FilterOperatorEnum op = filter.getOperator();
 
         if (!(filter instanceof LogicalTupleFilter)) {
             return filter;
