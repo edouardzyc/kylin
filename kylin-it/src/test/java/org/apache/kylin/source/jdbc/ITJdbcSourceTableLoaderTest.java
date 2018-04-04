@@ -94,7 +94,7 @@ public class ITJdbcSourceTableLoaderTest extends LocalFileMetadataTestCase imple
     @Test
     public void test() throws Exception {
 
-        ISource source = SourceManager.getSource(new ITJdbcSourceTableLoaderTest());
+        ISource source = SourceManager.getSource(this);
         ISourceMetadataExplorer explr = source.getSourceMetadataExplorer();
         Pair<TableDesc, TableExtDesc> pair;
 
