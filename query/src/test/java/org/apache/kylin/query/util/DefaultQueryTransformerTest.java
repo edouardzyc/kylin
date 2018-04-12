@@ -33,6 +33,10 @@ public class DefaultQueryTransformerTest {
         String correctSql = transformer.transform(fnConvertSumSql, "", "");
         assertTrue("select sum(\"LSTG_SITE_ID\") from KYLIN_SALES group by LSTG_SITE_ID".equalsIgnoreCase(correctSql));
 
+        fnConvertSumSql = "select sum({fn convert(\"LSTG_SITE_ID\", DOUBLE)}) from KYLIN_SALES group by LSTG_SITE_ID";
+        correctSql = transformer.transform(fnConvertSumSql, "", "");
+        assertTrue("select sum(\"LSTG_SITE_ID\") from KYLIN_SALES group by LSTG_SITE_ID".equalsIgnoreCase(correctSql));
+
         //test SQL contains blank
         //Case one blank interval
         fnConvertSumSql = "select sum ( { fn convert( \"LSTG_SITE_ID\" , SQL_DOUBLE) } ) from KYLIN_SALES group by LSTG_SITE_ID";
@@ -92,7 +96,7 @@ public class DefaultQueryTransformerTest {
         assertTrue("select sum(LSTG_SITE_ID), sum(price) from KYLIN_SALES group by LSTG_SITE_ID"
                 .equalsIgnoreCase(correctSql));
     }
-    
+
     @Test
     public void functionEscapeTransform() throws Exception {
         DefaultQueryTransformer transformer = new DefaultQueryTransformer();

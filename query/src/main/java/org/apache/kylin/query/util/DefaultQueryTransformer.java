@@ -18,10 +18,10 @@
 
 package org.apache.kylin.query.util;
 
+import org.apache.kylin.query.util.QueryUtil.IQueryTransformer;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.kylin.query.util.QueryUtil.IQueryTransformer;
 
 public class DefaultQueryTransformer implements IQueryTransformer {
 
@@ -47,9 +47,9 @@ public class DefaultQueryTransformer implements IQueryTransformer {
             Pattern.CASE_INSENSITIVE);
     private static final Pattern PIN_SUM_OF_CAST = Pattern.compile(S0 + "SUM" + S0 + "\\(" + S0 + "CAST" + S0 + "\\("
             + S0 + "([^\\s,]+)" + S0 + "AS" + SM + "DOUBLE" + S0 + "\\)" + S0 + "\\)", Pattern.CASE_INSENSITIVE);
-    private static final Pattern PIN_SUM_OF_FN_CONVERT = Pattern
+    public static final Pattern PIN_SUM_OF_FN_CONVERT = Pattern
             .compile(S0 + "SUM" + S0 + "\\(" + S0 + "\\{\\s*fn" + SM + "convert" + S0 + "\\(" + S0 + "([^\\s,]+)" + S0
-                    + "," + S0 + "SQL_DOUBLE" + S0 + "\\)" + S0 + "\\}" + S0 + "\\)", Pattern.CASE_INSENSITIVE);
+                    + "," + S0 + "(SQL_DOUBLE|DOUBLE)" + S0 + "\\)" + S0 + "\\}" + S0 + "\\)", Pattern.CASE_INSENSITIVE);
 
     @Override
     public String transform(String sql, String project, String defaultSchema) {
@@ -138,7 +138,7 @@ public class DefaultQueryTransformer implements IQueryTransformer {
             sql = sql.substring(0, m.start(1)) + "'" + value + "'" + sql.substring(m.end(3));
         }
 
-        
+
         return sql;
     }
 }
