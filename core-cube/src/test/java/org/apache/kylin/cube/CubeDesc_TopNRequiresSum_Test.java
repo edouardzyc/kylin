@@ -84,5 +84,13 @@ public class CubeDesc_TopNRequiresSum_Test extends LocalFileMetadataTestCase {
             HBaseColumnDesc hcol = cf1.getColumns()[0];
             Assert.assertEquals("HBaseColumnDesc [qualifier=M, measureRefs=[TOP_SELLER_0, TOP_SELLER_1]]", hcol.toString());
         }
+        
+        // case when TopN first parameter is constant 1
+        {
+            CubeDesc cube = mgr.getCubeDesc("topn_with_constant_sum_cube");
+            Assert.assertTrue(!cube.isBroken());
+            Assert.assertEquals(2, cube.getMeasures().size());
+            Assert.assertEquals("TOP_SELLER", cube.getMeasures().get(1).getName());
+        }
     }
 }

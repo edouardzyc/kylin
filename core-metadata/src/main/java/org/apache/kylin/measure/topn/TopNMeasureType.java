@@ -116,7 +116,11 @@ public class TopNMeasureType extends MeasureType<TopNCounter<ByteArray>> {
     // TopN requires a Sum to work
     @Override
     public List<FunctionDesc> convertToInternalMeasures(FunctionDesc topN) {
-        TblColRef sumCol = topN.getParameter().getColRef();
+        ParameterDesc firstParam = topN.getParameter();
+        if (!firstParam.isColumnType())
+            return super.convertToInternalMeasures(topN);
+        
+        TblColRef sumCol = firstParam.getColRef();
         FunctionDesc sum = FunctionDesc.newInstance(FUNC_SUM, ParameterDesc.newInstance(sumCol), sumReturnType(sumCol));
         return Lists.newArrayList(topN, sum);
     }
