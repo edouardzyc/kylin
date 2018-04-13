@@ -23,6 +23,7 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.KylinConfig.SetAndUnsetThreadLocalConfig;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,31 +45,34 @@ public class AdminServiceTest extends ServiceTestBase {
         FileUtils.deleteQuietly(file);
         FileUtils.touch(file);
         String path = Thread.currentThread().getContextClassLoader().getResource("kylin.properties").getPath();
-        KylinConfig.setKylinConfigThreadLocal(KylinConfig.createInstanceFromUri(path));
         
-        String expected = "kylin.web.link-streaming-guide=http://kylin.apache.org/\n" +
-                "kylin.web.contact-mail=\n" +
-                "kylin.query.cache-enabled=true\n" +
-                "kylin.web.link-diagnostic=\n" +
-                "kylin.web.help.length=4\n" +
-                "kylin.web.timezone=GMT+8\n" +
-                "kylin.server.external-acl-provider=\n" +
-                "kylin.storage.default=2\n" +
-                "kylin.source.default=0\n" +
-                "kylin.web.help=\n" +
-                "kylin.web.export-allow-other=true\n" +
-                "kylin.web.link-hadoop=\n" +
-                "kylin.web.hide-measures=RAW\n" +
-                "kylin.htrace.show-gui-trace-toggle=false\n" +
-                "kylin.web.export-allow-admin=true\n" +
-                "kylin.env=QA\n" +
-                "kylin.web.hive-limit=20\n" +
-                "kylin.engine.default=2\n" +
-                "kylin.web.help.3=onboard|Cube Design Tutorial|\n" +
-                "kylin.web.help.2=tableau|Tableau Guide|\n" +
-                "kylin.web.help.1=odbc|ODBC Driver|\n" +
-                "kylin.web.help.0=start|Getting Started|\n" +
-                "kylin.security.profile=testing\n";
-        Assert.assertEquals(expected, adminService.getPublicConfig());
+        KylinConfig config = KylinConfig.createInstanceFromUri(path);
+        try (SetAndUnsetThreadLocalConfig autoUnset = KylinConfig.setAndUnsetThreadLocalConfig(config)) {
+        
+            String expected = "kylin.web.link-streaming-guide=http://kylin.apache.org/\n" +
+                    "kylin.web.contact-mail=\n" +
+                    "kylin.query.cache-enabled=true\n" +
+                    "kylin.web.link-diagnostic=\n" +
+                    "kylin.web.help.length=4\n" +
+                    "kylin.web.timezone=GMT+8\n" +
+                    "kylin.server.external-acl-provider=\n" +
+                    "kylin.storage.default=2\n" +
+                    "kylin.source.default=0\n" +
+                    "kylin.web.help=\n" +
+                    "kylin.web.export-allow-other=true\n" +
+                    "kylin.web.link-hadoop=\n" +
+                    "kylin.web.hide-measures=RAW\n" +
+                    "kylin.htrace.show-gui-trace-toggle=false\n" +
+                    "kylin.web.export-allow-admin=true\n" +
+                    "kylin.env=QA\n" +
+                    "kylin.web.hive-limit=20\n" +
+                    "kylin.engine.default=2\n" +
+                    "kylin.web.help.3=onboard|Cube Design Tutorial|\n" +
+                    "kylin.web.help.2=tableau|Tableau Guide|\n" +
+                    "kylin.web.help.1=odbc|ODBC Driver|\n" +
+                    "kylin.web.help.0=start|Getting Started|\n" +
+                    "kylin.security.profile=testing\n";
+            Assert.assertEquals(expected, adminService.getPublicConfig());
+        }
     }
 }
