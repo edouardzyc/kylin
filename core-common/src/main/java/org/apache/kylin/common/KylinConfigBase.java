@@ -306,7 +306,7 @@ abstract public class KylinConfigBase implements Serializable {
     public String getCacheSyncErrorHandler() {
         return getOptional("kylin.metadata.sync-error-handler");
     }
-    
+
     // for test only
     public void setMetadataUrl(String metadataUrl) {
         setProperty("kylin.metadata.url", metadataUrl);
@@ -742,7 +742,7 @@ abstract public class KylinConfigBase implements Serializable {
     public String getHiveBeelineShell() {
         return getOptional("kylin.source.hive.beeline-shell", "beeline");
     }
-    
+
     public String getHiveBeelineParams() {
         return getOptional("kylin.source.hive.beeline-params", "");
     }
@@ -750,11 +750,11 @@ abstract public class KylinConfigBase implements Serializable {
     public boolean getEnableSparkSqlForTableOps() {
         return Boolean.parseBoolean(getOptional("kylin.source.hive.enable-sparksql-for-table-ops", "false"));
     }
-    
+
     public String getSparkSqlBeelineShell() {
         return getOptional("kylin.source.hive.sparksql-beeline-shell", "");
     }
-    
+
     public String getSparkSqlBeelineParams() {
         return getOptional("kylin.source.hive.sparksql-beeline-params", "");
     }
@@ -1511,7 +1511,7 @@ abstract public class KylinConfigBase implements Serializable {
                         + "kylin.web.help,kylin.web.hide-measures,kylin.web.link-streaming-guide,kylin.server.external-acl-provider,kylin.security.profile,"
                         + "kylin.htrace.show-gui-trace-toggle,kylin.web.export-allow-admin,kylin.web.export-allow-other,kylin.source.default");
     }
-    
+
     // ============================================================================
     // RESTCLIENT
     // ============================================================================
@@ -1527,7 +1527,7 @@ abstract public class KylinConfigBase implements Serializable {
     // ============================================================================
     // Metrics
     // ============================================================================
-    
+
     public String getCoadhaleMetricsReportClassesNames() {
         return getOptional("kylin.metrics.reporter-classes",
                 "org.apache.kylin.common.metrics.metrics2.JsonFileMetricsReporter,org.apache.kylin.common.metrics.metrics2.JmxMetricsReporter");
