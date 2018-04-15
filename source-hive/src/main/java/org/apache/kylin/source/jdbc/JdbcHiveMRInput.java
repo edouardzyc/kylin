@@ -19,6 +19,7 @@
 package org.apache.kylin.source.jdbc;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.engine.mr.steps.CubingExecutableUtil;
@@ -40,6 +41,8 @@ import org.slf4j.LoggerFactory;
 public class JdbcHiveMRInput extends HiveMRInput {
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcHiveMRInput.class);
+    private static final String MR_OVERRIDE_QUEUE_KEY = "mapreduce.job.queuename";
+    private static final String DEFAULT_QUEUE = "default";
 
     public IMRBatchCubingInputSide getBatchCubingInputSide(IJoinedFlatTableDesc flatDesc) {
         return new BatchCubingInputSide(flatDesc);
@@ -56,7 +59,7 @@ public class JdbcHiveMRInput extends HiveMRInput {
         }
 
         @Override
-        protected void addStepPhase1_DoCreateFlatTable(DefaultChainedExecutable jobFlow) {
+        public void addStepPhase1_DoCreateFlatTable(DefaultChainedExecutable jobFlow) {
             final String cubeName = CubingExecutableUtil.getCubeName(jobFlow.getParams());
             final String hiveInitStatements = JoinedFlatTable.generateHiveInitStatements(flatTableDatabase);
             final String jobWorkingDir = getJobWorkingDir(jobFlow);
@@ -132,6 +135,14 @@ public class JdbcHiveMRInput extends HiveMRInput {
             return splitColumn;
         }
 
+        protected String getSqoopJobQueueName(KylinConfig config) {
+            Map<String, String> mrConfigOverride = config.getMRConfigOverride();
+            if (mrConfigOverride.containsKey(MR_OVERRIDE_QUEUE_KEY)) {
+                return mrConfigOverride.get(MR_OVERRIDE_QUEUE_KEY);
+            }
+            return DEFAULT_QUEUE;
+        }
+
         protected AbstractExecutable createSqoopToFlatHiveStep(String jobWorkingDir, String cubeName) {
             KylinConfig config = getConfig();
             PartitionDesc partitionDesc = flatDesc.getDataModel().getPartitionDesc();
@@ -169,12 +180,16 @@ public class JdbcHiveMRInput extends HiveMRInput {
                 bquery += " WHERE " + partitionString;
             }
 
-            String cmd = String.format("%s/sqoop import -Dorg.apache.sqoop.splitter.allow_text_splitter=true "
-                    + "--connect \"%s\" --driver %s --username %s --password %s --query \"%s AND \\$CONDITIONS\" "
-                    + "--target-dir %s/%s --split-by %s.%s --boundary-query \"%s\" --null-string '' "
-                    + "--fields-terminated-by '%s' --num-mappers %d", sqoopHome, connectionUrl, driverClass, jdbcUser,
-                    jdbcPass, selectSql, jobWorkingDir, hiveTable, splitTable, splitColumn, bquery, filedDelimiter,
-                    mapperNum);
+            //related to "kylin.engine.mr.config-override.mapreduce.job.queuename"
+            String queueName = getSqoopJobQueueName(config);
+            String cmd = String.format(
+                    "%s/sqoop import -Dorg.apache.sqoop.splitter.allow_text_splitter=true "
+                            + "-Dmapreduce.job.queuename=%s "
+                            + "--connect \"%s\" --driver %s --username %s --password %s --query \"%s AND \\$CONDITIONS\" "
+                            + "--target-dir %s/%s --split-by %s.%s --boundary-query \"%s\" --null-string '' "
+                            + "--fields-terminated-by '%s' --num-mappers %d",
+                    sqoopHome, queueName, connectionUrl, driverClass, jdbcUser, jdbcPass, selectSql, jobWorkingDir, hiveTable,
+                    splitTable, splitColumn, bquery, filedDelimiter, mapperNum);
             logger.debug("sqoop cmd: {}", cmd);
             
             CmdStep step = new CmdStep();
