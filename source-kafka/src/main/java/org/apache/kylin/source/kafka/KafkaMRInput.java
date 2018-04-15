@@ -183,6 +183,11 @@ public class KafkaMRInput implements IMRInput {
         }
 
         @Override
+        public void addStepPhase1_DoCreateFlatTable(DefaultChainedExecutable jobFlow) {
+
+        }
+
+        @Override
         public IMRTableInputFormat getFlatTableInputFormat() {
             KafkaConfigManager kafkaConfigManager = KafkaConfigManager.getInstance(KylinConfig.getInstanceFromEnv());
             KafkaConfig kafkaConfig = kafkaConfigManager.getKafkaConfig(seg.getCubeInstance().getRootFactTable());

@@ -89,6 +89,9 @@ public class CreateFlatHiveTableStep extends AbstractExecutable {
         String cubeName = CubingExecutableUtil.getCubeName(getParams());
         CubeManager manager = CubeManager.getInstance(KylinConfig.getInstanceFromEnv());
         CubeInstance cube = manager.getCube(cubeName);
+        if (cube == null) {
+            return KylinConfig.getInstanceFromEnv();
+        }
         return cube.getConfig();
     }
 
@@ -98,7 +101,6 @@ public class CreateFlatHiveTableStep extends AbstractExecutable {
         try {
             createFlatHiveTable(config);
             return new ExecuteResult(ExecuteResult.State.SUCCEED, stepLogger.getBufferedLog());
-
         } catch (Exception e) {
             logger.error("job:" + getId() + " execute finished with exception", e);
             return new ExecuteResult(ExecuteResult.State.ERROR, stepLogger.getBufferedLog(), e);

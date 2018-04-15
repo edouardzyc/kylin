@@ -38,6 +38,11 @@ import org.apache.kylin.storage.StorageFactory;
 
 public class MRUtil {
 
+    public static IMRBatchCubingInputSide getBatchCubingInputSide(IJoinedFlatTableDesc flatTableDesc) {
+        return SourceManager.createEngineAdapter(flatTableDesc.getDataModel().getRootFactTable().getTableDesc(), IMRInput.class)
+                .getBatchCubingInputSide(flatTableDesc);
+    }
+
     public static IMRBatchCubingInputSide getBatchCubingInputSide(CubeSegment seg) {
         IJoinedFlatTableDesc flatDesc = EngineFactory.getJoinedFlatTableDesc(seg);
         return SourceManager.createEngineAdapter(seg, IMRInput.class).getBatchCubingInputSide(flatDesc);

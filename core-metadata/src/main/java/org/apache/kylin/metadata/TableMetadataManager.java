@@ -474,5 +474,4 @@ public class TableMetadataManager {
             extFilterCrud.delete(name);
         }
     }
-
 }

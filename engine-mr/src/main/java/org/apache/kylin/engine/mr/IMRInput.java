@@ -71,6 +71,8 @@ public interface IMRInput {
 
         /** Add step that does necessary clean up, like delete the intermediate flat table */
         public void addStepPhase4_Cleanup(DefaultChainedExecutable jobFlow);
+
+        public void addStepPhase1_DoCreateFlatTable(DefaultChainedExecutable jobFlow);
     }
 
     public interface IMRBatchMergeInputSide {

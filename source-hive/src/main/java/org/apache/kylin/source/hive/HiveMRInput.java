@@ -158,7 +158,8 @@ public class HiveMRInput implements IMRInput {
             addStepPhase1_DoMaterializeLookupTable(jobFlow);
         }
 
-        protected void addStepPhase1_DoCreateFlatTable(DefaultChainedExecutable jobFlow) {
+        @Override
+        public void addStepPhase1_DoCreateFlatTable(DefaultChainedExecutable jobFlow) {
             final String cubeName = CubingExecutableUtil.getCubeName(jobFlow.getParams());
             final String hiveInitStatements = JoinedFlatTable.generateHiveInitStatements(flatTableDatabase);
             final String jobWorkingDir = getJobWorkingDir(jobFlow);
@@ -264,7 +265,12 @@ public class HiveMRInput implements IMRInput {
             //from hive to hive
             final String dropTableHql = JoinedFlatTable.generateDropTableStatement(flatDesc);
             final String createTableHql = JoinedFlatTable.generateCreateTableStatement(flatDesc, jobWorkingDir);
-            String insertDataHqls = JoinedFlatTable.generateInsertDataStatement(flatDesc);
+            String insertDataHqls;
+            if (flatDesc.getSegment() instanceof CubeSegment) {
+                insertDataHqls = JoinedFlatTable.generateInsertDataStatement(flatDesc);
+            } else {
+                insertDataHqls = JoinedFlatTable.generateInsertPartialDataStatement(flatDesc);
+            }
 
             CreateFlatHiveTableStep step = new CreateFlatHiveTableStep();
             step.setInitStatement(hiveInitStatements);
