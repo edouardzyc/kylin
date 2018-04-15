@@ -48,11 +48,11 @@ public class MultiVersionControl {
         distributedLock = KylinConfig.getInstanceFromEnv().getDistributedLockFactory()
                 .lockForCurrentThread();
         distributedLock.lock(key, Long.MAX_VALUE);
-        ProjectDictionaryVersionInfo proDictVersion = ProjectDictionaryManager.getInstance().getMaxVersion(key);
-        if (proDictVersion == null)
+        ProjectDictionaryVersionInfo projectDictionaryVersion = ProjectDictionaryManager.getInstance().getMaxVersion(key);
+        if (projectDictionaryVersion == null)
             this.sequenceId = new AtomicLong(-1);
         else
-            this.sequenceId = new AtomicLong(proDictVersion.getMaxVersion());
+            this.sequenceId = new AtomicLong(projectDictionaryVersion.getMaxVersion());
         logger.info("init mvc:" + key + ": " + sequenceId.get());
     }
 

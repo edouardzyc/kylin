@@ -97,7 +97,7 @@ public class ProjectDictionaryManager {
         this.dictionaryManager = DictionaryManager.getInstance(kylinConfig);
         this.versionCache = new CaseInsensitiveStringCache<>(kylinConfig, "project_dictionary_version");
         this.crud = new CachedCrudAssist<ProjectDictionaryVersionInfo>(getStore(),
-                ResourceStore.GLOBAL_DICT_RESOURCE_ROOT + "/metadata", MetadataConstants.TYPE_VERSION,
+                ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/metadata", MetadataConstants.TYPE_VERSION,
                 ProjectDictionaryVersionInfo.class, versionCache, false) {
             @Override
             protected ProjectDictionaryVersionInfo initEntityAfterReload(ProjectDictionaryVersionInfo projectDictionaryVersionInfo,
@@ -325,12 +325,12 @@ public class ProjectDictionaryManager {
             return createDictionary(sourceIdentify, dictionaryInfo, mvc, versionEntry);
         } else {
             logger.info("Append a new project dictionary with version : " + versionEntry.getVersion());
-            return appendProDictionary(sourceIdentify, dictionaryInfo, mvc, versionEntry);
+            return appendDictionary(sourceIdentify, dictionaryInfo, mvc, versionEntry);
         }
     }
 
-    private SegmentProjectDictDesc appendProDictionary(String sourceIdentify, DictionaryInfo dictionaryInfo,
-                                                       MultiVersionControl mvc, MultiVersionControl.VersionEntry versionEntry) throws IOException {
+    private SegmentProjectDictDesc appendDictionary(String sourceIdentify, DictionaryInfo dictionaryInfo,
+                                                    MultiVersionControl mvc, MultiVersionControl.VersionEntry versionEntry) throws IOException {
         checkInterrupted(sourceIdentify);
 
         logger.info("Append project dictionary with column: " + sourceIdentify);
@@ -341,9 +341,9 @@ public class ProjectDictionaryManager {
     }
 
     private void versionCheckPoint(String sourceIdentify, MultiVersionControl.VersionEntry versionEntry,
-            ProjectDictionaryVersionInfo proDictVersion, int sizeOfId) throws IOException {
-        if (proDictVersion != null) {
-            ProjectDictionaryVersionInfo copy = proDictVersion.copy();
+            ProjectDictionaryVersionInfo projectDictionaryVersion, int sizeOfId) throws IOException {
+        if (projectDictionaryVersion != null) {
+            ProjectDictionaryVersionInfo copy = projectDictionaryVersion.copy();
             copy.setMaxVersion(versionEntry.getVersion());
             crud.save(copy);
         } else {

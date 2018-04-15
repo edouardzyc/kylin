@@ -48,7 +48,7 @@ public class IntersectBitmapCounter {
         map = new LinkedHashMap<>();
     }
 
-    public static IntersectBitmapCounter warp(Object key, List<String> keyList, Object value) {
+    public static IntersectBitmapCounter wrap(Object key, List<String> keyList, Object value) {
         IntersectBitmapCounter intersectBitmapCounter = new IntersectBitmapCounter();
         intersectBitmapCounter.add(key, keyList, value);
         return intersectBitmapCounter;

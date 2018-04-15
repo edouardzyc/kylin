@@ -91,7 +91,7 @@ final public class ProjectDictionaryHelper {
         }
 
         public static String segmentPatchPath(String sourceIdentify, String uuid) {
-            return ResourceStore.GLOBAL_DICT_RESOURCE_ROOT + "/" + sourceIdentify + "/segment/" + uuid;
+            return ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/" + sourceIdentify + "/segment/" + uuid;
         }
 
         public static String versionKey(String sourceIdentify) {
@@ -99,11 +99,11 @@ final public class ProjectDictionaryHelper {
         }
 
         public static String dataPath(String sourceIdentify, long version) {
-            return ResourceStore.GLOBAL_DICT_RESOURCE_ROOT + "/" + sourceIdentify + "/" + version + DICT_DATA;
+            return ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/" + sourceIdentify + "/" + version + DICT_DATA;
         }
 
         public static String patchPath(String sourceIdentify, long currentVersion, long toVersion) {
-            return ResourceStore.GLOBAL_DICT_RESOURCE_ROOT + "/" + sourceIdentify + "/" + toVersion + "/"
+            return ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/" + sourceIdentify + "/" + toVersion + "/"
                     + currentVersion + "-" + toVersion;
         }
 
@@ -113,7 +113,7 @@ final public class ProjectDictionaryHelper {
         }
 
         public static String verisionPath(String sourceIdentify) {
-            return ResourceStore.GLOBAL_DICT_RESOURCE_ROOT + "/metadata/"
+            return ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/metadata/"
                     + ProjectDictionaryHelper.PathBuilder.versionKey(sourceIdentify) + MetadataConstants.TYPE_VERSION;
         }
     }

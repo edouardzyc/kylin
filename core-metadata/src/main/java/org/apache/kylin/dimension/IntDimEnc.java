@@ -65,7 +65,12 @@ public class IntDimEnc extends DimensionEncoding implements Serializable {
 
     transient private int avoidVerbose = 0;
 
-    private ValueConvert valueConvert;
+    private ValueConvert valueConvert = new ValueConvert() {
+        @Override
+        public Object convert(long value) {
+            return String.valueOf(value);
+        }
+    };
     private String dataType;
 
     //no-arg constructor is required for Externalizable

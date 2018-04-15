@@ -411,7 +411,7 @@ abstract public class KylinConfigBase implements Serializable {
     }
     
     public boolean isGlobalDictionaryEnabled() {
-        return Boolean.parseBoolean(getOptional("kylin.dictionary.global-dictionary-enabled", "false"));
+        return Boolean.parseBoolean(getOptional("kylin.dictionary.global-dictionary-enabled", "true"));
     }
 
     public int getCachedSnapshotMaxEntrySize() {

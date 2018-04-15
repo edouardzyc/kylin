@@ -61,8 +61,6 @@ abstract public class ResourceStore {
     public static final String CUBE_DESC_RESOURCE_ROOT = "/cube_desc";
     public static final String DATA_MODEL_DESC_RESOURCE_ROOT = "/model_desc";
     public static final String DICT_RESOURCE_ROOT = "/dict";
-    public static final String GLOBAL_DICT_RESOURCE_ROOT = "/global_dict";
-    public static final String SPARDER_DICT_RESOURCE_ROOT = "/sparder/dict";
     public static final String PROJECT_RESOURCE_ROOT = "/project";
     public static final String SNAPSHOT_RESOURCE_ROOT = "/table_snapshot";
     public static final String TABLE_EXD_RESOURCE_ROOT = "/table_exd";

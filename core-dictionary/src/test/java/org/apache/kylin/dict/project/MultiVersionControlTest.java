@@ -26,6 +26,9 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+/**
+ * 这个测试用来测试MVC,稍后再补充
+ */
 @Ignore
 public class MultiVersionControlTest extends LocalFileMetadataTestCase {
     String key = "default/DEFAULT.TEST_ACCOUNT/ACCOUNT_COUNTRY";

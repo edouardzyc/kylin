@@ -180,8 +180,4 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
         int nullId = NULL_ID[idLength];
         return (nullId & id) == nullId;
     }
-//    public boolean isNull(int id) {
-//        boolean b = ((id + 1) & NULL_ID[BytesUtil.sizeForValue(id)]) == 0;
-//        return b;
-//    }
 }

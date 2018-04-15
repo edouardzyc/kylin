@@ -40,12 +40,5 @@ public enum CubeBuildTypeEnum {
     /**
      * checkpoint for set of other jobs
      */
-    CHECKPOINT,
-
-    /**
-     * gen global dictionary
-     */
-    GLOBAL_DICTIONARY,
-
-    GLOBAL_DICTIONARY_REFRESH
+    CHECKPOINT
 }

@@ -129,7 +129,7 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
 
     private Map<Long, Short> cuboidBaseShards = Maps.newConcurrentMap(); // cuboid id ==> base(starting) shard for this cuboid
 
-    @JsonProperty("ProDict")
+    @JsonProperty("project_dictionary_desc")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Map<String, SegmentProjectDictDesc> projectDictDescs = Maps.newHashMap();
 
@@ -607,7 +607,7 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
         CubeManager cubeMgr = CubeManager.getInstance(this.getCubeInstance().getConfig());
         HashSet<String> paths = Sets.newHashSet();
         for (SegmentProjectDictDesc segmentProjectDictDesc : projectDictDescs.values()) {
-                 paths.addAll(cubeMgr.getProDictResourcePaths(segmentProjectDictDesc));
+                 paths.addAll(cubeMgr.getProjectDictionaryResourcePaths(segmentProjectDictDesc));
         }
         return paths;
     }

@@ -90,6 +90,6 @@ public class ProjectDictionaryInfo extends DictionaryInfo {
 
 
     public String getResourceDir() {
-        return ResourceStore.GLOBAL_DICT_RESOURCE_ROOT + "/" + sourceTable + "/" + sourceColumn;
+        return ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/" + sourceTable + "/" + sourceColumn;
     }
 }

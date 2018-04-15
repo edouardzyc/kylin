@@ -983,7 +983,7 @@ public class CubeManager implements IRealizationProvider {
         return dictAssist.saveDictionary(cubeSeg, col, inpTable, dict);
     }
 
-    public void updateSegmentDict(CubeSegment cubeSegment) throws IOException, ExecutionException {
+    public void updateSegmentProjectDictionary(CubeSegment cubeSegment) throws IOException, ExecutionException {
         logger.info("update : " + cubeSegment.getName() + " project dictionary.");
         Map<String, String> dictionaries = cubeSegment.getDictionaries();
         Map<String, List<String>> dictMapping = Maps.newHashMap();
@@ -1041,7 +1041,7 @@ public class CubeManager implements IRealizationProvider {
         return dictAssist.getDictionary(cubeSeg, col);
     }
 
-    public List<String> getProDictResourcePaths(SegmentProjectDictDesc desc) throws IOException {
+    public List<String> getProjectDictionaryResourcePaths(SegmentProjectDictDesc desc) throws IOException {
         return dictAssist.getMVDictMeta(desc);
     }
 
@@ -1132,7 +1132,7 @@ public class CubeManager implements IRealizationProvider {
                     return null;
                 }
 
-//                if (config.isGlobalDictionaryEnabled()) {
+                if (config.isGlobalDictionaryEnabled()) {
                 SegmentProjectDictDesc projectDictDesc = cubeSeg.getProjectDictDesc(col);
                 if (projectDictDesc != null) {
                     DisguiseTrieDictionary<String> dictionary = (DisguiseTrieDictionary<String>) ProjectDictionaryManager
@@ -1141,7 +1141,7 @@ public class CubeManager implements IRealizationProvider {
                         return dictionary;
                     }
                 }
-//                }
+                }
                 info = dictMgr.getDictionaryInfo(dictResPath);
                 if (info == null) {
                     throw new IllegalStateException("No dictionary found by " + dictResPath

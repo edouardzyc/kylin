@@ -80,12 +80,16 @@ public class IntegerDimEnc extends DimensionEncoding implements Serializable {
     transient private int avoidVerbose = 0;
     transient private int avoidVerbose2 = 0;
 
-    private ValueConvert valueConvert;
+    private ValueConvert valueConvert = new ValueConvert() {
+        @Override
+        public Object convert(long value) {
+            return String.valueOf(value);
+        }
+    };;
     private String dataType;
 
     //no-arg constructor is required for Externalizable
     public IntegerDimEnc() {
-        initCovert();
     }
 
     public IntegerDimEnc(int len) {
@@ -109,47 +113,56 @@ public class IntegerDimEnc extends DimensionEncoding implements Serializable {
     }
 
     private void initCovert() {
-        switch (this.dataType) {
-        case "integer":
-            this.valueConvert = new ValueConvert() {
-                @Override
-                public Object convert(long value) {
-                    return (int) value;
-                }
-            };
-            break;
-        case "bigint":
-            this.valueConvert = new ValueConvert() {
-                @Override
-                public Object convert(long value) {
-                    return value;
-                }
-            };
-            break;
-        case "smallint":
-            this.valueConvert = new ValueConvert() {
-                @Override
-                public Object convert(long value) {
-                    return (short) value;
-                }
-            };
-            break;
-        case "tinyint":
-            this.valueConvert = new ValueConvert() {
-                @Override
-                public Object convert(long value) {
-                    return (byte) value;
-                }
-            };
-            break;
-        default:
+        if(this.dataType == null){
             this.valueConvert = new ValueConvert() {
                 @Override
                 public Object convert(long value) {
                     return String.valueOf(value);
                 }
             };
-            break;
+        }else {
+            switch (this.dataType) {
+                case "integer":
+                    this.valueConvert = new ValueConvert() {
+                        @Override
+                        public Object convert(long value) {
+                            return (int) value;
+                        }
+                    };
+                    break;
+                case "bigint":
+                    this.valueConvert = new ValueConvert() {
+                        @Override
+                        public Object convert(long value) {
+                            return value;
+                        }
+                    };
+                    break;
+                case "smallint":
+                    this.valueConvert = new ValueConvert() {
+                        @Override
+                        public Object convert(long value) {
+                            return (short) value;
+                        }
+                    };
+                    break;
+                case "tinyint":
+                    this.valueConvert = new ValueConvert() {
+                        @Override
+                        public Object convert(long value) {
+                            return (byte) value;
+                        }
+                    };
+                    break;
+                default:
+                    this.valueConvert = new ValueConvert() {
+                        @Override
+                        public Object convert(long value) {
+                            return String.valueOf(value);
+                        }
+                    };
+                    break;
+            }
         }
     }
 

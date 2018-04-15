@@ -23,5 +23,11 @@ import org.apache.kylin.common.util.Dictionary;
 
 public abstract class DisguiseDictionary extends Dictionary<String> {
 
+
+    /**
+     *
+     * @param originId  This segment id what the old dictionary encoding.
+     * @return New id for project dictionary.
+     */
     public abstract int upgrade(int originId);
 }

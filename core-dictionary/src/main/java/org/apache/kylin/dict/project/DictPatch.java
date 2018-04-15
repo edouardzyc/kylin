@@ -25,6 +25,7 @@ import java.io.IOException;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.kylin.common.persistence.RootPersistentEntity;
 
+
 public class DictPatch extends RootPersistentEntity {
     private int[] offset;
 

@@ -23,6 +23,9 @@ import org.apache.kylin.measure.bitmap.BitmapCounter;
 import org.apache.kylin.measure.bitmap.BitmapCounterFactory;
 import org.apache.kylin.measure.bitmap.RoaringBitmapCounterFactory;
 
+/**
+ *  This is dummy aggregator, the effective aggregation is done in org.apache.spark.sql.udf.SparderExternalAggFunc
+ */
 public class IntersectMeasureAggregator extends MeasureAggregator<IntersectBitmapCounter> {
     private static final BitmapCounterFactory bitmapFactory = RoaringBitmapCounterFactory.INSTANCE;
 
@@ -39,7 +42,6 @@ public class IntersectMeasureAggregator extends MeasureAggregator<IntersectBitma
 
     @Override
     public IntersectBitmapCounter aggregate(IntersectBitmapCounter value1, IntersectBitmapCounter value2) {
-
 
 
 

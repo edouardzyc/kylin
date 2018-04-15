@@ -71,7 +71,7 @@ public class MergeDictionaryStep extends AbstractExecutable {
             CubeSegment newSegCopy = cubeCopy.getSegmentById(newSegment.getUuid());
 
             makeDictForNewSegment(conf, cubeCopy, newSegCopy, mergingSegments);
-            makeProDictForNewSegment(conf, cubeCopy, newSegCopy, mergingSegments);
+            makeProjectDictForNewSegment(cubeCopy, newSegCopy, mergingSegments);
             makeSnapshotForNewSegment(cubeCopy, newSegCopy, mergingSegments);
 
             CubeUpdate update = new CubeUpdate(cubeCopy);
@@ -137,8 +137,8 @@ public class MergeDictionaryStep extends AbstractExecutable {
         return dictInfo;
     }
 
-    private void makeProDictForNewSegment(KylinConfig conf, CubeInstance cube, CubeSegment newSeg,
-                                          List<CubeSegment> mergingSegments) {
+    private void makeProjectDictForNewSegment(CubeInstance cube, CubeSegment newSeg,
+                                              List<CubeSegment> mergingSegments) {
         CubeDesc cubeDesc = cube.getDescriptor();
         ProjectDictionaryManager projectDictionaryManager = ProjectDictionaryManager.getInstance();
 
@@ -148,7 +148,8 @@ public class MergeDictionaryStep extends AbstractExecutable {
                 if (projectDictDesc != null) {
                     ProjectDictionaryVersionInfo mvdVersion = projectDictionaryManager.getMaxVersion(projectDictDesc);
                     long maxVersion = mvdVersion.getMaxVersion();
-                    newSeg.putProjectDictDesc(col.getIdentity(), new SegmentProjectDictDesc(projectDictDesc.getSourceIdentify(), maxVersion, mvdVersion.getIdLength()));
+                    newSeg.putProjectDictDesc(col.getIdentity(),
+                            new SegmentProjectDictDesc(projectDictDesc.getSourceIdentify(), maxVersion, mvdVersion.getIdLength()));
                     break;
                 }
             }

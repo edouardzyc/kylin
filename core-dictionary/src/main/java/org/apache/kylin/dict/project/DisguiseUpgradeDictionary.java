@@ -125,7 +125,4 @@ public class DisguiseUpgradeDictionary extends DisguiseDictionary {
         int nullId = NULL_ID[idLength];
         return (nullId & id) == nullId;
     }
-//    public boolean isNull(int id) {
-//        return ((id + 1) & NULL_ID[BytesUtil.sizeForValue(id)]) == 0;
-//    }
 }
