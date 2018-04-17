@@ -6,15 +6,15 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
 package org.apache.kylin.engine.mr.common;
 
@@ -26,12 +26,9 @@ import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -47,7 +44,6 @@ import org.apache.kylin.common.persistence.RawResource;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.util.ByteArray;
 import org.apache.kylin.common.util.Bytes;
-import org.apache.kylin.common.util.ClassUtil;
 import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.common.util.SumHelper;
 import org.apache.kylin.cube.CubeInstance;
@@ -59,11 +55,9 @@ import org.apache.kylin.cube.kv.CubeDimEncMap;
 import org.apache.kylin.cube.kv.RowKeyEncoder;
 import org.apache.kylin.cube.model.CubeDesc;
 import org.apache.kylin.measure.hllc.HLLCounter;
-import org.apache.kylin.measure.topn.TopNMeasureType;
 import org.apache.kylin.metadata.datatype.DataType;
 import org.apache.kylin.metadata.model.FunctionDesc;
 import org.apache.kylin.metadata.model.MeasureDesc;
-import org.apache.kylin.metadata.model.ParameterDesc;
 import org.apache.kylin.metadata.model.TblColRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +94,7 @@ public class CubeStatsReader {
         RawResource resource = store.getResource(statsKey);
         if (resource == null)
             throw new IllegalStateException("Missing resource at " + statsKey);
-
+        
         File tmpSeqFile = writeTmpSeqFile(resource.inputStream);
         Path path = new Path(HadoopUtil.fixWindowsPath("file://" + tmpSeqFile.getAbsolutePath()));
 
@@ -117,10 +111,13 @@ public class CubeStatsReader {
 
     /**
      * Read statistics from
+     * @param path
+     * rather than
+     * @param cubeSegment
      *
-     * @param path        rather than
-     * @param cubeSegment Since the statistics are from
-     * @param path        cuboid scheduler should be provided by default
+     * Since the statistics are from
+     * @param path
+     * cuboid scheduler should be provided by default
      */
     public CubeStatsReader(CubeSegment cubeSegment, CuboidScheduler cuboidScheduler, KylinConfig kylinConfig, Path path)
             throws IOException {
@@ -231,17 +228,12 @@ public class CubeStatsReader {
         int normalSpace = rowkeyLength;
         int countDistinctSpace = 0;
         double percentileSpace = 0;
-        int topNSpace = 0;
         for (MeasureDesc measureDesc : cubeSegment.getCubeDesc().getMeasures()) {
             DataType returnType = measureDesc.getFunction().getReturnDataType();
             if (measureDesc.getFunction().getExpression().equals(FunctionDesc.FUNC_COUNT_DISTINCT)) {
                 countDistinctSpace += returnType.getStorageBytesEstimate();
             } else if (measureDesc.getFunction().getExpression().equals(FunctionDesc.FUNC_PERCENTILE)) {
                 percentileSpace += returnType.getStorageBytesEstimate(baseCuboidCount * 1.0 / rowCount);
-            } else if (measureDesc.getFunction().getExpression().equals(TopNMeasureType.FUNC_TOP_N)) {
-                long estimateTopNCount = estimateTopNCount(measureDesc, cubeSegment, cuboidId, baseCuboidCount,
-                        rowCount);
-                topNSpace += returnType.getStorageBytesEstimate(estimateTopNCount);
             } else {
                 normalSpace += returnType.getStorageBytesEstimate();
             }
@@ -249,99 +241,10 @@ public class CubeStatsReader {
 
         double cuboidSizeRatio = kylinConf.getJobCuboidSizeRatio();
         double cuboidSizeMemHungryRatio = kylinConf.getJobCuboidSizeCountDistinctRatio();
-        double cuboidSizeTopNRatio = kylinConf.getJobCuboidSizeTopNRatio();
-
         double ret = (1.0 * normalSpace * rowCount * cuboidSizeRatio
-                + 1.0 * countDistinctSpace * rowCount * cuboidSizeMemHungryRatio + 1.0 * percentileSpace * rowCount
-                + 1.0 * topNSpace * rowCount * cuboidSizeTopNRatio) / (1024L * 1024L);
+                + 1.0 * countDistinctSpace * rowCount * cuboidSizeMemHungryRatio + 1.0 * percentileSpace * rowCount)
+                / (1024L * 1024L);
         return ret;
-    }
-
-    private static long estimateTopNCount(MeasureDesc measureDesc, CubeSegment cubeSegment, long cuboidId,
-            long baseCuboidCount, long cuboidRowCount) {
-        long estimateTopNCount = Long.MAX_VALUE;
-        ParameterDesc parameter = measureDesc.getFunction().getParameter();
-        if (parameter != null) {
-            // skip the first parameter, the group by column starts from the second
-            parameter = parameter.getNextParameter();
-        }
-        Set<String> columns = new HashSet<>();
-        while (parameter != null) {
-            if (FunctionDesc.PARAMETER_TYPE_COLUMN.equals(parameter.getType())) {
-                columns.add(parameter.getValue());
-            }
-            parameter = parameter.getNextParameter();
-        }
-        Set<String> dimensionColumnNames = new HashSet<>();
-        Cuboid cuboid = Cuboid.findById(cubeSegment.getCubeDesc().getInitialCuboidScheduler(), cuboidId);
-        KylinConfig kylinConf = cubeSegment.getConfig();
-
-        List<TblColRef> dimensionColumns = cuboid.getColumns();
-        for (TblColRef tblColRef : dimensionColumns) {
-            dimensionColumnNames.add(tblColRef.getIdentity());
-        }
-        Set<String> diffColumns = new HashSet<>();
-        diffColumns.addAll(columns);
-        diffColumns.removeAll(dimensionColumnNames);
-
-        columns.addAll(dimensionColumnNames);
-
-        if (CollectionUtils.isEmpty(diffColumns)) {
-            estimateTopNCount = 1L;
-        } else {
-            Map<String, Long> columnCardinalityMap = getColumnCardinalityMap(cubeSegment, kylinConf,
-                    cuboid.getCubeDesc().getModelName(), columns);
-
-            // check columnCardinalityMap
-            for (String column : columns) {
-                Long columnCardinality = columnCardinalityMap.get(column);
-                if (columnCardinality < 0) {
-                    // if missing the columnCardinality abort estimateTopNCount
-                    return estimateTopNCount;
-                }
-            }
-
-            // suppose on row key we have A,B, in top N we have group by C sum(D), we denote it as AB|C
-            // then each topn counter's row num can be estimated as |A*B*C|/|A*B|,
-            // which can be estimated as min(baseCuboidCount, |A|*|B|*|C|)) / cuboidRowCount
-            long allColumnsCardinality = calcAllColumnsCardinality(columnCardinalityMap, columns);
-            estimateTopNCount = Math.min(allColumnsCardinality, baseCuboidCount) / cuboidRowCount;
-            if (estimateTopNCount == 0) {
-                estimateTopNCount = 1L;
-            }
-        }
-
-        return estimateTopNCount;
-    }
-
-    private static long calcAllColumnsCardinality(Map<String, Long> columnCardinalityMap, Set<String> columns) {
-        long allColumnsCardinality = 1L;
-        for (String column : columns) {
-            Long columnCardinality = columnCardinalityMap.get(column);
-            if (Long.MAX_VALUE / columnCardinality > allColumnsCardinality) {
-                allColumnsCardinality = allColumnsCardinality * columnCardinality;
-            } else {
-                allColumnsCardinality = Long.MAX_VALUE;
-                break;
-            }
-        }
-        return allColumnsCardinality;
-    }
-
-    private static Map<String, Long> getColumnCardinalityMap(CubeSegment cubeSegment, KylinConfig kylinConf,
-            String modelName, Set<String> columns) {
-        try {
-            String cls = kylinConf.getModelStatusReaderImpl();
-            if (StringUtils.isNotBlank(cls)) {
-                ModelStatsReader modelStatsReader = ClassUtil.forName(cls, ModelStatsReader.class)
-                        .getConstructor(CubeSegment.class).newInstance(cubeSegment);
-                return modelStatsReader.getColumnCardinalityMap(modelName, columns);
-            } else {
-                return Maps.newHashMap();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private void print(PrintWriter out) {

@@ -335,10 +335,6 @@ abstract public class KylinConfigBase implements Serializable {
         return getOptional("kylin.metadata.data-model-manager-impl", null);
     }
 
-    public String getModelStatusReaderImpl() {
-        return getOptional("kylin.metadata.model-status-reader-impl", null);
-    }
-
     public String[] getRealizationProviders() {
         return getOptionalStringArray("kylin.metadata.realization-providers", //
                 new String[] { "org.apache.kylin.cube.CubeManager", "org.apache.kylin.storage.hybrid.HybridManager" });
@@ -1624,9 +1620,5 @@ abstract public class KylinConfigBase implements Serializable {
 
     public boolean isReduceExpressionsRulesEnabled() {
         return Boolean.parseBoolean(getOptional("kylin.query.calcite.reduce-rules-enabled", "true"));
-    }
-
-    public double getJobCuboidSizeTopNRatio() {
-        return Double.parseDouble(getOptional("kylin.cube.size-estimate-topn-ratio", "0.2"));
     }
 }
