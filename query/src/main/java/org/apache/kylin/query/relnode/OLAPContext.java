@@ -267,7 +267,7 @@ public class OLAPContext {
     // ============================================================================
 
     public interface IAccessController {
-        public void check(List<OLAPContext> contexts, KylinConfig config) throws IllegalStateException;
+        public void check(List<OLAPContext> contexts, OLAPRel tree, KylinConfig config) throws IllegalStateException;
     }
 
 }

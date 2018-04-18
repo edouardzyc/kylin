@@ -93,7 +93,7 @@ public class OLAPToEnumerableConverter extends ConverterImpl implements Enumerab
 
         RealizationChooser.selectRealization(contexts);
 
-        doAccessControl(contexts);
+        doAccessControl(contexts, (OLAPRel) getInput());
 
         // rewrite query if necessary
         OLAPRel.RewriteImplementor rewriteImplementor = new OLAPRel.RewriteImplementor();
@@ -128,12 +128,12 @@ public class OLAPToEnumerableConverter extends ConverterImpl implements Enumerab
         return result;
     }
 
-    protected void doAccessControl(List<OLAPContext> contexts) {
+    protected void doAccessControl(List<OLAPContext> contexts, OLAPRel tree) {
         KylinConfig config = KylinConfig.getInstanceFromEnv();
         String controllerCls = config.getQueryAccessController();
         if (null != controllerCls && !controllerCls.isEmpty()) {
             OLAPContext.IAccessController accessController = (OLAPContext.IAccessController) ClassUtil.newInstance(controllerCls);
-            accessController.check(contexts, config);
+            accessController.check(contexts, tree, config);
         }
     }
 }

@@ -18,14 +18,20 @@
 
 package org.apache.kylin.query.routing;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.debug.BackdoorToggles;
+import org.apache.kylin.common.util.Pair;
 import org.apache.kylin.metadata.model.ColumnDesc;
 import org.apache.kylin.metadata.model.DataModelDesc;
 import org.apache.kylin.metadata.model.JoinDesc;
@@ -144,8 +150,10 @@ public class RealizationChooser {
             if (ctx.joinsGraph == null) {
                 ctx.joinsGraph = new JoinsGraph(firstTable, ctx.joins);
             }
+            // TODO: finally we should remove joinsTree, it's only used in Auto-Modelling.
             if (ctx.joinsTree == null) {
-                ctx.joinsTree = new JoinsTree(firstTable, ctx.joins);
+                Pair<TableRef, List<JoinDesc>> reordered = reorderJoins(firstTable, ctx.joins);
+                ctx.joinsTree = new JoinsTree(reordered.getFirst(), reordered.getSecond());
             }
             matched = JoinsGraph.match(ctx.joinsGraph, model.getJoinsGraph(), matchUp);
         }
@@ -158,6 +166,46 @@ public class RealizationChooser {
 
         ctx.realizationCheck.addCapableModel(model, matchUp);
         return matchUp;
+    }
+
+    private static Pair<TableRef, List<JoinDesc>> reorderJoins(TableRef root, List<JoinDesc> joins) {
+        if (joins.isEmpty()) {
+            return new Pair(root, joins);
+        }
+
+        Set<TableRef> fkSides = new HashSet<>();
+        Set<TableRef> pkSides = new HashSet<>();
+        Map<TableRef, List<JoinDesc>> fkMap = new HashMap<>();
+        for (JoinDesc join : joins) {
+            fkSides.add(join.getFKSide());
+            pkSides.add(join.getPKSide());
+            if (fkMap.containsKey(join.getFKSide())) {
+                fkMap.get(join.getFKSide()).add(join);
+            } else {
+                fkMap.put(join.getFKSide(), Lists.newArrayList(join));
+            }
+        }
+        fkSides.removeAll(pkSides);
+        if (fkSides.size() > 1) {
+            throw new IllegalArgumentException("joins is not a valid join tree: " + joins);
+        }
+
+        TableRef newRoot = fkSides.iterator().next();
+        Queue<TableRef> pending = new LinkedList();
+        pending.offer(newRoot);
+        List<JoinDesc> reordered = new ArrayList<>();
+
+        while (!pending.isEmpty()) {
+            TableRef cur = pending.poll();
+            if (fkMap.containsKey(cur)) {
+                reordered.addAll(fkMap.get(cur));
+                for (JoinDesc join : fkMap.get(cur)) {
+                    pending.offer(join.getPKSide());
+                }
+            }
+        }
+
+        return new Pair(newRoot, reordered);
     }
 
     private static Map<DataModelDesc, Set<IRealization>> makeOrderedModelMap(OLAPContext context) {
