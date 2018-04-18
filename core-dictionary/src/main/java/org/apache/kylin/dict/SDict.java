@@ -46,6 +46,7 @@ public class SDict extends Dictionary<String> implements DictFileResource {
     private RandomAccessFile raf;
     private FileChannel fc;
 
+    // one thread in use, occupations + 1
     private AtomicInteger occupations = new AtomicInteger(0);
     private AtomicLong accessTime = new AtomicLong(0L);
 

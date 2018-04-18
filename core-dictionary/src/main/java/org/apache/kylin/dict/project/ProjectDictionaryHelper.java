@@ -82,9 +82,12 @@ final public class ProjectDictionaryHelper {
     }
 
     public static class PathBuilder {
-        private static String DICT_DATA = "/data.dict";
-        private static String S_DICT_DATA = "/data.sdict";
-        private static String SPARDER_S_DICT = "sparder/sdict";
+        public final static String DICT_DATA = "/data.dict";
+        public final static String SDICT_DATA = "/data.sdict";
+        public final static String SPARDER_SDICT_BASE_DIR = "sparder/sdict";
+        public final static String SDICT_ZIP_DIR = "/sdict.zip";
+        public final static String SDICT_DIR = "/sdict";
+        public final static String SPARDER_DIR = "/sparder";
 
         public static String sourceIdentify(String project, DictionaryInfo dictionaryInfo) {
             return project + "/" + dictionaryInfo.getSourceTable() + "/" + dictionaryInfo.getSourceColumn();
@@ -109,7 +112,7 @@ final public class ProjectDictionaryHelper {
 
         public static String sDictPath(String sourceIdentify, long currentVersion) {
             String hdfsWorkingDirectory = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory();
-            return hdfsWorkingDirectory + SPARDER_S_DICT + "/" + sourceIdentify + "/" + currentVersion + S_DICT_DATA;
+            return hdfsWorkingDirectory + SPARDER_SDICT_BASE_DIR + "/" + sourceIdentify + "/" + currentVersion + SDICT_DATA;
         }
 
         public static String verisionPath(String sourceIdentify) {

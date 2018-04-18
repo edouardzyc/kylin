@@ -42,6 +42,7 @@ public class SDictTest {
 
         SDict w = new SDict(dict);
         File f = File.createTempFile("dict", ".dict");
+        f.deleteOnExit();
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(f))) {
             w.write(out);
         }
@@ -58,7 +59,6 @@ public class SDictTest {
         Assert.assertArrayEquals(dict[99].getBytes(), d2.getValueBytesFromIdImpl(99));
         Assert.assertArrayEquals(dict[50].getBytes(), d2.getValueBytesFromIdImpl(50));
         Assert.assertArrayEquals(dict[0].getBytes(), d2.getValueBytesFromIdImpl(0));
-
     }
 
     @Test
@@ -72,6 +72,7 @@ public class SDictTest {
 
         // test write and read
         File f = File.createTempFile("dict", ".dict");
+        f.deleteOnExit();
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(f))) {
             dict.write(out);
         }
@@ -96,6 +97,7 @@ public class SDictTest {
 
         SDict w = new SDict(dict);
         File f = File.createTempFile("dict", ".dict");
+        f.deleteOnExit();
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(f))) {
             w.write(out);
         }
@@ -141,6 +143,7 @@ public class SDictTest {
 
         SDict w = new SDict(dict);
         File f = File.createTempFile("dict", ".dict");
+        f.deleteOnExit();
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(f))) {
             w.write(out);
         }
@@ -150,16 +153,10 @@ public class SDictTest {
         r.init();
 
         long t1 = System.currentTimeMillis();
-        for (int i = 0; i < 1000000000; i++) {
-            r.getValueBytesFromIdImpl(new Random().nextInt(cap));
+        for (int i = 0; i < cap; i++) {
+            r.getValueBytesFromIdImpl(new Random().nextInt(cap)); //1 million read, 399ms
         }
         System.out.println("duration:" + (System.currentTimeMillis() - t1));
-
-        long t2 = System.currentTimeMillis();
-        for (int i = 0; i < 1000000000; i++) {
-            r.getValueBytesFromIdImpl(new Random().nextInt(cap));
-        }
-        System.out.println("duration:" + (System.currentTimeMillis() - t2));
     }
 
     private static String gen() {
