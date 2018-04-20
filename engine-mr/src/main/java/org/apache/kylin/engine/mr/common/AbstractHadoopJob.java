@@ -95,8 +95,9 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
             .hasArg().isRequired(true).withDescription("Cube segment name").create(BatchConstants.ARG_SEGMENT_NAME);
     protected static final Option OPTION_SEGMENT_ID = OptionBuilder.withArgName(BatchConstants.ARG_SEGMENT_ID).hasArg()
             .isRequired(true).withDescription("Cube segment id").create(BatchConstants.ARG_SEGMENT_ID);
-    protected static final Option OPTION_MERGE_SEGMENT_ID = OptionBuilder.withArgName(BatchConstants.ARG_MERGE_SEGMENT_ID).hasArg()
-            .isRequired(true).withDescription("Cube segment id").create(BatchConstants.ARG_MERGE_SEGMENT_ID);
+    protected static final Option OPTION_MERGE_SEGMENT_ID = OptionBuilder
+            .withArgName(BatchConstants.ARG_MERGE_SEGMENT_ID).hasArg().isRequired(true)
+            .withDescription("Cube segment id").create(BatchConstants.ARG_MERGE_SEGMENT_ID);
     protected static final Option OPTION_INPUT_PATH = OptionBuilder.withArgName(BatchConstants.ARG_INPUT).hasArg()
             .isRequired(true).withDescription("Input path").create(BatchConstants.ARG_INPUT);
     protected static final Option OPTION_INPUT_FORMAT = OptionBuilder.withArgName(BatchConstants.ARG_INPUT_FORMAT)
@@ -275,8 +276,6 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
 
         setJobTmpJarsAndFiles(job, kylinDependency.toString());
     }
-
-
 
     private String filterKylinHiveDependency(String kylinHiveDependency, KylinConfig config) {
         if (StringUtils.isBlank(kylinHiveDependency))
@@ -459,7 +458,7 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
     }
 
     public static KylinConfig loadKylinPropsAndMetadata() throws IOException {
-        if("true".equals(System.getProperty("mr.local"))) {
+        if ("true".equals(System.getProperty("mr.local"))) {
             return KylinConfig.getInstanceFromEnv();
         }
         File metaDir = new File("meta");
@@ -492,7 +491,8 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
         logger.info("Ready to load KylinConfig from uri: {}", uri);
         KylinConfig config;
         FileSystem fs;
-        String realHdfsPath = StorageURL.valueOf(uri).getParameter("path") + "/" + KylinConfig.KYLIN_CONF_PROPERTIES_FILE;
+        String realHdfsPath = StorageURL.valueOf(uri).getParameter("path") + "/"
+                + KylinConfig.KYLIN_CONF_PROPERTIES_FILE;
         try {
             fs = HadoopUtil.getFileSystem(realHdfsPath);
             InputStream is = fs.open(new Path(realHdfsPath));
@@ -501,12 +501,12 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        
-        // This is a bad example where the thread local KylinConfig cannot be auto-closed due to 
+
+        // This is a bad example where the thread local KylinConfig cannot be auto-closed due to
         // limitation of MR API. It works because MR task runs its own process. Do not copy.
         @SuppressWarnings("unused")
         SetAndUnsetThreadLocalConfig shouldAutoClose = KylinConfig.setAndUnsetThreadLocalConfig(config);
-        
+
         return config;
     }
 
@@ -517,22 +517,7 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
     }
 
     protected void attachCubeMetadata(CubeInstance cube, Configuration conf) throws IOException {
-        dumpKylinPropsAndMetadata(cube.getProject(), collectCubeMetadata(cube), cube.getConfig(),
-                conf);
-    }
-
-    protected void attachCubeMetadataWithDict(CubeInstance cube, Configuration conf) throws IOException {
-        Set<String> dumpList = new LinkedHashSet<>(collectCubeMetadata(cube));
-        attachSegmentDict(cube.getSegments(), dumpList);
-        dumpKylinPropsAndMetadata(cube.getProject(), dumpList, cube.getConfig(), conf);
-    }
-
-    private void attachSegmentDict(List<CubeSegment> segments, Set<String> dumpList) throws IOException {
-        for (CubeSegment segment : segments) {
-            dumpList.addAll(segment.getDictionaryPaths());
-            // if system.getProperty(dict.debug.enabled)  will put dictionary source
-            dumpList.addAll(segment.getProjectDictionaryPaths());
-        }
+        dumpKylinPropsAndMetadata(cube.getProject(), collectCubeMetadata(cube), cube.getConfig(), conf);
     }
 
     protected void attachSegmentsMetadataWithDict(List<CubeSegment> segments, Configuration conf) throws IOException {
@@ -637,12 +622,12 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
         for (InputSplit split : input.getSplits(job)) {
             mapInputBytes += split.getLength();
         }
-        
+
         // 0 input bytes is possible when the segment range hits no partition on a partitioned hive table (KYLIN-2470) 
         if (mapInputBytes == 0) {
             logger.warn("Map input splits are 0 bytes, something is wrong?");
         }
-        
+
         double totalMapInputMB = (double) mapInputBytes / 1024 / 1024;
         return totalMapInputMB;
     }
