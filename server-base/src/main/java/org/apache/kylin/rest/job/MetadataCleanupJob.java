@@ -19,8 +19,10 @@
 package org.apache.kylin.rest.job;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -30,6 +32,7 @@ import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.cube.CubeSegment;
+import org.apache.kylin.dict.project.SegmentProjectDictDesc;
 import org.apache.kylin.job.dao.ExecutableDao;
 import org.apache.kylin.job.dao.ExecutablePO;
 import org.apache.kylin.job.execution.ExecutableState;
@@ -38,27 +41,28 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.collect.TreeMultimap;
 
 public class MetadataCleanupJob {
 
     private static final Logger logger = LoggerFactory.getLogger(MetadataCleanupJob.class);
 
-    private static final long NEW_RESOURCE_THREADSHOLD_MS = 12 * 3600 * 1000L; // 12 hour
+    public static final long NEW_RESOURCE_THREADSHOLD_MS = 12 * 3600 * 1000L; // 12 hour
 
     // ============================================================================
 
     final KylinConfig config;
-    
+
     private List<String> garbageResources = Collections.emptyList();
-    
+
     public MetadataCleanupJob() {
         this(KylinConfig.getInstanceFromEnv());
     }
-    
+
     public MetadataCleanupJob(KylinConfig config) {
         this.config = config;
     }
-    
+
     public List<String> getGarbageResources() {
         return garbageResources;
     }
@@ -94,15 +98,57 @@ public class MetadataCleanupJob {
             }
         }
 
+        // project dict
+        TreeMultimap<String, String> col2dict = TreeMultimap.create();
+
+        NavigableSet<String> prjs = noNull(store.listResources(ResourceStore.PROJECT_DICT_RESOURCE_ROOT));
+        removeSpecificForder(prjs, "/metadata"); // exclude "metadata" folder
+        for (String prj : prjs) {
+            for (String tbl : noNull(store.listResources(prj))) {
+                for (String col : noNull(store.listResources(tbl))) {
+                    NavigableSet<String> versions = noNull(store.listResources(col));
+                    removeSpecificForder(versions, "/segment"); // exclude "segment" folder
+                    col2dict.putAll(col, versions);
+                }
+            }
+        }
+
         // exclude resources in use
         Set<String> activeResources = Sets.newHashSet();
+        Set<String> activePrjDictCol = Sets.newHashSet();
+
         for (CubeInstance cube : cubeManager.listAllCubes()) {
             for (CubeSegment segment : cube.getSegments()) {
                 activeResources.addAll(segment.getSnapshotPaths());
                 activeResources.addAll(segment.getDictionaryPaths());
                 activeResources.add(segment.getStatisticsResourcePath());
+                activePrjDictCol.addAll(getAllColsHasMVDict(segment));
             }
         }
+
+        NavigableMap<String, Collection<String>> map = col2dict.asMap();
+        for (String colIdentifier : activePrjDictCol) {
+            for (String colPath : map.keySet()) {
+                if (colPath.contains(colIdentifier)) {
+                    NavigableSet<String> versions = (NavigableSet<String>) map.get(colPath);
+                    if (versions !=null && versions.size() > 1) {
+                        versions.remove(versions.last());
+                    }
+                }
+            }
+        }
+
+        for (Collection<String> versions : map.values()) {
+            for (String version : versions) {
+                for (String dict : noNull(store.listResources(version))) {
+                    // check modify time.
+                    if (store.getResourceTimestamp(dict) < newResourceTimeCut) {
+                        toDeleteCandidates.add(dict);
+                    }
+                }
+            }
+        }
+
         toDeleteCandidates.removeAll(activeResources);
 
         // delete old and completed jobs
@@ -123,9 +169,28 @@ public class MetadataCleanupJob {
                 }
             }
         }
-        
+
         garbageResources = cleanupConclude(delete, toDeleteCandidates);
         return garbageResources;
+    }
+
+    public static Set<String> getAllColsHasMVDict(CubeSegment segment) {
+        Set<String> activePrjDictCol = Sets.newHashSet();
+        Collection<SegmentProjectDictDesc> prjDictDescs = segment.getProjectDictDescs();
+        for (SegmentProjectDictDesc prjDictDesc : prjDictDescs) {
+            activePrjDictCol.add(prjDictDesc.getSourceIdentify());
+        }
+        return activePrjDictCol;
+    }
+
+    private void removeSpecificForder(NavigableSet<String> paths, String toBeRmovedSuffix) {
+        String toBeRemovePath = "";
+        for (String p : paths) {
+            if (p.endsWith(toBeRmovedSuffix)) {
+                toBeRemovePath = p;
+            }
+        }
+        paths.remove(toBeRemovePath);
     }
 
     private List<String> cleanupConclude(boolean delete, List<String> toDeleteResources) {
@@ -133,7 +198,7 @@ public class MetadataCleanupJob {
             logger.info("No metadata resource to clean up");
             return toDeleteResources;
         }
-        
+
         logger.info(toDeleteResources.size() + " metadata resource to clean up");
 
         if (delete) {

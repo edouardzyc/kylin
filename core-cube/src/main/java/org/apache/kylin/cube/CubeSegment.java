@@ -603,6 +603,10 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
         return projectDictDescs.get(key);
     }
 
+    public Collection<SegmentProjectDictDesc> getProjectDictDescs() {
+        return projectDictDescs.values();
+    }
+
     public Collection<String> getProjectDictionaryPaths() throws IOException {
         CubeManager cubeMgr = CubeManager.getInstance(this.getCubeInstance().getConfig());
         HashSet<String> paths = Sets.newHashSet();

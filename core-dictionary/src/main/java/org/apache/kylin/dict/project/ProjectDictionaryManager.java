@@ -382,11 +382,6 @@ public class ProjectDictionaryManager {
             workingFileSystem.mkdirs(sDictDir);
         }
 
-
-        ByteArrayOutputStream buf2 = new ByteArrayOutputStream();
-        DataOutputStream out2 = new DataOutputStream(buf);
-
-        String sDictPath = PathBuilder.sDictPath(sourceIdentify, dictionaryInfo.getDictionaryVersion());
         Path f = new Path(sDictDir, new Path(sourceIdentify + "/" + dictionaryInfo.getDictionaryVersion() + "/data.sdict"));
         try (FSDataOutputStream out1 = workingFileSystem.create(f)) {
             SDict.wrap(dictionaryInfo.getDictionaryObject()).write(out1);

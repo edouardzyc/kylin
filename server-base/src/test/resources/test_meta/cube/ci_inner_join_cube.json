@@ -54,6 +54,14 @@
       "tableIndexSegmentPath" : "file:///Users/imad/mock_kylin/metastore/ci_cube/parquet/2993d0d2-ee05-4e3a-8247-b121a1bdf7bc/adb2275e-c1d5-498b-b8ea-0201586868aa/",
       "tableIndexFileCount" : "7",
       "tableIndexStorageSizeBytes" : "8700293"
+    },
+    "project_dictionary_desc": {
+      "TEST_KYLIN_FACT.TRANS_ID" : {
+        "sourceIdentify" : "default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID",
+        "current_version" : 3,
+        "patch" : "/project_dict/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/segment/0aa94178-12aa-4dae-843c-91232978c907_3",
+        "id_length" : 1
+      }
     }
   }],
   "create_time" : null
