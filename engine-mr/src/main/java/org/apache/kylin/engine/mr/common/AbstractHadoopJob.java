@@ -545,6 +545,8 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
         dumpList.addAll(collectCubeMetadata(segment.getCubeInstance()));
         if (ifDictIncluded) {
             dumpList.addAll(segment.getDictionaryPaths());
+            // if system.getProperty(dict.debug.enabled)  will put dictionary source
+            dumpList.addAll(segment.getProjectDictionaryPaths());
         }
         if (ifStatsIncluded) {
             dumpList.add(segment.getStatisticsResourcePath());
