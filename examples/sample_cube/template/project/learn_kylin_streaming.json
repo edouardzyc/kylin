@@ -1,0 +1,19 @@
+{
+  "uuid": "c3930d8e-77ef-48d3-a1cd-421a686f910f",
+  "name": "learn_kylin_streaming",
+  "realizations": [
+    {
+      "name": "kylin_streaming_cube",
+      "type": "CUBE",
+      "realization": "kylin_streaming_cube"
+    }
+  ],
+  "tables": [
+    "DEFAULT.KYLIN_STREAMING_TABLE"
+  ],
+  "models": [
+    "kylin_streaming_model"
+  ],
+  "ext_filters": [],
+  "override_kylin_properties": {}
+}

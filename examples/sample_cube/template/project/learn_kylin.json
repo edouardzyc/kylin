@@ -6,11 +6,6 @@
       "name": "kylin_sales_cube",
       "type": "CUBE",
       "realization": "kylin_sales_cube"
-    },
-    {
-      "name": "kylin_streaming_cube",
-      "type": "CUBE",
-      "realization": "kylin_streaming_cube"
     }
   ],
   "tables": [
@@ -18,12 +13,10 @@
     "DEFAULT.KYLIN_CAL_DT",
     "DEFAULT.KYLIN_CATEGORY_GROUPINGS",
     "DEFAULT.KYLIN_ACCOUNT",
-    "DEFAULT.KYLIN_COUNTRY",
-    "DEFAULT.KYLIN_STREAMING_TABLE"
+    "DEFAULT.KYLIN_COUNTRY"
   ],
   "models": [
-    "kylin_sales_model",
-    "kylin_streaming_model"
+    "kylin_sales_model"
   ],
   "ext_filters": [],
   "override_kylin_properties": {}
