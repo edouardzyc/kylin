@@ -109,6 +109,7 @@ public class IntegerDimEnc extends DimensionEncoding implements Serializable {
         if (len <= 0 || len >= CAP.length)
             throw new IllegalArgumentException();
         this.dataType = dataType;
+        this.fixedLen = len;
         initCovert();
     }
 

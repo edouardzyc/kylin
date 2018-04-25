@@ -156,6 +156,12 @@ public class IntegerDimEncTest {
         }
     }
 
+     @Test
+     public void checkFixLength(){
+         IntegerDimEnc enc = new IntegerDimEnc(4, "integer");
+         Assert.assertEquals(enc.getLengthOfEncoding(), 4);
+     }
+     
     private void testSerDes(IntegerDimEnc enc, long value) {
         DataTypeSerializer<Object> ser = enc.asDataTypeSerializer();
         byte[] buf = new byte[enc.getLengthOfEncoding()];
