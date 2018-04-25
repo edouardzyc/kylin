@@ -18,11 +18,21 @@
 
 package org.apache.kylin.cube;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.persistence.JsonSerializer;
@@ -70,20 +80,11 @@ import org.apache.kylin.source.SourcePartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * @author yangli9
@@ -817,10 +818,12 @@ public class CubeManager implements IRealizationProvider {
             return segment;
         }
 
-        public void promoteNewlyBuiltSegments(CubeInstance cube, CubeSegment newSegment) throws IOException {
-            // work on copy instead of cached objects
-            CubeInstance cubeCopy = cube.latestCopyForWrite(); // get a latest copy
-            CubeSegment newSegCopy = cubeCopy.getSegmentById(newSegment.getUuid());
+        public void promoteNewlyBuiltSegments(CubeInstance cube, CubeSegment newSegCopy) throws IOException {
+            // double check the updating objects are not on cache
+            if (newSegCopy.getCubeInstance().isCachedAndShared())
+                throw new IllegalStateException();
+            
+            CubeInstance cubeCopy = getCube(cube.getName()).latestCopyForWrite();
 
             if (StringUtils.isBlank(newSegCopy.getStorageLocationIdentifier())) {
                 throw new IllegalStateException(
@@ -1100,29 +1103,9 @@ public class CubeManager implements IRealizationProvider {
             updateCube(update);
         }
 
-        private void saveGlobalDictionaryInfo(CubeSegment cubeSeg, TblColRef col, DictionaryInfo dictInfo)
-                throws IOException {
-            if (dictInfo == null) {
-                return;
-            }
-
-            // work on copy instead of cached objects
-            CubeInstance cubeCopy = cubeSeg.getCubeInstance().latestCopyForWrite(); // get a latest copy
-            CubeSegment segCopy = cubeCopy.getSegmentById(cubeSeg.getUuid());
-
-            Dictionary<?> dict = dictInfo.getDictionaryObject();
-            segCopy.putDictResPath(col, dictInfo.getResourcePath());
-            segCopy.getRowkeyStats().add(new Object[] {col.getIdentity(), dict.getSize(), dict.getSizeOfId()});
-
-            CubeUpdate update = new CubeUpdate(cubeCopy);
-            update.setToUpdateSegs(segCopy);
-            updateCube(update);
-        }
-
         /**
          * return null if no dictionary for given column
          */
-        @SuppressWarnings("unchecked")
         public Dictionary<String> getDictionary(CubeSegment cubeSeg, TblColRef col) {
             DictionaryInfo info = null;
             try {

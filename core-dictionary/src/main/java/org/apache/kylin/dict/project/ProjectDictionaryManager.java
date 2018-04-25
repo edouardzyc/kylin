@@ -19,7 +19,6 @@
 package org.apache.kylin.dict.project;
 
 import static org.apache.kylin.dict.project.DictPatch.DictPatchSerializer.DICT_PATCH_SERIALIZER;
-import static org.apache.kylin.dict.project.ProjectDictionaryHelper.PathBuilder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,6 +38,7 @@ import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.dict.DictionaryInfo;
 import org.apache.kylin.dict.DictionaryManager;
 import org.apache.kylin.dict.SDict;
+import org.apache.kylin.dict.project.ProjectDictionaryHelper.PathBuilder;
 import org.apache.kylin.metadata.MetadataConstants;
 import org.apache.kylin.metadata.cachesync.Broadcaster;
 import org.apache.kylin.metadata.cachesync.CachedCrudAssist;
@@ -239,7 +239,7 @@ public class ProjectDictionaryManager {
         // Todo : Is nullable?
         if (projectDictionaryInfo == null) {
             ProjectDictionaryInfo nullProjectDictionaryInfo = new ProjectDictionaryInfo();
-            nullProjectDictionaryInfo.setDictionaryObject(new DisguiseTrieDictionary<>(desc.getIdLength(), null, patch));
+            nullProjectDictionaryInfo.setDictionaryObject(new DisguiseTrieDictionary<String>(desc.getIdLength(), null, patch));
             return nullProjectDictionaryInfo;
         }
         logger.info("Get Special Dictionary: " + desc.getSourceIdentify() + " version : " + specialVersion);
