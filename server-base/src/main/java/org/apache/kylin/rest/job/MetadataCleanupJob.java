@@ -32,7 +32,7 @@ import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.cube.CubeSegment;
-import org.apache.kylin.dict.project.SegmentProjectDictDesc;
+import org.apache.kylin.dict.project.SegProjectDict;
 import org.apache.kylin.job.dao.ExecutableDao;
 import org.apache.kylin.job.dao.ExecutablePO;
 import org.apache.kylin.job.execution.ExecutableState;
@@ -89,10 +89,12 @@ public class MetadataCleanupJob {
         // three level resources, only dictionaries
         for (String resourceRoot : new String[] { ResourceStore.DICT_RESOURCE_ROOT }) {
             for (String dir : noNull(store.listResources(resourceRoot))) {
-                for (String dir2 : noNull(store.listResources(dir))) {
-                    for (String res : noNull(store.listResources(dir2))) {
-                        if (store.getResourceTimestamp(res) < newResourceTimeCut)
-                            toDeleteCandidates.add(res);
+                if (!dir.startsWith(ResourceStore.PROJECT_DICT_RESOURCE_ROOT)) {
+                    for (String dir2 : noNull(store.listResources(dir))) {
+                        for (String res : noNull(store.listResources(dir2))) {
+                            if (store.getResourceTimestamp(res) < newResourceTimeCut)
+                                toDeleteCandidates.add(res);
+                        }
                     }
                 }
             }
@@ -120,7 +122,6 @@ public class MetadataCleanupJob {
         for (CubeInstance cube : cubeManager.listAllCubes()) {
             for (CubeSegment segment : cube.getSegments()) {
                 activeResources.addAll(segment.getSnapshotPaths());
-                activeResources.addAll(segment.getDictionaryPaths());
                 activeResources.add(segment.getStatisticsResourcePath());
                 activePrjDictCol.addAll(getAllColsHasMVDict(segment));
             }
@@ -176,9 +177,9 @@ public class MetadataCleanupJob {
 
     public static Set<String> getAllColsHasMVDict(CubeSegment segment) {
         Set<String> activePrjDictCol = Sets.newHashSet();
-        Collection<SegmentProjectDictDesc> prjDictDescs = segment.getProjectDictDescs();
-        for (SegmentProjectDictDesc prjDictDesc : prjDictDescs) {
-            activePrjDictCol.add(prjDictDesc.getSourceIdentify());
+        Collection<SegProjectDict> prjDictDescs = segment.getProjectDictionaries();
+        for (SegProjectDict prjDictDesc : prjDictDescs) {
+            activePrjDictCol.add(prjDictDesc.getSourceIdentifier());
         }
         return activePrjDictCol;
     }

@@ -20,30 +20,30 @@ package org.apache.kylin.dict.project;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class SegmentProjectDictDesc {
-    @JsonProperty("sourceIdentify")
-    private String sourceIdentify;
+public class SegProjectDict {
+    @JsonProperty("source_identifier")
+    private String sourceIdentifier;
     @JsonProperty("current_version")
     private long currentVersion;
 
-    @JsonProperty("patch")
-    private String patch;
+    @JsonProperty("seg_path")
+    private String segPatch;
 
     @JsonProperty("id_length")
     private int idLength;
 
-    public SegmentProjectDictDesc() {
+    public SegProjectDict() {
     }
 
-    public SegmentProjectDictDesc(String sourceIdentify, long currentVersion, String patch, int idLength) {
-        this.sourceIdentify = sourceIdentify;
+    public SegProjectDict(String sourceIdentifier, long currentVersion, String segPatch, int idLength) {
+        this.sourceIdentifier = sourceIdentifier;
         this.currentVersion = currentVersion;
-        this.patch = patch;
+        this.segPatch = segPatch;
         this.idLength = idLength;
     }
 
-    public SegmentProjectDictDesc(String sourceIdentify, long currentVersion, int idLength) {
-        this.sourceIdentify = sourceIdentify;
+    public SegProjectDict(String sourceIdentifier, long currentVersion, int idLength) {
+        this.sourceIdentifier = sourceIdentifier;
         this.currentVersion = currentVersion;
         this.idLength = idLength;
     }
@@ -52,25 +52,21 @@ public class SegmentProjectDictDesc {
         return idLength;
     }
 
-    public String getSourceIdentify() {
-        return sourceIdentify;
+    public String getSourceIdentifier() {
+        return sourceIdentifier;
     }
 
     public long getCurrentVersion() {
         return currentVersion;
     }
 
-    public String getPatch() {
-        return patch;
+    public String getSegPatch() {
+        return segPatch;
     }
 
     @Override
     public String toString() {
-        return "SegmentProjectDictDesc{" +
-                "sourceIdentify='" + sourceIdentify + '\'' +
-                ", currentVersion=" + currentVersion +
-                ", patch='" + patch + '\'' +
-                ", idLength=" + idLength +
-                '}';
+        return "SegProjectDict{" + "sourceIdentifier='" + sourceIdentifier + '\'' + ", currentVersion=" + currentVersion
+                + ", segPatch='" + segPatch + '\'' + ", idLength=" + idLength + '}';
     }
 }

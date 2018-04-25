@@ -78,7 +78,7 @@ abstract public class ResourceStore {
     public static final String DRAFT_RESOURCE_ROOT = "/draft";
     public static final String USER_ROOT = "/user";
     public static final String ROW_ACL_RESOURCE_ROOT = "/row_acl";
-    public static final String PROJECT_DICT_RESOURCE_ROOT = "/project_dict";
+    public static final String PROJECT_DICT_RESOURCE_ROOT = DICT_RESOURCE_ROOT + "/prj";
 
     public static final String METASTORE_UUID_TAG = "/UUID";
 

@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.google.common.collect.Sets;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.util.Dictionary;
@@ -39,7 +38,7 @@ import org.apache.kylin.cube.cuboid.CuboidScheduler;
 import org.apache.kylin.cube.kv.CubeDimEncMap;
 import org.apache.kylin.cube.kv.RowConstants;
 import org.apache.kylin.cube.model.CubeDesc;
-import org.apache.kylin.dict.project.SegmentProjectDictDesc;
+import org.apache.kylin.dict.project.SegProjectDict;
 import org.apache.kylin.metadata.model.DataModelDesc;
 import org.apache.kylin.metadata.model.IBuildable;
 import org.apache.kylin.metadata.model.ISegment;
@@ -58,6 +57,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
 @JsonAutoDetect(fieldVisibility = Visibility.NONE, getterVisibility = Visibility.NONE, isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
@@ -107,7 +107,7 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
     private ConcurrentHashMap<String, String> dictionaries; // table/column ==> dictionary resource path
 
     @JsonProperty("global_dictionaries")
-    private ConcurrentHashMap<String, SegmentProjectDictDesc> globalDictionaries; // table/column ==> dictionary resource path
+    private ConcurrentHashMap<String, SegProjectDict> globalDictionaries; // table/column ==> dictionary resource path
 
     @JsonProperty("snapshots")
     private ConcurrentHashMap<String, String> snapshots; // table name ==> snapshot resource path
@@ -129,9 +129,9 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
 
     private Map<Long, Short> cuboidBaseShards = Maps.newConcurrentMap(); // cuboid id ==> base(starting) shard for this cuboid
 
-    @JsonProperty("project_dictionary_desc")
+    @JsonProperty("project_dictionaries")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Map<String, SegmentProjectDictDesc> projectDictDescs = Maps.newHashMap();
+    private Map<String, SegProjectDict> projectDictionaries = Maps.newHashMap();
 
     // lazy init
     transient volatile ISegmentAdvisor advisor = null;
@@ -313,10 +313,10 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
         return r;
     }
 
-    public SegmentProjectDictDesc getProjectDictDesc(TblColRef col) {
-        SegmentProjectDictDesc desc;
+    public SegProjectDict getProjectDict(TblColRef col) {
+        SegProjectDict desc;
         String dictKey = col.getIdentity();
-        desc = getProjectDictDesc(dictKey);
+        desc = getProjectDict(dictKey);
         return desc;
     }
 
@@ -595,24 +595,25 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
         this.sourcePartitionOffsetStart = sourcePartitionOffsetStart;
     }
 
-    public void putProjectDictDesc(String key, SegmentProjectDictDesc segmentProjectDictDesc) {
-        projectDictDescs.put(key, segmentProjectDictDesc);
+    public void putProjectDictDesc(String key, SegProjectDict segProjectDict) {
+        projectDictionaries.put(key, segProjectDict);
     }
 
-    public SegmentProjectDictDesc getProjectDictDesc(String key) {
-        return projectDictDescs.get(key);
+    public SegProjectDict getProjectDict(String key) {
+        return projectDictionaries.get(key);
     }
 
-    public Collection<SegmentProjectDictDesc> getProjectDictDescs() {
-        return projectDictDescs.values();
+    public Collection<SegProjectDict> getProjectDictionaries() {
+        return projectDictionaries.values();
     }
 
     public Collection<String> getProjectDictionaryPaths() throws IOException {
         CubeManager cubeMgr = CubeManager.getInstance(this.getCubeInstance().getConfig());
         HashSet<String> paths = Sets.newHashSet();
-        for (SegmentProjectDictDesc segmentProjectDictDesc : projectDictDescs.values()) {
-                 paths.addAll(cubeMgr.getProjectDictionaryResourcePaths(segmentProjectDictDesc));
+        for (SegProjectDict segProjectDict : projectDictionaries.values()) {
+            paths.addAll(cubeMgr.getProjectDictionaryResourcePaths(segProjectDict));
         }
         return paths;
     }
+
 }

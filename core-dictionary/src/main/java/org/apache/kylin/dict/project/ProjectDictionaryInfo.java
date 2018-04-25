@@ -18,9 +18,6 @@
 
 package org.apache.kylin.dict.project;
 
-import java.util.List;
-
-import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.util.Dictionary;
 import org.apache.kylin.dict.DictionaryInfo;
 import org.apache.kylin.source.IReadableTable;
@@ -34,10 +31,6 @@ public class ProjectDictionaryInfo extends DictionaryInfo {
     @JsonProperty("dictionary_version")
     private long dictionaryVersion;
     
-    @Deprecated
-    @JsonProperty("eated_dictionaries")
-    private List<String> eatedDictionaries;
-
     public ProjectDictionaryInfo() {
     }
 
@@ -65,24 +58,8 @@ public class ProjectDictionaryInfo extends DictionaryInfo {
     }
 
 
-    public List<String> getEatedDictionaries() {
-        return eatedDictionaries;
-    }
-
-    public void setEatedDictionaries(List<String> eatedDictionaries) {
-        this.eatedDictionaries = eatedDictionaries;
-    }
-
     long getDictionaryVersion() {
         return dictionaryVersion;
     }
 
-    void setDictionaryVersion(int version) {
-        this.dictionaryVersion = version;
-    }
-
-
-    public String getResourceDir() {
-        return ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/" + sourceTable + "/" + sourceColumn;
-    }
 }

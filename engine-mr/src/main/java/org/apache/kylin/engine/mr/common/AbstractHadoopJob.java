@@ -525,8 +525,6 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
         dumpList.addAll(collectCubeMetadata(cube));
         for (CubeSegment segment : cube.getSegments()) {
             dumpList.addAll(segment.getDictionaryPaths());
-            // if system.getProperty(dict.debug.enabled)  will put dictionary source
-            dumpList.addAll(segment.getProjectDictionaryPaths());
         }
         dumpKylinPropsAndMetadata(cube.getProject(), dumpList, cube.getConfig(), conf);
     }
@@ -536,8 +534,6 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
         Set<String> dumpList = new LinkedHashSet<>(collectCubeMetadata(cube));
         for (CubeSegment segment : segments) {
             dumpList.addAll(segment.getDictionaryPaths());
-            // if system.getProperty(dict.debug.enabled)  will put dictionary source
-            dumpList.addAll(segment.getProjectDictionaryPaths());
         }
         dumpKylinPropsAndMetadata(cube.getProject(), dumpList, cube.getConfig(), conf);
     }
@@ -556,8 +552,6 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
         dumpList.addAll(collectCubeMetadata(segment.getCubeInstance()));
         if (ifDictIncluded) {
             dumpList.addAll(segment.getDictionaryPaths());
-            // if system.getProperty(dict.debug.enabled)  will put dictionary source
-            dumpList.addAll(segment.getProjectDictionaryPaths());
         }
         if (ifStatsIncluded) {
             dumpList.add(segment.getStatisticsResourcePath());

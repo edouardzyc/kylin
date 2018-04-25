@@ -25,21 +25,15 @@ import java.io.IOException;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.kylin.common.persistence.RootPersistentEntity;
 
-
-@SuppressWarnings("serial")
 public class DictPatch extends RootPersistentEntity {
     private int[] offset;
 
-    public DictPatch(int[] offset) {
+    DictPatch(int[] offset) {
         this.offset = offset;
     }
 
     public int[] getOffset() {
         return offset;
-    }
-
-    public void setOffset(int[] offset) {
-        this.offset = offset;
     }
 
     public static class DictPatchSerializer implements org.apache.kylin.common.persistence.Serializer<DictPatch> {
@@ -79,11 +73,12 @@ public class DictPatch extends RootPersistentEntity {
     }
 
     public DictPatch upgrade(DictPatch patch) {
+        int[] newOffset = new int[this.getOffset().length];
         int[] originOffset = this.getOffset();
         int[] patchOffset = patch.getOffset();
         for (int i = 0; i < originOffset.length; i++) {
-            originOffset[i] = patchOffset[originOffset[i]];
+            newOffset[i] = patchOffset[originOffset[i]];
         }
-        return this;
+        return new DictPatch(newOffset);
     }
 }

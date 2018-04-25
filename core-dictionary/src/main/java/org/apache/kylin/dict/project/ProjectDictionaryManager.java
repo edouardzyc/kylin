@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -47,19 +48,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public class ProjectDictionaryManager {
     public static final Logger logger = LoggerFactory.getLogger(ProjectDictionaryManager.class);
 
-    // todo: use cache
-    private Map<String, ProjectDictionaryInfo> dictionaryInfoMap = Maps.newConcurrentMap();
+    private ResourceLock resourceLock = new ResourceLock();
+    private final static Cache<String, ProjectDictionaryInfo> dictionaryInfoCache = CacheBuilder.newBuilder()
+            .maximumSize(50).expireAfterWrite(1, TimeUnit.HOURS).removalListener(//
+                    new RemovalListener<String, ProjectDictionaryInfo>() {
+                        @Override
+                        public void onRemoval(RemovalNotification<String, ProjectDictionaryInfo> notification) {
+                            logger.info("DictionaryInfoCache entry with key {} is removed due to {} ",
+                                    notification.getKey(), notification.getCause());
+                        }
+                    })
+            .build();
+
+    private final static Cache<String, DictPatch> patchCache = CacheBuilder.newBuilder().maximumSize(100)
+            .expireAfterWrite(1, TimeUnit.HOURS).removalListener(//
+                    new RemovalListener<String, DictPatch>() {
+                        @Override
+                        public void onRemoval(RemovalNotification<String, DictPatch> notification) {
+                            logger.info("PatchCache entry with key {} is removed due to {} ", notification.getKey(),
+                                    notification.getCause());
+                        }
+                    })
+            .build();
+
     private CaseInsensitiveStringCache<ProjectDictionaryVersionInfo> versionCache;
     private CachedCrudAssist<ProjectDictionaryVersionInfo> crud;
     // only use by  job node
@@ -75,15 +97,16 @@ public class ProjectDictionaryManager {
             .maximumSize(1000)//
             .expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, MultiVersionControl>() {
                 @Override
-                public MultiVersionControl load(String key) {
-                    return new MultiVersionControl(key);
+                public MultiVersionControl load(String key) throws IOException, InterruptedException {
+                    return new MultiVersionControl(key, resourceLock);
                 }
             });
 
     private volatile static ProjectDictionaryManager ProjectDictionaryManager;
     private DictionaryManager dictionaryManager;
 
-    private ProjectDictionaryManager() throws IOException {
+    // only for test to change private to public
+    public ProjectDictionaryManager() throws IOException {
         KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
         this.dictionaryManager = DictionaryManager.getInstance(kylinConfig);
         this.versionCache = new CaseInsensitiveStringCache<>(kylinConfig, "project_dictionary_version");
@@ -91,9 +114,8 @@ public class ProjectDictionaryManager {
                 ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/metadata", MetadataConstants.TYPE_VERSION,
                 ProjectDictionaryVersionInfo.class, versionCache, false) {
             @Override
-            protected ProjectDictionaryVersionInfo initEntityAfterReload(ProjectDictionaryVersionInfo projectDictionaryVersionInfo,
-                    String resourceName) {
-                //                versionCache.put(mvdVersion.getSourceIdentify(), mvdVersion);
+            protected ProjectDictionaryVersionInfo initEntityAfterReload(
+                    ProjectDictionaryVersionInfo projectDictionaryVersionInfo, String resourceName) {
                 return projectDictionaryVersionInfo;
             }
         };
@@ -101,7 +123,8 @@ public class ProjectDictionaryManager {
 
         // touch lower level metadata before registering my listener
         crud.reloadAll();
-        Broadcaster.getInstance(kylinConfig).registerListener(new ProjectDictionarySyncListener(), "mvd_version");
+        Broadcaster.getInstance(kylinConfig).registerListener(new ProjectDictionarySyncListener(),
+                "project_dictionary_version");
     }
 
     private class ProjectDictionarySyncListener extends Broadcaster.Listener {
@@ -128,8 +151,8 @@ public class ProjectDictionaryManager {
         return ProjectDictionaryManager;
     }
 
-    public ProjectDictionaryVersionInfo getMaxVersion(SegmentProjectDictDesc desc) {
-        return getMaxVersion(desc.getSourceIdentify());
+    public ProjectDictionaryVersionInfo getMaxVersion(SegProjectDict desc) {
+        return getMaxVersion(desc.getSourceIdentifier());
     }
 
     public ProjectDictionaryVersionInfo getMaxVersion(String sourceIdentify) {
@@ -137,145 +160,152 @@ public class ProjectDictionaryManager {
         return versionCache.get(s);
     }
 
-    public DictPatch getMaxVersionPatch(SegmentProjectDictDesc segmentProjectDictDesc) throws IOException {
-        long maxVersion = getMaxVersion(segmentProjectDictDesc).getMaxVersion();
-        return getSpecialPatch(segmentProjectDictDesc, maxVersion);
+    public DictPatch getMaxVersionPatch(SegProjectDict segProjectDict) throws IOException {
+        long maxVersion = getMaxVersion(segProjectDict).getMaxVersion();
+        return getSpecificPatch(segProjectDict, maxVersion);
     }
 
-    // todo :
-    public DictPatch getSpecialPatch(SegmentProjectDictDesc segmentProjectDictDesc, long toVersion) throws IOException {
-        logger.info("Get patch for : " + segmentProjectDictDesc.getSourceIdentify());
-        String patchPath = PathBuilder.patchPath(segmentProjectDictDesc.getSourceIdentify(),
-                segmentProjectDictDesc.getCurrentVersion(), toVersion);
-        DictPatch patch = null;
-        // need upgrade
-        if (segmentProjectDictDesc.getCurrentVersion() != toVersion) {
-            patch = loadDictPatch(patchPath);
-        }
-        //  current version is max version
-        if (patch == null && segmentProjectDictDesc.getPatch() == null) {
-            logger.info("The dictionary is current segment dictionary, skip all patch.");
+    public DictPatch getSpecificPatch(SegProjectDict segProjectDict, long toVersion) throws IOException {
+        ArrayList<String> patchPaths = getPatchResourceIdentifier(segProjectDict, toVersion);
+        switch (patchPaths.size()) {
+        case 0:
             return null;
+        case 1: // Has segment patch
+            return loadDictPatch(patchPaths.get(0));
+        case 2:
+            String cacheKey = String.join(",", patchPaths);
+            DictPatch mergedPatch = patchCache.getIfPresent(cacheKey);
+            if (mergedPatch != null) {
+                return mergedPatch;
+            }
+            // 0 is segment patch, 1 is prj dict to prj dict patch
+            mergedPatch = loadDictPatch(patchPaths.get(0)).upgrade(loadDictPatch(patchPaths.get(1)));
+            patchCache.put(cacheKey, mergedPatch);
+            return mergedPatch;
+        default:
+            throw new RuntimeException(
+                    "Error for get dictionary patch : " + segProjectDict.getSourceIdentifier());
         }
-        //  is first version
-        if (segmentProjectDictDesc.getPatch() == null) {
-            logger.info("The segment dictionary is first version, so it's hasn't segment patch.");
-            return patch;
-        }
-        //  is max version
-        if (patch == null && segmentProjectDictDesc.getPatch() != null) {
-            logger.info("The segment dictionary is max version project dictionary ,return segment dictionary");
-            return loadDictPatch(segmentProjectDictDesc.getPatch());
-        }
+    }
 
-        DictPatch origin = loadDictPatch(segmentProjectDictDesc.getPatch());
-        return origin.upgrade(patch);
+    private ArrayList<String> getPatchResourceIdentifier(SegProjectDict segProjectDict, long toVersion) {
+        Preconditions.checkState(segProjectDict.getCurrentVersion() <= toVersion);
+        logger.info("Get patch for : " + segProjectDict.getSourceIdentifier());
+        ArrayList<String> patchPaths = Lists.newArrayList();
+        if (segProjectDict.getSegPatch() != null) {
+            logger.info("Add segment patch path: " + segProjectDict.getSegPatch());
+            patchPaths.add(segProjectDict.getSegPatch());
+        }
+        // need upgrade
+        if (segProjectDict.getCurrentVersion() != toVersion) {
+            String projectToProjectDictPatch = PathBuilder.patchPath(segProjectDict.getSourceIdentifier(),
+                    segProjectDict.getCurrentVersion(), toVersion);
+            logger.info("Add project dict to project dict patch path: " + projectToProjectDictPatch);
+            patchPaths.add(projectToProjectDictPatch);
+        }
+        return patchPaths;
     }
 
     /**
-     *  It's use for merge cube -> MergeDictionaryStep
-     * @param segmentProjectDictDesc
+     * It's use for merge cube -> MergeDictionaryStep
+     *
+     * @param segProjectDict
      * @return Resource path
      * @throws IOException
      */
-    public List<String> getPatchMetaStore(SegmentProjectDictDesc segmentProjectDictDesc) throws IOException {
+    public List<String> getPatchMetaStore(SegProjectDict segProjectDict) throws IOException {
         List<String> paths = Lists.newArrayList();
-        long toVersion = getMaxVersion(segmentProjectDictDesc).getMaxVersion();
-        paths.add(PathBuilder.verisionPath(segmentProjectDictDesc.getSourceIdentify()));
-        //        if (!toVersion == segmentProjectDictDesc.getCurrentVersion()) {
-        String patchPath = PathBuilder.patchPath(segmentProjectDictDesc.getSourceIdentify(),
-                segmentProjectDictDesc.getCurrentVersion(), toVersion);
-        if (loadDictPatch(patchPath) != null)
-            paths.add(patchPath);
-        //        }
-
-        if ("true".equals(System.getProperty("dict.debug.enabled"))) {
-            paths.add(PathBuilder.dataPath(segmentProjectDictDesc.getSourceIdentify(), toVersion));
-        }
-        if (segmentProjectDictDesc.getPatch() != null)
-            paths.add(segmentProjectDictDesc.getPatch());
-
-        logger.info("Get metadata with : " + segmentProjectDictDesc + ", version: " + toVersion + ", paths: "
+        long toVersion = getMaxVersion(segProjectDict).getMaxVersion();
+        paths.add(PathBuilder.verisionPath(segProjectDict.getSourceIdentifier()));
+        paths.add(PathBuilder.dataPath(segProjectDict.getSourceIdentifier(), toVersion));
+        paths.addAll(getPatchResourceIdentifier(segProjectDict, toVersion));
+        logger.info("Get metadata with : " + segProjectDict + ", version: " + toVersion + ", paths: "
                 + String.join(",", paths));
         return paths;
     }
 
     private DictPatch loadDictPatch(String path) throws IOException {
+        DictPatch dictPatch = patchCache.getIfPresent(path);
+        if (dictPatch != null) {
+            logger.info("Hint patch cache : " + path);
+            return dictPatch;
+        }
         logger.info("Load project dictionary patch: " + path);
         ResourceStore store = getStore();
-        return store.getResource(path, DictPatch.class, DICT_PATCH_SERIALIZER);
+        DictPatch resource = store.getResource(path, DictPatch.class, DICT_PATCH_SERIALIZER);
+        // dict  != null  ;  never
+        if (resource == null) {
+            throw new RuntimeException("Error for get dictionary patch.");
+        }
+        patchCache.put(path, resource);
+        return resource;
     }
 
     public ProjectDictionaryInfo getDictionary(String dictResPath) {
-        if (dictionaryInfoMap.containsKey(dictResPath)) {
-            return dictionaryInfoMap.get(dictResPath);
+        ProjectDictionaryInfo dictionaryInfoIfPresent = dictionaryInfoCache.getIfPresent(dictResPath);
+        if (dictionaryInfoIfPresent != null) {
+            return dictionaryInfoIfPresent;
         } else {
             try {
-                return loadDict(dictResPath);
+                ProjectDictionaryInfo projectDictionaryInfo = doLoad(dictResPath, true);
+                // merge step may be null
+                if (projectDictionaryInfo != null) {
+                    dictionaryInfoCache.put(dictResPath, projectDictionaryInfo);
+                }
+                return projectDictionaryInfo;
             } catch (IOException e) {
-                throw new RuntimeException("Load dictionary " + dictResPath + "failed!", e);
+                throw new RuntimeException("Load dictionary " + dictResPath + " failed!", e);
             }
         }
     }
 
-    public ProjectDictionaryInfo getSpecialDictionary(SegmentProjectDictDesc desc, long specialVersion)
+    public ProjectDictionaryInfo getSpecificDictionary(SegProjectDict desc, long SpecificVersion)
             throws IOException {
         if (desc == null) {
             return null;
         }
-        Preconditions.checkArgument(desc.getCurrentVersion() <= specialVersion);
-        ProjectDictionaryInfo projectDictionaryInfo = loadDictByVersion(desc.getSourceIdentify(), specialVersion);
-        DictPatch patch = getSpecialPatch(desc, specialVersion);
-
-        // Todo : Is nullable?
-        if (projectDictionaryInfo == null) {
-            ProjectDictionaryInfo nullProjectDictionaryInfo = new ProjectDictionaryInfo();
-            nullProjectDictionaryInfo.setDictionaryObject(new DisguiseTrieDictionary<String>(desc.getIdLength(), null, patch));
-            return nullProjectDictionaryInfo;
-        }
-        logger.info("Get Special Dictionary: " + desc.getSourceIdentify() + " version : " + specialVersion);
+        Preconditions.checkArgument(desc.getCurrentVersion() <= SpecificVersion);
+        ProjectDictionaryInfo projectDictionaryInfo = loadDictByVersion(desc.getSourceIdentifier(), SpecificVersion);
+        DictPatch patch = getSpecificPatch(desc, SpecificVersion);
+        logger.info("Get Specific Dictionary: " + desc.getSourceIdentifier() + " version : " + SpecificVersion);
 
         return ProjectDictionaryInfo.copy(projectDictionaryInfo,
                 new DisguiseTrieDictionary<>(desc.getIdLength(), projectDictionaryInfo.getDictionaryObject(), patch));
     }
 
-    public ProjectDictionaryInfo getSpecialDictWithOutPatch(SegmentProjectDictDesc desc, long specialVersion) {
-        ProjectDictionaryInfo projectDictionaryInfo = loadDictByVersion(desc.getSourceIdentify(), specialVersion);
+    public ProjectDictionaryInfo getSpecificDictWithOutPatch(SegProjectDict desc, long SpecificVersion) {
+        ProjectDictionaryInfo projectDictionaryInfo = loadDictByVersion(desc.getSourceIdentifier(), SpecificVersion);
         if (projectDictionaryInfo == null) {
             throw new RuntimeException(" error dictionary");
         }
-        logger.info("get dictionary: " + desc.getSourceIdentify());
+        logger.info("get dictionary: " + desc.getSourceIdentifier());
         return ProjectDictionaryInfo.copy(projectDictionaryInfo,
                 new DisguiseTrieDictionary<>(desc.getIdLength(), projectDictionaryInfo.getDictionaryObject(), null));
     }
 
     /**
-     *
      * @param desc the segment project dict desc
-     * @return     Combinatio dictionary  =  patch + max version dictionary
-     * @throws IOException     ioe
+     * @return Combinatio dictionary  =  patch + max version dictionary
+     * @throws IOException ioe
      */
-    public ProjectDictionaryInfo getCombinationDictionary(SegmentProjectDictDesc desc) throws IOException {
-        long maxVersion = getMaxVersion(desc).getMaxVersion();
-        return getSpecialDictionary(desc, maxVersion);
+    public ProjectDictionaryInfo getCombinationDictionary(SegProjectDict desc) throws IOException {
+        ProjectDictionaryVersionInfo versionInfo = getMaxVersion(desc);
+        if (versionInfo == null) {
+            // build step the version is null.
+            return null;
+        }
+        long maxVersion = versionInfo.getMaxVersion();
+        return getSpecificDictionary(desc, maxVersion);
     }
 
     /**
-     *
-     * @param baseDir   s
+     * @param baseDir s
      * @param version
      * @return
      */
     private ProjectDictionaryInfo loadDictByVersion(String baseDir, long version) {
         String dictResPath = PathBuilder.dataPath(baseDir, version);
         return getDictionary(dictResPath);
-    }
-
-    private synchronized ProjectDictionaryInfo loadDict(String dictResPath) throws IOException {
-        ProjectDictionaryInfo load = doLoad(dictResPath, true);
-        if (load != null)
-            dictionaryInfoMap.put(dictResPath, load);
-        return load;
     }
 
     private ProjectDictionaryInfo doLoad(String resourcePath, boolean loadDictObj) throws IOException {
@@ -292,9 +322,9 @@ public class ProjectDictionaryManager {
     }
 
     // todo save all dict to hdfs too
-    public SegmentProjectDictDesc append(String project, DictionaryInfo dictionaryInfo)
+    public SegProjectDict append(String project, DictionaryInfo dictionaryInfo)
             throws ExecutionException, IOException {
-        String sourceIdentify = PathBuilder.sourceIdentify(project, dictionaryInfo);
+        String sourceIdentify = PathBuilder.sourceIdentifier(project, dictionaryInfo);
         MultiVersionControl mvc = mvcMap.get(sourceIdentify);
         long currentVersion = mvc.getCurrentVersion();
         // check contains
@@ -304,7 +334,7 @@ public class ProjectDictionaryManager {
             if (projectDictionaryInfo.getDictionaryObject().contains(dictionaryInfo.getDictionaryObject())) {
                 logger.info("Dictionary " + sourceIdentify + "be contained version"
                         + projectDictionaryInfo.getDictionaryVersion());
-                return new SegmentProjectDictDesc(sourceIdentify, currentVersion,
+                return new SegProjectDict(sourceIdentify, currentVersion,
                         genSegmentDictionaryToProjectDictionaryMapping(dictionaryInfo, sourceIdentify,
                                 projectDictionaryInfo, currentVersion),
                         dictionaryInfo.getDictionaryObject().getSizeOfId());
@@ -320,18 +350,18 @@ public class ProjectDictionaryManager {
         }
     }
 
-    private SegmentProjectDictDesc appendDictionary(String sourceIdentify, DictionaryInfo dictionaryInfo,
-                                                    MultiVersionControl mvc, MultiVersionControl.VersionEntry versionEntry) throws IOException {
+    private SegProjectDict appendDictionary(String sourceIdentify, DictionaryInfo dictionaryInfo,
+            MultiVersionControl mvc, MultiVersionControl.VersionEntry versionEntry) throws IOException {
         checkInterrupted(sourceIdentify);
 
         logger.info("Append project dictionary with column: " + sourceIdentify);
         String s = eatAndUpgradeDictionary(dictionaryInfo, sourceIdentify, versionEntry.getVersion(), versionEntry);
-        mvc.commit(versionEntry);
-        return new SegmentProjectDictDesc(sourceIdentify, versionEntry.getVersion(), s,
+        mvc.commit();
+        return new SegProjectDict(sourceIdentify, versionEntry.getVersion(), s,
                 dictionaryInfo.getDictionaryObject().getSizeOfId());
     }
 
-    private void versionCheckPoint(String sourceIdentify, MultiVersionControl.VersionEntry versionEntry,
+    private synchronized void versionCheckPoint(String sourceIdentify, MultiVersionControl.VersionEntry versionEntry,
             ProjectDictionaryVersionInfo projectDictionaryVersion, int sizeOfId) throws IOException {
         if (projectDictionaryVersion != null) {
             ProjectDictionaryVersionInfo copy = projectDictionaryVersion.copy();
@@ -342,21 +372,22 @@ public class ProjectDictionaryManager {
         }
     }
 
-    private SegmentProjectDictDesc createDictionary(String sourceIdentify, DictionaryInfo dictionaryInfo,
-                                                    MultiVersionControl mvc, MultiVersionControl.VersionEntry versionEntry) throws IOException {
+    private SegProjectDict createDictionary(String sourceIdentify, DictionaryInfo dictionaryInfo,
+            MultiVersionControl mvc, MultiVersionControl.VersionEntry versionEntry) throws IOException {
         checkInterrupted(sourceIdentify);
 
         logger.info("create project dictionary : " + sourceIdentify);
         ProjectDictionaryInfo warp = ProjectDictionaryInfo.wrap(dictionaryInfo, versionEntry.getVersion());
         saveDictionary(sourceIdentify, warp);
-        mvc.commit(versionEntry);
+        mvc.commit();
         ProjectDictionaryVersionInfo versionInfo = versionCache.get(PathBuilder.versionKey(sourceIdentify));
-        versionCheckPoint(sourceIdentify, versionEntry, versionInfo, dictionaryInfo.getDictionaryObject().getSizeOfId());
-        return new SegmentProjectDictDesc(sourceIdentify, versionEntry.getVersion(),
+        versionCheckPoint(sourceIdentify, versionEntry, versionInfo,
+                dictionaryInfo.getDictionaryObject().getSizeOfId());
+        return new SegProjectDict(sourceIdentify, versionEntry.getVersion(),
                 dictionaryInfo.getDictionaryObject().getSizeOfId());
     }
 
-    private void saveDictionary(String sourceIdentify, ProjectDictionaryInfo dictionaryInfo) throws IOException {
+    protected void saveDictionary(String sourceIdentify, ProjectDictionaryInfo dictionaryInfo) throws IOException {
         checkInterrupted(sourceIdentify);
         String path = PathBuilder.dataPath(sourceIdentify, dictionaryInfo.getDictionaryVersion());
         logger.info("Saving dictionary at " + path + "version is :" + dictionaryInfo.getDictionaryObject());
@@ -373,14 +404,15 @@ public class ProjectDictionaryManager {
             workingFileSystem.mkdirs(sDictDir);
         }
 
-        Path f = new Path(sDictDir, new Path(sourceIdentify + "/" + dictionaryInfo.getDictionaryVersion() + "/data.sdict"));
+        Path f = new Path(sDictDir,
+                new Path(sourceIdentify + "/" + dictionaryInfo.getDictionaryVersion() + "/data.sdict"));
         try (FSDataOutputStream out1 = workingFileSystem.create(f)) {
             SDict.wrap(dictionaryInfo.getDictionaryObject()).write(out1);
         }
     }
 
     private String eatAndUpgradeDictionary(DictionaryInfo originDict, String sourceIdentify, long version,
-                                           MultiVersionControl.VersionEntry versionEntry) throws IOException {
+            MultiVersionControl.VersionEntry versionEntry) throws IOException {
         ProjectDictionaryInfo beforeVersion = loadDictByVersion(sourceIdentify, version - 1);
         DictionaryInfo mergedDictionary = dictionaryManager
                 .mergeDictionary(Lists.newArrayList(beforeVersion, originDict));
@@ -393,7 +425,8 @@ public class ProjectDictionaryManager {
             saveMapping(sourceIdentify, i, version, value);
         }
         ProjectDictionaryVersionInfo versionInfo = versionCache.get(PathBuilder.versionKey(sourceIdentify));
-        versionCheckPoint(sourceIdentify, versionEntry, versionInfo, mergedDictionary.getDictionaryObject().getSizeOfId());
+        versionCheckPoint(sourceIdentify, versionEntry, versionInfo,
+                mergedDictionary.getDictionaryObject().getSizeOfId());
 
         if (originDict.getDictionaryObject().getSize() > 0) {
             return genSegmentDictionaryToProjectDictionaryMapping(originDict, sourceIdentify, mergedDictionary,
@@ -403,11 +436,11 @@ public class ProjectDictionaryManager {
         }
     }
 
-    private String genSegmentDictionaryToProjectDictionaryMapping(DictionaryInfo originDict, String baseDir,
+    private String genSegmentDictionaryToProjectDictionaryMapping(DictionaryInfo originDict, String sourceIdentify,
             DictionaryInfo mergedDictionary, long version) throws IOException {
         int[] offset = ProjectDictionaryHelper.genOffset(originDict, mergedDictionary);
         // different version has different patch
-        String path = PathBuilder.segmentPatchPath(baseDir, originDict.getUuid() + "_" + version);
+        String path = PathBuilder.segmentPatchPath(sourceIdentify, originDict.getUuid(), version);
         saveMappingToPath(offset, path);
         return path;
     }
@@ -428,19 +461,27 @@ public class ProjectDictionaryManager {
     }
 
     //  remove mvc, to be init again
-    public void releaseAll() {
-        for (Map.Entry<String, MultiVersionControl> entry : mvcMap.asMap().entrySet()) {
-            mvcMap.invalidate(entry.getKey());
-            entry.getValue().clear();
+    public void shutdown() {
+        logger.info("Shut down project dictionary manager.");
+        for (Map.Entry<String, MultiVersionControl> mvc : mvcMap.asMap().entrySet()) {
+            mvc.getValue().clear();
+            this.mvcMap.invalidate(mvc.getKey());
         }
     }
 
-    private void checkInterrupted(String sourceIdentify) {
-        if (Thread.currentThread().isInterrupted()) {
+    //  remove mvc, to be init again
+    public void init() {
+        logger.info("Init project dictionary manager.");
+        mvcMap.asMap().clear();
+    }
+
+    protected void checkInterrupted(String sourceIdentify) {
+        if (Thread.interrupted()) {
             try {
-                mvcMap.get(sourceIdentify).notifyAllThread();
+                MultiVersionControl multiVersionControl = mvcMap.get(sourceIdentify);
+                multiVersionControl.commit();
             } catch (ExecutionException e) {
-                logger.info("failed to find mvc  with column :" + sourceIdentify);
+                logger.info("Failed to find mvc  with column :" + sourceIdentify);
             }
             throw new RuntimeException(new InterruptedException("Interrupted build dictionary : " + sourceIdentify));
         }

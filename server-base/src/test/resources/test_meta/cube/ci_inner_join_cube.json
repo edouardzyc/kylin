@@ -55,9 +55,9 @@
       "tableIndexFileCount" : "7",
       "tableIndexStorageSizeBytes" : "8700293"
     },
-    "project_dictionary_desc": {
+    "project_dictionaries": {
       "TEST_KYLIN_FACT.TRANS_ID" : {
-        "sourceIdentify" : "default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID",
+        "source_identifier" : "default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID",
         "current_version" : 3,
         "patch" : "/project_dict/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/segment/0aa94178-12aa-4dae-843c-91232978c907_3",
         "id_length" : 1

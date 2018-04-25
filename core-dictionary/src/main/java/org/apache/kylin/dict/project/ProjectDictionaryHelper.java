@@ -25,12 +25,19 @@ import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.util.Dictionary;
 import org.apache.kylin.common.util.Pair;
 import org.apache.kylin.dict.DictionaryInfo;
+import org.apache.kylin.dict.TrieDictionary;
+import org.apache.kylin.dict.TrieDictionaryForest;
 import org.apache.kylin.metadata.MetadataConstants;
 import org.slf4j.Logger;
 
 import com.google.common.collect.Lists;
 
 final public class ProjectDictionaryHelper {
+
+    public static boolean canUseProjectDictionary(Dictionary<String> dictionary){
+       return dictionary instanceof TrieDictionaryForest || dictionary instanceof TrieDictionary;
+    }
+
 
     public static int[] genOffset(DictionaryInfo small, DictionaryInfo big) {
         Dictionary<String> smallDict = small.getDictionaryObject();
@@ -82,19 +89,21 @@ final public class ProjectDictionaryHelper {
     }
 
     public static class PathBuilder {
-        public final static String DICT_DATA = "/data.dict";
+
+        public final static String DICT_DATA = "/data.pdict";
         public final static String SDICT_DATA = "/data.sdict";
         public final static String SPARDER_SDICT_BASE_DIR = "sparder/sdict";
         public final static String SDICT_ZIP_DIR = "/sdict.zip";
         public final static String SDICT_DIR = "/sdict";
         public final static String SPARDER_DIR = "/sparder";
+        public final static String PROJECT_DICT_FLAG = ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/flag" ;
 
-        public static String sourceIdentify(String project, DictionaryInfo dictionaryInfo) {
+        public static String sourceIdentifier(String project, DictionaryInfo dictionaryInfo) {
             return project + "/" + dictionaryInfo.getSourceTable() + "/" + dictionaryInfo.getSourceColumn();
         }
 
-        public static String segmentPatchPath(String sourceIdentify, String uuid) {
-            return ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/" + sourceIdentify + "/segment/" + uuid;
+        public static String segmentPatchPath(String sourceIdentify, String uuid, long version) {
+            return ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/" + sourceIdentify + "/segment/" + uuid + "_" + version;
         }
 
         public static String versionKey(String sourceIdentify) {
@@ -106,8 +115,7 @@ final public class ProjectDictionaryHelper {
         }
 
         public static String patchPath(String sourceIdentify, long currentVersion, long toVersion) {
-            return ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/" + sourceIdentify + "/" + toVersion + "/"
-                    + currentVersion + "-" + toVersion;
+            return  ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/" + sourceIdentify + "/" + toVersion + "/" + currentVersion + "-" + toVersion;
         }
 
         public static String sDictPath(String sourceIdentify, long currentVersion) {

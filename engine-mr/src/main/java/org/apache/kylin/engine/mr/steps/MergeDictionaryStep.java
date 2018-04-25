@@ -32,9 +32,6 @@ import org.apache.kylin.cube.CubeUpdate;
 import org.apache.kylin.cube.model.CubeDesc;
 import org.apache.kylin.dict.DictionaryInfo;
 import org.apache.kylin.dict.DictionaryManager;
-import org.apache.kylin.dict.project.ProjectDictionaryVersionInfo;
-import org.apache.kylin.dict.project.ProjectDictionaryManager;
-import org.apache.kylin.dict.project.SegmentProjectDictDesc;
 import org.apache.kylin.job.exception.ExecuteException;
 import org.apache.kylin.job.execution.AbstractExecutable;
 import org.apache.kylin.job.execution.ExecutableContext;
@@ -71,7 +68,6 @@ public class MergeDictionaryStep extends AbstractExecutable {
             CubeSegment newSegCopy = cubeCopy.getSegmentById(newSegment.getUuid());
 
             makeDictForNewSegment(conf, cubeCopy, newSegCopy, mergingSegments);
-            makeProjectDictForNewSegment(cubeCopy, newSegCopy, mergingSegments);
             makeSnapshotForNewSegment(cubeCopy, newSegCopy, mergingSegments);
 
             CubeUpdate update = new CubeUpdate(cubeCopy);
@@ -119,7 +115,7 @@ public class MergeDictionaryStep extends AbstractExecutable {
                     DictionaryInfo dictInfo = dictMgr.getDictionaryInfo(segment.getDictResPath(col));
                     if (dictInfo != null && !dictInfos.contains(dictInfo)) {
                         dictInfos.add(dictInfo);
-                    } else {
+                    } else if (dictInfo == null) {
                         logger.warn("Failed to load DictionaryInfo from " + segment.getDictResPath(col));
                     }
                 }
@@ -137,24 +133,6 @@ public class MergeDictionaryStep extends AbstractExecutable {
         return dictInfo;
     }
 
-    private void makeProjectDictForNewSegment(CubeInstance cube, CubeSegment newSeg,
-                                              List<CubeSegment> mergingSegments) {
-        CubeDesc cubeDesc = cube.getDescriptor();
-        ProjectDictionaryManager projectDictionaryManager = ProjectDictionaryManager.getInstance();
-
-        for (TblColRef col : cubeDesc.getAllColumnsNeedDictionaryExcludeReuseBuilt()) {
-            for (CubeSegment cubeSegment : mergingSegments) {
-                SegmentProjectDictDesc projectDictDesc = cubeSegment.getProjectDictDesc(col);
-                if (projectDictDesc != null) {
-                    ProjectDictionaryVersionInfo mvdVersion = projectDictionaryManager.getMaxVersion(projectDictDesc);
-                    long maxVersion = mvdVersion.getMaxVersion();
-                    newSeg.putProjectDictDesc(col.getIdentity(),
-                            new SegmentProjectDictDesc(projectDictDesc.getSourceIdentify(), maxVersion, mvdVersion.getIdLength()));
-                    break;
-                }
-            }
-        }
-    }
 
     /**
      * make snapshots for the new segment by copying from the latest one of the underlying

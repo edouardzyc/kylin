@@ -377,7 +377,6 @@ public class TopNMeasureType extends MeasureType<TopNCounter<ByteArray>> {
             }
 
             if (sqlDigest.aggregations.size() > 0) {
-                topnFunc.setReturnType(sqlDigest.aggregations.get(0).getReturnType());
                 FunctionDesc origFunc = sqlDigest.aggregations.iterator().next();
                 if (origFunc.isSum() == false && origFunc.isCount() == false) {
                     logger.warn("When query with topN, only SUM/Count function is allowed.");

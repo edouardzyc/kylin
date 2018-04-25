@@ -371,13 +371,14 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
         fetcher = jobEngineConfig.getJobPriorityConsidered() ? new FetcherRunnerWithPriority() : new FetcherRunner();
         logger.info("Creating fetcher pool instance:" + System.identityHashCode(fetcher));
         fetcherPool.scheduleAtFixedRate(fetcher, pollSecond / 10, pollSecond, TimeUnit.SECONDS);
+        // init project dictionary manager
+        ProjectDictionaryManager.getInstance().init();
         hasStarted = true;
     }
 
     @Override
     public void shutdown() throws SchedulerException {
         logger.info("Shutting down DefaultScheduler ....");
-        ProjectDictionaryManager.getInstance().releaseAll();
         jobLock.unlockJobEngine();
         initialized = false;
         hasStarted = false;
@@ -395,6 +396,7 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
             //ignore it
             logger.warn("InterruptedException is caught when shutting down job pool.", e);
         }
+        ProjectDictionaryManager.getInstance().shutdown();
     }
 
     @Override

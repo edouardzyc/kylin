@@ -44,14 +44,16 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
             patch = null;
         }
         this.dictionary = dictionary;
-        if (patch != null) {
-            this.offset = patch.getOffset();
-        }
         this.idLength = idLength;
         if (dictionary != null) {
             Preconditions.checkArgument(dictionary.getMinId() == 0);
             this.min = 0;
             this.max = dictionary.getMaxId();
+        }
+        if (patch != null) {
+            this.offset = patch.getOffset();
+            this.max = dictionary.getMaxId();
+
         }
 
     }
@@ -92,11 +94,7 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
         if (isNull(id)) {
             return null;
         }
-        T valueFromId = dictionary.getValueFromId(transformId(id));
-        if(valueFromId == null){
-            System.out.println();
-        }
-        return valueFromId;
+        return dictionary.getValueFromId(transformId(id));
     }
 
     @Override
@@ -167,8 +165,8 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
         if (offset != null) {
             reverseOffset = new int[getSize()];
             for (int i = 0; i < reverseOffset.length; i++) {
-                // default  null id is 0
-                reverseOffset[i] = 0;
+                // filter translation may provide hit missing values, need to return null on such case
+                reverseOffset[i] =  NULL_ID[idLength];
             }
             for (int i = 0; i < offset.length; i++) {
                 reverseOffset[offset[i]] = i;

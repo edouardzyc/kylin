@@ -19,17 +19,9 @@
 package org.apache.kylin.dict.project;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.TreeSet;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.google.common.base.Preconditions;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
-import org.apache.kylin.common.KylinConfig;
-import org.apache.kylin.common.lock.DistributedLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,164 +29,53 @@ public class MultiVersionControl {
     public static final Logger logger = LoggerFactory.getLogger(MultiVersionControl.class);
 
     private String key;
-    private final LinkedList<VersionEntry> writeQueue = new LinkedList<>();
-    private AtomicLong sequenceId;
-    //    private DistributedLock distributedLock;
-    private static final String VERSION_PREFIX = "version_";
-    private DistributedLock distributedLock;
+    private ResourceLock.Lock lockInternal;
+    private Semaphore semaphore = new Semaphore(1);
+    private volatile AtomicLong id = new AtomicLong(-1);
 
-    MultiVersionControl(String key){
+    MultiVersionControl(String key, ResourceLock resourceLock) throws IOException, InterruptedException {
         this.key = key;
-        distributedLock = KylinConfig.getInstanceFromEnv().getDistributedLockFactory()
-                .lockForCurrentThread();
-        distributedLock.lock(key, Long.MAX_VALUE);
-        ProjectDictionaryVersionInfo projectDictionaryVersion = ProjectDictionaryManager.getInstance().getMaxVersion(key);
-        if (projectDictionaryVersion == null)
-            this.sequenceId = new AtomicLong(-1);
-        else
-            this.sequenceId = new AtomicLong(projectDictionaryVersion.getMaxVersion());
-        logger.info("init mvc:" + key + ": " + sequenceId.get());
-    }
-
-    @Deprecated
-    Long[] listAllVersionWithHDFSs(FileSystem fileSystem, Path basePath) throws IOException {
-        FileStatus[] versionDirs = fileSystem.listStatus(basePath, new PathFilter() {
-            @Override
-            public boolean accept(Path path) {
-                return path.getName().startsWith(VERSION_PREFIX);
-            }
-        });
-        TreeSet<Long> versions = new TreeSet<>();
-        for (FileStatus versionDir : versionDirs) {
-            Path path = versionDir.getPath();
-            versions.add(Long.parseLong(path.getName().substring(VERSION_PREFIX.length())));
+        ProjectDictionaryVersionInfo maxVersion = ProjectDictionaryManager.getInstance().getMaxVersion(key);
+        if (maxVersion != null) {
+            id.set(ProjectDictionaryManager.getInstance().getMaxVersion(key).getMaxVersion());
         }
-        return versions.toArray(new Long[0]);
+        logger.info("acquire mvc lock for : " + key);
+        lockInternal = resourceLock.getLockInterna(key);
     }
 
     public long getCurrentVersion() {
-
-        return sequenceId.get();
+        return id.get();
     }
-
     private long getDictionaryVersion() {
-        return sequenceId.incrementAndGet();
-    }
-
-    private boolean checkMyLock() {
-        return distributedLock.isLockedByMe(key);
+        return getCurrentVersion() + 1;
     }
 
     VersionEntry beginAppendWhenPreviousAppendCompleted() {
-        Preconditions.checkState(checkMyLock(), "Current node is not job node");
-        waitForPreviousAppendCompleted();
-        // Ensure this is job node
-        Preconditions.checkState(checkMyLock(), "Current node is not job node");
-        return beginAppend(getDictionaryVersion());
-    }
-
-    private VersionEntry beginAppend(Long sequeueId) {
-        VersionEntry e = new VersionEntry(sequeueId);
-        synchronized (writeQueue) {
-            writeQueue.add(e);
-            return e;
-        }
-    }
-
-    private void waitForPreviousAppendCompleted() {
-        // create a null entity
-        VersionEntry versionEntry = beginAppend(-1L);
-        waitForPreviousAppendCompleted(versionEntry);
-    }
-
-    private void waitForPreviousAppendCompleted(VersionEntry waitedEntry) {
-        logger.info("Request lock with column: " + key);
-        // avend
-        boolean interrupted = false;
-        VersionEntry w = waitedEntry;
-
         try {
-            VersionEntry firstEntry = null;
-            do {
-                synchronized (writeQueue) {
-                    // writeQueue won't be empty at this point, the following is just a safety check
-                    if (writeQueue.isEmpty()) {
-                        break;
-                    }
-                    firstEntry = writeQueue.getFirst();
-                    if (firstEntry == w) {
-                        // all previous in-flight transactions are done
-                        break;
-                    }
-                    try {
-                        writeQueue.wait(0);
-                    } catch (InterruptedException ie) {
-                        // We were interrupted... finish the loop -- i.e. cleanup --and then
-                        // on our way out, reset the interrupt flag.
-                        interrupted = true;
-                        break;
-                    }
-                }
-            } while (firstEntry != null);
-        } finally {
-            if (w != null) {
-                commit(w);
-            }
-        }
-        if (interrupted) {
-            Thread.currentThread().interrupt();
-        }
-    }
+            logger.info("acquire lock for : " + key);
+            semaphore.acquire();
 
-    void rollBack(VersionEntry e) {
-        synchronized (writeQueue) {
-            e.markCompleted();
-
-            while (!writeQueue.isEmpty()) {
-                VersionEntry queueFirst = writeQueue.getFirst();
-                if (queueFirst.isCompleted()) {
-                    // Using Max because Edit complete in WAL sync order not arriving order
-                    writeQueue.removeFirst();
-                    sequenceId.decrementAndGet();
-                } else {
-                    break;
-                }
-            }
-
-            // notify waiters on writeQueue before return
-            writeQueue.notifyAll();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Interrupt with acquire lock", e);
         }
+        logger.info("Get lock for : " + key + " version : " + getDictionaryVersion());
+
+        return new VersionEntry(getDictionaryVersion());
     }
 
     void clear() {
-        distributedLock.unlock(key);
+        lockInternal.release();
     }
 
-    void notifyAllThread(){
-        writeQueue.notifyAll();
-    }
-    void commit(VersionEntry e) {
-        synchronized (writeQueue) {
-            e.markCompleted();
-
-            while (!writeQueue.isEmpty()) {
-                VersionEntry queueFirst = writeQueue.getFirst();
-                if (queueFirst.isCompleted()) {
-                    // Using Max because Edit complete in WAL sync order not arriving order
-                    writeQueue.removeFirst();
-                } else {
-                    break;
-                }
-            }
-            // notify waiters on writeQueue before return
-            writeQueue.notifyAll();
-        }
-
+    void commit() {
+        // First add  then release
+        id.incrementAndGet();
+        logger.info("release lock for : " + key + "  version: " + (id.get() + 1));
+        semaphore.release();
     }
 
     class VersionEntry {
         private long version;
-        private boolean isCompleted = false;
 
         VersionEntry(long version) {
             this.version = version;
@@ -206,14 +87,6 @@ public class MultiVersionControl {
 
         public void setVersion(long version) {
             this.version = version;
-        }
-
-        public boolean isCompleted() {
-            return isCompleted;
-        }
-
-        void markCompleted() {
-            this.isCompleted = true;
         }
     }
 }
