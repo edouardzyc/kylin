@@ -28,6 +28,7 @@ import org.apache.kylin.common.util.Dictionary;
 import com.google.common.base.Preconditions;
 
 // todo check  override
+@SuppressWarnings("serial")
 public class DisguiseTrieDictionary<T> extends Dictionary<T> {
     private Dictionary<T> dictionary;
     private int[] offset;
@@ -103,7 +104,7 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
         return dictionary.getValueByteFromId(transformId(id));
     }
 
-    public int transformId(int id) {
+    private int transformId(int id) {
         // todo remove offset.length = 0
         if (offset != null) {
             try {
@@ -118,7 +119,7 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
         }
     }
 
-    public int transformReverseId(int id) {
+    private int transformReverseId(int id) {
         if (reverseOffset != null) {
             try {
                 return reverseOffset[id];
@@ -147,7 +148,7 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
         if (!reverse) {
             initReverse();
         }
-       int id = transformReverseId(dictionary.getIdFromValue(value, roundingFlag));
+        int id = transformReverseId(dictionary.getIdFromValue(value, roundingFlag));
         return id;
     }
 
@@ -162,7 +163,7 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
 
     }
 
-    public void initReverse() {
+    private void initReverse() {
         if (offset != null) {
             reverseOffset = new int[getSize()];
             for (int i = 0; i < reverseOffset.length; i++) {
@@ -176,7 +177,7 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
         reverse = true;
     }
 
-    public boolean isNull(int id) {
+    private boolean isNull(int id) {
         int nullId = NULL_ID[idLength];
         return (nullId & id) == nullId;
     }

@@ -26,6 +26,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.kylin.common.persistence.RootPersistentEntity;
 
 
+@SuppressWarnings("serial")
 public class DictPatch extends RootPersistentEntity {
     private int[] offset;
 
@@ -78,14 +79,10 @@ public class DictPatch extends RootPersistentEntity {
     }
 
     public DictPatch upgrade(DictPatch patch) {
-        try {
-            int[] originOffset = this.getOffset();
-            int[] patchOffset = patch.getOffset();
-            for (int i = 0; i < originOffset.length; i++) {
-                originOffset[i] = patchOffset[originOffset[i]];
-            }
-        } catch (NullPointerException e) {
-            System.out.println("s");
+        int[] originOffset = this.getOffset();
+        int[] patchOffset = patch.getOffset();
+        for (int i = 0; i < originOffset.length; i++) {
+            originOffset[i] = patchOffset[originOffset[i]];
         }
         return this;
     }

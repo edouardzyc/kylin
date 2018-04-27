@@ -22,6 +22,7 @@ import org.apache.kylin.common.persistence.RootPersistentEntity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@SuppressWarnings("serial")
 public class ProjectDictionaryVersionInfo extends RootPersistentEntity {
     @JsonProperty("key")
     private String key;
@@ -74,7 +75,7 @@ public class ProjectDictionaryVersionInfo extends RootPersistentEntity {
         this.idLength = idLength;
     }
 
-    public ProjectDictionaryVersionInfo copy(){
+    public ProjectDictionaryVersionInfo copy() {
         ProjectDictionaryVersionInfo copy = new ProjectDictionaryVersionInfo(this.getKey(), this.getMaxVersion(), this.getIdLength());
         copy.setLastModified(this.getLastModified());
         return copy ;

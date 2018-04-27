@@ -21,8 +21,8 @@ package org.apache.kylin.dict.project;
 
 import org.apache.kylin.common.util.Dictionary;
 
+@SuppressWarnings("serial")
 public abstract class DisguiseDictionary extends Dictionary<String> {
-
 
     /**
      *

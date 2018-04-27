@@ -28,6 +28,7 @@ import org.apache.kylin.source.IReadableTable;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@SuppressWarnings("serial")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ProjectDictionaryInfo extends DictionaryInfo {
     @JsonProperty("dictionary_version")
@@ -38,14 +39,6 @@ public class ProjectDictionaryInfo extends DictionaryInfo {
     private List<String> eatedDictionaries;
 
     public ProjectDictionaryInfo() {
-    }
-
-    private ProjectDictionaryInfo(String sourceTable, String sourceColumn, int sourceColumnIndex, String dataType,
-                                  IReadableTable.TableSignature input, Dictionary<String> dictionaryObject) {
-        super(sourceTable, sourceColumn, sourceColumnIndex, dataType, input);
-        super.setDictionaryObject(dictionaryObject);
-        super.setDictionaryClass(dictionaryClass);
-
     }
 
     private ProjectDictionaryInfo(String sourceTable, String sourceColumn, int sourceColumnIndex, String dataType,
@@ -72,7 +65,7 @@ public class ProjectDictionaryInfo extends DictionaryInfo {
     }
 
 
-        public List<String> getEatedDictionaries() {
+    public List<String> getEatedDictionaries() {
         return eatedDictionaries;
     }
 

@@ -25,6 +25,7 @@ import java.io.PrintStream;
 
 import org.apache.kylin.common.util.Dictionary;
 
+@SuppressWarnings("serial")
 public class DisguiseUpgradeDictionary extends DisguiseDictionary {
 
     private DictPatch patch;
@@ -114,7 +115,7 @@ public class DisguiseUpgradeDictionary extends DisguiseDictionary {
                 return offset[id];
             } catch (Exception e) {
 
-                //  user to debug
+                // keep for debug
                 throw e;
             }
         } else {

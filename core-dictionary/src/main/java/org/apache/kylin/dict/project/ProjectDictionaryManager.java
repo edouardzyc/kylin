@@ -83,15 +83,6 @@ public class ProjectDictionaryManager {
     private volatile static ProjectDictionaryManager ProjectDictionaryManager;
     private DictionaryManager dictionaryManager;
 
-    private class CubeSyncListener extends Broadcaster.Listener {
-
-        @Override
-        public void onEntityChange(Broadcaster broadcaster, String entity, Broadcaster.Event event, String cacheKey)
-                throws IOException {
-            crud.reload(cacheKey);
-        }
-    }
-
     private ProjectDictionaryManager() throws IOException {
         KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
         this.dictionaryManager = DictionaryManager.getInstance(kylinConfig);
@@ -110,7 +101,7 @@ public class ProjectDictionaryManager {
 
         // touch lower level metadata before registering my listener
         crud.reloadAll();
-                Broadcaster.getInstance(kylinConfig).registerListener(new ProjectDictionarySyncListener(), "mvd_version");
+        Broadcaster.getInstance(kylinConfig).registerListener(new ProjectDictionarySyncListener(), "mvd_version");
     }
 
     private class ProjectDictionarySyncListener extends Broadcaster.Listener {
@@ -388,7 +379,6 @@ public class ProjectDictionaryManager {
         }
     }
 
-    //todo if equal
     private String eatAndUpgradeDictionary(DictionaryInfo originDict, String sourceIdentify, long version,
                                            MultiVersionControl.VersionEntry versionEntry) throws IOException {
         ProjectDictionaryInfo beforeVersion = loadDictByVersion(sourceIdentify, version - 1);

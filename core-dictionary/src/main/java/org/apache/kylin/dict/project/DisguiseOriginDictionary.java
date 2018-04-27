@@ -25,6 +25,7 @@ import java.io.PrintStream;
 
 import org.apache.kylin.common.util.Dictionary;
 
+@SuppressWarnings("serial")
 public class DisguiseOriginDictionary extends DisguiseDictionary {
 
     DictPatch dictPatch;

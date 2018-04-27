@@ -1016,8 +1016,7 @@ public class CubeManager implements IRealizationProvider {
                     dictionaryInfo);
             logger.info("update dictionary :" + dictPath + " and this segmentProjectDesc is :" + deft.toString());
             for (String key : dict) {
-                CubeManager.getInstance(KylinConfig.getInstanceFromEnv()).saveSegmentProjectDictDesc(cubeSegment, key,
-                        deft);
+                saveSegmentProjectDictDesc(cubeSegment, key, deft);
             }
         }
     }
