@@ -297,7 +297,7 @@ public class OLAPJoinRel extends EnumerableJoin implements OLAPRel {
 
     @Override
     public EnumerableRel implementEnumerable(List<EnumerableRel> inputs) {
-        if (this.context == null) {
+        if (this.hasSubQuery) {
             try {
                 return constr.newInstance(getCluster(), getCluster().traitSetOf(EnumerableConvention.INSTANCE), //
                         inputs.get(0), inputs.get(1), condition, leftKeys, rightKeys, variablesSet, joinType);
