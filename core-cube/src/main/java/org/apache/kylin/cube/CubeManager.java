@@ -1014,7 +1014,7 @@ public class CubeManager implements IRealizationProvider {
             List<String> dict = dictMapping.get(dictPath);
             SegmentProjectDictDesc deft = ProjectDictionaryManager.getInstance().append(cubeSegment.getProject(),
                     dictionaryInfo);
-            logger.info("update dictionary :" + dictPath + "and this segmentProjectDesc is :" + deft.toString());
+            logger.info("update dictionary :" + dictPath + " and this segmentProjectDesc is :" + deft.toString());
             for (String key : dict) {
                 CubeManager.getInstance(KylinConfig.getInstanceFromEnv()).saveSegmentProjectDictDesc(cubeSegment, key,
                         deft);

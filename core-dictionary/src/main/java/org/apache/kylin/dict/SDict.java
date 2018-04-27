@@ -111,7 +111,12 @@ public class SDict extends Dictionary<String> implements DictFileResource {
 
     @Override
     protected String getValueFromIdImpl(int id) {
-        throw new UnsupportedOperationException("Dict only for query");
+        byte[] bytes = get(id);
+        if (bytes == null) {
+            return null;
+        } else {
+            return new String(bytes);
+        }
     }
 
     @Override
