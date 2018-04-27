@@ -60,7 +60,7 @@ public class MergeCuboidJob extends CuboidJob {
             setJobClasspath(job, cube.getConfig());
 
             // add metadata to distributed cache
-            attachSegmentsMetadataWithDict(cube.getMergingSegments(cubeSeg), job.getConfiguration());
+            attachCubeMetadataWithDict(cube, job.getConfiguration());
 
             // Mapper
             job.setMapperClass(MergeCuboidMapper.class);

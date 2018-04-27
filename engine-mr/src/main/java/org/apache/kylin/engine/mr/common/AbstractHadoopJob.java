@@ -520,6 +520,15 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
         dumpKylinPropsAndMetadata(cube.getProject(), collectCubeMetadata(cube), cube.getConfig(), conf);
     }
 
+    protected void attachCubeMetadataWithDict(CubeInstance cube, Configuration conf) throws IOException {
+        Set<String> dumpList = new LinkedHashSet<>();
+        dumpList.addAll(collectCubeMetadata(cube));
+        for (CubeSegment segment : cube.getSegments()) {
+            dumpList.addAll(segment.getDictionaryPaths());
+        }
+        dumpKylinPropsAndMetadata(cube.getProject(), dumpList, cube.getConfig(), conf);
+    }
+
     protected void attachSegmentsMetadataWithDict(List<CubeSegment> segments, Configuration conf) throws IOException {
         CubeInstance cube = segments.get(0).getCubeInstance();
         Set<String> dumpList = new LinkedHashSet<>(collectCubeMetadata(cube));
