@@ -95,9 +95,11 @@ public class KylinVersion implements Comparable {
     /**
      * Require MANUAL updating kylin version per ANY upgrading.
      */
-    private static final KylinVersion CURRENT_KYLIN_VERSION = new KylinVersion("2.3.0.20505");
+    private static final KylinVersion CURRENT_KYLIN_VERSION = new KylinVersion("3.0.0.00001");
 
     private static final KylinVersion VERSION_200 = new KylinVersion("2.0.0");
+
+    private static final KylinVersion VERSION_300 = new KylinVersion("3.0.0");
 
     private static final Set<KylinVersion> SIGNATURE_INCOMPATIBLE_REVISIONS = new HashSet<KylinVersion>();
 
