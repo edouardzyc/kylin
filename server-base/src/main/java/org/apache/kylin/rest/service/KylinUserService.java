@@ -29,6 +29,7 @@ import org.apache.kylin.common.persistence.JsonSerializer;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.persistence.Serializer;
 import org.apache.kylin.rest.constant.Constant;
+import org.apache.kylin.rest.exception.BadRequestException;
 import org.apache.kylin.rest.exception.InternalErrorException;
 import org.apache.kylin.rest.msg.Message;
 import org.apache.kylin.rest.msg.MsgPicker;
@@ -74,6 +75,9 @@ public class KylinUserService implements UserService {
     @Override
     //@PreAuthorize(Constant.ACCESS_HAS_ROLE_ADMIN) --- DON'T DO THIS, CAUSES CIRCULAR DEPENDENCY BETWEEN UserService & AclService
     public void createUser(UserDetails user) {
+        if (getKylinUserManager().exists(user.getUsername())) {
+            throw new BadRequestException("User creating is not allowed when username is already exists.");
+        }
         updateUser(user);
     }
 

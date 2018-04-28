@@ -61,6 +61,19 @@ public class UserServiceTest extends ServiceTestBase {
     }
 
     @Test
+    public void testAddExistingUser() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(Constant.ROLE_ADMIN));
+        ManagedUser user = new ManagedUser("ADMIN", "PWD", false, authorities);
+        try {
+            userService.createUser(user);
+            Assert.fail();
+        } catch (Exception e) {
+            Assert.assertEquals("User creating is not allowed when username is already exists.", e.getMessage());
+        }
+    }
+
+    @Test
     public void testDeleteAdmin() throws IOException {
         try {
             userService.deleteUser("ADMIN");
