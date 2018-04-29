@@ -43,6 +43,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.Lists;
 
+import static org.apache.kylin.rest.constant.Constant.GROUP_ALL_USERS;
+
 @SuppressWarnings("serial")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ManagedUser extends RootPersistentEntity implements UserDetails {
@@ -69,6 +71,7 @@ public class ManagedUser extends RootPersistentEntity implements UserDetails {
     //DISABLED_ROLE is a ancient way to represent disabled user
     //now we no longer support such way, however legacy metadata may still contain it
     private static final String DISABLED_ROLE = "--disabled--";
+    private static final SimpleGrantedAuthority DEFAULT_GROUP = new SimpleGrantedAuthority(GROUP_ALL_USERS);
 
     public ManagedUser() {
     }
@@ -98,7 +101,10 @@ public class ManagedUser extends RootPersistentEntity implements UserDetails {
         for (String a : authoritiesStr) {
             authorities.add(new SimpleGrantedAuthority(a));
         }
-
+        // user must belong to all users.
+        if (!authorities.contains(DEFAULT_GROUP)) {
+            authorities.add(DEFAULT_GROUP);
+        }
         caterLegacy();
     }
 
@@ -107,9 +113,11 @@ public class ManagedUser extends RootPersistentEntity implements UserDetails {
         this.username = username;
         this.password = password;
         this.setDefaultPassword(defaultPassword);
-
         this.setGrantedAuthorities(grantedAuthorities);
-
+        // user must belong to all users.
+        if (!authorities.contains(DEFAULT_GROUP)) {
+            authorities.add(DEFAULT_GROUP);
+        }
         caterLegacy();
     }
 

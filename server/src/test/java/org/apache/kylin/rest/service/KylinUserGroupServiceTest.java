@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.google.common.collect.Lists;
 
+import static org.apache.kylin.rest.constant.Constant.GROUP_ALL_USERS;
+
 public class KylinUserGroupServiceTest extends ServiceTestBase {
 
     @Autowired
@@ -37,6 +39,6 @@ public class KylinUserGroupServiceTest extends ServiceTestBase {
     @Test
     public void testGetAllUserAuthorities() throws IOException {
         List<String> allUserAuthorities = userGroupService.getAllUserAuthorities();
-        Assert.assertEquals(Lists.newArrayList("ROLE_ADMIN", "ROLE_ANALYST", "ROLE_MODELER"), allUserAuthorities);
+        Assert.assertEquals(Lists.newArrayList("ROLE_ADMIN", "ROLE_ANALYST", "ROLE_MODELER", GROUP_ALL_USERS), allUserAuthorities);
     }
 }

@@ -86,6 +86,10 @@ public class KylinUserService implements UserService {
     public void updateUser(UserDetails user) {
         Preconditions.checkState(user instanceof ManagedUser, "User {} is not ManagedUser", user);
         ManagedUser managedUser = (ManagedUser) user;
+
+        if (!managedUser.getAuthorities().contains(new SimpleGrantedAuthority(Constant.GROUP_ALL_USERS))) {
+            throw new BadRequestException("Can not remove user from ALL USERS group.");
+        }
         getKylinUserManager().update(managedUser);
         logger.trace("update user : {}", user.getUsername());
         setEvictCacheFlag(true);

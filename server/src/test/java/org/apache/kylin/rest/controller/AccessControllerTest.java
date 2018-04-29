@@ -97,7 +97,7 @@ public class AccessControllerTest extends ServiceTestBase implements AclEntityTy
         List<ProjectInstance> projects = projectController.getProjects(10000, 0);
         assertTrue(projects.size() > 0);
         ProjectInstance project = projects.get(0);
-        ManagedUser user = new ManagedUser("u", "kylin", false, "all_users", "g1", "g2", "g3", "g4");
+        ManagedUser user = new ManagedUser("u", "kylin", false, "g1", "g2", "g3", "g4");
         userService.createUser(user);
 
         grantPermission("g1", READ, project.getUuid());
