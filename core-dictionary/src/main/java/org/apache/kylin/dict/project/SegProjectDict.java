@@ -26,7 +26,7 @@ public class SegProjectDict {
     @JsonProperty("current_version")
     private long currentVersion;
 
-    @JsonProperty("seg_path")
+    @JsonProperty("seg_patch")
     private String segPatch;
 
     @JsonProperty("id_length")

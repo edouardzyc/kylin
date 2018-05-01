@@ -18,13 +18,6 @@
 
 package org.apache.kylin.dict.project;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.io.PrintStream;
-
-import org.apache.kylin.common.util.Dictionary;
-
 @SuppressWarnings("serial")
 public class DisguiseOriginDictionary extends DisguiseDictionary {
 
@@ -36,74 +29,6 @@ public class DisguiseOriginDictionary extends DisguiseDictionary {
         this.dictPatch = maxVersionPatch;
         this.sizeOfId = sizeOfId;
     }
-
-    @Override
-    public int getMinId() {
-        return 0;
-    }
-
-    @Override
-    public int getMaxId() {
-        return dictPatch.getOffset().length;
-    }
-
-    @Override
-    public int getSizeOfId() {
-        return sizeOfId;
-    }
-
-    @Override
-    public int getSizeOfValue() {
-        return sizeOfId;
-    }
-
-    @Override
-    public boolean contains(Dictionary<?> another) {
-        return false;
-    }
-
-    /**
-     *
-     * @param id eat something
-     * @return  return = value
-     * @throws IllegalArgumentException
-     */
-    @Override
-    public String getValueFromId(int id) throws IllegalArgumentException {
-        return id + "";
-    }
-
-    /**
-     *
-     * @param value eat something
-     * @param roundingFlag  return = value
-     * @return
-     */
-    @Override
-    protected int getIdFromValueImpl(String value, int roundingFlag) {
-        return Integer.parseInt(value);
-    }
-
-    @Override
-    protected String getValueFromIdImpl(int id) {
-        return id + "";
-    }
-
-    @Override
-    public void dump(PrintStream out) {
-
-    }
-
-    @Override
-    public void write(DataOutput out) throws IOException {
-
-    }
-
-    @Override
-    public void readFields(DataInput in) throws IOException {
-
-    }
-
     @Override
     public int upgrade(int originId) {
         return originId;

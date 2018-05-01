@@ -34,8 +34,8 @@ import com.google.common.collect.Lists;
 
 final public class ProjectDictionaryHelper {
 
-    public static boolean canUseProjectDictionary(Dictionary<String> dictionary){
-       return dictionary instanceof TrieDictionaryForest || dictionary instanceof TrieDictionary;
+    public static boolean useProjectDictionary(Dictionary<String> dictionary) {
+        return (dictionary instanceof TrieDictionaryForest || dictionary instanceof TrieDictionary);
     }
 
 
@@ -92,18 +92,20 @@ final public class ProjectDictionaryHelper {
 
         public final static String DICT_DATA = "/data.pdict";
         public final static String SDICT_DATA = "/data.sdict";
-        public final static String SPARDER_SDICT_BASE_DIR = "sparder/sdict";
+        public final static String SPARDER_SDICT_BASE_DIR = ResourceStore.SPARDER_DICT_RESOURCE_ROOT;
         public final static String SDICT_ZIP_DIR = "/sdict.zip";
         public final static String SDICT_DIR = "/sdict";
         public final static String SPARDER_DIR = "/sparder";
-        public final static String PROJECT_DICT_FLAG = ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/flag" ;
+        public final static String SPARDER_DICT_ROOT = SPARDER_DIR + SDICT_DIR;
+        public final static String PROJECT_DICT_FLAG = ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/migrate_ok";
+        public final static String PROJECT_DICT_DIR = ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/data";
 
         public static String sourceIdentifier(String project, DictionaryInfo dictionaryInfo) {
             return project + "/" + dictionaryInfo.getSourceTable() + "/" + dictionaryInfo.getSourceColumn();
         }
 
         public static String segmentPatchPath(String sourceIdentify, String uuid, long version) {
-            return ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/" + sourceIdentify + "/segment/" + uuid + "_" + version;
+            return PROJECT_DICT_DIR + "/" + sourceIdentify + "/segment/" + uuid + "_" + version;
         }
 
         public static String versionKey(String sourceIdentify) {
@@ -111,11 +113,11 @@ final public class ProjectDictionaryHelper {
         }
 
         public static String dataPath(String sourceIdentify, long version) {
-            return ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/" + sourceIdentify + "/" + version + DICT_DATA;
+            return PROJECT_DICT_DIR + "/" + sourceIdentify + "/" + version + DICT_DATA;
         }
 
         public static String patchPath(String sourceIdentify, long currentVersion, long toVersion) {
-            return  ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/" + sourceIdentify + "/" + toVersion + "/" + currentVersion + "-" + toVersion;
+            return PROJECT_DICT_DIR + "/" + sourceIdentify + "/" + toVersion + "/" + currentVersion + "-" + toVersion;
         }
 
         public static String sDictPath(String sourceIdentify, long currentVersion) {
@@ -123,8 +125,8 @@ final public class ProjectDictionaryHelper {
             return hdfsWorkingDirectory + SPARDER_SDICT_BASE_DIR + "/" + sourceIdentify + "/" + currentVersion + SDICT_DATA;
         }
 
-        public static String verisionPath(String sourceIdentify) {
-            return ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/metadata/"
+        public static String versionPath(String sourceIdentify) {
+            return PROJECT_DICT_DIR + "/metadata/"
                     + ProjectDictionaryHelper.PathBuilder.versionKey(sourceIdentify) + MetadataConstants.TYPE_VERSION;
         }
     }

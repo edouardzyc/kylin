@@ -52,7 +52,7 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
         }
         if (patch != null) {
             this.offset = patch.getOffset();
-            this.max = dictionary.getMaxId();
+            this.max = patch.getOffset().length;
 
         }
 
@@ -162,15 +162,19 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
     }
 
     private void initReverse() {
-        if (offset != null) {
-            reverseOffset = new int[getSize()];
-            for (int i = 0; i < reverseOffset.length; i++) {
-                // filter translation may provide hit missing values, need to return null on such case
-                reverseOffset[i] =  NULL_ID[idLength];
+        try {
+            if (offset != null) {
+                reverseOffset = new int[dictionary.getSize()];
+                for (int i = 0; i < reverseOffset.length; i++) {
+                    // filter translation may provide hit missing values, need to return null on such case
+                    reverseOffset[i] = NULL_ID[idLength];
+                }
+                for (int i = 0; i < offset.length; i++) {
+                    reverseOffset[offset[i]] = i;
+                }
             }
-            for (int i = 0; i < offset.length; i++) {
-                reverseOffset[offset[i]] = i;
-            }
+        } catch (Exception e) {
+            System.out.println();
         }
         reverse = true;
     }

@@ -19,10 +19,10 @@
 package org.apache.kylin.dict.project;
 
 
-import org.apache.kylin.common.util.Dictionary;
 
 @SuppressWarnings("serial")
-public abstract class DisguiseDictionary extends Dictionary<String> {
+public abstract class DisguiseDictionary {
+    public static final int[] NULL_ID = new int[] { 0, 0xff, 0xffff, 0xffffff, 0xffffffff };
 
     /**
      *
@@ -30,4 +30,5 @@ public abstract class DisguiseDictionary extends Dictionary<String> {
      * @return New id for project dictionary.
      */
     public abstract int upgrade(int originId);
+
 }

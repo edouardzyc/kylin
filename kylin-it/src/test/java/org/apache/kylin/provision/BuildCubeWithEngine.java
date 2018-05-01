@@ -301,15 +301,15 @@ public class BuildCubeWithEngine {
             return false;
         if (!buildSegment(cubeName, date3, date4))
             return false;
-        //        if (!buildSegment(cubeName, date4, date5)) // one empty segment
-        //            return false;
-        //        if (!buildSegment(cubeName, date5, date6)) // another empty segment
-        //            return false;
+        if (!buildSegment(cubeName, date4, date5)) // one empty segment
+            return false;
+        if (!buildSegment(cubeName, date5, date6)) // another empty segment
+            return false;
 
         if (!mergeSegment(cubeName, date2, date4)) // merge 2 normal segments
             return false;
-        //        if (!mergeSegment(cubeName, date2, date5)) // merge normal and empty
-        //            return false;
+        if (!mergeSegment(cubeName, date2, date5)) // merge normal and empty
+            return false;
 
         // now have 2 normal segments [date1, date2) [date2, date5) and 1 empty segment [date5, date6)
         return true;

@@ -988,6 +988,9 @@ public class CubeManager implements IRealizationProvider {
 
     public void updateSegmentProjectDictionary(CubeSegment cubeSegment,
             ProjectDictionaryManager projectDictionaryManager) throws IOException, ExecutionException {
+        if (!cubeSegment.getProjectDictionaries().isEmpty()) {
+            return;
+        }
         logger.info("update : " + cubeSegment.getCubeDesc().getName() + ":" + cubeSegment.getName()
                 + " project dictionary.");
         Map<String, String> dictionaries = cubeSegment.getDictionaries();
@@ -1006,10 +1009,11 @@ public class CubeManager implements IRealizationProvider {
                 dictMapping.put(value, list);
             }
         }
+        Map<String, SegProjectDict> map = Maps.newHashMap();
         for (String dictPath : dictMapping.keySet()) {
             // todo is enough
             DictionaryInfo dictionaryInfo = getDictionaryManager().getDictionaryInfo(dictPath);
-            if (!ProjectDictionaryHelper.canUseProjectDictionary(dictionaryInfo.getDictionaryObject())) {
+            if (!ProjectDictionaryHelper.useProjectDictionary(dictionaryInfo.getDictionaryObject())) {
                 continue;
             }
             List<String> dict = dictMapping.get(dictPath);
@@ -1018,10 +1022,12 @@ public class CubeManager implements IRealizationProvider {
             for (String key : dict) {
                 logger.info("update : " + cubeSegment.getCubeDesc().getName() + ":" + cubeSegment.getName() + ":" + key
                         + " project dictionary." + deft);
+                map.put(key, deft);
                 saveSegmentProjectDictDesc(cubeSegment, key, deft);
             }
         }
-        //        CubeManager.getInstance(KylinConfig.getInstanceFromEnv()).saveSegmentProjectDictDesc(cubeSegment, map);
+        CubeManager.getInstance(KylinConfig.getInstanceFromEnv()).saveSegmentProjectDictDesc(cubeSegment, map);
+
     }
 
     private synchronized void saveSegmentProjectDictDesc(CubeSegment cubeSeg, Map<String, SegProjectDict> map)
@@ -1031,7 +1037,7 @@ public class CubeManager implements IRealizationProvider {
         CubeInstance cubeCopy = cubeSeg.getCubeInstance().latestCopyForWrite(); // get a latest copy
         CubeSegment segCopy = cubeCopy.getSegmentById(cubeSeg.getUuid());
         for (Map.Entry<String, SegProjectDict> entry : map.entrySet()) {
-            segCopy.putProjectDictDesc(entry.getKey(), entry.getValue());
+            segCopy.putProjectDict(entry.getKey(), entry.getValue());
         }
         CubeUpdate update = new CubeUpdate(cubeCopy);
         update.setToUpdateSegs(segCopy);
@@ -1052,7 +1058,7 @@ public class CubeManager implements IRealizationProvider {
         // work on copy instead of cached objects
         CubeInstance cubeCopy = cubeSeg.getCubeInstance().latestCopyForWrite(); // get a latest copy
         CubeSegment segCopy = cubeCopy.getSegmentById(cubeSeg.getUuid());
-        segCopy.putProjectDictDesc(key, segProjectDict);
+        segCopy.putProjectDict(key, segProjectDict);
         CubeUpdate update = new CubeUpdate(cubeCopy);
         update.setToUpdateSegs(segCopy);
         updateCube(update);
@@ -1141,13 +1147,12 @@ public class CubeManager implements IRealizationProvider {
                     if (projectDictDesc != null) {
                         ProjectDictionaryInfo combinationDictionary = ProjectDictionaryManager.getInstance()
                                 .getCombinationDictionary(projectDictDesc);
-                        if (combinationDictionary == null) {
-                            return null;
-                        }
-                        DisguiseTrieDictionary<String> dictionary = (DisguiseTrieDictionary<String>) combinationDictionary
-                                .getDictionaryObject();
-                        if (dictionary != null) {
-                            return dictionary;
+                        if (combinationDictionary != null) {
+                            DisguiseTrieDictionary<String> dictionary = (DisguiseTrieDictionary<String>) combinationDictionary
+                                    .getDictionaryObject();
+                            if (dictionary != null) {
+                                return dictionary;
+                            }
                         }
                     }
                 }

@@ -398,6 +398,18 @@ abstract public class KylinConfigBase implements Serializable {
         return Boolean.parseBoolean(this.getOptional("kylin.dictionary.growing-enabled", "false"));
     }
 
+    public boolean isProjectDictionaryEnabled() {
+        return Boolean.parseBoolean(getOptional("kylin.dictionary.project-dictionary-enabled", "true"));
+    }
+
+    public int getCachedPrjDictMaxEntrySize() {
+        return Integer.parseInt(getOptional("kylin.dictionary.project-dictionary-max-cache-entry", "100"));
+    }
+
+    public int getCachedPrjDictPatchMaxEntrySize() {
+        return Integer.parseInt(getOptional("kylin.dictionary.project-dictionary-patch-max-cache-entry", "200"));
+    }
+
     public int getAppendDictEntrySize() {
         return Integer.parseInt(getOptional("kylin.dictionary.append-entry-size", "10000000"));
     }
@@ -410,9 +422,6 @@ abstract public class KylinConfigBase implements Serializable {
         return Integer.parseInt(getOptional("kylin.dictionary.append-version-ttl", "259200000"));
     }
     
-    public boolean isProjectDictionaryEnabled() {
-        return Boolean.parseBoolean(getOptional("kylin.dictionary.project-dictionary-enabled", "false"));
-    }
 
     public int getCachedSnapshotMaxEntrySize() {
         return Integer.parseInt(getOptional("kylin.snapshot.max-cache-entry", "500"));

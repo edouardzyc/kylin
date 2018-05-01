@@ -30,23 +30,18 @@ import org.junit.Test;
  * 这个测试用来测试MVC,稍后再补充
  */
 @Ignore
-public class MultiVersionControlTest extends LocalFileMetadataTestCase {
+public class VersionControlTest extends LocalFileMetadataTestCase {
     String key = "default/DEFAULT.TEST_ACCOUNT/ACCOUNT_COUNTRY";
-    MultiVersionControl multiVersionControl;
+    VersionControl versionControl;
     Path baseDir;
 
     @Before
     public void init() throws IOException {
         staticCleanupTestMetadata();
-        //        multiVersionControl = new MultiVersionControl(key);
-        //        baseDir = multiVersionControl.getBaseDir();
     }
 
     @Test
     public void listAllVersions() throws IOException {
-
-//        Long[] longs = multiVersionControl.listAllVersionWithHDFSs(FileSystem.get(new Configuration()), baseDir);
-//        System.out.println(longs);
     }
 
     @Test

@@ -27,9 +27,16 @@ import org.apache.kylin.common.persistence.RootPersistentEntity;
 
 public class DictPatch extends RootPersistentEntity {
     private int[] offset;
+    private int[] compressed;
 
     DictPatch(int[] offset) {
         this.offset = offset;
+        this.compressed = IntegratedUtils.compress(offset);
+    }
+
+    DictPatch(int[] offset, int[] compress) {
+        this.offset = offset;
+        this.compressed = compress;
     }
 
     public int[] getOffset() {
@@ -42,9 +49,10 @@ public class DictPatch extends RootPersistentEntity {
 
         @Override
         public void serialize(DictPatch obj, DataOutputStream out) throws IOException {
-            int length = obj.getOffset().length;
+            int[] compressed = obj.compressed;
+            int length = compressed.length;
             out.writeInt(length);
-            for (int i : obj.getOffset()) {
+            for (int i : compressed) {
                 out.writeInt(i);
             }
         }
@@ -52,12 +60,12 @@ public class DictPatch extends RootPersistentEntity {
         @Override
         public DictPatch deserialize(DataInputStream in) throws IOException {
             int length = in.readInt();
-            int[] offsets = new int[length];
+            int[] compress = new int[length];
             for (int i = 0; i < length; i++) {
-                offsets[i] = in.readInt();
+                compress[i] = in.readInt();
             }
-
-            return new DictPatch(offsets);
+            int[] uncompress = IntegratedUtils.unCompress(compress);
+            return new DictPatch(uncompress, compress);
         }
 
     }

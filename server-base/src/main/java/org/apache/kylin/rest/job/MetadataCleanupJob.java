@@ -122,6 +122,7 @@ public class MetadataCleanupJob {
         for (CubeInstance cube : cubeManager.listAllCubes()) {
             for (CubeSegment segment : cube.getSegments()) {
                 activeResources.addAll(segment.getSnapshotPaths());
+                activeResources.addAll(segment.getDictionaryPaths());
                 activeResources.add(segment.getStatisticsResourcePath());
                 activePrjDictCol.addAll(getAllColsHasMVDict(segment));
             }

@@ -18,11 +18,9 @@
 
 package org.apache.kylin.cube;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +55,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
 @JsonAutoDetect(fieldVisibility = Visibility.NONE, getterVisibility = Visibility.NONE, isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
@@ -595,10 +592,13 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
         this.sourcePartitionOffsetStart = sourcePartitionOffsetStart;
     }
 
-    public void putProjectDictDesc(String key, SegProjectDict segProjectDict) {
+    public void putProjectDict(String key, SegProjectDict segProjectDict) {
         projectDictionaries.put(key, segProjectDict);
     }
 
+    public void clearProjectDict() {
+        projectDictionaries.clear();
+    }
     public SegProjectDict getProjectDict(String key) {
         return projectDictionaries.get(key);
     }
@@ -607,13 +607,5 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
         return projectDictionaries.values();
     }
 
-    public Collection<String> getProjectDictionaryPaths() throws IOException {
-        CubeManager cubeMgr = CubeManager.getInstance(this.getCubeInstance().getConfig());
-        HashSet<String> paths = Sets.newHashSet();
-        for (SegProjectDict segProjectDict : projectDictionaries.values()) {
-            paths.addAll(cubeMgr.getProjectDictionaryResourcePaths(segProjectDict));
-        }
-        return paths;
-    }
 
 }

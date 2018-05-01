@@ -18,13 +18,6 @@
 
 package org.apache.kylin.dict.project;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.io.PrintStream;
-
-import org.apache.kylin.common.util.Dictionary;
-
 @SuppressWarnings("serial")
 public class DisguiseUpgradeDictionary extends DisguiseDictionary {
 
@@ -40,61 +33,8 @@ public class DisguiseUpgradeDictionary extends DisguiseDictionary {
         }
     }
 
-    @Override
-    public int getMinId() {
-        return 0;
-    }
-
-    @Override
-    public int getMaxId() {
-        return patch.getOffset().length;
-    }
-
-    @Override
-    public int getSizeOfId() {
-        return idLength;
-    }
-
-    @Override
-    public int getSizeOfValue() {
-        return 0;
-    }
-
-    @Override
-    public boolean contains(Dictionary<?> another) {
-        return false;
-    }
-
-    @Override
-    protected int getIdFromValueImpl(String value, int roundingFlag) {
-        if (patch == null) {
-            return Integer.parseInt(value);
-        }
-        try {
-            return patch.getOffset()[Integer.parseInt(value)];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            return nullId();
-        }
-    }
-
-    @Override
-    protected String getValueFromIdImpl(int id) {
-        return null;
-    }
-
-    @Override
-    public void dump(PrintStream out) {
-
-    }
-
-    @Override
-    public void write(DataOutput out) throws IOException {
-
-    }
-
-    @Override
-    public void readFields(DataInput in) throws IOException {
-
+    public int nullId() {
+        return NULL_ID[idLength];
     }
 
     @Override
@@ -114,7 +54,6 @@ public class DisguiseUpgradeDictionary extends DisguiseDictionary {
             try {
                 return offset[id];
             } catch (Exception e) {
-
                 // keep for debug
                 throw e;
             }
@@ -122,7 +61,8 @@ public class DisguiseUpgradeDictionary extends DisguiseDictionary {
             return id;
         }
     }
-    public boolean isNull(int id) {
+
+    public boolean isNullId(int id) {
         int nullId = NULL_ID[idLength];
         return (nullId & id) == nullId;
     }

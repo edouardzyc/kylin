@@ -18,39 +18,40 @@
 
 package org.apache.kylin.dict.project;
 
-import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MultiVersionControl {
-    public static final Logger logger = LoggerFactory.getLogger(MultiVersionControl.class);
+public class VersionControl {
+    public static final Logger logger = LoggerFactory.getLogger(VersionControl.class);
 
     private String key;
-    private ResourceLock.Lock lockInternal;
+    private Semaphore lock;
     private Semaphore semaphore = new Semaphore(1);
     private volatile AtomicLong id = new AtomicLong(-1);
 
-    MultiVersionControl(String key, ResourceLock resourceLock) throws IOException, InterruptedException {
+    VersionControl(String key) throws InterruptedException {
         this.key = key;
         ProjectDictionaryVersionInfo maxVersion = ProjectDictionaryManager.getInstance().getMaxVersion(key);
         if (maxVersion != null) {
             id.set(ProjectDictionaryManager.getInstance().getMaxVersion(key).getMaxVersion());
         }
         logger.info("acquire mvc lock for : " + key);
-        lockInternal = resourceLock.getLockInterna(key);
+        lock = MVCLock.getLock(key);
     }
 
     public long getCurrentVersion() {
         return id.get();
     }
+
     private long getDictionaryVersion() {
         return getCurrentVersion() + 1;
     }
 
-    VersionEntry beginAppendWhenPreviousAppendCompleted() {
+    long beginAppendWhenPreviousAppendCompleted() {
         try {
             logger.info("acquire lock for : " + key);
             semaphore.acquire();
@@ -60,33 +61,50 @@ public class MultiVersionControl {
         }
         logger.info("Get lock for : " + key + " version : " + getDictionaryVersion());
 
-        return new VersionEntry(getDictionaryVersion());
+        return getDictionaryVersion();
     }
 
     void clear() {
-        lockInternal.release();
+        MVCLock.remove(key);
+        lock.release();
     }
 
-    void commit() {
+    void commit(boolean isSuccess) {
         // First add  then release
-        id.incrementAndGet();
+        if (isSuccess) {
+            id.incrementAndGet();
+        }
         logger.info("release lock for : " + key + "  version: " + (id.get() + 1));
         semaphore.release();
     }
 
-    class VersionEntry {
-        private long version;
+    public static class MVCLock {
+        private static final ConcurrentHashMap<String, Semaphore> locks = new ConcurrentHashMap<>();
 
-        VersionEntry(long version) {
-            this.version = version;
+        public static Semaphore getLock(String sourcePath) throws InterruptedException {
+            Semaphore semaphore = locks.get(sourcePath);
+            if (semaphore == null) {
+                synchronized (MVCLock.class) {
+                    semaphore = locks.get(sourcePath);
+                    if (semaphore == null) {
+                        semaphore = new Semaphore(1);
+                        semaphore.acquire();
+                        locks.put(sourcePath, semaphore);
+                        return semaphore;
+                    } else {
+                        semaphore.acquire();
+                        return semaphore;
+                    }
+                }
+            } else {
+                logger.error("Find multiple VersionControl acquire lock.");
+                throw new RuntimeException("Find multiple VersionControl acquire lock.");
+            }
         }
 
-        public long getVersion() {
-            return version;
-        }
-
-        public void setVersion(long version) {
-            this.version = version;
+        public static synchronized void remove(String sourcePath) {
+            locks.remove(sourcePath);
         }
     }
+
 }

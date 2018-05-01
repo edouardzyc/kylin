@@ -22,12 +22,14 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -54,6 +56,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
+
+import me.lemire.integercompression.differential.IntegratedBinaryPacking;
+import me.lemire.integercompression.differential.IntegratedVariableByte;
+import me.lemire.integercompression.differential.SkippableIntegratedComposition;
 
 @Ignore
 public class ProjectTrieDictionaryTest extends LocalFileMetadataTestCase {
@@ -121,8 +127,8 @@ public class ProjectTrieDictionaryTest extends LocalFileMetadataTestCase {
 
     @Test
     public void testOffset() throws IOException {
-        DictionaryInfo small = createDictionary(100);
-        DictionaryInfo big = createDictionary(200);
+        DictionaryInfo small = createDictionary(1000000);
+        DictionaryInfo big = createDictionary(2000000);
         DictionaryInfo mergeDictionary = dictionaryManager.mergeDictionary(Lists.newArrayList(small, big));
         int[] mapping = ProjectDictionaryHelper.genOffset(small, mergeDictionary);
         int minId = small.getDictionaryObject().getMinId();
@@ -132,6 +138,31 @@ public class ProjectTrieDictionaryTest extends LocalFileMetadataTestCase {
                     mergeDictionary.getDictionaryObject().getValueFromId(mapping[i - minId]));
         }
 
+    }
+
+    SkippableIntegratedComposition codec = new SkippableIntegratedComposition(new IntegratedBinaryPacking(),
+            new IntegratedVariableByte());
+
+    @Test
+    public void testOffsetCompress() throws IOException {
+        DictionaryInfo small = createDictionary(1000000);
+        DictionaryInfo big = createDictionary(1500000);
+        DictionaryInfo mergeDictionary = dictionaryManager.mergeDictionary(Lists.newArrayList(small, big));
+        int[] mapping = ProjectDictionaryHelper.genOffset(small, mergeDictionary);
+        int[] recovered = IntegratedUtils.unCompress(IntegratedUtils.compress(mapping));
+        if (Arrays.equals(mapping, recovered)) {
+            System.out.println("data is recovered without loss");
+        } else {
+            throw new RuntimeException("bug"); // could use assert
+        }
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+        StringBuilder stringBuilder = new StringBuilder(outputStream.toByteArray().length);
+        for (int map : mapping) {
+            dataOutputStream.writeInt(map);
+            stringBuilder.append(map);
+        }
     }
 
     @Test
