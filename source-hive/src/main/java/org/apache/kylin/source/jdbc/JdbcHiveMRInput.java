@@ -30,6 +30,7 @@ import org.apache.kylin.job.execution.DefaultChainedExecutable;
 import org.apache.kylin.metadata.TableMetadataManager;
 import org.apache.kylin.metadata.model.IJoinedFlatTableDesc;
 import org.apache.kylin.metadata.model.PartitionDesc;
+import org.apache.kylin.metadata.model.SegmentRange;
 import org.apache.kylin.metadata.model.TableExtDesc;
 import org.apache.kylin.metadata.model.TableExtDesc.ColumnStats;
 import org.apache.kylin.metadata.model.TableRef;
@@ -147,20 +148,19 @@ public class JdbcHiveMRInput extends HiveMRInput {
             KylinConfig config = getConfig();
             PartitionDesc partitionDesc = flatDesc.getDataModel().getPartitionDesc();
             String partCol = null;
-            String partitionString = null;
 
             if (partitionDesc.isPartitioned()) {
-                partCol = partitionDesc.getPartitionDateColumn();//tablename.colname
-                partitionString = partitionDesc.getPartitionConditionBuilder().buildDateRangeCondition(partitionDesc,
-                        flatDesc.getSegment(), flatDesc.getSegRange());
+                partCol = partitionDesc.getPartitionDateColumn(); //tablename.colname
             }
 
             String splitTable;
+            String splitTableAlias;
             String splitColumn;
             String splitDatabase;
             TblColRef splitColRef = determineSplitColumn();
             splitTable = splitColRef.getTableRef().getTableName();
-            splitColumn = splitColRef.getName();
+            splitTableAlias = splitColRef.getTableAlias();
+            splitColumn = splitColRef.getExpressionInSourceDB();
             splitDatabase = splitColRef.getColumnDesc().getTable().getDatabase();
 
             //using sqoop to extract data from jdbc source and dump them to hive
@@ -174,24 +174,31 @@ public class JdbcHiveMRInput extends HiveMRInput {
             String filedDelimiter = config.getJdbcSourceFieldDelimiter();
             int mapperNum = config.getSqoopMapperNum();
 
-            String bquery = String.format("SELECT min(%s), max(%s) FROM %s.%s", splitColumn, splitColumn, splitDatabase,
-                    splitTable);
-            if (partitionString != null) {
-                bquery += " WHERE " + partitionString;
+            String bquery = String.format("SELECT min(%s), max(%s) FROM \"%s\".%s as %s", splitColumn, splitColumn,
+                    splitDatabase, splitTable, splitTableAlias);
+            if (partitionDesc.isPartitioned()) {
+                SegmentRange segRange = flatDesc.getSegRange();
+                if (segRange != null && !segRange.isInfinite()) {
+                    if (partitionDesc.getPartitionDateColumnRef().getTableAlias().equals(splitTableAlias)
+                            && (partitionDesc.getPartitionTimeColumnRef() == null || partitionDesc
+                                    .getPartitionTimeColumnRef().getTableAlias().equals(splitTableAlias))) {
+                        bquery += " WHERE " + partitionDesc.getPartitionConditionBuilder()
+                                .buildDateRangeCondition(partitionDesc, flatDesc.getSegment(), segRange);
+                    }
+                }
             }
 
             //related to "kylin.engine.mr.config-override.mapreduce.job.queuename"
             String queueName = getSqoopJobQueueName(config);
-            String cmd = String.format(
-                    "%s/sqoop import -Dorg.apache.sqoop.splitter.allow_text_splitter=true "
-                            + "-Dmapreduce.job.queuename=%s "
-                            + "--connect \"%s\" --driver %s --username %s --password %s --query \"%s AND \\$CONDITIONS\" "
-                            + "--target-dir %s/%s --split-by %s.%s --boundary-query \"%s\" --null-string '' "
-                            + "--fields-terminated-by '%s' --num-mappers %d",
-                    sqoopHome, queueName, connectionUrl, driverClass, jdbcUser, jdbcPass, selectSql, jobWorkingDir, hiveTable,
-                    splitTable, splitColumn, bquery, filedDelimiter, mapperNum);
+            String cmd = String.format("%s/sqoop import -Dorg.apache.sqoop.splitter.allow_text_splitter=true "
+                    + "-Dmapreduce.job.queuename=%s "
+                    + "--connect \"%s\" --driver %s --username %s --password %s --query \"%s AND \\$CONDITIONS\" "
+                    + "--target-dir %s/%s --split-by %s.%s --boundary-query \"%s\" --null-string '' "
+                    + "--fields-terminated-by '%s' --num-mappers %d", sqoopHome, queueName, connectionUrl, driverClass,
+                    jdbcUser, jdbcPass, selectSql, jobWorkingDir, hiveTable, splitTable, splitColumn, bquery,
+                    filedDelimiter, mapperNum);
             logger.debug("sqoop cmd: {}", cmd);
-            
+
             CmdStep step = new CmdStep();
             step.setCmd(cmd);
             step.setName(ExecutableConstants.STEP_NAME_SQOOP_TO_FLAT_HIVE_TABLE);
