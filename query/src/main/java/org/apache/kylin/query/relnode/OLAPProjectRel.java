@@ -179,7 +179,7 @@ public class OLAPProjectRel extends Project implements OLAPRel {
         }
     }
 
-    protected TblColRef translateFirstRexInputRef(RexCall call, ColumnRowType inputColumnRowType, String fieldName,
+    private TblColRef translateFirstRexInputRef(RexCall call, ColumnRowType inputColumnRowType, String fieldName,
             Set<TblColRef> sourceCollector) {
         for (RexNode operand : call.getOperands()) {
             if (operand instanceof RexInputRef) {
@@ -195,7 +195,7 @@ public class OLAPProjectRel extends Project implements OLAPRel {
         return null;
     }
 
-    protected TblColRef translateRexInputRef(RexInputRef inputRef, ColumnRowType inputColumnRowType, String fieldName,
+    private TblColRef translateRexInputRef(RexInputRef inputRef, ColumnRowType inputColumnRowType, String fieldName,
             Set<TblColRef> sourceCollector) {
         int index = inputRef.getIndex();
         // check it for rewrite count
@@ -349,7 +349,7 @@ public class OLAPProjectRel extends Project implements OLAPRel {
         // find missed rewrite fields
         int paramIndex = this.rowType.getFieldList().size();
         List<RelDataTypeField> newFieldList = new LinkedList<RelDataTypeField>();
-        List<RexNode> newExpList = new LinkedList<RexNode>();
+        List<RexNode> newExpList = new LinkedList<>();
         ColumnRowType inputColumnRowType = ((OLAPRel) getInput()).getColumnRowType();
 
         for (Map.Entry<String, RelDataType> rewriteField : this.context.rewriteFields.entrySet()) {
