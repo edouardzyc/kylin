@@ -34,7 +34,7 @@ public class DictPatch extends RootPersistentEntity {
         this.compressed = IntegratedUtils.compress(offset);
     }
 
-    DictPatch(int[] offset, int[] compress) {
+    private DictPatch(int[] offset, int[] compress) {
         this.offset = offset;
         this.compressed = compress;
     }
@@ -81,12 +81,16 @@ public class DictPatch extends RootPersistentEntity {
     }
 
     public DictPatch upgrade(DictPatch patch) {
+        int[] newOffset = genNewOffset(patch.offset);
+        return new DictPatch(newOffset);
+    }
+
+    protected int[] genNewOffset(int[] offset) {
         int[] newOffset = new int[this.getOffset().length];
         int[] originOffset = this.getOffset();
-        int[] patchOffset = patch.getOffset();
         for (int i = 0; i < originOffset.length; i++) {
-            newOffset[i] = patchOffset[originOffset[i]];
+            newOffset[i] = offset[originOffset[i]];
         }
-        return new DictPatch(newOffset);
+        return newOffset;
     }
 }

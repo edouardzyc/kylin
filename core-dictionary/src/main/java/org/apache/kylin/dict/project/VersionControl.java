@@ -37,7 +37,7 @@ public class VersionControl {
         this.key = key;
         ProjectDictionaryVersionInfo maxVersion = ProjectDictionaryManager.getInstance().getMaxVersion(key);
         if (maxVersion != null) {
-            id.set(ProjectDictionaryManager.getInstance().getMaxVersion(key).getMaxVersion());
+            id.set(ProjectDictionaryManager.getInstance().getMaxVersion(key).getProjectDictionaryVersion());
         }
         logger.info("acquire mvc lock for : " + key);
         lock = MVCLock.getLock(key);
@@ -51,13 +51,13 @@ public class VersionControl {
         return getCurrentVersion() + 1;
     }
 
-    long beginAppendWhenPreviousAppendCompleted() {
+    long acquireMyVersion() {
         try {
             logger.info("acquire lock for : " + key);
             semaphore.acquire();
 
         } catch (InterruptedException e) {
-            throw new RuntimeException("Interrupt with acquire lock", e);
+            throw new RuntimeException("Interrupted when acquiring lock for key " + key, e);
         }
         logger.info("Get lock for : " + key + " version : " + getDictionaryVersion());
 
@@ -74,7 +74,7 @@ public class VersionControl {
         if (isSuccess) {
             id.incrementAndGet();
         }
-        logger.info("release lock for : " + key + "  version: " + (id.get() + 1));
+        logger.info("release the lock : " + key + "  version: " + (id.get() + 1));
         semaphore.release();
     }
 

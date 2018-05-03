@@ -991,8 +991,7 @@ public class CubeManager implements IRealizationProvider {
         if (!cubeSegment.getProjectDictionaries().isEmpty()) {
             return;
         }
-        logger.info("update : " + cubeSegment.getCubeDesc().getName() + ":" + cubeSegment.getName()
-                + " project dictionary.");
+        logger.info("update project dictionary for segment: " + cubeSegment.getName());
         Map<String, String> dictionaries = cubeSegment.getDictionaries();
         Map<String, List<String>> dictMapping = Maps.newHashMap();
         // collect all dicts
@@ -1020,14 +1019,12 @@ public class CubeManager implements IRealizationProvider {
             SegProjectDict deft = projectDictionaryManager.append(cubeSegment.getProject(), dictionaryInfo);
             logger.info("update dictionary :" + dictPath + " and this segmentProjectDesc is :" + deft.toString());
             for (String key : dict) {
-                logger.info("update : " + cubeSegment.getCubeDesc().getName() + ":" + cubeSegment.getName() + ":" + key
-                        + " project dictionary." + deft);
                 map.put(key, deft);
-                saveSegmentProjectDictDesc(cubeSegment, key, deft);
+                logger.info("segment-local dictionary " + dictPath + " will be update by segmentProjectDesc: "
+                        + deft.toString());
             }
         }
         CubeManager.getInstance(KylinConfig.getInstanceFromEnv()).saveSegmentProjectDictDesc(cubeSegment, map);
-
     }
 
     private synchronized void saveSegmentProjectDictDesc(CubeSegment cubeSeg, Map<String, SegProjectDict> map)
@@ -1046,22 +1043,6 @@ public class CubeManager implements IRealizationProvider {
 
     public void updateSegmentProjectDictionary(CubeSegment cubeSegment) throws IOException, ExecutionException {
         updateSegmentProjectDictionary(cubeSegment, ProjectDictionaryManager.getInstance());
-    }
-
-    private synchronized void saveSegmentProjectDictDesc(CubeSegment cubeSeg, String key, SegProjectDict segProjectDict)
-            throws IOException {
-
-        if (segProjectDict == null) {
-            return;
-        }
-        // thread unsafe
-        // work on copy instead of cached objects
-        CubeInstance cubeCopy = cubeSeg.getCubeInstance().latestCopyForWrite(); // get a latest copy
-        CubeSegment segCopy = cubeCopy.getSegmentById(cubeSeg.getUuid());
-        segCopy.putProjectDict(key, segProjectDict);
-        CubeUpdate update = new CubeUpdate(cubeCopy);
-        update.setToUpdateSegs(segCopy);
-        updateCube(update);
     }
 
     /**
@@ -1136,12 +1117,6 @@ public class CubeManager implements IRealizationProvider {
         public Dictionary<String> getDictionary(CubeSegment cubeSeg, TblColRef col) {
             DictionaryInfo info = null;
             try {
-                DictionaryManager dictMgr = getDictionaryManager();
-                String dictResPath = cubeSeg.getDictResPath(col);
-                if (dictResPath == null) {
-                    return null;
-                }
-
                 if (config.isProjectDictionaryEnabled()) {
                     SegProjectDict projectDictDesc = cubeSeg.getProjectDict(col);
                     if (projectDictDesc != null) {
@@ -1155,6 +1130,11 @@ public class CubeManager implements IRealizationProvider {
                             }
                         }
                     }
+                }
+                DictionaryManager dictMgr = getDictionaryManager();
+                String dictResPath = cubeSeg.getDictResPath(col);
+                if (dictResPath == null) {
+                    return null;
                 }
                 info = dictMgr.getDictionaryInfo(dictResPath);
                 if (info == null) {

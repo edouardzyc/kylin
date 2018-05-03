@@ -27,8 +27,8 @@ public class ProjectDictionaryVersionInfo extends RootPersistentEntity {
     @JsonProperty("key")
     private String key;
 
-    @JsonProperty("max_version")
-    private long maxVersion;
+    @JsonProperty("project_dictionary_version")
+    private long projectDictionaryVersion;
 
     @JsonProperty("id_length")
     private int idLength;
@@ -38,7 +38,7 @@ public class ProjectDictionaryVersionInfo extends RootPersistentEntity {
 
     public ProjectDictionaryVersionInfo(String key, long version, int length) {
         this.key = pathToKey(key);
-        this.maxVersion = version;
+        this.projectDictionaryVersion = version;
         this.idLength = length;
     }
 
@@ -59,12 +59,12 @@ public class ProjectDictionaryVersionInfo extends RootPersistentEntity {
         this.key = key;
     }
 
-    public long getMaxVersion() {
-        return maxVersion;
+    public long getProjectDictionaryVersion() {
+        return projectDictionaryVersion;
     }
 
-    public void setMaxVersion(long maxVersion) {
-        this.maxVersion = maxVersion;
+    public void setProjectDictionaryVersion(long projectDictionaryVersion) {
+        this.projectDictionaryVersion = projectDictionaryVersion;
     }
 
     public int getIdLength() {
@@ -76,7 +76,8 @@ public class ProjectDictionaryVersionInfo extends RootPersistentEntity {
     }
 
     public ProjectDictionaryVersionInfo copy() {
-        ProjectDictionaryVersionInfo copy = new ProjectDictionaryVersionInfo(this.getKey(), this.getMaxVersion(), this.getIdLength());
+        ProjectDictionaryVersionInfo copy = new ProjectDictionaryVersionInfo(this.getKey(),
+                this.getProjectDictionaryVersion(), this.getIdLength());
         copy.setLastModified(this.getLastModified());
         return copy ;
     }
