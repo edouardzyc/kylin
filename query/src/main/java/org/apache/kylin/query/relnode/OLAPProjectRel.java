@@ -18,8 +18,6 @@
 
 package org.apache.kylin.query.relnode;
 
-import static org.apache.kylin.metadata.filter.CompareTupleFilter.CompareResultType;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -55,6 +53,7 @@ import org.apache.calcite.sql.fun.SqlCaseOperator;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.validate.SqlUserDefinedFunction;
 import org.apache.calcite.tools.RelUtils;
+import org.apache.kylin.metadata.filter.CompareTupleFilter.CompareResultType;
 import org.apache.kylin.metadata.model.TblColRef;
 import org.apache.kylin.metadata.model.TblColRef.InnerDataTypeEnum;
 
@@ -202,8 +201,7 @@ public class OLAPProjectRel extends Project implements OLAPRel {
         // check it for rewrite count
         if (index < inputColumnRowType.size()) {
             TblColRef column = inputColumnRowType.getColumnByIndex(index);
-            if (!column.isInnerColumn() && !this.rewriting
-                    && !this.afterAggregate) {
+            if (!column.isInnerColumn() && !this.rewriting && !this.afterAggregate) {
                 sourceCollector.add(column);
             }
             return column;
