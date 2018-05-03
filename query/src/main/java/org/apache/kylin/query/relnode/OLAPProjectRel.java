@@ -136,6 +136,13 @@ public class OLAPProjectRel extends Project implements OLAPRel {
         this.afterAggregate = context.afterAggregate;
 
         this.columnRowType = buildColumnRowType();
+        for (Set<TblColRef> colRefSet : columnRowType.getSourceColumns()) {
+            for (TblColRef colRef : colRefSet) {
+                if (!isMerelyPermutation) {
+                    context.allColumns.add(colRef);
+                }
+            }
+        }
     }
 
     protected ColumnRowType buildColumnRowType() {
@@ -173,7 +180,7 @@ public class OLAPProjectRel extends Project implements OLAPRel {
         }
     }
 
-    TblColRef translateFirstRexInputRef(RexCall call, ColumnRowType inputColumnRowType, String fieldName,
+    protected TblColRef translateFirstRexInputRef(RexCall call, ColumnRowType inputColumnRowType, String fieldName,
             Set<TblColRef> sourceCollector) {
         for (RexNode operand : call.getOperands()) {
             if (operand instanceof RexInputRef) {
@@ -195,11 +202,8 @@ public class OLAPProjectRel extends Project implements OLAPRel {
         // check it for rewrite count
         if (index < inputColumnRowType.size()) {
             TblColRef column = inputColumnRowType.getColumnByIndex(index);
-            if (!column.isInnerColumn() && context.belongToContextTables(column) && !this.rewriting
+            if (!column.isInnerColumn() && !this.rewriting
                     && !this.afterAggregate) {
-                if (!isMerelyPermutation) {
-                    context.allColumns.add(column);
-                }
                 sourceCollector.add(column);
             }
             return column;
@@ -218,15 +222,12 @@ public class OLAPProjectRel extends Project implements OLAPRel {
 
     }
 
-    TblColRef translateRexCall(RexCall call, ColumnRowType inputColumnRowType, String fieldName,
+    protected TblColRef translateRexCall(RexCall call, ColumnRowType inputColumnRowType, String fieldName,
             Set<TblColRef> sourceCollector) {
         SqlOperator operator = call.getOperator();
-        if (operator == SqlStdOperatorTable.EXTRACT_DATE) {
+        if (operator == SqlStdOperatorTable.EXTRACT_DATE
+                || operator instanceof SqlUserDefinedFunction && ("QUARTER").equals(operator.getName())) {
             return translateFirstRexInputRef(call, inputColumnRowType, fieldName, sourceCollector);
-        } else if (operator instanceof SqlUserDefinedFunction) {
-            if (operator.getName().equals("QUARTER")) {
-                return translateFirstRexInputRef(call, inputColumnRowType, fieldName, sourceCollector);
-            }
         }
 
         List<RexNode> children = limitTranslateScope(call.getOperands(), operator);

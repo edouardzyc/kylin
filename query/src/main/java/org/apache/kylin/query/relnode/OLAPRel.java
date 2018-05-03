@@ -18,12 +18,8 @@
 
 package org.apache.kylin.query.relnode;
 
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Stack;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.calcite.adapter.enumerable.EnumerableRel;
 import org.apache.calcite.adapter.enumerable.EnumerableRelImplementor;
 import org.apache.calcite.plan.Convention;
@@ -35,8 +31,11 @@ import org.apache.calcite.rel.SingleRel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Stack;
 
 /**
  */
@@ -54,7 +53,7 @@ public interface OLAPRel extends RelNode {
 
     /**
      * get the row type of ColumnDesc
-     * 
+     *
      * @return
      */
     public ColumnRowType getColumnRowType();
@@ -225,7 +224,6 @@ public interface OLAPRel extends RelNode {
 
         @Override
         public EnumerableRel.Result visitChild(EnumerableRel parent, int ordinal, EnumerableRel child, EnumerableRel.Prefer prefer) {
-            
             if (calciteDebug) {
                 OLAPContext context;
                 if (child instanceof OLAPRel)

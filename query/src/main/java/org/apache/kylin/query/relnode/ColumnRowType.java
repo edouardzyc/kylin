@@ -84,6 +84,10 @@ public class ColumnRowType {
         return columns;
     }
 
+    public List<Set<TblColRef>> getSourceColumns() {
+        return sourceColumns;
+    }
+
     public int size() {
         return columns.size();
     }

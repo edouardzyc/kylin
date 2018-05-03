@@ -304,7 +304,7 @@ public class OLAPTableScan extends TableScan implements OLAPRel, EnumerableRel {
             context.firstTableScan = this;
         }
 
-        if (needCollectionColumns(implementor)) {
+        if (needCollectionColumns(implementor.getParentNodeStack())) {
             // OLAPToEnumerableConverter on top of table scan, should be a select * from table
             for (TblColRef tblColRef : columnRowType.getAllColumns()) {
                 if (!tblColRef.getName().startsWith("_KY_")) {
@@ -322,8 +322,7 @@ public class OLAPTableScan extends TableScan implements OLAPRel, EnumerableRel {
      *      * OLAPProjectRel -> skip column collection
      *      * OLAPToEnumerableConverter and OLAPUnionRel -> require column collection
      */
-    protected boolean needCollectionColumns(OLAPImplementor implementor) {
-        Stack<RelNode> allParents = implementor.getParentNodeStack();
+    protected boolean needCollectionColumns(Stack<RelNode> allParents) {
         int index = allParents.size() - 1;
 
         while (index >= 0) {
