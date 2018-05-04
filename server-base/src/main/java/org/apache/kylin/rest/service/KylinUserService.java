@@ -76,7 +76,7 @@ public class KylinUserService implements UserService {
     //@PreAuthorize(Constant.ACCESS_HAS_ROLE_ADMIN) --- DON'T DO THIS, CAUSES CIRCULAR DEPENDENCY BETWEEN UserService & AclService
     public void createUser(UserDetails user) {
         if (getKylinUserManager().exists(user.getUsername())) {
-            throw new BadRequestException("User creating is not allowed when username is already exists.");
+            throw new BadRequestException("User creating is not allowed when username:" + user.getUsername() +" is already exists.");
         }
         updateUser(user);
     }
