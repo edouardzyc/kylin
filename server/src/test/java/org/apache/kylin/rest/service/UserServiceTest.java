@@ -69,7 +69,7 @@ public class UserServiceTest extends ServiceTestBase {
             userService.createUser(user);
             Assert.fail();
         } catch (Exception e) {
-            Assert.assertEquals("User creating is not allowed when username:ADMIN is already exists.", e.getMessage());
+            Assert.assertEquals("User creating is not allowed when username:ADMIN already exists.", e.getMessage());
         }
     }
 
