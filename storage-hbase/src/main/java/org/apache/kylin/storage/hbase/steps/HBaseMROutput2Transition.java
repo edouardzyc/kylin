@@ -82,6 +82,11 @@ public class HBaseMROutput2Transition implements IMROutput2 {
             }
 
             @Override
+            public void addStepPhase5_DuplicateStorage(DefaultChainedExecutable jobFlow) {
+                // nothing to do
+            }
+
+            @Override
             public IMROutputFormat getOuputFormat() {
                 return new HBaseMROutputFormat();
             }
@@ -142,6 +147,11 @@ public class HBaseMROutput2Transition implements IMROutput2 {
             @Override
             public void addStepPhase3_Cleanup(DefaultChainedExecutable jobFlow) {
                 steps.addMergingGarbageCollectionSteps(jobFlow);
+            }
+
+            @Override
+            public void addStepPhase4_DuplicateStorage(DefaultChainedExecutable jobFlow) {
+                // nothing to do
             }
 
             @Override

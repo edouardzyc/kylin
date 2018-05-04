@@ -58,6 +58,9 @@ public interface IMROutput2 {
         /** Add step that does any necessary clean up. */
         public void addStepPhase4_Cleanup(DefaultChainedExecutable jobFlow);
 
+        /** Add duplicate storage step for r/w mode */
+        public void addStepPhase5_DuplicateStorage(DefaultChainedExecutable jobFlow);
+
         public IMROutputFormat getOuputFormat();
 
     }
@@ -99,6 +102,9 @@ public interface IMROutput2 {
 
         /** Add step that does any necessary clean up. */
         public void addStepPhase3_Cleanup(DefaultChainedExecutable jobFlow);
+
+        /** Add duplicate storage step for r/w mode */
+        public void addStepPhase4_DuplicateStorage(DefaultChainedExecutable jobFlow);
 
         public IMRMergeOutputFormat getOuputFormat();
     }
