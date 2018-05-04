@@ -141,17 +141,13 @@ public class ModelServiceTest extends ServiceTestBase {
         Draft d = new Draft();
         d.setProject("default");
         d.updateRandomUuid();
-        DataModelDesc modelDesc = DataModelDesc.getCopyOf(modelService.getModel("ci_left_join_model", "default"));
-        modelDesc.setName("ci_left_join_model_draft");
+        DataModelDesc modelDesc = modelService.getModel("ci_left_join_model", "default");
         d.setEntity(modelDesc);
         mgr.save(d);
 
         // Check list draft
         List<Draft> draftList = modelService.listModelDrafts("", "default");
         Assert.assertEquals(draftList.size(), 1);
-
-        // Check new a model with its name same with draft's name
-        Assert.assertFalse(modelService.isModelNameValid("ci_left_join_model_draft"));
     }
 
 

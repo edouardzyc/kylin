@@ -77,8 +77,8 @@ public class ModelController extends BasicController {
 
     @RequestMapping(value = "/validate/{modelName}", method = RequestMethod.GET, produces = { "application/json" })
     @ResponseBody
-    public EnvelopeResponse<Boolean> validateModelName(@PathVariable String modelName) throws IOException {
-        return new EnvelopeResponse<>(ResponseCode.CODE_SUCCESS, modelService.isModelNameValid(modelName), "");
+    public EnvelopeResponse<Boolean> validateModelName(@PathVariable String modelName) {
+        return new EnvelopeResponse<>(ResponseCode.CODE_SUCCESS, modelService.isModelNameValidate(modelName), "");
     }
 
     @RequestMapping(value = "", method = { RequestMethod.GET }, produces = { "application/json" })

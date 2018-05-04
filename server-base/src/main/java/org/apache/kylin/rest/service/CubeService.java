@@ -115,18 +115,12 @@ public class CubeService extends BasicService implements InitializingBean {
     @Autowired
     private AclEvaluate aclEvaluate;
 
-    public boolean isCubeNameValid(final String cubeName) throws IOException {
+    public boolean isCubeNameVaildate(final String cubeName) {
         if (StringUtils.isEmpty(cubeName) || !StringUtils.containsOnly(cubeName, VALID_CUBENAME)) {
             return false;
         }
         for (CubeInstance cubeInstance : getCubeManager().listAllCubes()) {
             if (cubeName.equalsIgnoreCase(cubeInstance.getName())) {
-                return false;
-            }
-        }
-        for (Draft draft : getDraftManager().list(null)) {
-            RootPersistentEntity e = draft.getEntity();
-            if (e instanceof CubeDesc && cubeName.equals(((CubeDesc) e).getName())) {
                 return false;
             }
         }
@@ -514,8 +508,8 @@ public class CubeService extends BasicService implements InitializingBean {
 
         CubeUpdate update = new CubeUpdate(cube.latestCopyForWrite());
         update.setToRemoveSegs(cube.getSegments().toArray(new CubeSegment[cube.getSegments().size()]));
-        update.setCuboids(Maps.<Long, Long> newHashMap());
-        update.setCuboidsRecommend(Sets.<Long> newHashSet());
+        update.setCuboids(Maps.<Long, Long>newHashMap());
+        update.setCuboidsRecommend(Sets.<Long>newHashSet());
         CubeManager.getInstance(getConfig()).updateCube(update);
     }
 

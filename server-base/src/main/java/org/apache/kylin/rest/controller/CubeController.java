@@ -124,8 +124,8 @@ public class CubeController extends BasicController {
 
     @RequestMapping(value = "/validate/{cubeName}", method = RequestMethod.GET, produces = { "application/json" })
     @ResponseBody
-    public EnvelopeResponse<Boolean> validateModelName(@PathVariable String cubeName) throws IOException {
-        return new EnvelopeResponse<>(ResponseCode.CODE_SUCCESS, cubeService.isCubeNameValid(cubeName), "");
+    public EnvelopeResponse<Boolean> validateModelName(@PathVariable String cubeName) {
+        return new EnvelopeResponse<>(ResponseCode.CODE_SUCCESS, cubeService.isCubeNameVaildate(cubeName), "");
     }
 
     @RequestMapping(value = "", method = { RequestMethod.GET }, produces = { "application/json" })
