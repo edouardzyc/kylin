@@ -524,12 +524,5 @@ public class ProjectDictionaryManager {
                 getStore().deleteResource(deletePath);
             }
         }
-        // delete sdict
-        tobeDelete = getStore().listResourcesRecursively(PathBuilder.SPARDER_DICT_ROOT);
-        if (tobeDelete != null) {
-            for (String deletePath : tobeDelete) {
-                getStore().deleteResource(deletePath);
-            }
-        }
     }
 }
