@@ -137,7 +137,7 @@ public class OLAPProjectRel extends Project implements OLAPRel {
         this.columnRowType = buildColumnRowType();
         for (Set<TblColRef> colRefSet : columnRowType.getSourceColumns()) {
             for (TblColRef colRef : colRefSet) {
-                if (!isMerelyPermutation) {
+                if (!isMerelyPermutation && context.belongToContextTables(colRef)) {
                     context.allColumns.add(colRef);
                 }
             }
