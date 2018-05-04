@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *  
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,7 +52,7 @@ import com.google.common.collect.Sets;
 
 /**
  * companion tool for CubeMetaExtractor, ingest the extracted cube meta into another metadata store
- * 
+ *
  * TODO: only support ingest cube now
  * TODO: ingest job history
  */
@@ -61,16 +61,32 @@ public class CubeMetaIngester extends AbstractApplication {
     private static final Logger logger = LoggerFactory.getLogger(CubeMetaIngester.class);
 
     @SuppressWarnings("static-access")
-    private static final Option OPTION_SRC = OptionBuilder.withArgName("srcPath").hasArg().isRequired(true).withDescription("specify the path to the extracted cube metadata zip file").create("srcPath");
+    private static final Option OPTION_SRC = OptionBuilder.withArgName("srcPath").hasArg().isRequired(true)
+            .withDescription("specify the path to the extracted cube metadata zip file").create("srcPath");
 
     @SuppressWarnings("static-access")
-    private static final Option OPTION_PROJECT = OptionBuilder.withArgName("project").hasArg().isRequired(true).withDescription("specify the target project for the new cubes").create("project");
+    private static final Option OPTION_PROJECT = OptionBuilder.withArgName("project").hasArg().isRequired(true)
+            .withDescription("specify the target project for the new cubes").create("project");
 
     @SuppressWarnings("static-access")
-    private static final Option OPTION_FORCE_INGEST = OptionBuilder.withArgName("forceIngest").hasArg().isRequired(false).withDescription("skip the target cube, model and table check and ingest by force. Use in caution because it might break existing cubes! Suggest to backup metadata store first").create("forceIngest");
+    private static final Option OPTION_FORCE_INGEST = OptionBuilder.withArgName("forceIngest").hasArg()
+            .isRequired(false)
+            .withDescription(
+                    "skip the target cube, model and table check and ingest by force. Use in caution because it might break existing cubes! Suggest to backup metadata store first")
+            .create("forceIngest");
 
     @SuppressWarnings("static-access")
-    private static final Option OPTION_OVERWRITE_TABLES = OptionBuilder.withArgName("overwriteTables").hasArg().isRequired(false).withDescription("If table meta conflicts, overwrite the one in metadata store with the one in srcPath. Use in caution because it might break existing cubes! Suggest to backup metadata store first").create("overwriteTables");
+    private static final Option OPTION_OVERWRITE_TABLES = OptionBuilder.withArgName("overwriteTables").hasArg()
+            .isRequired(false)
+            .withDescription(
+                    "If table meta conflicts, overwrite the one in metadata store with the one in srcPath. Use in caution because it might break existing cubes! Suggest to backup metadata store first")
+            .create("overwriteTables");
+
+    @SuppressWarnings("static-access")
+    private static final Option OPTION_RESTORE_TYPE = OptionBuilder.withArgName("restoreType").hasArg().isRequired(true)
+            .withDescription("specify restore project or cube").create("restoreType");
+
+    private static final String PROJECT_TYPE = "project";
 
     private KylinConfig kylinConfig;
 
@@ -78,6 +94,8 @@ public class CubeMetaIngester extends AbstractApplication {
     private String targetProjectName;
     private boolean overwriteTables = false;
     private boolean forceIngest = false;
+    private String restoreType;
+    private static String[] defaultProsKeys = new String[] { "kylin.query.force-limit", "kylin.source.default" };
 
     @Override
     protected Options getOptions() {
@@ -86,6 +104,7 @@ public class CubeMetaIngester extends AbstractApplication {
         options.addOption(OPTION_PROJECT);
         options.addOption(OPTION_FORCE_INGEST);
         options.addOption(OPTION_OVERWRITE_TABLES);
+        options.addOption(OPTION_RESTORE_TYPE);
         return options;
     }
 
@@ -102,6 +121,8 @@ public class CubeMetaIngester extends AbstractApplication {
         }
 
         targetProjectName = optionsHelper.getOptionValue(OPTION_PROJECT);
+
+        restoreType = optionsHelper.getOptionValue(OPTION_RESTORE_TYPE);
 
         String srcPath = optionsHelper.getOptionValue(OPTION_SRC);
         if (!srcPath.endsWith(".zip")) {
@@ -132,27 +153,32 @@ public class CubeMetaIngester extends AbstractApplication {
         CubeManager srcCubeManager = CubeManager.getInstance(srcConfig);
         CubeDescManager srcCubeDescManager = CubeDescManager.getInstance(srcConfig);
 
-        checkAndMark(srcMetadataManager, srcModelManager, srcHybridManager, srcCubeManager, srcCubeDescManager);
+        checkAndMark(srcMetadataManager, srcModelManager, srcHybridManager, srcCubeManager, srcCubeDescManager,
+                srcConfig);
         ResourceTool.copy(srcConfig, kylinConfig, Lists.newArrayList(requiredResources));
 
         // clear the cache
         Broadcaster.getInstance(kylinConfig).notifyClearAll();
-        
+
         ProjectManager projectManager = ProjectManager.getInstance(kylinConfig);
         for (TableDesc tableDesc : srcMetadataManager.listAllTables(null)) {
             logger.info("add " + tableDesc + " to " + targetProjectName);
-            projectManager.addTableDescToProject(Lists.newArrayList(tableDesc.getIdentity()).toArray(new String[0]), targetProjectName);
+            projectManager.addTableDescToProject(Lists.newArrayList(tableDesc.getIdentity()).toArray(new String[0]),
+                    targetProjectName);
         }
 
         for (CubeInstance cube : srcCubeManager.listAllCubes()) {
             logger.info("add " + cube + " to " + targetProjectName);
-            projectManager.addModelToProject(cube.getModel().getName(), targetProjectName);
+            //Since there are no projects in sourceConfig, cube.getModel().getName() causes NPE.
+            projectManager.addModelToProject(cube.getDescriptor().getModelName(), targetProjectName);
             projectManager.moveRealizationToProject(RealizationType.CUBE, cube.getName(), targetProjectName, null);
         }
 
     }
 
-    private void checkAndMark(TableMetadataManager srcMetadataManager, DataModelManager srcModelManager, HybridManager srcHybridManager, CubeManager srcCubeManager, CubeDescManager srcCubeDescManager) {
+    private void checkAndMark(TableMetadataManager srcMetadataManager, DataModelManager srcModelManager,
+            HybridManager srcHybridManager, CubeManager srcCubeManager, CubeDescManager srcCubeDescManager,
+            KylinConfig srcConfig) {
         if (srcHybridManager.listHybridInstances().size() > 0) {
             throw new IllegalStateException("Does not support ingest hybrid yet");
         }
@@ -160,19 +186,42 @@ public class CubeMetaIngester extends AbstractApplication {
         ProjectManager projectManager = ProjectManager.getInstance(kylinConfig);
         ProjectInstance targetProject = projectManager.getProject(targetProjectName);
         if (targetProject == null) {
-            throw new IllegalStateException("Target project does not exist in target metadata: " + targetProjectName);
+            if (PROJECT_TYPE.equals(restoreType)) {
+                ProjectManager srcProjectManager = ProjectManager.getInstance(srcConfig);
+                ProjectInstance srcProject = srcProjectManager.getProject(targetProjectName);
+                if (srcProject == null) {
+                    throw new IllegalStateException(
+                            "Target project does not exist in source metadata: " + targetProjectName);
+                }
+                try {
+                    projectManager.createProject(targetProjectName, srcProject.getOwner(), srcProject.getDescription(),
+                            srcProject.getOverrideKylinProps());
+                } catch (IOException e) {
+                    logger.error(
+                            "create target project from source metadata to  target metadata error :" + e.getMessage(),
+                            e);
+                    throw new IllegalStateException(
+                            "create target project from source metadata to  target metadata : " + targetProjectName);
+                }
+            } else {
+                throw new IllegalStateException(
+                        "Target project does not exist in target metadata: " + targetProjectName);
+            }
         }
 
         TableMetadataManager metadataManager = TableMetadataManager.getInstance(kylinConfig);
         for (TableDesc tableDesc : srcMetadataManager.listAllTables(null)) {
             TableDesc existing = metadataManager.getTableDesc(tableDesc.getIdentity(), targetProjectName);
             if (existing != null && !existing.equals(tableDesc)) {
-                logger.info("Table {} already has a different version in target metadata store", tableDesc.getIdentity());
+                logger.info("Table {} already has a different version in target metadata store",
+                        tableDesc.getIdentity());
                 logger.info("Existing version: " + existing);
                 logger.info("New version: " + tableDesc);
 
                 if (!forceIngest && !overwriteTables) {
-                    throw new IllegalStateException("table already exists with a different version: " + tableDesc.getIdentity() + ". Consider adding -overwriteTables option to force overwriting (with caution)");
+                    throw new IllegalStateException(
+                            "table already exists with a different version: " + tableDesc.getIdentity()
+                                    + ". Consider adding -overwriteTables option to force overwriting (with caution)");
                 } else {
                     logger.warn("Overwriting the old table desc: " + tableDesc.getIdentity());
                 }
