@@ -71,7 +71,7 @@ public class ModelService extends BasicService {
     @Autowired
     private AclEvaluate aclEvaluate;
 
-    public boolean isModelNameValidate(final String modelName) {
+    public boolean isModelNameValid(final String modelName) throws IOException {
         if (StringUtils.isEmpty(modelName) || !StringUtils.containsOnly(modelName, VALID_MODELNAME)) {
             return false;
         }
@@ -154,6 +154,13 @@ public class ModelService extends BasicService {
         for (CubeDesc cubeDesc : cubeDescs) {
             if (cubeDesc.getModelName().equals(desc.getName())) {
                 throw new BadRequestException(String.format(msg.getDROP_REFERENCED_MODEL(), cubeDesc.getName()));
+            }
+        }
+        //check cube draft exist
+        for (Draft draft : getDraftManager().list(null)) {
+            RootPersistentEntity e = draft.getEntity();
+            if (e instanceof CubeDesc && desc.getName().equals(((CubeDesc) e).getModelName())) {
+                throw new BadRequestException(String.format(msg.getDROP_REFERENCED_MODEL(), ((CubeDesc) e).getName()));
             }
         }
 

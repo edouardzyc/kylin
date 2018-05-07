@@ -115,7 +115,7 @@ public class CubeService extends BasicService implements InitializingBean {
     @Autowired
     private AclEvaluate aclEvaluate;
 
-    public boolean isCubeNameVaildate(final String cubeName) {
+    public boolean isCubeNameValid(final String cubeName) throws IOException {
         if (StringUtils.isEmpty(cubeName) || !StringUtils.containsOnly(cubeName, VALID_CUBENAME)) {
             return false;
         }
@@ -508,8 +508,8 @@ public class CubeService extends BasicService implements InitializingBean {
 
         CubeUpdate update = new CubeUpdate(cube.latestCopyForWrite());
         update.setToRemoveSegs(cube.getSegments().toArray(new CubeSegment[cube.getSegments().size()]));
-        update.setCuboids(Maps.<Long, Long>newHashMap());
-        update.setCuboidsRecommend(Sets.<Long>newHashSet());
+        update.setCuboids(Maps.<Long, Long> newHashMap());
+        update.setCuboidsRecommend(Sets.<Long> newHashSet());
         CubeManager.getInstance(getConfig()).updateCube(update);
     }
 
