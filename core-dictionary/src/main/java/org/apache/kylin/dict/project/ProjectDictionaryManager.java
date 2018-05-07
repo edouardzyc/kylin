@@ -89,13 +89,14 @@ public class ProjectDictionaryManager {
     private CaseInsensitiveStringCache<ProjectDictionaryVersionInfo> versionCache;
     private CachedCrudAssist<ProjectDictionaryVersionInfo> crud;
     // only use by  job node
-    private final static LoadingCache<String, VersionControl> mvcMap = CacheBuilder.newBuilder()//
-            .softValues()
-            .removalListener(new RemovalListener<String, VersionControl>() {
+    private final static LoadingCache<String, VersionControl> mvcMap = CacheBuilder.newBuilder()
+            .maximumSize(Long.MAX_VALUE).removalListener(new RemovalListener<String, VersionControl>() {
                 @Override
                 public void onRemoval(RemovalNotification<String, VersionControl> notification) {
                     logger.info("Dict with resource path " + notification.getKey() + " is removed due to "
                             + notification.getCause());
+                    if (notification.getValue() != null)
+                        notification.getValue().clear();
                 }
             })
             .expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, VersionControl>() {
