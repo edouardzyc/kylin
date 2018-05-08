@@ -186,6 +186,10 @@ public class CnMessage extends Message {
         return "模型被 Cube '%s' 引用, 不能被删除";
     }
 
+    public String getINVALID_BREOK_DEFINITION() {
+        return "无效输入";
+    }
+
     public String getUPDATE_MODEL_KEY_FIELD() {
         return "由于维度、度量或者连接关系被修改导致与存在的cube定义不一致，因而当前模型无法保存。";
     }
@@ -252,6 +256,7 @@ public class CnMessage extends Message {
     public String getRENAME_PROJECT_NOT_EMPTY() {
         return "不能重命名该项目，如果要重命名请先清空其中的Cube和Model";
     }
+
     // Table
     public String getHIVE_TABLE_NOT_FOUND() {
         return "找不到 Hive 表 '%s'";

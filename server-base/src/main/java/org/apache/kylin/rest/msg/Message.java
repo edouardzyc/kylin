@@ -186,6 +186,10 @@ public class Message {
         return "Model is referenced by Cube '%s' , could not dropped";
     }
 
+    public String getINVALID_BREOK_DEFINITION() {
+        return "Invalid input";
+    }
+
     public String getUPDATE_MODEL_KEY_FIELD() {
         return "Model cannot save because there are dimensions, measures or join relations modified to be inconsistent with existing cube.";
     }
