@@ -22,7 +22,7 @@ source $(cd -P -- "$(dirname -- "$0")" && pwd -P)/header.sh
 hive -e "select 1" > /dev/null 2>&1 &
 pid=$!
 
-((timeLeft = 60))
+((timeLeft = 180))
 
 while ((timeLeft > 0)); do
     sleep 5
