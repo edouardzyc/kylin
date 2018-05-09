@@ -95,7 +95,7 @@ public class DateFormat {
         // try to be smart and guess the date format
         if (isAllDigits(str)) {
             if (str.length() == 8)
-                //TODO: might be prolematic if an actual ts happends to be 8 digits, e.g. 1970-01-01 10:00:01.123
+                //TODO: might be problematic if an actual ts happens to be 8 digits, e.g. 1970-01-01 10:00:01.123
                 return stringToDate(str, COMPACT_DATE_PATTERN).getTime();
             else
                 return Long.parseLong(str);

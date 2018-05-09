@@ -181,8 +181,6 @@ public class CompareTupleFilter extends TupleFilter implements IOptimizeableTupl
             return false;
         }
 
-        // tricky here -- order is ensured by string compare (even for number columns)
-        // because it's row key ID (not real value) being compared
         int comp = cs.compare(tupleValue, firstCondValue);
 
         boolean result;
