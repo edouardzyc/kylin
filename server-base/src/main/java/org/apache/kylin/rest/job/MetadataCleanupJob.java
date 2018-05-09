@@ -103,7 +103,7 @@ public class MetadataCleanupJob {
         // project dict
         TreeMultimap<String, String> col2dict = TreeMultimap.create();
 
-        NavigableSet<String> prjs = noNull(store.listResources(ResourceStore.PROJECT_DICT_RESOURCE_ROOT));
+        NavigableSet<String> prjs = noNull(store.listResources(ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/data"));
         removeSpecificForder(prjs, "/metadata"); // exclude "metadata" folder
         for (String prj : prjs) {
             for (String tbl : noNull(store.listResources(prj))) {
