@@ -47,11 +47,13 @@ import java.util.logging.LogManager;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
 import org.apache.calcite.sql.SqlNode;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.QueryContext;
 import org.apache.kylin.common.debug.BackdoorToggles;
 import org.apache.kylin.common.util.HBaseMetadataTestCase;
+import org.apache.kylin.common.util.JsonUtil;
 import org.apache.kylin.common.util.Pair;
 import org.apache.kylin.metadata.project.ProjectInstance;
 import org.apache.kylin.metadata.querymeta.SelectedColumnMeta;
@@ -630,6 +632,7 @@ public class KylinTestBase {
 
             // execute Kylin
             logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
+            QueryContext.reset();
             IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
             ITable kylinTable = executeQuery(kylinConn, queryName, sql1, needSort);
 
@@ -646,6 +649,10 @@ public class KylinTestBase {
                 logger.info("execAndCompQuery failed on: " + sqlFile.getAbsolutePath());
                 throw t;
             }
+            
+            QueryContext queryContext = QueryContext.current();
+            dumpTestQueryStats(sqlFile, queryContext);
+            Assert.assertTrue(verifyTestQueryStats(sqlFile, queryContext));
 
             compQueryCount++;
             if (kylinTable.getRowCount() == 0) {
@@ -825,4 +832,45 @@ public class KylinTestBase {
         return throwable;
     }
 
+    protected boolean enableDumpTestQueryStats() {
+        return true;
+    }
+
+    private void dumpTestQueryStats(File sqlFile, QueryContext queryContext) {
+        if (!enableDumpTestQueryStats()) {
+            return;
+        }
+        try {
+            TestQueryStats queryStats = new TestQueryStats(queryContext);
+            String json = JsonUtil.writeValueAsIndentString(queryStats);
+            File queryStatsFile = new File(sqlFile.getAbsolutePath() + ".stats");
+            FileUtils.writeStringToFile(queryStatsFile, json);
+            logger.debug("{} saved:\n{}", queryStatsFile.getAbsolutePath(), json);
+        } catch (IOException e) {
+            logger.error("Fail to dump query stats", e);
+        }
+    }
+
+    protected boolean enableVerifyTestQueryStats() {
+        return true;
+    }
+
+    private boolean verifyTestQueryStats(File sqlFile, QueryContext queryContext) {
+        if (!enableVerifyTestQueryStats()) {
+            return true;
+        }
+        try {
+            TestQueryStats actual = new TestQueryStats(queryContext);
+            File queryStatsFile = new File(sqlFile.getPath() + ".stats");
+            String json = FileUtils.readFileToString(queryStatsFile);
+            TestQueryStats expected = JsonUtil.readValue(json, TestQueryStats.class);
+            if (expected == null) {
+                return false;
+            }
+            return expected.equals(actual);
+        } catch (IOException e) {
+            logger.error("Fail to dump query stats", e);
+            return false;
+        }
+    }
 }

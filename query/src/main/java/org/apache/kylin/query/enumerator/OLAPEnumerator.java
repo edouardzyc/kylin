@@ -22,6 +22,7 @@ import java.util.Arrays;
 
 import org.apache.calcite.DataContext;
 import org.apache.calcite.linq4j.Enumerator;
+import org.apache.kylin.common.QueryContext;
 import org.apache.kylin.metadata.realization.SQLDigest;
 import org.apache.kylin.metadata.tuple.ITuple;
 import org.apache.kylin.metadata.tuple.ITupleIterator;
@@ -53,6 +54,9 @@ public class OLAPEnumerator implements Enumerator<Object[]> {
         this.cursor = null;
         scope = Trace.startSpan("query realization " + olapContext.realization.getCanonicalName());
 
+        // trace realization info
+        QueryContext.current().setContextRealization(olapContext.id, olapContext.realization.getName(),
+                olapContext.realization.getType().toString());
     }
 
     @Override

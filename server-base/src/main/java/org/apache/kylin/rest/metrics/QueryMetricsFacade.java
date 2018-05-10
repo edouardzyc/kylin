@@ -199,7 +199,7 @@ public class QueryMetricsFacade {
     }
 
     private static void setQueryWrapper(RecordEvent metricsEvent, String user, long queryHashCode, String queryType,
-            String projectName, String realizationName, int realizationType, Throwable throwable) {
+            String projectName, String realizationName, String realizationType, Throwable throwable) {
         metricsEvent.put(QueryPropertyEnum.USER.toString(), user);
         metricsEvent.put(QueryPropertyEnum.ID_CODE.toString(), queryHashCode);
         metricsEvent.put(QueryPropertyEnum.TYPE.toString(), queryType);

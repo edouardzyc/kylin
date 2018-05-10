@@ -56,7 +56,7 @@ public class QueryContext {
     private Object calcitePlan;
 
     private List<RPCStatistics> rpcStatisticsList = Lists.newCopyOnWriteArrayList();
-    private Map<Integer, CubeSegmentStatisticsResult> cubeSegmentStatisticsResultMap = Maps.newConcurrentMap();
+    private Map<Integer, CubeSegmentStatisticsResult> cubeSegmentStatisticsResultMap = Maps.newLinkedHashMap();
 
     private QueryContext() {
         // use QueryContext.current() instead
@@ -138,7 +138,7 @@ public class QueryContext {
         cubeSegmentStatisticsResultMap.put(ctxId, new CubeSegmentStatisticsResult(type, cubeSegmentStatisticsMap));
     }
 
-    public void setContextRealization(int ctxId, String realizationName, int realizationType) {
+    public void setContextRealization(int ctxId, String realizationName, String realizationType) {
         CubeSegmentStatisticsResult cubeSegmentStatisticsResult = cubeSegmentStatisticsResultMap.get(ctxId);
         if (cubeSegmentStatisticsResult == null) {
             logger.warn("Cannot find CubeSegmentStatisticsResult for context " + ctxId);
@@ -156,26 +156,19 @@ public class QueryContext {
         return Lists.newArrayList(cubeSegmentStatisticsResultMap.values());
     }
 
-    public void addRPCStatistics(int ctxId, String rpcServer, String cubeName, String segmentName, long sourceCuboidId,
-            long targetCuboidId, long filterMask, Exception e, long rpcCallTimeMs, long skippedRows, long scannedRows,
-            long returnedRows, long aggregatedRows, long scannedBytes) {
-        RPCStatistics rpcStatistics = new RPCStatistics();
-        rpcStatistics.setWrapper(cubeName, rpcServer);
-        rpcStatistics.setStats(rpcCallTimeMs, skippedRows, scannedRows, returnedRows, aggregatedRows, scannedBytes);
-        rpcStatistics.setException(e);
-        rpcStatisticsList.add(rpcStatistics);
-
+    public CubeSegmentStatistics addCubeSegmentStatistics(int ctxId, String cubeName, String segmentName, long sourceCuboidId, long targetCuboidId,
+            long filterMask) {
         CubeSegmentStatisticsResult cubeSegmentStatisticsResult = cubeSegmentStatisticsResultMap.get(ctxId);
         if (cubeSegmentStatisticsResult == null) {
             logger.warn("CubeSegmentStatisticsResult should be initialized for context " + ctxId);
-            return;
+            return null;
         }
         Map<String, Map<String, CubeSegmentStatistics>> cubeSegmentStatisticsMap = cubeSegmentStatisticsResult.cubeSegmentStatisticsMap;
         if (cubeSegmentStatisticsMap == null) {
             logger.warn(
                     "cubeSegmentStatisticsMap should be initialized for CubeSegmentStatisticsResult with query type "
                             + cubeSegmentStatisticsResult.queryType);
-            return;
+            return null;
         }
         Map<String, CubeSegmentStatistics> segmentStatisticsMap = cubeSegmentStatisticsMap.get(cubeName);
         if (segmentStatisticsMap == null) {
@@ -187,6 +180,23 @@ public class QueryContext {
             segmentStatistics = new CubeSegmentStatistics();
             segmentStatisticsMap.put(segmentName, segmentStatistics);
             segmentStatistics.setWrapper(cubeName, segmentName, sourceCuboidId, targetCuboidId, filterMask);
+        }
+        return segmentStatistics;
+    }
+
+    public void addRPCStatistics(int ctxId, String rpcServer, String cubeName, String segmentName, long sourceCuboidId,
+            long targetCuboidId, long filterMask, Exception e, long rpcCallTimeMs, long skippedRows, long scannedRows,
+            long returnedRows, long aggregatedRows, long scannedBytes) {
+        RPCStatistics rpcStatistics = new RPCStatistics();
+        rpcStatistics.setWrapper(cubeName, rpcServer);
+        rpcStatistics.setStats(rpcCallTimeMs, skippedRows, scannedRows, returnedRows, aggregatedRows, scannedBytes);
+        rpcStatistics.setException(e);
+        rpcStatisticsList.add(rpcStatistics);
+
+        CubeSegmentStatistics segmentStatistics = addCubeSegmentStatistics(ctxId, cubeName, segmentName, sourceCuboidId,
+                targetCuboidId, filterMask);
+        if (segmentStatistics == null) {
+            return;
         }
         if (segmentStatistics.sourceCuboidId != sourceCuboidId || segmentStatistics.targetCuboidId != targetCuboidId
                 || segmentStatistics.filterMask != filterMask) {
@@ -490,7 +500,7 @@ public class QueryContext {
         private String queryType;
         private Map<String, Map<String, CubeSegmentStatistics>> cubeSegmentStatisticsMap;
         private String realization;
-        private int realizationType;
+        private String realizationType;
 
         public CubeSegmentStatisticsResult() {
         }
@@ -509,11 +519,11 @@ public class QueryContext {
             return realization;
         }
 
-        public int getRealizationType() {
+        public String getRealizationType() {
             return realizationType;
         }
 
-        public void setRealizationType(int realizationType) {
+        public void setRealizationType(String realizationType) {
             this.realizationType = realizationType;
         }
 
