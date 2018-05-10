@@ -832,6 +832,10 @@ public class KylinTestBase {
         return throwable;
     }
 
+    protected String getTestQueryStatsFilePostfix() {
+        return ".stats";
+    }
+    
     protected boolean enableDumpTestQueryStats() {
         return true;
     }
@@ -843,7 +847,7 @@ public class KylinTestBase {
         try {
             TestQueryStats queryStats = new TestQueryStats(queryContext);
             String json = JsonUtil.writeValueAsIndentString(queryStats);
-            File queryStatsFile = new File(sqlFile.getAbsolutePath() + ".stats");
+            File queryStatsFile = new File(sqlFile.getAbsolutePath() + getTestQueryStatsFilePostfix());
             FileUtils.writeStringToFile(queryStatsFile, json);
             logger.debug("{} saved:\n{}", queryStatsFile.getAbsolutePath(), json);
         } catch (IOException e) {
@@ -861,7 +865,7 @@ public class KylinTestBase {
         }
         try {
             TestQueryStats actual = new TestQueryStats(queryContext);
-            File queryStatsFile = new File(sqlFile.getPath() + ".stats");
+            File queryStatsFile = new File(sqlFile.getPath() + getTestQueryStatsFilePostfix());
             String json = FileUtils.readFileToString(queryStatsFile);
             TestQueryStats expected = JsonUtil.readValue(json, TestQueryStats.class);
             if (expected == null) {
