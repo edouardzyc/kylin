@@ -1,0 +1,9 @@
+{
+  "realizations" : [ {
+    "query_type" : "OLAP",
+    "realization" : "ci_inner_join_hybrid",
+    "realization_type" : "HYBRID",
+    "source_cuboid_id" : 196608,
+    "target_cuboid_id" : 196608
+  } ]
+}

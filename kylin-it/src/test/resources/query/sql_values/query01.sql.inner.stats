@@ -1,0 +1,39 @@
+{
+  "realizations" : [ {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "CUBE",
+    "source_cuboid_id" : 4194304,
+    "target_cuboid_id" : 7864320
+  }, {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "CUBE",
+    "source_cuboid_id" : 4194304,
+    "target_cuboid_id" : 7864320
+  }, {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "CUBE",
+    "source_cuboid_id" : 4194304,
+    "target_cuboid_id" : 7864320
+  }, {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "CUBE",
+    "source_cuboid_id" : 4194304,
+    "target_cuboid_id" : 7864320
+  }, {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "CUBE",
+    "source_cuboid_id" : 4194304,
+    "target_cuboid_id" : 7864320
+  }, {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "CUBE",
+    "source_cuboid_id" : 4194304,
+    "target_cuboid_id" : 7864320
+  } ]
+}

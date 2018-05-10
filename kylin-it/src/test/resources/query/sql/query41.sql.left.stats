@@ -1,0 +1,9 @@
+{
+  "realizations" : [ {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "CUBE",
+    "source_cuboid_id" : 3145728,
+    "target_cuboid_id" : 3145728
+  } ]
+}
