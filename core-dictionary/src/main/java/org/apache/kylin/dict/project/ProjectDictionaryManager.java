@@ -272,7 +272,7 @@ public class ProjectDictionaryManager {
         DictPatch patch = getSpecificPatch(desc, SpecificVersion);
         logger.info("Get Specific Dictionary: " + desc.getSourceIdentifier() + " version : " + SpecificVersion);
 
-        return ProjectDictionaryInfo.copy(projectDictionaryInfo,
+        return projectDictionaryInfo == null ? null :ProjectDictionaryInfo.copy(projectDictionaryInfo,
                 new DisguiseTrieDictionary<>(desc.getIdLength(), projectDictionaryInfo.getDictionaryObject(), patch));
     }
 

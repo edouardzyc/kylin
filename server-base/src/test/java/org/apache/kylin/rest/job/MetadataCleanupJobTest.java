@@ -30,6 +30,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.kylin.common.util.LocalFileMetadataTestCase;
+import org.apache.kylin.dict.project.ProjectDictionaryManager;
+import org.apache.kylin.dict.project.SegProjectDict;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -77,6 +79,31 @@ public class MetadataCleanupJobTest {
         MetadataCleanupJob metadataCleanupJob = new MetadataCleanupJob();
         List<String> cleanupList = metadataCleanupJob.cleanup(false, 30);
         Assert.assertEquals(0, cleanupList.size());
+    }
+
+    @Test
+    public void testCleanUpPdict() throws Exception {
+        staticCreateTestMetadata(false, new ResetTimeHook(1, "src/test/resources/test_meta"));
+        MetadataCleanupJob metadataCleanupJob = new MetadataCleanupJob();
+        ProjectDictionaryManager manager = ProjectDictionaryManager.getInstance();
+        Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 0, 1), 0));
+        Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 1, 1), 1));
+        Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 2, 1), 2));
+        Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 0, 1), 0));
+        Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 1, 1), 1));
+        Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 2, 1), 2));
+        List<String> cleanupList = metadataCleanupJob.cleanup(true, 30);
+        Assert.assertEquals(19, cleanupList.size());
+        manager.clear();
+        Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 0, 1), 0));
+        Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 1, 1), 1));
+        Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 2, 1), 2));
+        Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 0, 1), 0));
+        Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 1, 1), 1));
+        Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 2, 1), 2));
+        Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 3, 1), 3));
+        List<String> cleanupList2 = metadataCleanupJob.cleanup(false, 30);
+        Assert.assertEquals(0, cleanupList2.size());
     }
 
     private class ResetTimeHook extends LocalFileMetadataTestCase.OverlayMetaHook {
