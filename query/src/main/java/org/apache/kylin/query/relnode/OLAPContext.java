@@ -119,6 +119,7 @@ public class OLAPContext {
     public OLAPSchema olapSchema = null;
     public OLAPTableScan firstTableScan = null; // to be fact table scan except "select * from lookupTable"
     public OLAPRel topNode = null; // the context's toppest node
+    public OLAPRel parentOfTopNode = null; // record the context is divide in Join Rel， in other case it should be null
     public Set<OLAPTableScan> allTableScans = new HashSet<>();
     public Set<OLAPJoinRel> allOlapJoins = new HashSet<>();
     public Set<MeasureDesc> involvedMeasure = new HashSet<>();

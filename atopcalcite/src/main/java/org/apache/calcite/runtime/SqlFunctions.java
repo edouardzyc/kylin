@@ -16,24 +16,6 @@
  */
 package org.apache.calcite.runtime;
 
-import org.apache.calcite.DataContext;
-import org.apache.calcite.avatica.util.ByteString;
-import org.apache.calcite.avatica.util.DateTimeUtils;
-import org.apache.calcite.avatica.util.Spaces;
-import org.apache.calcite.avatica.util.TimeUnitRange;
-import org.apache.calcite.linq4j.AbstractEnumerable;
-import org.apache.calcite.linq4j.CartesianProductEnumerator;
-import org.apache.calcite.linq4j.Enumerable;
-import org.apache.calcite.linq4j.Enumerator;
-import org.apache.calcite.linq4j.Linq4j;
-import org.apache.calcite.linq4j.function.Deterministic;
-import org.apache.calcite.linq4j.function.Function1;
-import org.apache.calcite.linq4j.function.NonDeterministic;
-import org.apache.calcite.linq4j.tree.Primitive;
-import org.apache.calcite.runtime.FlatLists.ComparableList;
-import org.apache.calcite.util.Bug;
-import org.apache.calcite.util.NumberUtil;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -52,6 +34,24 @@ import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
+
+import org.apache.calcite.DataContext;
+import org.apache.calcite.avatica.util.ByteString;
+import org.apache.calcite.avatica.util.DateTimeUtils;
+import org.apache.calcite.avatica.util.Spaces;
+import org.apache.calcite.avatica.util.TimeUnitRange;
+import org.apache.calcite.linq4j.AbstractEnumerable;
+import org.apache.calcite.linq4j.CartesianProductEnumerator;
+import org.apache.calcite.linq4j.Enumerable;
+import org.apache.calcite.linq4j.Enumerator;
+import org.apache.calcite.linq4j.Linq4j;
+import org.apache.calcite.linq4j.function.Deterministic;
+import org.apache.calcite.linq4j.function.Function1;
+import org.apache.calcite.linq4j.function.NonDeterministic;
+import org.apache.calcite.linq4j.tree.Primitive;
+import org.apache.calcite.runtime.FlatLists.ComparableList;
+import org.apache.calcite.util.Bug;
+import org.apache.calcite.util.NumberUtil;
 
 /**
  * Helper methods to implement SQL functions in generated code.
@@ -140,11 +140,15 @@ public class SqlFunctions {
 
     /** SQL UPPER(string) function. */
     public static String upper(String s) {
+        if (s == null)
+            return "";
         return s.toUpperCase(Locale.ROOT);
     }
 
     /** SQL LOWER(string) function. */
     public static String lower(String s) {
+        if (s == null)
+            return "";
         return s.toLowerCase(Locale.ROOT);
     }
 
@@ -187,6 +191,8 @@ public class SqlFunctions {
 
     /** SQL CHARACTER_LENGTH(string) function. */
     public static int charLength(String s) {
+        if (s == null)
+            return 0;
         return s.length();
     }
 
