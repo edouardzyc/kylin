@@ -88,12 +88,12 @@ public class CubeMetaIngester extends AbstractApplication {
 
     private static final String PROJECT_TYPE = "project";
 
-    private KylinConfig kylinConfig;
+    protected KylinConfig kylinConfig;
 
-    Set<String> requiredResources = Sets.newLinkedHashSet();
+    protected Set<String> requiredResources = Sets.newLinkedHashSet();
     private String targetProjectName;
     private boolean overwriteTables = false;
-    private boolean forceIngest = false;
+    protected boolean forceIngest = false;
     private String restoreType;
     private static String[] defaultProsKeys = new String[] { "kylin.query.force-limit", "kylin.source.default" };
 
@@ -176,7 +176,7 @@ public class CubeMetaIngester extends AbstractApplication {
 
     }
 
-    private void checkAndMark(TableMetadataManager srcMetadataManager, DataModelManager srcModelManager,
+    protected void checkAndMark(TableMetadataManager srcMetadataManager, DataModelManager srcModelManager,
             HybridManager srcHybridManager, CubeManager srcCubeManager, CubeDescManager srcCubeDescManager,
             KylinConfig srcConfig) {
         if (srcHybridManager.listHybridInstances().size() > 0) {

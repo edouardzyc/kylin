@@ -121,7 +121,7 @@ public class CubeMetaExtractor extends AbstractInfoExtractor {
                     "set this to true if want to extract segment details too, such as dict, tablesnapshot. Default false")
             .create("includeSegmentDetails");
 
-    private KylinConfig kylinConfig;
+    protected KylinConfig kylinConfig;
     private DataModelManager metadataManager;
     private ProjectManager projectManager;
     private HybridManager hybridManager;
@@ -340,7 +340,7 @@ public class CubeMetaExtractor extends AbstractInfoExtractor {
         }
     }
 
-    private void retrieveResourcePath(IRealization realization) throws IOException {
+    protected void retrieveResourcePath(IRealization realization) throws IOException {
         if (realization == null) {
             return;
         }
@@ -433,7 +433,7 @@ public class CubeMetaExtractor extends AbstractInfoExtractor {
         }
     }
 
-    private void addRequired(String record) {
+    protected void addRequired(String record) {
         logger.info("adding required resource {}", record);
         requiredResources.add(record);
     }
