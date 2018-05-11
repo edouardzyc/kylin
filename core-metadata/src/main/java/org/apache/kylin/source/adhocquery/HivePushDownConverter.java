@@ -102,6 +102,9 @@ public class HivePushDownConverter implements IPushDownConverter {
             case "LONG":
                 supportedType = "bigint";
                 break;
+            case "VARCHAR":
+                supportedType = "string";
+                break;
             default:
                 supportedType = type;
             }
