@@ -29,6 +29,10 @@ public class KylinAggregateCall extends AggregateCall {
         super(aggCall.getAggregation(), aggCall.isDistinct(), aggCall.getArgList(), aggCall.type, aggCall.name);
         this.func = func;
     }
+    
+    public boolean isSum0() {
+        return "$SUM0".equals(getAggregation().getName());
+    }
 
     public FunctionDesc getFunc() {
         return func;
