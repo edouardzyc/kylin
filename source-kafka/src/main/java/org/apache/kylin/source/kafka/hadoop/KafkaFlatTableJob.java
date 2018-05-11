@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.commons.cli.Options;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -119,6 +120,7 @@ public class KafkaFlatTableJob extends AbstractHadoopJob {
             org.apache.log4j.Logger.getRootLogger().info("Output hdfs compression: " + true);
             job.getConfiguration().set(BatchConstants.CFG_OUTPUT_PATH, output.toString());
 
+            attachCubeMetadata(cube, job.getConfiguration());
             deletePath(job.getConfiguration(), output);
             return waitForCompletion(job);
 
@@ -150,7 +152,7 @@ public class KafkaFlatTableJob extends AbstractHadoopJob {
 
         job.setMapperClass(KafkaFlatTableMapper.class);
         job.setInputFormatClass(KafkaInputFormat.class);
-        job.setOutputKeyClass(Text.class);
+        job.setOutputKeyClass(NullWritable.class);
         job.setOutputValueClass(Text.class);
         job.setOutputFormatClass(SequenceFileOutputFormat.class);
         job.setNumReduceTasks(0);
