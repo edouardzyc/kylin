@@ -167,6 +167,10 @@ public abstract class GTCubeStorageQueryBase implements IStorageQuery {
         enableStreamAggregateIfBeneficial(cuboid, groupsD, context);
         // check query deadline
         QueryContext.current().checkMillisBeforeDeadline();
+        
+        QueryContext.current().addCubeSegmentStatistics(context.ctxId, cubeInstance.getDescName(),
+                "", cuboid.getInputID(), cuboid.getId(),
+                context.getFilterMask());
 
         // push down having clause filter if possible
         TupleFilter havingFilter = checkHavingCanPushDown(sqlDigest.havingFilter, groupsD, sqlDigest.aggregations,

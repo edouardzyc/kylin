@@ -135,6 +135,9 @@ public class QueryContext {
         if (ifCube) {
             cubeSegmentStatisticsMap = Maps.newConcurrentMap();
         }
+        if (cubeSegmentStatisticsResultMap.containsKey(ctxId)) {
+            return;
+        }
         cubeSegmentStatisticsResultMap.put(ctxId, new CubeSegmentStatisticsResult(type, cubeSegmentStatisticsMap));
     }
 

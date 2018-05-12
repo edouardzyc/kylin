@@ -35,6 +35,7 @@ import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.QueryContext;
 import org.apache.kylin.common.util.ClassUtil;
+import org.apache.kylin.metadata.realization.IRealization;
 import org.apache.kylin.query.routing.RealizationChooser;
 import org.apache.kylin.query.security.QueryInterceptor;
 import org.apache.kylin.query.security.QueryInterceptorUtil;
@@ -109,6 +110,15 @@ public class OLAPToEnumerableConverter extends ConverterImpl implements Enumerab
             System.out.println("EXECUTION PLAN AFTER REWRITE");
             System.out.println(dumpPlan);
             QueryContext.current().setCalcitePlan(this.copy(getTraitSet(), getInputs()));
+        }
+        for (OLAPContext context : contexts) {
+            IRealization realization = context.realization;
+            if (realization == null) {
+                continue;
+            }
+            // trace realization info
+            QueryContext.current().setContextRealization(context.id, realization.getName(),
+                        realization.getType().toString());
         }
 
         return impl.visitChild(this, 0, inputAsEnum, pref);
