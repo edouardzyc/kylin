@@ -3,7 +3,7 @@
     "query_type" : "OLAP",
     "realization" : "ci_inner_join_hybrid",
     "realization_type" : "HYBRID",
-    "source_cuboid_id" : 0,
-    "target_cuboid_id" : 0
+    "source_cuboid_id" : 131072,
+    "target_cuboid_id" : 131072
   } ]
 }

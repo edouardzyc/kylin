@@ -1,10 +1,10 @@
 {
   "realizations" : [ {
     "query_type" : "OLAP",
-    "realization" : "ci_inner_join_hybrid",
-    "realization_type" : "HYBRID",
-    "source_cuboid_id" : 524288,
-    "target_cuboid_id" : 524288
+    "realization" : "ci_inner_join_cube",
+    "realization_type" : "INVERTED_INDEX",
+    "source_cuboid_id" : 0,
+    "target_cuboid_id" : 0
   }, {
     "query_type" : "OLAP",
     "realization" : "ci_inner_join_hybrid",

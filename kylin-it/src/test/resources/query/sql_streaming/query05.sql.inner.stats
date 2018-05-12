@@ -1,8 +1,8 @@
 {
   "realizations" : [ {
     "query_type" : "OLAP",
-    "realization" : "test_streaming_table_cube",
-    "realization_type" : "CUBE",
+    "realization" : null,
+    "realization_type" : null,
     "source_cuboid_id" : 4,
     "target_cuboid_id" : 4
   } ]

@@ -2,9 +2,9 @@
   "realizations" : [ {
     "query_type" : "OLAP",
     "realization" : "ci_left_join_cube",
-    "realization_type" : "CUBE",
-    "source_cuboid_id" : 41943040,
-    "target_cuboid_id" : 41943504
+    "realization_type" : "INVERTED_INDEX",
+    "source_cuboid_id" : 0,
+    "target_cuboid_id" : 0
   }, {
     "query_type" : "OLAP",
     "realization" : "ci_left_join_cube",
@@ -15,7 +15,7 @@
     "query_type" : "OLAP",
     "realization" : "ci_left_join_cube",
     "realization_type" : "CUBE",
-    "source_cuboid_id" : 33554432,
+    "source_cuboid_id" : 41943040,
     "target_cuboid_id" : 41943504
   } ]
 }
