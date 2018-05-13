@@ -64,6 +64,13 @@ import org.apache.calcite.util.NumberUtil;
  * If null arguments are possible, the code-generation framework checks for
  * nulls before calling the functions.</p>
  */
+
+/*
+ * OVERRIDE POINT:
+ * - more power() overloads
+ * - refined org.apache.calcite.runtime.SqlFunctions#addMonths(int, int)
+ */
+
 @SuppressWarnings("UnnecessaryUnboxing")
 @Deterministic
 public class SqlFunctions {
@@ -848,6 +855,7 @@ public class SqlFunctions {
         return Math.pow(b0, b1.doubleValue());
     }
 
+    // OVERRIDE POINT starts, more power overloads
     public static double power(double n1, long n2) {
         return Math.pow(n1, (double)n2);
     }
@@ -895,6 +903,8 @@ public class SqlFunctions {
     public static double power(int n1, int n2) {
         return Math.pow(n1, n2);
     }
+
+    // OVERRIDE POINT ends, more power overloads
 
     // LN
 
@@ -2143,9 +2153,14 @@ public class SqlFunctions {
         int y0 = (int) DateTimeUtils.unixDateExtract(TimeUnitRange.YEAR, date);
         int m0 = (int) DateTimeUtils.unixDateExtract(TimeUnitRange.MONTH, date);
         int d0 = (int) DateTimeUtils.unixDateExtract(TimeUnitRange.DAY, date);
-        int y = m / 12;
+        int y = (m + m0) / 12;
         y0 += y;
-        m0 += m - y * 12;
+        m0 = m + m0 - y * 12;
+        if(m0 <= 0) {
+            m0 += 12;
+            assert m0 > 0;
+            y0--;
+        }
         int last = lastDay(y0, m0);
         if (d0 > last) {
             d0 = last;
