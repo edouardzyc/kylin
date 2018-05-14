@@ -128,7 +128,7 @@ public abstract class FilterJoinRule extends RelOptRule {
         final List<RexNode> origJoinFilters = ImmutableList.copyOf(joinFilters);
 
         // HACK POINT
-        if (join.getJoinType() != JoinRelType.INNER) {
+        if (join.getJoinType() != JoinRelType.INNER || joinFilters.size() != 0) {
             return;
         }
 
