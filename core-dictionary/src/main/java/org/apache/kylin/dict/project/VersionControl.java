@@ -39,7 +39,7 @@ public class VersionControl {
         if (maxVersion != null) {
             id.set(ProjectDictionaryManager.getInstance().getMaxVersion(key).getProjectDictionaryVersion());
         }
-        logger.info("acquire mvc lock for : " + key);
+        logger.info("Acquire mvc lock for : " + key);
         lock = MVCLock.getLock(key);
     }
 
@@ -53,7 +53,7 @@ public class VersionControl {
 
     long acquireMyVersion() {
         try {
-            logger.info("acquire lock for : " + key);
+            logger.info("Acquire lock for : " + key);
             semaphore.acquire();
 
         } catch (InterruptedException e) {

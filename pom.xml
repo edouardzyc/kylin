@@ -628,6 +628,12 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-unsafe_2.11</artifactId>
+                <version>${spark.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>com.esotericsoftware</groupId>
                 <artifactId>kryo-shaded</artifactId>
                 <version>${kryo.version}</version>

@@ -18,26 +18,35 @@
 
 package org.apache.kylin.dict;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import org.apache.kylin.common.util.Dictionary;
+import org.apache.spark.unsafe.Platform;
+import sun.nio.ch.FileChannelImpl;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.kylin.common.util.Dictionary;
-
-import sun.nio.ch.FileChannelImpl;
+import static org.apache.spark.unsafe.Platform.BYTE_ARRAY_OFFSET;
 
 // dict for query
 public class SDict extends Dictionary<String> implements DictFileResource {
     private int[] pos;
     private MappedByteBuffer byteBuffer;
+    private SdictByteBuffer sdictByteBuffer;
 
     // only need when write dict
     private String[] values;
@@ -49,6 +58,9 @@ public class SDict extends Dictionary<String> implements DictFileResource {
     // one thread in use, occupations + 1
     private AtomicInteger occupations = new AtomicInteger(0);
     private AtomicLong accessTime = new AtomicLong(0L);
+
+
+    private Cache<Integer, byte[]> cache;
 
     public SDict() { // default constructor for Writable interface
     }
@@ -121,6 +133,14 @@ public class SDict extends Dictionary<String> implements DictFileResource {
 
     @Override
     protected byte[] getValueBytesFromIdImpl(int id) {
+        //  null id
+        if (id > pos.length) {
+            return null;
+        }
+        byte[] bytes = cache.getIfPresent(id);
+        if (bytes != null) {
+            return bytes;
+        }
         return get(id);
     }
 
@@ -135,11 +155,15 @@ public class SDict extends Dictionary<String> implements DictFileResource {
         try {
             fc = raf.getChannel();
             byteBuffer = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
-
-            int len = byteBuffer.getInt();
-            pos = new int[len];
+            sdictByteBuffer = new SdictByteBuffer(byteBuffer);
+            int size = sdictByteBuffer.getInt();
+            cache = CacheBuilder.newBuilder()
+                    .softValues()
+                    .maximumSize(size)
+                    .expireAfterWrite(1, TimeUnit.HOURS).build();
+            pos = new int[size];
             for (int i = 0; i < pos.length; i++) {
-                pos[i] = byteBuffer.getInt();
+                pos[i] = sdictByteBuffer.getInt();
             }
         } catch (Exception e) {
             throw new RuntimeException("Can not init sdict.", e);
@@ -214,12 +238,11 @@ public class SDict extends Dictionary<String> implements DictFileResource {
                 r = new byte[l];
                 index = p + base;
             }
-            for (int i = 0; i < r.length; i++) {
-                r[i] = byteBuffer.get(index + i);
-            }
+            sdictByteBuffer.copyMemory(index, r, 0, r.length);
         } catch (ArrayIndexOutOfBoundsException e) {
             return null;
         }
+        cache.put(id, r);
         return r;
     }
 
@@ -233,6 +256,40 @@ public class SDict extends Dictionary<String> implements DictFileResource {
             m.invoke(FileChannelImpl.class, byteBuffer);
         } catch (Exception e) {
             throw new RuntimeException("Can not release file mapping memory.", e);
+        }
+    }
+
+
+    public class SdictByteBuffer {
+        ByteBuffer a;
+        long baseAddress;
+
+
+        public SdictByteBuffer(ByteBuffer buffer) {
+            try {
+                Field address = Buffer.class.getDeclaredField("address");
+                address.setAccessible(true);
+                this.baseAddress = (long) address.get(buffer);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            this.a = buffer;
+        }
+
+
+        public int getInt() {
+            return a.getInt();
+        }
+
+
+        public void copyMemory(int pos, byte[] dst, int offset, int length) {
+            Platform.copyMemory(null, ix(pos), dst,
+                    BYTE_ARRAY_OFFSET,
+                    (long) length << 0);
+        }
+
+        private long ix(int i) {
+            return baseAddress + ((long) i << 0);
         }
     }
 }

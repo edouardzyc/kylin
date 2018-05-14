@@ -18,11 +18,6 @@
 
 package org.apache.kylin.dict.project;
 
-import java.util.Arrays;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import me.lemire.integercompression.BinaryPacking;
 import me.lemire.integercompression.IntWrapper;
 import me.lemire.integercompression.SkippableComposition;
@@ -31,6 +26,10 @@ import me.lemire.integercompression.VariableByte;
 import me.lemire.integercompression.differential.IntegratedBinaryPacking;
 import me.lemire.integercompression.differential.IntegratedVariableByte;
 import me.lemire.integercompression.differential.SkippableIntegratedComposition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
 
 public class IntegratedUtils {
     private static final Logger log = LoggerFactory.getLogger(IntegratedUtils.class);
@@ -40,17 +39,21 @@ public class IntegratedUtils {
             new VariableByte());
 
     public static int[] compress(int[] ints) {
+        long start = System.currentTimeMillis();
         int[] compressed = new int[ints.length + 1024];
         compressed[0] = ints.length;
         IntWrapper inputOffset = new IntWrapper(0);
         IntWrapper outputOffset = new IntWrapper(1);
         sortedCodec.headlessCompress(ints, inputOffset, ints.length, compressed, outputOffset, new IntWrapper(0));
-        log.info("compressed from " + ints.length * 4 / 1024 + "KB to " + outputOffset.intValue() * 4 / 1024 + "KB");
+        log.info("Compressed from " + ints.length * 4 / 1024 + "KB to " + outputOffset.intValue() * 4 / 1024 + "KB");
         // we can repack the data: (optional)
+        log.info("Compress take time :" + (System.currentTimeMillis() - start));
+
         return Arrays.copyOf(compressed, outputOffset.intValue());
     }
 
     public static int[] unCompress(int[] compressed) {
+        long start = System.currentTimeMillis();
         int size = compressed[0];
         if (size == 0) {
             return new int[0];
@@ -60,6 +63,7 @@ public class IntegratedUtils {
         IntWrapper recOffset = new IntWrapper(0);
         sortedCodec.headlessUncompress(compressed, new IntWrapper(1), compressed.length, recovered, recOffset, size,
                 new IntWrapper(0));
+        log.info("UnCompress take time :" + (System.currentTimeMillis() - start));
         return recovered;
     }
 
