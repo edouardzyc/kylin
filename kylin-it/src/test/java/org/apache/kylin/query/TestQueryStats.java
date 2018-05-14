@@ -19,14 +19,22 @@
 package org.apache.kylin.query;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.QueryContext;
 import org.apache.kylin.common.QueryContext.CubeSegmentStatistics;
 import org.apache.kylin.common.QueryContext.CubeSegmentStatisticsResult;
+import org.apache.kylin.cube.CubeDescManager;
+import org.apache.kylin.cube.CubeInstance;
+import org.apache.kylin.cube.CubeManager;
+import org.apache.kylin.cube.model.CubeDesc;
+import org.apache.kylin.cube.model.RowKeyColDesc;
+import org.apache.kylin.metadata.model.TblColRef;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
@@ -39,7 +47,7 @@ public class TestQueryStats {
     public TestQueryStats() {
     }
     
-    public TestQueryStats(QueryContext queryContext) {
+    public TestQueryStats(KylinConfig config, String project, QueryContext queryContext) {
         realizationStatsList = Lists.newArrayList();
         for (CubeSegmentStatisticsResult cssResult : queryContext.getCubeSegmentStatisticsResultList()) {
             RealizationStats rStats = new RealizationStats();
@@ -54,13 +62,31 @@ public class TestQueryStats {
                     .getCubeSegmentStatisticsMap().entrySet()) {
                 for (Entry<String, CubeSegmentStatistics> segmentEntry : cubeEntry.getValue().entrySet()) {
                     CubeSegmentStatistics css = segmentEntry.getValue();
-                    rStats.sourceCuboidId = css.getSourceCuboidId();
-                    rStats.targetCuboidId = css.getTargetCuboidId();
+                    CubeDesc cubeDesc = CubeDescManager.getInstance(config).getCubeDesc(css.getCubeName());
+                    rStats.sourceCuboidCols = translateIdToColumns(cubeDesc, css.getSourceCuboidId());
+                    rStats.targetCuboidCols = translateIdToColumns(cubeDesc, css.getTargetCuboidId());
                     break;
                 }
                 break;
             }
         }
+    }
+
+
+    private List<String> translateIdToColumns(CubeDesc cubeDesc, long cuboidID) {
+        List<String> dimesnions = Lists.newArrayList();
+        if (cubeDesc == null) {
+            return dimesnions;
+        }
+        RowKeyColDesc[] allColumns = cubeDesc.getRowkey().getRowKeyColumns();
+        for (int i = 0; i < allColumns.length; i++) {
+            long bitmask = 1L << allColumns[i].getBitIndex();
+            if ((cuboidID & bitmask) != 0) {
+                TblColRef colRef = allColumns[i].getColRef();
+                dimesnions.add(colRef.getIdentity());
+            }
+        }
+        return dimesnions;
     }
     
     @Override
@@ -88,10 +114,10 @@ public class TestQueryStats {
         private String realization;
         @JsonProperty("realization_type")
         private String realizationType;
-        @JsonProperty("source_cuboid_id")
-        private long sourceCuboidId;
-        @JsonProperty("target_cuboid_id")
-        private long targetCuboidId;
+        @JsonProperty("source_cuboid_cols")
+        private List<String> sourceCuboidCols = Lists.newArrayList();;
+        @JsonProperty("target_cuboid_cols")
+        private List<String> targetCuboidCols = Lists.newArrayList();;
         
         @Override
         public boolean equals(Object obj) {
@@ -108,10 +134,10 @@ public class TestQueryStats {
             if (!StringUtils.equals(this.realizationType, other.realizationType)) {
                 return false;
             }
-            if (this.sourceCuboidId != other.sourceCuboidId) {
+            if (!(this.sourceCuboidCols.equals(other.sourceCuboidCols))) {
                 return false;
             }
-            if (this.targetCuboidId != other.targetCuboidId) {
+            if (!(this.targetCuboidCols.equals(other.targetCuboidCols))) {
                 return false;
             }
             return true;
@@ -123,8 +149,8 @@ public class TestQueryStats {
             result = 31 * result + queryType.hashCode();
             result = 31 * result + realization.hashCode();
             result = 31 * result + realizationType.hashCode();
-            result = 31 * result + Long.hashCode(sourceCuboidId);
-            result = 31 * result + Long.hashCode(targetCuboidId);
+            result = 31 * result + sourceCuboidCols.hashCode();
+            result = 31 * result + targetCuboidCols.hashCode();
             return result;
         }
     }

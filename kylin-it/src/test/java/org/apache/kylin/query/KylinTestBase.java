@@ -652,7 +652,7 @@ public class KylinTestBase {
             
             QueryContext queryContext = QueryContext.current();
             dumpTestQueryStats(sqlFile, queryContext);
-            Assert.assertTrue(verifyTestQueryStats(sqlFile, queryContext));
+            verifyTestQueryStats(sqlFile, queryContext);
 
             compQueryCount++;
             if (kylinTable.getRowCount() == 0) {
@@ -835,17 +835,17 @@ public class KylinTestBase {
     protected String getTestQueryStatsFilePostfix() {
         return ".stats";
     }
-    
-    protected boolean enableDumpTestQueryStats() {
-        return true;
+
+    protected boolean isDumpTestQueryStatsEnabled() {
+        return false;
     }
 
     private void dumpTestQueryStats(File sqlFile, QueryContext queryContext) {
-        if (!enableDumpTestQueryStats()) {
+        if (!isDumpTestQueryStatsEnabled()) {
             return;
         }
         try {
-            TestQueryStats queryStats = new TestQueryStats(queryContext);
+            TestQueryStats queryStats = new TestQueryStats(config, ProjectInstance.DEFAULT_PROJECT_NAME, queryContext);
             String json = JsonUtil.writeValueAsIndentString(queryStats);
             File queryStatsFile = new File(sqlFile.getAbsolutePath() + getTestQueryStatsFilePostfix());
             FileUtils.writeStringToFile(queryStatsFile, json);
@@ -855,26 +855,22 @@ public class KylinTestBase {
         }
     }
 
-    protected boolean enableVerifyTestQueryStats() {
-        return true;
+    protected boolean isVerifyTestQueryStatsEnabled() {
+        return false;
     }
 
-    private boolean verifyTestQueryStats(File sqlFile, QueryContext queryContext) {
-        if (!enableVerifyTestQueryStats()) {
-            return true;
+    private void verifyTestQueryStats(File sqlFile, QueryContext queryContext) {
+        if (!isVerifyTestQueryStatsEnabled()) {
+            return;
         }
         try {
-            TestQueryStats actual = new TestQueryStats(queryContext);
+            TestQueryStats actual = new TestQueryStats(config, ProjectInstance.DEFAULT_PROJECT_NAME, queryContext);
             File queryStatsFile = new File(sqlFile.getPath() + getTestQueryStatsFilePostfix());
             String json = FileUtils.readFileToString(queryStatsFile);
             TestQueryStats expected = JsonUtil.readValue(json, TestQueryStats.class);
-            if (expected == null) {
-                return false;
-            }
-            return expected.equals(actual);
+            Assert.assertEquals(expected, actual);
         } catch (IOException e) {
-            logger.error("Fail to dump query stats", e);
-            return false;
+            logger.error("Fail to compare query stats of {}", sqlFile.getPath(), e);
         }
     }
 }
