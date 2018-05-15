@@ -1,0 +1,45 @@
+{
+  "realizations" : [ {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "INVERTED_INDEX",
+    "source_cuboid_cols" : [ ],
+    "target_cuboid_cols" : [ ]
+  }, {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "INVERTED_INDEX",
+    "source_cuboid_cols" : [ ],
+    "target_cuboid_cols" : [ ]
+  }, {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "INVERTED_INDEX",
+    "source_cuboid_cols" : [ ],
+    "target_cuboid_cols" : [ ]
+  }, {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "INVERTED_INDEX",
+    "source_cuboid_cols" : [ ],
+    "target_cuboid_cols" : [ ]
+  }, {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "INVERTED_INDEX",
+    "source_cuboid_cols" : [ ],
+    "target_cuboid_cols" : [ ]
+  }, {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "INVERTED_INDEX",
+    "source_cuboid_cols" : [ ],
+    "target_cuboid_cols" : [ ]
+  }, {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "INVERTED_INDEX",
+    "source_cuboid_cols" : [ ],
+    "target_cuboid_cols" : [ ]
+  } ]
+}

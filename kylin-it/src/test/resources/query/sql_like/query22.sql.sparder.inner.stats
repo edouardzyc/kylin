@@ -1,0 +1,9 @@
+{
+  "realizations" : [ {
+    "query_type" : "OLAP",
+    "realization" : "ci_inner_join_hybrid",
+    "realization_type" : "HYBRID",
+    "source_cuboid_cols" : [ "TEST_CATEGORY_GROUPINGS.META_CATEG_NAME" ],
+    "target_cuboid_cols" : [ "TEST_CATEGORY_GROUPINGS.META_CATEG_NAME" ]
+  } ]
+}

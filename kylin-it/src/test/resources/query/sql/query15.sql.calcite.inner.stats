@@ -1,0 +1,9 @@
+{
+  "realizations" : [ {
+    "query_type" : "OLAP",
+    "realization" : "ci_inner_join_hybrid",
+    "realization_type" : "HYBRID",
+    "source_cuboid_cols" : [ "TEST_KYLIN_FACT.CAL_DT", "TEST_CATEGORY_GROUPINGS.META_CATEG_NAME" ],
+    "target_cuboid_cols" : [ "TEST_KYLIN_FACT.CAL_DT", "TEST_KYLIN_FACT.LEAF_CATEG_ID", "TEST_CATEGORY_GROUPINGS.META_CATEG_NAME", "TEST_CATEGORY_GROUPINGS.CATEG_LVL2_NAME", "TEST_CATEGORY_GROUPINGS.CATEG_LVL3_NAME" ]
+  } ]
+}

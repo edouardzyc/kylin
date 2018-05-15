@@ -1,0 +1,9 @@
+{
+  "realizations" : [ {
+    "query_type" : "OLAP",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "CUBE",
+    "source_cuboid_cols" : [ "TEST_KYLIN_FACT.LSTG_FORMAT_NAME", "TEST_KYLIN_FACT.SLR_SEGMENT_CD" ],
+    "target_cuboid_cols" : [ "TEST_KYLIN_FACT.LSTG_FORMAT_NAME", "TEST_KYLIN_FACT.LSTG_SITE_ID", "TEST_KYLIN_FACT.SLR_SEGMENT_CD", "TEST_KYLIN_FACT.DEAL_YEAR" ]
+  } ]
+}

@@ -1,0 +1,21 @@
+{
+  "realizations" : [ {
+    "query_type" : "OLAP",
+    "realization" : "ci_inner_join_hybrid",
+    "realization_type" : "HYBRID",
+    "source_cuboid_cols" : [ "TEST_KYLIN_FACT.CAL_DT", "TEST_KYLIN_FACT.LSTG_SITE_ID" ],
+    "target_cuboid_cols" : [ "TEST_KYLIN_FACT.CAL_DT", "TEST_KYLIN_FACT.LSTG_FORMAT_NAME", "TEST_KYLIN_FACT.LSTG_SITE_ID", "TEST_KYLIN_FACT.SLR_SEGMENT_CD" ]
+  }, {
+    "query_type" : "LOOKUP_TABLE",
+    "realization" : null,
+    "realization_type" : null,
+    "source_cuboid_cols" : [ ],
+    "target_cuboid_cols" : [ ]
+  }, {
+    "query_type" : "LOOKUP_TABLE",
+    "realization" : null,
+    "realization_type" : null,
+    "source_cuboid_cols" : [ ],
+    "target_cuboid_cols" : [ ]
+  } ]
+}

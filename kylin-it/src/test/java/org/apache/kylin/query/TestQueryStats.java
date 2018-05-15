@@ -19,7 +19,6 @@
 package org.apache.kylin.query;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,8 +29,6 @@ import org.apache.kylin.common.QueryContext;
 import org.apache.kylin.common.QueryContext.CubeSegmentStatistics;
 import org.apache.kylin.common.QueryContext.CubeSegmentStatisticsResult;
 import org.apache.kylin.cube.CubeDescManager;
-import org.apache.kylin.cube.CubeInstance;
-import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.cube.model.CubeDesc;
 import org.apache.kylin.cube.model.RowKeyColDesc;
 import org.apache.kylin.metadata.model.TblColRef;

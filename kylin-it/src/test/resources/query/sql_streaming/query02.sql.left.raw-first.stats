@@ -1,9 +1,0 @@
-{
-  "realizations" : [ {
-    "query_type" : "OLAP",
-    "realization" : null,
-    "realization_type" : null,
-    "source_cuboid_id" : 6,
-    "target_cuboid_id" : 6
-  } ]
-}

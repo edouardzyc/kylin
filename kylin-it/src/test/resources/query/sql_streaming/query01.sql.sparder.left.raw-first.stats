@@ -1,0 +1,9 @@
+{
+  "realizations" : [ {
+    "query_type" : "OLAP",
+    "realization" : "test_streaming_table_cube",
+    "realization_type" : "CUBE",
+    "source_cuboid_cols" : [ ],
+    "target_cuboid_cols" : [ "STREAMING_TABLE.ITM" ]
+  } ]
+}
