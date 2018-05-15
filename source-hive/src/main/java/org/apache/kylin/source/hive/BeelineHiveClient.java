@@ -18,7 +18,6 @@
 
 package org.apache.kylin.source.hive;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -123,13 +122,14 @@ public class BeelineHiveClient implements IHiveClient {
     }
 
     @Override
-    public void executeHQL(String hql) throws IOException {
-        throw new UnsupportedOperationException();
+    public void executeHQL(String hql) throws Exception {
+        stmt.execute(hql);
     }
 
     @Override
-    public void executeHQL(String[] hqls) throws IOException {
-        throw new UnsupportedOperationException();
+    public void executeHQL(String[] hqls) throws Exception {
+        for (String sql : hqls)
+            executeHQL(sql);
     }
 
     public HiveTableMeta getHiveTableMeta(String database, String tableName) throws SQLException {

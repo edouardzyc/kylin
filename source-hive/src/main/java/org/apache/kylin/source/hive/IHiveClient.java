@@ -18,14 +18,13 @@
 
 package org.apache.kylin.source.hive;
 
-import java.io.IOException;
 import java.util.List;
 
 public interface IHiveClient {
 
-    void executeHQL(String hql) throws IOException;
+    void executeHQL(String hql) throws Exception;
 
-    void executeHQL(String[] hqls) throws IOException;
+    void executeHQL(String[] hqls) throws Exception;
     
     HiveTableMeta getHiveTableMeta(String database, String tableName) throws Exception;
 

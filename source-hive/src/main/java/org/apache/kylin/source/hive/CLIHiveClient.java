@@ -18,7 +18,6 @@
 
 package org.apache.kylin.source.hive;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -49,10 +48,10 @@ public class CLIHiveClient implements IHiveClient {
 
     /**
      * only used by Deploy Util
-     * @throws IOException 
+     * @throws Exception 
      */
     @Override
-    public void executeHQL(String hql) throws IOException {
+    public void executeHQL(String hql) throws Exception {
         final HiveCmdBuilder hiveCmdBuilder = new HiveCmdBuilder();
         hiveCmdBuilder.addStatement(hql);
         Pair<Integer, String> response = KylinConfig.getInstanceFromEnv().getCliCommandExecutor()
@@ -67,7 +66,7 @@ public class CLIHiveClient implements IHiveClient {
      * only used by Deploy Util
      */
     @Override
-    public void executeHQL(String[] hqls) throws IOException {
+    public void executeHQL(String[] hqls) throws Exception {
         for (String sql : hqls)
             executeHQL(sql);
     }
