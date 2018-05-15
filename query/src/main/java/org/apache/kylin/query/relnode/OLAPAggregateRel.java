@@ -47,6 +47,7 @@ import org.apache.calcite.schema.FunctionParameter;
 import org.apache.calcite.schema.impl.AggregateFunctionImpl;
 import org.apache.calcite.sql.SqlAggFunction;
 import org.apache.calcite.sql.SqlIdentifier;
+import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.type.InferTypes;
@@ -109,6 +110,10 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
     }
 
     public static String getAggrFuncName(AggregateCall aggCall) {
+        // issue 4337
+        if(aggCall.getAggregation().kind.equals(SqlKind.SINGLE_VALUE)){
+            return SqlKind.SINGLE_VALUE.sql;
+        }
         String sqlName = getSqlFuncName(aggCall);
         String funcName = AGGR_FUNC_MAP.get(sqlName);
         if (funcName == null) {
