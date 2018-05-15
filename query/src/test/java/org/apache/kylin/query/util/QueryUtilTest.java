@@ -177,4 +177,10 @@ public class QueryUtilTest extends LocalFileMetadataTestCase {
         Assert.assertNotNull(s);
         Assert.assertEquals("select SUM(\"LSTG_SITE_ID\") from KYLIN_SALES group by LSTG_SITE_ID".toUpperCase(), s.toUpperCase());
     }
+
+    @Test
+    public void testUnknownErrorResponseMessage() {
+        String msg = QueryUtil.makeErrorMsgUserFriendly(new NullPointerException());
+        Assert.assertEquals("Unknown error.", msg);
+    }
 }
