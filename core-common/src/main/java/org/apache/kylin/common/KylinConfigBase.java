@@ -1296,7 +1296,7 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public int getBadQueryHistoryNum() {
-        return Integer.parseInt(getOptional("kylin.query.badquery-history-number", "50"));
+        return Integer.parseInt(getOptional("kylin.query.badquery-history-number", "500"));
     }
 
     public int getBadQueryDefaultAlertingSeconds() {
