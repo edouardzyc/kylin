@@ -6,15 +6,15 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 package org.apache.kylin.common.restclient;
 
@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -114,7 +115,7 @@ public class RestClient {
     }
 
     public RestClient(String host, int port, String userName, String password, Integer httpConnectionTimeoutMs,
-            Integer httpSocketTimeoutMs) {
+                      Integer httpSocketTimeoutMs) {
         if (httpConnectionTimeoutMs != null)
             this.httpConnectionTimeoutMs = httpConnectionTimeoutMs;
         if (httpSocketTimeoutMs != null)
@@ -236,6 +237,59 @@ public class RestClient {
 
     public boolean purgeCube(String cubeName) throws Exception {
         return changeCubeStatus(baseUrl + "/cubes/" + cubeName + "/purge");
+    }
+
+    public HashMap mergeSegment(String cube, List<String> segments, Boolean force) throws IOException {
+        String url = baseUrl + "/cubes/" + cube + "/segments";
+        HttpPut put = newPut(url);
+        put.addHeader("Content-Type", "application/vnd.apache.kylin-v2+json");
+        HttpResponse response = null;
+        try {
+            HashMap<String, Object> paraMap = new HashMap<String, Object>();
+            paraMap.put("segments", segments);
+            paraMap.put("force", force);
+            paraMap.put("buildType", "MERGE");
+            paraMap.put("mpValues", "");
+            String jsonMsg = JsonUtil.writeValueAsString(paraMap);
+            put.setEntity(new StringEntity(jsonMsg, "UTF-8"));
+            response = client.execute(put);
+            if (response.getStatusLine().getStatusCode() != 200) {
+                throw new IOException("Invalid response " + response.getStatusLine().getStatusCode()
+                        + " with merge segment  " + url + "\n" + jsonMsg);
+            }
+            return dealResponse(response);
+        } finally {
+            cleanup(put, response);
+        }
+    }
+
+    public void resumeJob(String job) throws IOException {
+        String url = baseUrl + "/jobs/" + job + "/resume";
+        HttpPut put = newPut(url);
+        put.addHeader("Content-Type", "application/vnd.apache.kylin-v2+json");
+        HttpResponse response = null;
+        try {
+            response = client.execute(put);
+            if (response.getStatusLine().getStatusCode() != 200) {
+                throw new IOException("Invalid response " + response.getStatusLine().getStatusCode()
+                        + " with resume job  " + url);
+            }
+        } finally {
+            cleanup(put, response);
+        }
+    }
+
+    public HashMap getJob(String jobId) throws Exception {
+        String url = baseUrl + "/jobs/" + jobId;
+        HttpGet get = newGet(url);
+        HttpResponse response = null;
+        try {
+            get.setURI(new URI(url));
+            response = client.execute(get);
+            return dealResponse(response);
+        } finally {
+            cleanup(get, response);
+        }
     }
 
     public HashMap getCube(String cubeName) throws Exception {
