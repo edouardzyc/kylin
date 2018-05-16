@@ -18,7 +18,6 @@
 
 package org.apache.kylin.engine.mr;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.kylin.cube.CubeSegment;
@@ -66,13 +65,15 @@ public class JobBuilderSupport {
         result.setName(ExecutableConstants.STEP_NAME_FACT_DISTINCT_COLUMNS);
         result.setMapReduceJobClass(FactDistinctColumnsJob.class);
         StringBuilder cmd = new StringBuilder();
-        appendMapReduceParameters(cmd);
+        result.setExtraJobParams(seg);
         appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getRealization().getName());
         appendExecCmdParameters(cmd, BatchConstants.ARG_OUTPUT, getFactDistinctColumnsPath(jobId));
         appendExecCmdParameters(cmd, BatchConstants.ARG_SEGMENT_ID, seg.getUuid());
         appendExecCmdParameters(cmd, BatchConstants.ARG_STATS_OUTPUT, getStatisticsPath(jobId));
-        appendExecCmdParameters(cmd, BatchConstants.ARG_STATS_SAMPLING_PERCENT, String.valueOf(config.getConfig().getCubingInMemSamplingPercent()));
-        appendExecCmdParameters(cmd, BatchConstants.ARG_JOB_NAME, "Kylin_Fact_Distinct_Columns_" + seg.getRealization().getName() + "_Step");
+        appendExecCmdParameters(cmd, BatchConstants.ARG_STATS_SAMPLING_PERCENT,
+                String.valueOf(config.getConfig().getCubingInMemSamplingPercent()));
+        appendExecCmdParameters(cmd, BatchConstants.ARG_JOB_NAME,
+                "Kylin_Fact_Distinct_Columns_" + seg.getRealization().getName() + "_Step");
         appendExecCmdParameters(cmd, BatchConstants.ARG_CUBING_JOB_ID, jobId);
         result.setMapReduceParams(cmd.toString());
         result.setCounterSaveAs(CubingJob.SOURCE_RECORD_COUNT + "," + CubingJob.SOURCE_SIZE_BYTES);
@@ -84,11 +85,12 @@ public class JobBuilderSupport {
         result.setName(ExecutableConstants.STEP_NAME_BUILD_UHC_DICTIONARY);
         result.setMapReduceJobClass(UHCDictionaryJob.class);
         StringBuilder cmd = new StringBuilder();
-        appendMapReduceParameters(cmd);
+        result.setExtraJobParams(seg);
         appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getRealization().getName());
         appendExecCmdParameters(cmd, BatchConstants.ARG_OUTPUT, getDictRootPath(jobId));
         appendExecCmdParameters(cmd, BatchConstants.ARG_INPUT, getFactDistinctColumnsPath(jobId));
-        appendExecCmdParameters(cmd, BatchConstants.ARG_JOB_NAME, "Kylin_Build_UHC_Dict" + seg.getRealization().getName());
+        appendExecCmdParameters(cmd, BatchConstants.ARG_JOB_NAME,
+                "Kylin_Build_UHC_Dict" + seg.getRealization().getName());
         appendExecCmdParameters(cmd, BatchConstants.ARG_CUBING_JOB_ID, jobId);
         result.setMapReduceParams(cmd.toString());
         result.setCounterSaveAs(CubingJob.SOURCE_RECORD_COUNT + "," + CubingJob.SOURCE_SIZE_BYTES);
@@ -105,7 +107,7 @@ public class JobBuilderSupport {
         result.setName(ExecutableConstants.STEP_NAME_CALCULATE_STATS_FROM_BASE_CUBOID);
         result.setMapReduceJobClass(CalculateStatsFromBaseCuboidJob.class);
         StringBuilder cmd = new StringBuilder();
-        appendMapReduceParameters(cmd);
+        result.setExtraJobParams(seg);
         appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getRealization().getName());
         appendExecCmdParameters(cmd, BatchConstants.ARG_SEGMENT_ID, seg.getUuid());
         appendExecCmdParameters(cmd, BatchConstants.ARG_INPUT, inputPath);
@@ -158,7 +160,8 @@ public class JobBuilderSupport {
         return result;
     }
 
-    public UpdateCubeInfoAfterMergeStep createUpdateCubeInfoAfterMergeStep(List<String> mergingSegmentIds, String jobId) {
+    public UpdateCubeInfoAfterMergeStep createUpdateCubeInfoAfterMergeStep(List<String> mergingSegmentIds,
+            String jobId) {
         UpdateCubeInfoAfterMergeStep result = new UpdateCubeInfoAfterMergeStep();
         result.setName(ExecutableConstants.STEP_NAME_UPDATE_CUBE_INFO);
 
@@ -186,21 +189,6 @@ public class JobBuilderSupport {
 
     public String getCuboidRootPath(CubeSegment seg) {
         return getCuboidRootPath(seg.getLastBuildJobID());
-    }
-
-    public void appendMapReduceParameters(StringBuilder buf) {
-        appendMapReduceParameters(buf, JobEngineConfig.DEFAUL_JOB_CONF_SUFFIX);
-    }
-
-    public void appendMapReduceParameters(StringBuilder buf, String jobType) {
-        try {
-            String jobConf = config.getHadoopJobConfFilePath(jobType);
-            if (jobConf != null && jobConf.length() > 0) {
-                buf.append(" -conf ").append(jobConf);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public String getFactDistinctColumnsPath(String jobId) {

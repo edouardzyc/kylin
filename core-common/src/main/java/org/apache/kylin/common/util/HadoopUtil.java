@@ -20,6 +20,9 @@ package org.apache.kylin.common.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -84,7 +87,7 @@ public class HadoopUtil {
     public static FileSystem getFileSystem(String path, Configuration conf) throws IOException {
         return getFileSystem(new Path(makeURI(path)), conf);
     }
-    
+
     public static FileSystem getFileSystem(Path path) throws IOException {
         Configuration conf = getCurrentConfiguration();
         return getFileSystem(path, conf);
@@ -185,5 +188,15 @@ public class HadoopUtil {
             result[i] = fileStatus[i].getPath();
         }
         return result;
+    }
+
+    public static Configuration loadConfig(String path) {
+        Configuration config = new Configuration(false);
+        try {
+            config.addResource(new FileInputStream(new File(path)));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("Job config file is not exists, path: " + path);
+        }
+        return config;
     }
 }

@@ -123,7 +123,7 @@ public class BatchCubingJobBuilder2 extends JobBuilderSupport {
         MapReduceExecutable cubeStep = new MapReduceExecutable();
 
         StringBuilder cmd = new StringBuilder();
-        appendMapReduceParameters(cmd, JobEngineConfig.IN_MEM_JOB_CONF_SUFFIX);
+        cubeStep.setExtraJobParams(seg, JobEngineConfig.IN_MEM_JOB_CONF_SUFFIX);
 
         cubeStep.setName(ExecutableConstants.STEP_NAME_BUILD_IN_MEM_CUBE);
 
@@ -147,7 +147,7 @@ public class BatchCubingJobBuilder2 extends JobBuilderSupport {
         MapReduceExecutable baseCuboidStep = new MapReduceExecutable();
 
         StringBuilder cmd = new StringBuilder();
-        appendMapReduceParameters(cmd);
+        baseCuboidStep.setExtraJobParams(seg);
 
         baseCuboidStep.setName(ExecutableConstants.STEP_NAME_BUILD_BASE_CUBOID);
 
@@ -176,7 +176,7 @@ public class BatchCubingJobBuilder2 extends JobBuilderSupport {
         ndCuboidStep.setName(ExecutableConstants.STEP_NAME_BUILD_N_D_CUBOID + " : level " + level);
         StringBuilder cmd = new StringBuilder();
 
-        appendMapReduceParameters(cmd);
+        ndCuboidStep.setExtraJobParams(seg);
         appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getRealization().getName());
         appendExecCmdParameters(cmd, BatchConstants.ARG_SEGMENT_ID, seg.getUuid());
         appendExecCmdParameters(cmd, BatchConstants.ARG_INPUT, parentPath);
