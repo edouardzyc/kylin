@@ -136,19 +136,19 @@ public class SDictTest {
     @Ignore
     public void benchmark() throws IOException {
         int cap = 1000 * 1000;
-        String[] dict = new String[cap];
-        for (int i = 0; i < dict.length; i++) {
-            dict[i] = gen();
-        }
+//        String[] dict = new String[cap];
+//        for (int i = 0; i < dict.length; i++) {
+//            dict[i] = gen();
+//        }
+//
+//        SDict w = new SDict(dict);
+//        File f = File.createTempFile("dict", ".dict");
+//        f.deleteOnExit();
+//        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(f))) {
+//            w.write(out);
+//        }
 
-        SDict w = new SDict(dict);
-        File f = File.createTempFile("dict", ".dict");
-        f.deleteOnExit();
-        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(f))) {
-            w.write(out);
-        }
-
-        RandomAccessFile in = new RandomAccessFile(f, "r");
+        RandomAccessFile in = new RandomAccessFile(new File("/Users/imad/mock_kylin/metastore/data.sdict"), "r");
         SDict r = new SDict(in);
         r.init();
 

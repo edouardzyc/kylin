@@ -22,12 +22,11 @@ package org.apache.kylin.dict.project;
 public class DisguiseOriginDictionary extends DisguiseDictionary {
 
     DictPatch dictPatch;
-    int sizeOfId;
 
     public DisguiseOriginDictionary(DictPatch maxVersionPatch, int sizeOfId) {
         super();
         this.dictPatch = maxVersionPatch;
-        this.sizeOfId = sizeOfId;
+        this.idLength = sizeOfId;
     }
     @Override
     public int upgrade(int originId) {

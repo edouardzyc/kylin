@@ -6,29 +6,28 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 package org.apache.kylin.rest.response;
 
-import java.io.Serializable;
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.kylin.common.QueryContext;
 import org.apache.kylin.metadata.querymeta.SelectedColumnMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.collect.Lists;
+import java.io.Serializable;
+import java.util.List;
 
 public class SQLResponse implements Serializable {
     protected static final long serialVersionUID = 1L;
@@ -73,14 +72,33 @@ public class SQLResponse implements Serializable {
     protected boolean queryPushDown = false;
 
     protected byte[] queryStatistics;
-    
+
     protected String traceUrl = null;
+    protected boolean isSparderEnabled;
+
+    protected boolean isLateDecodeEnabled;
+
+    public boolean isSparderEnabled() {
+        return isSparderEnabled;
+    }
+
+    public void setSparderEnabled(boolean sparderEnabled) {
+        isSparderEnabled = sparderEnabled;
+    }
+
+    public boolean isLateDecodeEnabled() {
+        return isLateDecodeEnabled;
+    }
+
+    public void setLateDecodeEnabled(boolean lateDecodeEnabled) {
+        isLateDecodeEnabled = lateDecodeEnabled;
+    }
 
     public SQLResponse() {
     }
 
     public SQLResponse(List<SelectedColumnMeta> columnMetas, List<List<String>> results, int affectedRowCount,
-            boolean isException, String exceptionMessage) {
+                       boolean isException, String exceptionMessage) {
         this.columnMetas = columnMetas;
         this.results = results;
         this.affectedRowCount = affectedRowCount;
@@ -89,7 +107,7 @@ public class SQLResponse implements Serializable {
     }
 
     public SQLResponse(List<SelectedColumnMeta> columnMetas, List<List<String>> results, String cube,
-            int affectedRowCount, boolean isException, String exceptionMessage, boolean isPartial, boolean isPushDown) {
+                       int affectedRowCount, boolean isException, String exceptionMessage, boolean isPartial, boolean isPushDown) {
         this.columnMetas = columnMetas;
         this.results = results;
         this.cube = cube;
@@ -205,11 +223,11 @@ public class SQLResponse implements Serializable {
     public void setTraceUrl(String traceUrl) {
         this.traceUrl = traceUrl;
     }
-    
+
     @JsonIgnore
     public List<QueryContext.CubeSegmentStatisticsResult> getCubeSegmentStatisticsList() {
         try {
-            return queryStatistics == null ? Lists.<QueryContext.CubeSegmentStatisticsResult> newArrayList()
+            return queryStatistics == null ? Lists.<QueryContext.CubeSegmentStatisticsResult>newArrayList()
                     : (List<QueryContext.CubeSegmentStatisticsResult>) SerializationUtils.deserialize(queryStatistics);
         } catch (Exception e) { // deserialize exception should not block query
             logger.warn("Error while deserialize queryStatistics due to " + e);

@@ -14,9 +14,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 package org.apache.kylin.common;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.kylin.common.exceptions.KylinTimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.List;
@@ -24,13 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.apache.kylin.common.exceptions.KylinTimeoutException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 /**
  * Holds per query information and statistics.
@@ -57,6 +56,34 @@ public class QueryContext {
 
     private List<RPCStatistics> rpcStatisticsList = Lists.newCopyOnWriteArrayList();
     private Map<Integer, CubeSegmentStatisticsResult> cubeSegmentStatisticsResultMap = Maps.newLinkedHashMap();
+
+    private boolean hasRuntimeAgg;
+    private boolean isSparderEnabled;
+    private boolean isLateDecode;
+
+    public boolean isSparderEnabled() {
+        return isSparderEnabled;
+    }
+
+    public void setSparderEnabled(boolean sparderEnabled) {
+        isSparderEnabled = sparderEnabled;
+    }
+
+    public boolean isLateDecode() {
+        return isLateDecode;
+    }
+
+    public void setLateDecode(boolean lateDecode) {
+        isLateDecode = lateDecode;
+    }
+
+    public boolean hasRuntimeAgg() {
+        return hasRuntimeAgg;
+    }
+
+    public void setHasRuntimeAgg(Boolean hasRuntimeAgg) {
+        this.hasRuntimeAgg = hasRuntimeAgg;
+    }
 
     private QueryContext() {
         // use QueryContext.current() instead
@@ -160,7 +187,7 @@ public class QueryContext {
     }
 
     public CubeSegmentStatistics addCubeSegmentStatistics(int ctxId, String cubeName, String segmentName, long sourceCuboidId, long targetCuboidId,
-            long filterMask) {
+                                                          long filterMask) {
         CubeSegmentStatisticsResult cubeSegmentStatisticsResult = cubeSegmentStatisticsResultMap.get(ctxId);
         if (cubeSegmentStatisticsResult == null) {
             logger.warn("CubeSegmentStatisticsResult should be initialized for context " + ctxId);
@@ -188,8 +215,8 @@ public class QueryContext {
     }
 
     public void addRPCStatistics(int ctxId, String rpcServer, String cubeName, String segmentName, long sourceCuboidId,
-            long targetCuboidId, long filterMask, Exception e, long rpcCallTimeMs, long skippedRows, long scannedRows,
-            long returnedRows, long aggregatedRows, long scannedBytes) {
+                                 long targetCuboidId, long filterMask, Exception e, long rpcCallTimeMs, long skippedRows, long scannedRows,
+                                 long returnedRows, long aggregatedRows, long scannedBytes) {
         RPCStatistics rpcStatistics = new RPCStatistics();
         rpcStatistics.setWrapper(cubeName, rpcServer);
         rpcStatistics.setStats(rpcCallTimeMs, skippedRows, scannedRows, returnedRows, aggregatedRows, scannedBytes);
@@ -244,7 +271,7 @@ public class QueryContext {
         }
 
         public void setStats(long callTimeMs, long skipCount, long scanCount, long returnCount, long aggrCount,
-                long scanBytes) {
+                             long scanBytes) {
             this.callTimeMs = callTimeMs;
             this.skippedRows = skipCount;
             this.scannedRows = scanCount;
@@ -354,7 +381,7 @@ public class QueryContext {
         private long storageScannedBytes = 0L;
 
         public void setWrapper(String cubeName, String segmentName, long sourceCuboidId, long targetCuboidId,
-                long filterMask) {
+                               long filterMask) {
             this.cubeName = cubeName;
             this.segmentName = segmentName;
             this.sourceCuboidId = sourceCuboidId;
@@ -363,7 +390,7 @@ public class QueryContext {
         }
 
         public void addRPCStats(long callTimeMs, long skipCount, long scanCount, long returnCount, long aggrCount,
-                long scanBytes, boolean ifSuccess) {
+                                long scanBytes, boolean ifSuccess) {
             this.callCount++;
             this.callTimeSum += callTimeMs;
             if (this.callTimeMax < callTimeMs) {
@@ -509,7 +536,7 @@ public class QueryContext {
         }
 
         public CubeSegmentStatisticsResult(String queryType,
-                Map<String, Map<String, CubeSegmentStatistics>> cubeSegmentStatisticsMap) {
+                                           Map<String, Map<String, CubeSegmentStatistics>> cubeSegmentStatisticsMap) {
             this.queryType = queryType;
             this.cubeSegmentStatisticsMap = cubeSegmentStatisticsMap;
         }

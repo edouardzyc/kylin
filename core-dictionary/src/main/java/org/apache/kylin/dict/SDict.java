@@ -18,8 +18,6 @@
 
 package org.apache.kylin.dict;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import org.apache.kylin.common.util.Dictionary;
 import org.apache.spark.unsafe.Platform;
 import sun.nio.ch.FileChannelImpl;
@@ -36,7 +34,6 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -59,8 +56,6 @@ public class SDict extends Dictionary<String> implements DictFileResource {
     private AtomicInteger occupations = new AtomicInteger(0);
     private AtomicLong accessTime = new AtomicLong(0L);
 
-
-    private Cache<Integer, byte[]> cache;
 
     public SDict() { // default constructor for Writable interface
     }
@@ -137,10 +132,6 @@ public class SDict extends Dictionary<String> implements DictFileResource {
         if (id > pos.length) {
             return null;
         }
-        byte[] bytes = cache.getIfPresent(id);
-        if (bytes != null) {
-            return bytes;
-        }
         return get(id);
     }
 
@@ -157,10 +148,6 @@ public class SDict extends Dictionary<String> implements DictFileResource {
             byteBuffer = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
             sdictByteBuffer = new SdictByteBuffer(byteBuffer);
             int size = sdictByteBuffer.getInt();
-            cache = CacheBuilder.newBuilder()
-                    .softValues()
-                    .maximumSize(size)
-                    .expireAfterWrite(1, TimeUnit.HOURS).build();
             pos = new int[size];
             for (int i = 0; i < pos.length; i++) {
                 pos[i] = sdictByteBuffer.getInt();
@@ -242,8 +229,30 @@ public class SDict extends Dictionary<String> implements DictFileResource {
         } catch (ArrayIndexOutOfBoundsException e) {
             return null;
         }
-        cache.put(id, r);
         return r;
+    }
+
+    public int getLength(int id) {
+        int length = 0;
+        if (id == 0) {
+            length = pos[0];
+        } else {
+            int p = pos[id - 1];
+            length = pos[id] - p;
+        }
+        return length;
+    }
+
+    public void copyToByte(byte[] dst, int offset, int id, int length) {
+        int base = 4 * pos.length + 4;
+        int index;
+        if (id == 0) {
+            index = base;
+        } else {
+            int p = pos[id - 1];
+            index = p + base;
+        }
+        sdictByteBuffer.copyMemory(index, dst, offset, length);
     }
 
     @Override
@@ -292,4 +301,6 @@ public class SDict extends Dictionary<String> implements DictFileResource {
             return baseAddress + ((long) i << 0);
         }
     }
+
+
 }

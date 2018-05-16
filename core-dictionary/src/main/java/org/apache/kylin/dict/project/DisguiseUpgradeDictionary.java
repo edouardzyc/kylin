@@ -22,7 +22,6 @@ package org.apache.kylin.dict.project;
 public class DisguiseUpgradeDictionary extends DisguiseDictionary {
 
     private DictPatch patch;
-    private int idLength;
     private int[] offset;
 
     public DisguiseUpgradeDictionary(DictPatch patch, int idLength) {
@@ -62,8 +61,5 @@ public class DisguiseUpgradeDictionary extends DisguiseDictionary {
         }
     }
 
-    public boolean isNullId(int id) {
-        int nullId = NULL_ID[idLength];
-        return (nullId & id) == nullId;
-    }
+
 }

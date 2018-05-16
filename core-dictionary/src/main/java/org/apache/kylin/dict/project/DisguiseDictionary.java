@@ -19,16 +19,24 @@
 package org.apache.kylin.dict.project;
 
 
-
 @SuppressWarnings("serial")
 public abstract class DisguiseDictionary {
-    public static final int[] NULL_ID = new int[] { 0, 0xff, 0xffff, 0xffffff, 0xffffffff };
+    public static final int[] NULL_ID = new int[] {0, 0xff, 0xffff, 0xffffff, 0xffffffff};
+    int idLength;
 
     /**
-     *
-     * @param originId  This segment id what the old dictionary encoding.
+     * @param originId This segment id what the old dictionary encoding.
      * @return New id for project dictionary.
      */
     public abstract int upgrade(int originId);
+
+    public int nullId() {
+        return NULL_ID[idLength];
+    }
+
+    public boolean isNullId(int id) {
+        int nullId = NULL_ID[idLength];
+        return (nullId & id) == nullId;
+    }
 
 }

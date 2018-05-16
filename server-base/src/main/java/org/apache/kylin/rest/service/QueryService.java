@@ -310,6 +310,8 @@ public class QueryService extends BasicService {
         stringBuilder.append("Storage cache used: ").append(storageCacheUsed).append(newLine);
         stringBuilder.append("Is Query Push-Down: ").append(isPushDown).append(newLine);
         stringBuilder.append("Is Prepare: ").append(BackdoorToggles.getPrepareOnly()).append(newLine);
+        stringBuilder.append("Is Sparder Enabled: ").append(response.isSparderEnabled()).append(newLine);
+        stringBuilder.append("Is Late Decode Enabled: ").append(response.isLateDecodeEnabled()).append(newLine);
         stringBuilder.append("Trace URL: ").append(response.getTraceUrl()).append(newLine);
         stringBuilder.append("Message: ").append(response.getExceptionMessage()).append(newLine);
         stringBuilder.append("==========================[QUERY]===============================").append(newLine);
@@ -465,7 +467,8 @@ public class QueryService extends BasicService {
             QueryContext queryContext = QueryContext.current();
             sqlResponse.setTotalScanCount(queryContext.getScannedRows());
             sqlResponse.setTotalScanBytes(queryContext.getScannedBytes());
-
+            sqlResponse.setSparderEnabled(queryContext.isSparderEnabled());
+            sqlResponse.setLateDecodeEnabled(queryContext.isLateDecode());
             if (queryCacheEnabled && e.getCause() != null
                     && ExceptionUtils.getRootCause(e) instanceof ResourceLimitExceededException) {
                 Cache exceptionCache = cacheManager.getCache(EXCEPTION_QUERY_CACHE);
