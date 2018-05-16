@@ -53,7 +53,7 @@ public class CLIHiveClient implements IHiveClient {
     @Override
     public void executeHQL(String hql) throws Exception {
         final HiveCmdBuilder hiveCmdBuilder = new HiveCmdBuilder();
-        hiveCmdBuilder.addStatement(hql);
+        hiveCmdBuilder.addStatement(hql.replaceAll("\\`", "\\\\`"));
         Pair<Integer, String> response = KylinConfig.getInstanceFromEnv().getCliCommandExecutor()
                 .execute(hiveCmdBuilder.toString());
         if (response.getFirst() != 0) {
