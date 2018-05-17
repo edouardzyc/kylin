@@ -38,7 +38,7 @@ import com.google.common.collect.Lists;
 public class CubingExecutableUtil {
 
     public static final String CUBE_NAME = "cubeName";
-    public static final String DISPALY_NAME = "displayName";
+    public static final String DISPLAY_NAME = "displayName";
     public static final String SEGMENT_NAME = "segmentName";
     public static final String SEGMENT_ID = "segmentId";
     public static final String MERGING_SEGMENT_IDS = "mergingSegmentIds";
@@ -61,6 +61,14 @@ public class CubingExecutableUtil {
 
     public static String getCubeName(Map<String, String> params) {
         return params.get(CUBE_NAME);
+    }
+
+    public static void setDisplayName(String displayName, Map<String, String> params) {
+        params.put(DISPLAY_NAME, displayName);
+    }
+
+    public static String getDisplayName(Map<String, String> params) {
+        return params.get(DISPLAY_NAME);
     }
 
     public static void setSegmentName(String segmentName, Map<String, String> params) {

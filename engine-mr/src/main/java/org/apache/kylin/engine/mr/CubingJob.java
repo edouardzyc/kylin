@@ -146,6 +146,7 @@ public class CubingJob extends DefaultChainedExecutable {
         CubingExecutableUtil.setCubeName(seg.getCubeInstance().getName(), result.getParams());
         CubingExecutableUtil.setSegmentId(seg.getUuid(), result.getParams());
         CubingExecutableUtil.setSegmentName(seg.getName(), result.getParams());
+        CubingExecutableUtil.setDisplayName(seg.getCubeInstance().getDisplayName(), result.getParams());
         result.setName(jobType + " CUBE - " + seg.getCubeInstance().getDisplayName() + " - " + seg.getName() + " - "
                 + format.format(new Date(System.currentTimeMillis())));
         result.setSubmitter(submitter);
@@ -267,16 +268,14 @@ public class CubingJob extends DefaultChainedExecutable {
 
     protected void updateMetrics(ExecutableContext context, ExecuteResult result, ExecutableState state) {
         JobMetricsFacade.JobStatisticsResult jobStats = new JobMetricsFacade.JobStatisticsResult();
-        jobStats.setWrapper(getSubmitter(), getProjectName(),
-                CubingExecutableUtil.getCubeName(getParams()), getId(), getJobType(),
-                getAlgorithm() == null ? "NULL" : getAlgorithm().toString());
+        jobStats.setWrapper(getSubmitter(), getProjectName(), CubingExecutableUtil.getCubeName(getParams()), getId(),
+                getJobType(), getAlgorithm() == null ? "NULL" : getAlgorithm().toString());
 
         if (state == ExecutableState.SUCCEED) {
             jobStats.setJobStats(findSourceSizeBytes(), findCubeSizeBytes(), getDuration(), getMapReduceWaitTime(),
                     getPerBytesTimeCost(findSourceSizeBytes(), getDuration()));
             if (CubingJobTypeEnum.getByName(getJobType()) == CubingJobTypeEnum.BUILD) {
-                jobStats.setJobStepStats(
-                        getTaskDurationByName(ExecutableConstants.STEP_NAME_FACT_DISTINCT_COLUMNS),
+                jobStats.setJobStepStats(getTaskDurationByName(ExecutableConstants.STEP_NAME_FACT_DISTINCT_COLUMNS),
                         getTaskDurationByName(ExecutableConstants.STEP_NAME_BUILD_DICTIONARY),
                         getTaskDurationByName(ExecutableConstants.STEP_NAME_BUILD_IN_MEM_CUBE),
                         getTaskDurationByName(ExecutableConstants.STEP_NAME_CONVERT_CUBOID_TO_HFILE));
