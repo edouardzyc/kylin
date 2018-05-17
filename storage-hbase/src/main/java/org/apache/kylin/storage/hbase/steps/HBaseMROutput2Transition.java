@@ -82,7 +82,7 @@ public class HBaseMROutput2Transition implements IMROutput2 {
             }
 
             @Override
-            public void addStepPhase5_DuplicateStorage(DefaultChainedExecutable jobFlow) {
+            public void addStepPhase5_MoveStorageToReadCluster(DefaultChainedExecutable jobFlow) {
                 // nothing to do
             }
 
@@ -150,7 +150,12 @@ public class HBaseMROutput2Transition implements IMROutput2 {
             }
 
             @Override
-            public void addStepPhase4_DuplicateStorage(DefaultChainedExecutable jobFlow) {
+            public void addStepPhase4_MoveStorageToReadCluster(DefaultChainedExecutable jobFlow) {
+                // nothing to do
+            }
+
+            @Override
+            public void addStepPhase5_CleanupMergingSegmentsStorage(DefaultChainedExecutable jobFlow) {
                 // nothing to do
             }
 

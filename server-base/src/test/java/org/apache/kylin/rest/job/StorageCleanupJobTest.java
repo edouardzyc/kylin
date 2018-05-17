@@ -105,8 +105,8 @@ public class StorageCleanupJobTest {
 
     class MockStorageCleanupJob extends StorageCleanupJob {
 
-        MockStorageCleanupJob(KylinConfig config, FileSystem defaultFs, FileSystem hbaseFs) {
-            super(config, defaultFs, hbaseFs);
+        MockStorageCleanupJob(KylinConfig config, FileSystem defaultFs, FileSystem readFs) {
+            super(config, defaultFs, readFs);
         }
 
         @Override

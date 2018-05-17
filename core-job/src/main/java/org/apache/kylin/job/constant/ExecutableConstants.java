@@ -59,6 +59,9 @@ public final class ExecutableConstants {
     public static final String STEP_NAME_HIVE_CLEANUP = "Hive Cleanup";
     public static final String STEP_NAME_KAFKA_CLEANUP = "Kafka Intermediate File Cleanup";
     public static final String STEP_NAME_GARBAGE_COLLECTION = "Garbage Collection";
+    public static final String STEP_NAME_MERGE_WORKING_DIRS_GARBAGE_COLLECTION = "Cube Merge Working Dirs Garbage Collection";
+    public static final String STEP_NAME_CUBE_TAR_COMPONENT_GARBAGE_COLLECTION = "Cube Tar Component Garbage Collection";
+    public static final String STEP_NAME_MERGING_SEGEMNTS_STORAGE_GARBAGE_COLLECTION = "Merging Segments Duplicate Storage Garbage Collection";
     public static final String STEP_NAME_GARBAGE_COLLECTION_HBASE = "Garbage Collection on HBase";
     public static final String STEP_NAME_GARBAGE_COLLECTION_HDFS = "Garbage Collection on HDFS";
     public static final String STEP_NAME_REDISTRIBUTE_FLAT_HIVE_TABLE = "Redistribute Flat Hive Table";

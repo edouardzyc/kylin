@@ -429,8 +429,9 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
             inp = inp.trim();
             if (inp.endsWith("/*")) {
                 inp = inp.substring(0, inp.length() - 2);
-                FileSystem fs = HadoopUtil.getWorkingFileSystem(job.getConfiguration());
                 Path path = new Path(inp);
+
+                FileSystem fs = HadoopUtil.getFileSystem(path);
 
                 if (!exists(fs, path)) {
                     logger.warn("Path not exist:" + path.toString());

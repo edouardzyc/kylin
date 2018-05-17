@@ -227,6 +227,12 @@ abstract public class KylinConfigBase implements Serializable {
 
     private String cachedHdfsWorkingDirectory;
 
+    public String getHdfsWorkingDirectoryWithoutScheme() {
+        String path = getHdfsWorkingDirectory();
+
+        return HadoopUtil.getPathWithoutScheme(path);
+    }
+
     public String getHdfsWorkingDirectory() {
         if (cachedHdfsWorkingDirectory != null)
             return cachedHdfsWorkingDirectory;
@@ -421,7 +427,7 @@ abstract public class KylinConfigBase implements Serializable {
     public int getAppendDictVersionTTL() {
         return Integer.parseInt(getOptional("kylin.dictionary.append-version-ttl", "259200000"));
     }
-    
+
 
     public int getCachedSnapshotMaxEntrySize() {
         return Integer.parseInt(getOptional("kylin.snapshot.max-cache-entry", "500"));
@@ -872,7 +878,7 @@ abstract public class KylinConfigBase implements Serializable {
     public Map<String, String> getSqoopConfigOverride() {
         return getPropertiesByPrefix("kylin.source.jdbc.sqoop-config-override.");
     }
-    
+
     public String getJdbcSourceFieldDelimiter() {
         return getOptional("kylin.source.jdbc.field-delimiter", "|");
     }

@@ -40,6 +40,7 @@ public interface IMROutput2 {
      * - Phase 2: Build Dictionary
      * - Phase 3: Build Cube
      * - Phase 4: Update Metadata & Cleanup
+     * - Phase 5: Move storage to read cluster
      */
     public interface IMRBatchCubingOutputSide2 {
 
@@ -58,8 +59,8 @@ public interface IMROutput2 {
         /** Add step that does any necessary clean up. */
         public void addStepPhase4_Cleanup(DefaultChainedExecutable jobFlow);
 
-        /** Add duplicate storage step for r/w mode */
-        public void addStepPhase5_DuplicateStorage(DefaultChainedExecutable jobFlow);
+        /** Add move storage to read cluster step */
+        public void addStepPhase5_MoveStorageToReadCluster(DefaultChainedExecutable jobFlow);
 
         public IMROutputFormat getOuputFormat();
 
@@ -85,6 +86,8 @@ public interface IMROutput2 {
      * - Phase 1: Merge Dictionary
      * - Phase 2: Merge Cube
      * - Phase 3: Update Metadata & Cleanup
+     * - Phase 4: Move storage to read cluster
+     * - Phase 5: Cleanup Mering Segments Data
      */
     public interface IMRBatchMergeOutputSide2 {
 
@@ -103,8 +106,11 @@ public interface IMROutput2 {
         /** Add step that does any necessary clean up. */
         public void addStepPhase3_Cleanup(DefaultChainedExecutable jobFlow);
 
-        /** Add duplicate storage step for r/w mode */
-        public void addStepPhase4_DuplicateStorage(DefaultChainedExecutable jobFlow);
+        /** Add move storage to read clusterstep */
+        public void addStepPhase4_MoveStorageToReadCluster(DefaultChainedExecutable jobFlow);
+
+        /** Add merging segments storage step */
+        public void addStepPhase5_CleanupMergingSegmentsStorage(DefaultChainedExecutable jobFlow);
 
         public IMRMergeOutputFormat getOuputFormat();
     }
