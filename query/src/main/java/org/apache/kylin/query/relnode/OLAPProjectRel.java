@@ -70,7 +70,7 @@ public class OLAPProjectRel extends Project implements OLAPRel {
     protected boolean rewriting;
     protected ColumnRowType columnRowType;
     protected boolean hasJoin;
-    protected boolean afterJoin;
+    protected boolean afterTopJoin;
     protected boolean afterAggregate;
     protected boolean isMerelyPermutation = false;//project additionally added by OLAPJoinPushThroughJoinRule
     private int caseCount = 0;
@@ -82,7 +82,7 @@ public class OLAPProjectRel extends Project implements OLAPRel {
         Preconditions.checkArgument(child.getConvention() == OLAPRel.CONVENTION);
         this.rewriteProjects = exps;
         this.hasJoin = false;
-        this.afterJoin = false;
+        this.afterTopJoin = false;
         this.rowType = getRowType();
         for (RexNode exp : exps) {
                 caseCount += RelUtils.countOperatorCall(SqlCaseOperator.INSTANCE, exp);
@@ -131,7 +131,7 @@ public class OLAPProjectRel extends Project implements OLAPRel {
 
         this.context = implementor.getContext();
         this.hasJoin = context.hasJoin;
-        this.afterJoin = context.afterJoin;
+        this.afterTopJoin = context.afterTopJoin;
         this.afterAggregate = context.afterAggregate;
 
         this.columnRowType = buildColumnRowType();
@@ -340,7 +340,7 @@ public class OLAPProjectRel extends Project implements OLAPRel {
         this.rewriting = true;
 
         // project before join or is just after OLAPToEnumerableConverter
-        if (!RewriteImplementor.needRewrite(this.context) || (this.hasJoin && !this.afterJoin) || this.afterAggregate
+        if (!RewriteImplementor.needRewrite(this.context) || (this.hasJoin && !this.afterTopJoin) || this.afterAggregate
                 || !(this.context.hasPrecalculatedFields())) {
             this.columnRowType = this.buildColumnRowType();
             return;

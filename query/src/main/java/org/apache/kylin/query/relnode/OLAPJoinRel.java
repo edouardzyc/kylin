@@ -172,7 +172,7 @@ public class OLAPJoinRel extends EnumerableJoin implements OLAPRel {
         this.columnRowType = buildColumnRowType();
 
         if (isTopJoin) {
-            this.context.afterJoin = true;
+            this.context.afterTopJoin = true;
         }
 
         if (!this.hasSubQuery) {
