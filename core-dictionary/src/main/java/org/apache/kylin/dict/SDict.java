@@ -243,7 +243,7 @@ public class SDict extends Dictionary<String> implements DictFileResource {
         return length;
     }
 
-    public void copyToByte(byte[] dst, int offset, int id, int length) {
+    public void copyToByteArray(byte[] dst, int offset, int id, int length) {
         int base = 4 * pos.length + 4;
         int index;
         if (id == 0) {

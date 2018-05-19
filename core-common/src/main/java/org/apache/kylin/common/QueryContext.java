@@ -59,7 +59,7 @@ public class QueryContext {
 
     private boolean hasRuntimeAgg;
     private boolean isSparderEnabled;
-    private boolean isLateDecode;
+    private boolean isLateDecodeEnabled;
 
     public boolean isSparderEnabled() {
         return isSparderEnabled;
@@ -69,12 +69,12 @@ public class QueryContext {
         isSparderEnabled = sparderEnabled;
     }
 
-    public boolean isLateDecode() {
-        return isLateDecode;
+    public boolean isLateDecodeEnabled() {
+        return isLateDecodeEnabled;
     }
 
-    public void setLateDecode(boolean lateDecode) {
-        isLateDecode = lateDecode;
+    public void setLateDecodeEnabled(boolean lateDecodeEnabled) {
+        isLateDecodeEnabled = lateDecodeEnabled;
     }
 
     public boolean hasRuntimeAgg() {

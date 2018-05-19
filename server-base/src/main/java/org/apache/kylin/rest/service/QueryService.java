@@ -468,7 +468,7 @@ public class QueryService extends BasicService {
             sqlResponse.setTotalScanCount(queryContext.getScannedRows());
             sqlResponse.setTotalScanBytes(queryContext.getScannedBytes());
             sqlResponse.setSparderEnabled(queryContext.isSparderEnabled());
-            sqlResponse.setLateDecodeEnabled(queryContext.isLateDecode());
+            sqlResponse.setLateDecodeEnabled(queryContext.isLateDecodeEnabled());
             if (queryCacheEnabled && e.getCause() != null
                     && ExceptionUtils.getRootCause(e) instanceof ResourceLimitExceededException) {
                 Cache exceptionCache = cacheManager.getCache(EXCEPTION_QUERY_CACHE);
