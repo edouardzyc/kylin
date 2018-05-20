@@ -292,8 +292,9 @@ public class SDict extends Dictionary<String> implements DictFileResource {
 
 
         public void copyMemory(int pos, byte[] dst, int offset, int length) {
+
             Platform.copyMemory(null, ix(pos), dst,
-                    BYTE_ARRAY_OFFSET,
+                    BYTE_ARRAY_OFFSET + ((long) offset << 0),
                     (long) length << 0);
         }
 
