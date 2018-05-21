@@ -57,9 +57,6 @@ public class MetadataCleanupJobTest {
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/PRICE/0/data.pdict",
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/PRICE/1/0-1",
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/PRICE/1/data.pdict",
-                "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/PRICE/2/0-2",
-                "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/PRICE/2/1-2",
-                "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/PRICE/2/data.pdict",
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/0/data.pdict",
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/1/0-1",
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/1/data.pdict",
@@ -93,11 +90,11 @@ public class MetadataCleanupJobTest {
         Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 1, 1), 1));
         Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 2, 1), 2));
         List<String> cleanupList = metadataCleanupJob.cleanup(true, 30);
-        Assert.assertEquals(19, cleanupList.size());
+        Assert.assertEquals(16, cleanupList.size());
         manager.clear();
         Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 0, 1), 0));
         Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 1, 1), 1));
-        Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 2, 1), 2));
+        Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 2, 1), 2));
         Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 0, 1), 0));
         Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 1, 1), 1));
         Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 2, 1), 2));

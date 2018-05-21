@@ -112,7 +112,9 @@ abstract public class Dictionary<T> implements Serializable {
         } else {
             try {
                 //if no key found, it will throw exception
-                getIdFromValueImpl(value, 0);
+                if (getIdFromValueImpl(value, 0) < 0) {
+                    return false;
+                }
             } catch (IllegalArgumentException e) {
                 return false;
             }

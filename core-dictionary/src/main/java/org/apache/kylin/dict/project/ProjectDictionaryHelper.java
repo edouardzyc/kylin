@@ -38,6 +38,12 @@ final public class ProjectDictionaryHelper {
         return (dictionary instanceof TrieDictionaryForest || dictionary instanceof TrieDictionary);
     }
 
+    public static boolean useProjectDictionary(String dictionaryClazz) {
+        if (dictionaryClazz.endsWith("AppendTrieDictionary")) {
+            return false;
+        }
+        return (dictionaryClazz.endsWith("TrieDictionaryForest") || dictionaryClazz.endsWith("TrieDictionary"));
+    }
 
     public static int[] genOffset(DictionaryInfo small, DictionaryInfo big) {
         Dictionary<String> smallDict = small.getDictionaryObject();
@@ -49,6 +55,15 @@ final public class ProjectDictionaryHelper {
             mapping[i - smallMin] = bigDict.getIdFromValue(smallDict.getValueFromId(i));
         }
         return mapping;
+    }
+
+    public static boolean container(Dictionary<String> big, Dictionary<String> small) {
+        for (int i = small.getMinId(); i < small.getMaxId(); i++) {
+            if (!big.containsValue(small.getValueFromId(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static List<Pair<String, String>> checkDict(DictionaryInfo originDict,
@@ -122,12 +137,13 @@ final public class ProjectDictionaryHelper {
 
         public static String sDictPath(String sourceIdentify, long currentVersion) {
             String hdfsWorkingDirectory = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory();
-            return hdfsWorkingDirectory + SPARDER_SDICT_BASE_DIR + "/" + sourceIdentify + "/" + currentVersion + SDICT_DATA;
+            return hdfsWorkingDirectory + SPARDER_SDICT_BASE_DIR + "/" + sourceIdentify + "/" + currentVersion
+                    + SDICT_DATA;
         }
 
         public static String versionPath(String sourceIdentify) {
-            return PROJECT_DICT_DIR + "/metadata/"
-                    + ProjectDictionaryHelper.PathBuilder.versionKey(sourceIdentify) + MetadataConstants.TYPE_VERSION;
+            return PROJECT_DICT_DIR + "/metadata/" + ProjectDictionaryHelper.PathBuilder.versionKey(sourceIdentify)
+                    + MetadataConstants.TYPE_VERSION;
         }
     }
 }

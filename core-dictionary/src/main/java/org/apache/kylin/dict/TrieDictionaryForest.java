@@ -32,6 +32,8 @@ import org.apache.kylin.common.util.Bytes;
 import org.apache.kylin.common.util.BytesUtil;
 import org.apache.kylin.common.util.ClassUtil;
 import org.apache.kylin.common.util.Dictionary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Use trie forest to optimize trie dictionary
@@ -41,6 +43,8 @@ import org.apache.kylin.common.util.Dictionary;
  * Created by xiefan on 16-10-26.
  */
 public class TrieDictionaryForest<T> extends CacheDictionary<T> {
+    private static final Logger logger = LoggerFactory.getLogger(TrieDictionaryForest.class);
+
     private static final long serialVersionUID = 1L;
 
     private ArrayList<TrieDictionary<T>> trees;
@@ -63,18 +67,22 @@ public class TrieDictionaryForest<T> extends CacheDictionary<T> {
     }
 
     public TrieDictionaryForest(ArrayList<TrieDictionary<T>> trees, ArrayList<ByteArray> valueDivide, //
-                                ArrayList<Integer> accuOffset, BytesConverter<T> bytesConverter, int baseId) {
+            ArrayList<Integer> accuOffset, BytesConverter<T> bytesConverter, int baseId) {
         init(trees, valueDivide, accuOffset, bytesConverter, baseId);
     }
 
-    private void init(ArrayList<TrieDictionary<T>> trees, ArrayList<ByteArray> valueDivide, ArrayList<Integer> accuOffset, BytesConverter<T> bytesConverter, int baseId) {
+    private void init(ArrayList<TrieDictionary<T>> trees, ArrayList<ByteArray> valueDivide,
+            ArrayList<Integer> accuOffset, BytesConverter<T> bytesConverter, int baseId) {
         this.trees = trees;
         this.valueDivide = valueDivide;
         this.accuOffset = accuOffset;
         this.bytesConvert = bytesConverter;
         this.baseId = baseId;
         initConstantValue();
-        initForestCache();
+        if (!"false".equalsIgnoreCase(System.getProperty("dict.cache.enabled"))) {
+            logger.info("Init dict cache");
+            initForestCache();
+        }
     }
 
     @Override
@@ -98,7 +106,8 @@ public class TrieDictionaryForest<T> extends CacheDictionary<T> {
     }
 
     @Override
-    protected int getIdFromValueBytesWithoutCache(byte[] value, int offset, int len, int roundingFlag) throws IllegalArgumentException {
+    protected int getIdFromValueBytesWithoutCache(byte[] value, int offset, int len, int roundingFlag)
+            throws IllegalArgumentException {
         int index;
         if (trees.size() == 1) {
             index = 0;
@@ -109,7 +118,8 @@ public class TrieDictionaryForest<T> extends CacheDictionary<T> {
                 if (roundingFlag > 0) {
                     return getMinId(); //searching value smaller than the smallest value in dict
                 } else {
-                    throw new IllegalArgumentException("Value '" + Bytes.toString(value, offset, len) + "' (" + Bytes.toStringBinary(value, offset, len) + ") not exists!");
+                    throw new IllegalArgumentException("Value '" + Bytes.toString(value, offset, len) + "' ("
+                            + Bytes.toStringBinary(value, offset, len) + ") not exists!");
                 }
             }
 
@@ -118,13 +128,15 @@ public class TrieDictionaryForest<T> extends CacheDictionary<T> {
                 if (search.compareTo(maxValueOfTree) > 0)
                     index++;
                 if (index >= trees.size())
-                    throw new IllegalArgumentException("Value '" + Bytes.toString(value, offset, len) + "' (" + Bytes.toStringBinary(value, offset, len) + ") not exists!");
+                    throw new IllegalArgumentException("Value '" + Bytes.toString(value, offset, len) + "' ("
+                            + Bytes.toStringBinary(value, offset, len) + ") not exists!");
             }
         }
         TrieDictionary<T> tree = trees.get(index);
         int id = tree.getIdFromValueBytesWithoutCache(value, offset, len, roundingFlag);
         if (id == -1)
-            throw new IllegalArgumentException("Value '" + Bytes.toString(value, offset, len) + "' (" + Bytes.toStringBinary(value, offset, len) + ") not exists!");
+            throw new IllegalArgumentException("Value '" + Bytes.toString(value, offset, len) + "' ("
+                    + Bytes.toStringBinary(value, offset, len) + ") not exists!");
         id = id + accuOffset.get(index);
         id += baseId;
         return id;

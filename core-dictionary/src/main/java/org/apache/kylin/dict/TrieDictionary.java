@@ -51,10 +51,11 @@ import com.google.common.base.Preconditions;
  *
  * @author yangli9
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class TrieDictionary<T> extends CacheDictionary<T> {
     private static final long serialVersionUID = 1L;
 
-    public static final byte[] MAGIC = new byte[]{0x54, 0x72, 0x69, 0x65, 0x44, 0x69, 0x63, 0x74}; // "TrieDict"
+    public static final byte[] MAGIC = new byte[] { 0x54, 0x72, 0x69, 0x65, 0x44, 0x69, 0x63, 0x74 }; // "TrieDict"
     public static final int MAGIC_SIZE_I = MAGIC.length;
 
     public static final int BIT_IS_LAST_CHILD = 0x80;
@@ -76,7 +77,6 @@ public class TrieDictionary<T> extends CacheDictionary<T> {
     transient private int sizeOfId;
     transient private long childOffsetMask;
     transient private int firstByteOffset;
-
 
     public TrieDictionary() { // default constructor for Writable interface
     }
@@ -112,7 +112,10 @@ public class TrieDictionary<T> extends CacheDictionary<T> {
             this.sizeOfId = BytesUtil.sizeForValue(baseId + nValues + 1L); // note baseId could raise 1 byte in ID space, +1 to reserve all 0xFF for NULL case
             this.childOffsetMask = ~((long) (BIT_IS_LAST_CHILD | BIT_IS_END_OF_VALUE) << ((sizeChildOffset - 1) * 8));
             this.firstByteOffset = sizeChildOffset + sizeNoValuesBeneath + 1; // the offset from begin of node to its first value byte
-            enableCache();
+            if (!"false".equalsIgnoreCase(System.getProperty("dict.cache.enabled"))) {
+                logger.info("Init dict cache");
+                enableCache();
+            }
         } catch (Exception e) {
             if (e instanceof RuntimeException)
                 throw (RuntimeException) e;
@@ -237,7 +240,6 @@ public class TrieDictionary<T> extends CacheDictionary<T> {
         else
             return k;
     }
-
 
     @Override
     protected byte[] getValueBytesFromIdWithoutCache(int id) {
@@ -418,7 +420,8 @@ public class TrieDictionary<T> extends CacheDictionary<T> {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         new ObjectOutputStream(baos).writeObject(dict);
 
-        TrieDictionary<String> dict2 = (TrieDictionary<String>) new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray())).readObject();
+        TrieDictionary<String> dict2 = (TrieDictionary<String>) new ObjectInputStream(
+                new ByteArrayInputStream(baos.toByteArray())).readObject();
         Preconditions.checkArgument(dict.contains(dict2));
         Preconditions.checkArgument(dict2.contains(dict));
         Preconditions.checkArgument(dict.equals(dict2));

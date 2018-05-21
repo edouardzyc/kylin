@@ -1010,9 +1010,14 @@ public class CubeManager implements IRealizationProvider {
         }
         Map<String, SegProjectDict> map = Maps.newHashMap();
         for (String dictPath : dictMapping.keySet()) {
+            DictionaryInfo dictionaryInfo;
             // todo is enough
-            DictionaryInfo dictionaryInfo = getDictionaryManager().getDictionaryInfo(dictPath);
-            if (!ProjectDictionaryHelper.useProjectDictionary(dictionaryInfo.getDictionaryObject())) {
+            try {
+                 dictionaryInfo = getDictionaryManager().getDictionaryInfo(dictPath);
+            } catch (Throwable e) {
+                throw new IOException("Error for get dict : " + dictPath, e);
+            }
+            if (dictionaryInfo.getDictionaryObject() == null || !ProjectDictionaryHelper.useProjectDictionary(dictionaryInfo.getDictionaryObject())) {
                 continue;
             }
             List<String> dict = dictMapping.get(dictPath);

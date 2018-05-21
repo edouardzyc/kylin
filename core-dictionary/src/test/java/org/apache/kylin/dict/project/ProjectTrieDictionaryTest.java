@@ -23,14 +23,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -44,6 +47,7 @@ import org.apache.kylin.dict.DictionaryGenerator;
 import org.apache.kylin.dict.DictionaryInfo;
 import org.apache.kylin.dict.DictionaryInfoSerializer;
 import org.apache.kylin.dict.DictionaryManager;
+import org.apache.kylin.dict.Number2BytesConverter;
 import org.apache.kylin.dict.TrieDictionaryForest;
 import org.apache.kylin.dict.TrieDictionaryForestBuilder;
 import org.apache.kylin.dict.TrieDictionaryForestTest;
@@ -60,6 +64,7 @@ import com.google.common.collect.Lists;
 import me.lemire.integercompression.differential.IntegratedBinaryPacking;
 import me.lemire.integercompression.differential.IntegratedVariableByte;
 import me.lemire.integercompression.differential.SkippableIntegratedComposition;
+import net.sf.ehcache.pool.sizeof.ReflectionSizeOf;
 
 @Ignore
 public class ProjectTrieDictionaryTest extends LocalFileMetadataTestCase {
@@ -67,9 +72,9 @@ public class ProjectTrieDictionaryTest extends LocalFileMetadataTestCase {
     static String base = "abcdefghijklmnopqrstuvwxyz0123456789";
     static Random random = new Random();
     DictionaryManager dictionaryManager;
+    ProjectDictionaryManager projectDictionaryManager;
 
     String baseDir = System.getProperty("user.dir");
-
 
     public static String getRandomString(int length) { //length表示生成字符串的长度
         StringBuffer sb = new StringBuffer();
@@ -84,7 +89,7 @@ public class ProjectTrieDictionaryTest extends LocalFileMetadataTestCase {
     public void before() throws Exception {
         staticCreateTestMetadata();
         dictionaryManager = DictionaryManager.getInstance(KylinConfig.getInstanceFromEnv());
-
+        projectDictionaryManager = ProjectDictionaryManager.getInstance();
     }
 
     @Test
@@ -184,6 +189,38 @@ public class ProjectTrieDictionaryTest extends LocalFileMetadataTestCase {
         }
     }
 
+    private static final ReflectionSizeOf DEFAULT_SIZE_OF = new ReflectionSizeOf();
+
+    @Test
+    public void testEstimate() throws IOException {
+        DictionaryInfo dictionary = createDictionary(3000000, 50);
+        long l = System.currentTimeMillis();
+        long sizeOf = DEFAULT_SIZE_OF.deepSizeOf(Integer.MAX_VALUE, true, dictionary).getCalculated();
+        System.out.println(System.currentTimeMillis() - l);
+        Path p = new Path(baseDir + "/dict/test" + 1 + ".dict");
+        FileSystem fileSystem = p.getFileSystem(new Configuration());
+        FSDataOutputStream open = fileSystem.create(p);
+        ProjectDictionaryInfoSerializer.FULL_SERIALIZER.serialize(ProjectDictionaryInfo.wrap(dictionary, 1),
+                new DataOutputStream(open));
+        open.close();
+    }
+
+    @Test
+    public void testAdd() throws IOException, ExecutionException {
+        String project = "test";
+        DictionaryInfo num1 = createNumberDictionary(1000000);
+        DictionaryInfo num2 = createNumberDictionary(1000000);
+        DictionaryInfo num3 = createNumberDictionary(1000000);
+        DictionaryInfo num4 = createNumberDictionary(1000000);
+
+        projectDictionaryManager.append(project, num1);
+        projectDictionaryManager.append(project, num2);
+        projectDictionaryManager.append(project, num3);
+        projectDictionaryManager.append(project, num4);
+        projectDictionaryManager.append(project, num2);
+
+    }
+
     @Test
     @Ignore
     public void testSense() throws IOException {
@@ -260,6 +297,42 @@ public class ProjectTrieDictionaryTest extends LocalFileMetadataTestCase {
     public DictionaryInfo createDictionary(int size) {
         RandomStrings randomStrings = new RandomStrings(size);
         return build(size, Lists.newArrayList(randomStrings.iterator()));
+    }
+
+    public DictionaryInfo createNumberDictionary(int size) throws IOException {
+        List<String> randomStrings = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            randomStrings.add(RandomUtils.nextDouble(0, 1000000) + "");
+        }
+        return buildNumber(size, Lists.newArrayList(randomStrings.iterator()));
+    }
+
+    private DictionaryInfo buildNumber(int size, List<String> randomStrings) throws IOException {
+        DictionaryGenerator.NumberTrieDictForestBuilder numberTrieDictForestBuilder = new DictionaryGenerator.NumberTrieDictForestBuilder();
+        DataType doubleType = DataType.getType("double");
+        numberTrieDictForestBuilder.init(null, 0, null);
+        Number2BytesConverter converter = new Number2BytesConverter(
+                Number2BytesConverter.MAX_DIGITS_BEFORE_DECIMAL_POINT);
+        randomStrings.sort(new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return doubleType.compare(o1, o2);
+            }
+        });
+        for (String va : randomStrings) {
+            numberTrieDictForestBuilder.addValue(va);
+        }
+        Dictionary<String> dict = numberTrieDictForestBuilder.build();
+        DictionaryInfo dictInfo = new DictionaryInfo();
+        dictInfo.setDictionaryObject(dict);
+        dictInfo.setDictionaryClass(dict.getClass().getCanonicalName());
+        IReadableTable.TableSignature tableSignature = new IReadableTable.TableSignature("", size,
+                System.currentTimeMillis());
+        dictInfo.setSourceTable(UUID.randomUUID().toString());
+        dictInfo.setSourceColumn(UUID.randomUUID().toString());
+        dictInfo.setInput(tableSignature);
+        dictInfo.setDataType("Double");
+        return dictInfo;
     }
 
     private DictionaryInfo build(int size, List<String> randomStrings) {

@@ -28,19 +28,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.persistence.ResourceStore;
+import org.apache.kylin.common.persistence.WriteConflictException;
 import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.dict.DictionaryInfo;
 import org.apache.kylin.dict.DictionaryManager;
 import org.apache.kylin.dict.SDict;
 import org.apache.kylin.dict.project.ProjectDictionaryHelper.PathBuilder;
+import org.apache.kylin.dict.utils.SizeOfUtil;
 import org.apache.kylin.metadata.MetadataConstants;
 import org.apache.kylin.metadata.cachesync.Broadcaster;
 import org.apache.kylin.metadata.cachesync.CachedCrudAssist;
@@ -55,26 +59,60 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import com.google.common.cache.Weigher;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class ProjectDictionaryManager {
     public static final Logger logger = LoggerFactory.getLogger(ProjectDictionaryManager.class);
-
-    private final static Cache<String, ProjectDictionaryInfo> dictionaryInfoCache = CacheBuilder.newBuilder()
-            .softValues()
-            .maximumSize(KylinConfig.getInstanceFromEnv().getCachedPrjDictMaxEntrySize())
-            .expireAfterWrite(1, TimeUnit.HOURS).removalListener(//
+    private static ConcurrentMap<String, Long> dictCacheSwapCount = Maps.newConcurrentMap();
+    private static final ProjectDictionaryInfo NONE_INDICATOR = new ProjectDictionaryInfo();
+    private static AtomicLong usedMem = new AtomicLong(0);
+    private final static LoadingCache<String, ProjectDictionaryInfo> dictionaryInfoCache = CacheBuilder.newBuilder()
+            .maximumWeight(KylinConfig.getInstanceFromEnv().getCachedPrjDictMaxMemory()).softValues()
+            .weigher(new Weigher<String, ProjectDictionaryInfo>() {
+                @Override
+                public int weigh(String sourceIdentity, ProjectDictionaryInfo dict) {
+                    long estimateBytes = SizeOfUtil.deepSizeOf(dict);
+                    long estimateMB = estimateBytes / (1024 * 1024);
+                    logger.info("Add project dictionary to cache, size : " + estimateMB + " M. Current used memory: "
+                            + usedMem + " M");
+                    if (dictCacheSwapCount.containsKey(sourceIdentity)) {
+                        dictCacheSwapCount.put(sourceIdentity, dictCacheSwapCount.get(sourceIdentity) + 1);
+                    } else {
+                        dictCacheSwapCount.put(sourceIdentity, 1L);
+                    }
+                    Long aLong = dictCacheSwapCount.get(sourceIdentity);
+                    logger.info("Load project dictionary " + sourceIdentity + " " + aLong + " times");
+                    usedMem.addAndGet(estimateMB);
+                    return (int) estimateMB;
+                }
+            }).expireAfterWrite(1, TimeUnit.HOURS).removalListener(//
                     new RemovalListener<String, ProjectDictionaryInfo>() {
                         @Override
                         public void onRemoval(RemovalNotification<String, ProjectDictionaryInfo> notification) {
+                            long estimateBytes = SizeOfUtil.deepSizeOf(notification.getValue());
+                            long estimateMB = estimateBytes / (1024 * 1024);
+                            usedMem.addAndGet(-estimateMB);
                             logger.info("DictionaryInfoCache entry with key {} is removed due to {} ",
-                                    notification.getKey(), notification.getCause());
+                                    notification.getKey(), notification.getCause() + ", release size : " + estimateMB + " M,"
+                                            + " Current use memory: " + usedMem);
                         }
                     })
-            .build();
+            .build(new CacheLoader<String, ProjectDictionaryInfo>() {
+                @Override
+                public ProjectDictionaryInfo load(String sourceIdentity) throws Exception {
+                    logger.info("Loading project dictionary :" + sourceIdentity);
+                    ProjectDictionaryInfo projectDictionaryInfo = doLoad(sourceIdentity, true);
+                    if (projectDictionaryInfo == null) {
+                        return NONE_INDICATOR;
+                    } else {
+                        return projectDictionaryInfo;
+                    }
+                }
+            });
 
-    private final static Cache<String, DictPatch> patchCache = CacheBuilder.newBuilder()
-            .softValues()
+    private final static Cache<String, DictPatch> patchCache = CacheBuilder.newBuilder().softValues()
             .maximumSize(KylinConfig.getInstanceFromEnv().getCachedPrjDictPatchMaxEntrySize())
             .expireAfterWrite(1, TimeUnit.HOURS).removalListener(//
                     new RemovalListener<String, DictPatch>() {
@@ -98,8 +136,7 @@ public class ProjectDictionaryManager {
                     if (notification.getValue() != null)
                         notification.getValue().clear();
                 }
-            })
-            .expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, VersionControl>() {
+            }).expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, VersionControl>() {
                 @Override
                 public VersionControl load(String key) throws IOException, InterruptedException {
                     return new VersionControl(key);
@@ -246,21 +283,19 @@ public class ProjectDictionaryManager {
     }
 
     public ProjectDictionaryInfo getDictionary(String dictResPath) {
-        ProjectDictionaryInfo dictionaryInfoIfPresent = dictionaryInfoCache.getIfPresent(dictResPath);
-        if (dictionaryInfoIfPresent != null) {
-            return dictionaryInfoIfPresent;
-        } else {
-            try {
-                ProjectDictionaryInfo projectDictionaryInfo = doLoad(dictResPath, true);
-                // merge step may be null
-                if (projectDictionaryInfo != null) {
-                    dictionaryInfoCache.put(dictResPath, projectDictionaryInfo);
-                }
-                return projectDictionaryInfo;
-            } catch (IOException e) {
-                throw new RuntimeException("Load dictionary " + dictResPath + " failed!", e);
+        logger.info("Get project dictionary : " + dictResPath);
+        ProjectDictionaryInfo result = null;
+        try {
+            result = dictionaryInfoCache.get(dictResPath);
+            if (result == NONE_INDICATOR) {
+                return null;
+            } else {
+                return result;
             }
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e.getCause());
         }
+
     }
 
     public ProjectDictionaryInfo getSpecificDictionary(SegProjectDict desc, long SpecificVersion) throws IOException {
@@ -272,8 +307,9 @@ public class ProjectDictionaryManager {
         DictPatch patch = getSpecificPatch(desc, SpecificVersion);
         logger.info("Get Specific Dictionary: " + desc.getSourceIdentifier() + " version : " + SpecificVersion);
 
-        return projectDictionaryInfo == null ? null :ProjectDictionaryInfo.copy(projectDictionaryInfo,
-                new DisguiseTrieDictionary<>(desc.getIdLength(), projectDictionaryInfo.getDictionaryObject(), patch));
+        return projectDictionaryInfo == null ? null
+                : ProjectDictionaryInfo.copy(projectDictionaryInfo, new DisguiseTrieDictionary<>(desc.getIdLength(),
+                        projectDictionaryInfo.getDictionaryObject(), patch));
     }
 
     public ProjectDictionaryInfo getSpecificDictWithOutPatch(SegProjectDict desc, long SpecificVersion) {
@@ -294,9 +330,12 @@ public class ProjectDictionaryManager {
     public ProjectDictionaryInfo getCombinationDictionary(SegProjectDict desc) throws IOException {
         ProjectDictionaryVersionInfo versionInfo = getMaxVersion(desc);
         if (versionInfo == null) {
+            logger.info("Max info is null");
             // build step the version is null.
             return null;
         }
+        logger.info("Get max version info : " + versionInfo.getVersion());
+
         long maxVersion = versionInfo.getProjectDictionaryVersion();
         return getSpecificDictionary(desc, maxVersion);
     }
@@ -311,33 +350,33 @@ public class ProjectDictionaryManager {
         return getDictionary(dictResPath);
     }
 
-    private ProjectDictionaryInfo doLoad(String resourcePath, boolean loadDictObj) throws IOException {
+    private static ProjectDictionaryInfo doLoad(String resourcePath, boolean loadDictObj) throws IOException {
         ResourceStore store = getStore();
-        logger.info("DictionaryManager(" + System.identityHashCode(this) + ") loading DictionaryInfo(loadDictObj:"
-                + loadDictObj + ") at " + resourcePath);
+        logger.info("Loading Project DictionaryInfo(loadDictObj:" + loadDictObj + ") at " + resourcePath);
         return store.getResource(resourcePath, ProjectDictionaryInfo.class,
                 loadDictObj ? ProjectDictionaryInfoSerializer.FULL_SERIALIZER
                         : ProjectDictionaryInfoSerializer.INFO_SERIALIZER);
     }
 
-    private ResourceStore getStore() {
+    private static ResourceStore getStore() {
         return ResourceStore.getStore(KylinConfig.getInstanceFromEnv());
     }
 
-    // todo save all dict to hdfs too
     public SegProjectDict append(String project, DictionaryInfo dictionaryInfo) throws ExecutionException, IOException {
         String sourceIdentify = PathBuilder.sourceIdentifier(project, dictionaryInfo);
+        logger.info("Begin append dict : " + sourceIdentify);
         VersionControl mvc;
         synchronized (ProjectDictionaryManager.class) {
             mvc = mvcMap.get(sourceIdentify);
         }
         long currentVersion = mvc.getCurrentVersion();
+        logger.info("Current version  is : " + currentVersion);
         // check contains
         if (currentVersion > -1) {
             // fetch current dict
             ProjectDictionaryInfo projectDictionaryInfo = loadDictByVersion(sourceIdentify, currentVersion);
             if (projectDictionaryInfo.getDictionaryObject().contains(dictionaryInfo.getDictionaryObject())) {
-                logger.info("Dictionary " + sourceIdentify + "be contained version"
+                logger.info("Dictionary " + sourceIdentify + "be contained version "
                         + projectDictionaryInfo.getDictionaryVersion());
                 return new SegProjectDict(sourceIdentify, currentVersion,
                         genSegmentDictionaryToProjectDictionaryPatch(dictionaryInfo, sourceIdentify,
@@ -410,12 +449,13 @@ public class ProjectDictionaryManager {
         if (!workingFileSystem.exists(sDictDir)) {
             workingFileSystem.mkdirs(sDictDir);
         }
-
         Path f = new Path(sDictDir,
                 new Path(sourceIdentify + "/" + dictionaryInfo.getDictionaryVersion() + PathBuilder.SDICT_DATA));
         try (FSDataOutputStream out1 = workingFileSystem.create(f)) {
             SDict.wrap(dictionaryInfo.getDictionaryObject()).write(out1);
         }
+        String newKey = PathBuilder.dataPath(sourceIdentify, dictionaryInfo.getDictionaryVersion());
+        dictionaryInfoCache.put(newKey, dictionaryInfo);
     }
 
     private String eatAndUpgradeDictionary(DictionaryInfo originDict, String sourceIdentify, long toVersion)
@@ -460,20 +500,52 @@ public class ProjectDictionaryManager {
         return path;
     }
 
-    private void savePatch(String sourceIdentify, long currentVersion, long toVersion, int[] value)
-            throws IOException {
+    private void savePatch(String sourceIdentify, long currentVersion, long toVersion, int[] value) throws IOException {
         checkInterrupted(sourceIdentify);
         String path = PathBuilder.patchPath(sourceIdentify, currentVersion, toVersion);
         ResourceStore store = getStore();
-        if (!store.exists(path)) {
-            store.putResource(path, new DictPatch(value), DICT_PATCH_SERIALIZER);
+        if (store.listResources(path) == null) {
+            logger.info("Saving patch at " + sourceIdentify + "version is " + currentVersion + " to " + toVersion);
+            patchCache.put(path, new DictPatch(value));
+
+            savePatch(value, path, store);
+        } else {
+            logger.info("Patch is exist, skip save patch : " + path);
         }
     }
 
     private void savePatchToPath(int[] value, String path) throws IOException {
         ResourceStore store = getStore();
-        if (!store.exists(path)) {
-            store.putResource(path, new DictPatch(value), DICT_PATCH_SERIALIZER);
+        if (store.listResources(path) == null) {
+            logger.info("Saving patch at " + path);
+            patchCache.put(path, new DictPatch(value));
+            savePatch(value, path, store);
+        } else {
+            logger.info("Patch is exist, skip save patch : " + path);
+        }
+    }
+
+    private void savePatch(int[] value, String path, ResourceStore store) throws IOException {
+        long retry = 100;
+        while (retry > 0) {
+            try {
+                store.putResource(path, new DictPatch(value), DICT_PATCH_SERIALIZER);
+                break;
+            } catch (WriteConflictException e) {
+
+                try {
+                    logger.info("Find WriteConflictException, Sleep 100 ms");
+                    Thread.sleep(100L);
+                } catch (InterruptedException ignore) {
+                }
+                retry--;
+                if (store.getResource(path, DictPatch.class, DICT_PATCH_SERIALIZER) != null) {
+                    logger.info("Patch is exist, skip save patch : " + path);
+                    break;
+                } else {
+                    throw new RuntimeException("Error for save patch: " + path);
+                }
+            }
         }
     }
 

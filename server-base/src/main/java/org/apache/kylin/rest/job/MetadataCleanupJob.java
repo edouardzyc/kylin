@@ -101,7 +101,7 @@ public class MetadataCleanupJob {
         }
 
         // project dict
-        TreeMultimap<String, String> col2dict = TreeMultimap.create();
+        TreeMultimap<String, String> allProjectDict = TreeMultimap.create();
 
         NavigableSet<String> prjs = noNull(store.listResources(ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/data"));
         removeSpecificForder(prjs, "/metadata"); // exclude "metadata" folder
@@ -110,33 +110,28 @@ public class MetadataCleanupJob {
                 for (String col : noNull(store.listResources(tbl))) {
                     NavigableSet<String> versions = noNull(store.listResources(col));
                     removeSpecificForder(versions, "/segment"); // exclude "segment" folder
-                    col2dict.putAll(col, versions);
+                    allProjectDict.putAll(col, versions);
                 }
             }
         }
 
         // exclude resources in use
         Set<String> activeResources = Sets.newHashSet();
-        Set<String> activePrjDictCol = Sets.newHashSet();
 
         for (CubeInstance cube : cubeManager.listAllCubes()) {
             for (CubeSegment segment : cube.getSegments()) {
                 activeResources.addAll(segment.getSnapshotPaths());
                 activeResources.addAll(segment.getDictionaryPaths());
                 activeResources.add(segment.getStatisticsResourcePath());
-                activePrjDictCol.addAll(getAllColsHasMVDict(segment));
             }
         }
-
-        NavigableMap<String, Collection<String>> map = col2dict.asMap();
-        for (String colIdentifier : activePrjDictCol) {
-            for (String colPath : map.keySet()) {
-                if (colPath.contains(colIdentifier)) {
-                    NavigableSet<String> versions = (NavigableSet<String>) map.get(colPath);
-                    if (versions !=null && versions.size() > 1) {
-                        versions.remove(versions.last());
-                    }
-                }
+        // remove last version
+        NavigableMap<String, Collection<String>> map = allProjectDict.asMap();
+        for (String colPath : map.keySet()) {
+            NavigableSet<String> versions = (NavigableSet<String>) map.get(colPath);
+            if (versions != null && versions.size() > 0) {
+                String last = versions.last();
+                activeResources.addAll(noNull(store.listResources(last)));
             }
         }
 

@@ -26,8 +26,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.exceptions.TooBigDictionaryException;
@@ -35,6 +37,7 @@ import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.util.ClassUtil;
 import org.apache.kylin.common.util.Dictionary;
 import org.apache.kylin.common.util.JsonUtil;
+import org.apache.kylin.dict.utils.SizeOfUtil;
 import org.apache.kylin.metadata.datatype.DataType;
 import org.apache.kylin.metadata.model.TblColRef;
 import org.apache.kylin.source.IReadableTable;
@@ -47,7 +50,9 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import com.google.common.cache.Weigher;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class DictionaryManager {
 
@@ -68,20 +73,41 @@ public class DictionaryManager {
 
     private KylinConfig config;
     private LoadingCache<String, DictionaryInfo> dictCache; // resource
+    private static ConcurrentMap<String, Long> dictCacheSwapCount = Maps.newConcurrentMap();
+    private static AtomicLong usedMem = new AtomicLong(0);
 
     private DictionaryManager(KylinConfig config) {
         this.config = config;
         this.dictCache = CacheBuilder.newBuilder()//
-                .softValues()//
                 .removalListener(new RemovalListener<String, DictionaryInfo>() {
                     @Override
                     public void onRemoval(RemovalNotification<String, DictionaryInfo> notification) {
+                        long estimateBytes = SizeOfUtil.deepSizeOf(notification.getValue());
+                        long estimateMB = estimateBytes / (1024 * 1024);
+                        usedMem.addAndGet(-estimateMB);
                         DictionaryManager.logger.info("Dict with resource path " + notification.getKey()
-                                + " is removed due to " + notification.getCause());
+                                + " is removed due to " + notification.getCause() + ", release size : " + estimateMB
+                                + " M" + " Current used memory: " + usedMem + " M");
                     }
-                })//
-                .maximumSize(config.getCachedDictMaxEntrySize())//
-                .expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, DictionaryInfo>() {
+                }).maximumWeight(KylinConfig.getInstanceFromEnv().getCachedDictMaxMemory()).softValues()
+                .weigher(new Weigher<String, DictionaryInfo>() {
+                    @Override
+                    public int weigh(String resPath, DictionaryInfo dict) {
+                        long estimateBytes = SizeOfUtil.deepSizeOf(dict);
+                        long estimateMB = estimateBytes / (1024 * 1024);
+                        logger.info("Add dictionary to cache, size : " + estimateMB + " M."
+                                + " Current used memory: " + usedMem + " M");
+                        if (dictCacheSwapCount.containsKey(resPath)) {
+                            dictCacheSwapCount.put(resPath, dictCacheSwapCount.get(resPath) + 1);
+                        } else {
+                            dictCacheSwapCount.put(resPath, 1L);
+                        }
+                        Long aLong = dictCacheSwapCount.get(resPath);
+                        logger.info("Load dictionary " + resPath + " " + aLong + " times");
+                        usedMem.addAndGet(estimateMB);
+                        return (int) estimateMB;
+                    }
+                }).expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, DictionaryInfo>() {
                     @Override
                     public DictionaryInfo load(String key) throws Exception {
                         DictionaryInfo dictInfo = DictionaryManager.this.load(key, true);
@@ -301,8 +327,10 @@ public class DictionaryManager {
             return trySaveNewDict(dictionary, dictInfo);
         } catch (Exception e) {
             if (e instanceof TooBigDictionaryException)
-                throw new TooBigDictionaryException("The dictionary of '" + col.getName() + "' is too big to build.", e);
-            else throw e;
+                throw new TooBigDictionaryException("The dictionary of '" + col.getName() + "' is too big to build.",
+                        e);
+            else
+                throw e;
         }
     }
 

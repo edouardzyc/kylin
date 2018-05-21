@@ -151,7 +151,7 @@ public class DictionaryGenerator {
         }
     }
 
-    private static class TimeDictBuilder implements IDictionaryBuilder {
+    public static class TimeDictBuilder implements IDictionaryBuilder {
 
         @Override
         public void init(DictionaryInfo info, int baseId, String hdfsDir) throws IOException {
@@ -173,7 +173,7 @@ public class DictionaryGenerator {
         }
     }
 
-    private static class StringTrieDictBuilder implements IDictionaryBuilder {
+    public static class StringTrieDictBuilder implements IDictionaryBuilder {
         int baseId;
         TrieDictionaryBuilder builder;
 
@@ -198,7 +198,7 @@ public class DictionaryGenerator {
         }
     }
 
-    private static class StringTrieDictForestBuilder implements IDictionaryBuilder {
+    public static class StringTrieDictForestBuilder implements IDictionaryBuilder {
         TrieDictionaryForestBuilder builder;
 
         @Override
@@ -222,7 +222,7 @@ public class DictionaryGenerator {
     }
 
     @SuppressWarnings("deprecation")
-    private static class NumberTrieDictBuilder implements IDictionaryBuilder {
+    public static class NumberTrieDictBuilder implements IDictionaryBuilder {
         int baseId;
         NumberDictionaryBuilder builder;
 
@@ -247,7 +247,7 @@ public class DictionaryGenerator {
         }
     }
 
-    private static class NumberTrieDictForestBuilder implements IDictionaryBuilder {
+    public static class NumberTrieDictForestBuilder implements IDictionaryBuilder {
         NumberDictionaryForestBuilder builder;
 
         @Override
