@@ -249,4 +249,8 @@ public class JobBuilderSupport {
     public static String getInMemCuboidPath(String cuboidRootPath) {
         return cuboidRootPath + PathNameCuboidInMem;
     }
+
+    public String getDumpMetadataPath(String jobId) {
+        return getRealizationRootPath(jobId) + "/metadata";
+    }
 }
