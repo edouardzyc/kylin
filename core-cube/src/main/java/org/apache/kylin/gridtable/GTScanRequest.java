@@ -66,6 +66,9 @@ public class GTScanRequest {
     private ImmutableBitSet aggrMetrics;
     private String[] aggrMetricsFuncs;//
 
+    // shard pruning
+    private int onlyShardId;
+    
     // hint to storage behavior
     private String storageBehavior;
     private long startTime;
@@ -82,7 +85,7 @@ public class GTScanRequest {
 
     GTScanRequest(GTInfo info, List<GTScanRange> ranges, ImmutableBitSet dimensions, ImmutableBitSet aggrGroupBy, //
             ImmutableBitSet aggrMetrics, String[] aggrMetricsFuncs, TupleFilter filterPushDown,
-            TupleFilter havingFilterPushDown, // 
+            TupleFilter havingFilterPushDown, int onlyShardId, // 
             boolean allowStorageAggregation, double aggCacheMemThreshold, int storageScanRowNumThreshold, //
             int storagePushDownLimit, StorageLimitLevel storageLimitLevel, String storageBehavior, long startTime,
             long timeout) {
@@ -99,6 +102,8 @@ public class GTScanRequest {
         this.aggrGroupBy = aggrGroupBy;
         this.aggrMetrics = aggrMetrics;
         this.aggrMetricsFuncs = aggrMetricsFuncs;
+        
+        this.onlyShardId = onlyShardId;
 
         this.storageBehavior = storageBehavior;
         this.startTime = startTime;
@@ -306,6 +311,10 @@ public class GTScanRequest {
     public String[] getAggrMetricsFuncs() {
         return aggrMetricsFuncs;
     }
+    
+    public int getOnlyShardId() {
+        return onlyShardId;
+    }
 
     public boolean isAllowStorageAggregation() {
         return allowStorageAggregation;
@@ -363,6 +372,7 @@ public class GTScanRequest {
         return Arrays.copyOf(byteBuffer.array(), byteBuffer.position());
     }
 
+    @SuppressWarnings("unused")
     private static final int SERIAL_0_BASE = 0;
     private static final int SERIAL_1_HAVING_FILTER = 1;
 
@@ -390,10 +400,11 @@ public class GTScanRequest {
                 BytesUtil.writeByteArray(
                         TupleFilterSerializer.serialize(value.havingFilterPushDown, StringCodeSystem.INSTANCE), out);
             }
-
+            
             ImmutableBitSet.serializer.serialize(value.aggrGroupBy, out);
             ImmutableBitSet.serializer.serialize(value.aggrMetrics, out);
             BytesUtil.writeAsciiStringArray(value.aggrMetricsFuncs, out);
+            BytesUtil.writeVInt(value.onlyShardId, out);
             BytesUtil.writeVInt(value.allowStorageAggregation ? 1 : 0, out);
             out.putDouble(value.aggCacheMemThreshold);
             BytesUtil.writeUTFString(value.getStorageLimitLevel().name(), out);
@@ -436,6 +447,7 @@ public class GTScanRequest {
             ImmutableBitSet sAggGroupBy = ImmutableBitSet.serializer.deserialize(in);
             ImmutableBitSet sAggrMetrics = ImmutableBitSet.serializer.deserialize(in);
             String[] sAggrMetricFuncs = BytesUtil.readAsciiStringArray(in);
+            int onlyShardId = BytesUtil.readVInt(in);
             boolean sAllowPreAggr = (BytesUtil.readVInt(in) == 1);
             double sAggrCacheGB = in.getDouble();
             StorageLimitLevel storageLimitLevel = StorageLimitLevel.valueOf(BytesUtil.readUTFString(in));
@@ -447,7 +459,7 @@ public class GTScanRequest {
 
             return new GTScanRequestBuilder().setInfo(sInfo).setRanges(sRanges).setDimensions(sColumns)
                     .setAggrGroupBy(sAggGroupBy).setAggrMetrics(sAggrMetrics).setAggrMetricsFuncs(sAggrMetricFuncs)
-                    .setFilterPushDown(sGTFilter).setHavingFilterPushDown(sGTHavingFilter)
+                    .setFilterPushDown(sGTFilter).setHavingFilterPushDown(sGTHavingFilter).setOnlyShardId(onlyShardId)
                     .setAllowStorageAggregation(sAllowPreAggr).setAggCacheMemThreshold(sAggrCacheGB)
                     .setStorageScanRowNumThreshold(storageScanRowNumThreshold)
                     .setStoragePushDownLimit(storagePushDownLimit).setStorageLimitLevel(storageLimitLevel)

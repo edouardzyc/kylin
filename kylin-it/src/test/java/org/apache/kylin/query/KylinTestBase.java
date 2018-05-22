@@ -241,6 +241,8 @@ public class KylinTestBase {
 
     protected ITable executeQuery(IDatabaseConnection dbConn, String queryName, String sql, boolean needSort)
             throws Exception {
+        
+        QueryContext.reset();
 
         // change join type to match current setting
         sql = changeJoinType(sql, joinType);
@@ -262,6 +264,8 @@ public class KylinTestBase {
 
     protected int executeQuery(String sql, boolean needDisplay) throws Exception {
 
+        QueryContext.reset();
+        
         // change join type to match current setting
         sql = changeJoinType(sql, joinType);
 
@@ -315,9 +319,11 @@ public class KylinTestBase {
     protected ITable executeDynamicQuery(IDatabaseConnection dbConn, String queryName, String sql,
             List<String> parameters, boolean needSort) throws Exception {
 
+        QueryContext.reset();
+
         // change join type to match current setting
         sql = changeJoinType(sql, joinType);
-
+        
         PreparedStatement prepStat = dbConn.getConnection().prepareStatement(sql);
         for (int j = 1; j <= parameters.size(); ++j) {
             prepStat.setString(j, parameters.get(j - 1).trim());
@@ -583,16 +589,16 @@ public class KylinTestBase {
             String sql1 = getTextFromFile(sqlFile);
             String sql2 = translator.transform(sqlFile);
 
-            // execute Kylin
-            logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
-            IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
-            ITable kylinTable = executeQuery(kylinConn, queryName, sql1, needSort);
-
             // execute H2
             logger.info("Query Result from H2 - " + queryName);
             long currentTime = System.currentTimeMillis();
             ITable h2Table = executeQuery(newH2Connection(), queryName, sql2, needSort);
             logger.info("H2 spent " + (System.currentTimeMillis() - currentTime) + " mili-seconds.");
+
+            // execute Kylin
+            logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
+            IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
+            ITable kylinTable = executeQuery(kylinConn, queryName, sql1, needSort);
 
             try {
                 // compare the result
@@ -630,17 +636,16 @@ public class KylinTestBase {
             String sql1 = getTextFromFile(sqlFile);
             String sql2 = translator.transform(sqlFile);
 
-            // execute Kylin
-            logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
-            QueryContext.reset();
-            IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
-            ITable kylinTable = executeQuery(kylinConn, queryName, sql1, needSort);
-
             // execute H2
             logger.info("Query Result from H2 - " + queryName);
             long currentTime = System.currentTimeMillis();
             ITable h2Table = executeQuery(newH2Connection(), queryName, sql2, needSort);
             logger.info("H2 spent " + (System.currentTimeMillis() - currentTime) + " mili-seconds.");
+
+            // execute Kylin
+            logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
+            IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
+            ITable kylinTable = executeQuery(kylinConn, queryName, sql1, needSort);
 
             try {
                 // compare the result

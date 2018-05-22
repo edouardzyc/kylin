@@ -34,6 +34,7 @@ public class GTScanRequestBuilder {
     private ImmutableBitSet aggrGroupBy = null;
     private ImmutableBitSet aggrMetrics = null;
     private String[] aggrMetricsFuncs = null;
+    private int onlyShardId = -1;
     private boolean allowStorageAggregation = true;
     private double aggCacheMemThreshold = 0;
     private int storageScanRowNumThreshold = Integer.MAX_VALUE;// storage should terminate itself when $storageScanRowNumThreshold cuboid rows are scanned, and throw exception.   
@@ -80,6 +81,11 @@ public class GTScanRequestBuilder {
 
     public GTScanRequestBuilder setAggrMetricsFuncs(String[] aggrMetricsFuncs) {
         this.aggrMetricsFuncs = aggrMetricsFuncs;
+        return this;
+    }
+    
+    public GTScanRequestBuilder setOnlyShardId(int onlyShardId) {
+        this.onlyShardId = onlyShardId;
         return this;
     }
 
@@ -146,7 +152,8 @@ public class GTScanRequestBuilder {
         this.timeout = timeout == -1 ? 300000 : timeout;
 
         return new GTScanRequest(info, ranges, dimensions, aggrGroupBy, aggrMetrics, aggrMetricsFuncs, filterPushDown,
-                havingFilterPushDown, allowStorageAggregation, aggCacheMemThreshold, storageScanRowNumThreshold,
-                storagePushDownLimit, storageLimitLevel, storageBehavior, startTime, timeout);
+                havingFilterPushDown, onlyShardId, allowStorageAggregation, aggCacheMemThreshold,
+                storageScanRowNumThreshold, storagePushDownLimit, storageLimitLevel, storageBehavior, startTime,
+                timeout);
     }
 }

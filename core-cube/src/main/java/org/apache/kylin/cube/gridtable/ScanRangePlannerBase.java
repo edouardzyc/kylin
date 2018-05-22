@@ -55,6 +55,7 @@ public abstract class ScanRangePlannerBase {
     protected ImmutableBitSet gtAggrMetrics;
     protected String[] gtAggrFuncs;
     protected TupleFilter havingFilter;
+    protected int onlyShardId = -1;
     protected boolean isPartitionColUsingDatetimeEncoding = true;
 
     protected RecordComparator rangeStartComparator;

@@ -18,18 +18,20 @@
 
 package org.apache.kylin.common;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import org.apache.kylin.common.exceptions.KylinTimeoutException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.apache.kylin.common.exceptions.KylinTimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * Holds per query information and statistics.
@@ -45,11 +47,22 @@ public class QueryContext {
         }
     };
 
+    public static QueryContext current() {
+        return contexts.get();
+    }
+
+    public static void reset() {
+        contexts.remove();
+    }
+
+    // ============================================================================
+    
     private long queryStartMillis;
 
     private String queryId;
     private String username;
     private Set<String> groups;
+    private AtomicInteger scannedShards = new AtomicInteger();
     private AtomicLong scannedRows = new AtomicLong();
     private AtomicLong scannedBytes = new AtomicLong();
     private String sql;
@@ -66,14 +79,6 @@ public class QueryContext {
         // use QueryContext.current() instead
         queryStartMillis = System.currentTimeMillis();
         queryId = UUID.randomUUID().toString();
-    }
-
-    public static QueryContext current() {
-        return contexts.get();
-    }
-
-    public static void reset() {
-        contexts.remove();
     }
 
     public long getQueryStartMillis() {
@@ -118,6 +123,14 @@ public class QueryContext {
         this.calcitePlan = calcitePlan;
     }
 
+    public int getScannedShards() {
+        return scannedShards.get();
+    }
+    
+    public void addScannedShards(int deltaFiles) {
+        scannedShards.addAndGet(deltaFiles);
+    }
+    
     public long getScannedRows() {
         return scannedRows.get();
     }
