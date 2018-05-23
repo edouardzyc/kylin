@@ -46,7 +46,6 @@ import com.google.common.collect.Sets;
 public class BaseCuboidBuilder implements java.io.Serializable {
 
     protected static final Logger logger = LoggerFactory.getLogger(BaseCuboidBuilder.class);
-    public static final String HIVE_NULL = "\\N";
     protected String cubeName;
     protected Cuboid baseCuboid;
     protected CubeDesc cubeDesc;
@@ -97,7 +96,6 @@ public class BaseCuboidBuilder implements java.io.Serializable {
 
     private void initNullBytes() {
         nullStrs = Sets.newHashSet();
-        nullStrs.add(HIVE_NULL);
         String[] nullStrings = cubeDesc.getNullStrings();
         if (nullStrings != null) {
             for (String s : nullStrings) {
