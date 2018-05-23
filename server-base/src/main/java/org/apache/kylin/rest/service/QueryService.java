@@ -71,18 +71,12 @@ import org.apache.kylin.common.util.SetThreadName;
 import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.cube.cuboid.Cuboid;
 import org.apache.kylin.metadata.badquery.BadQueryEntry;
-import org.apache.kylin.metadata.model.DataModelDesc;
-import org.apache.kylin.metadata.model.JoinDesc;
-import org.apache.kylin.metadata.model.JoinTableDesc;
-import org.apache.kylin.metadata.model.ModelDimensionDesc;
-import org.apache.kylin.metadata.model.TableRef;
-import org.apache.kylin.metadata.project.ProjectInstance;
 import org.apache.kylin.metadata.querymeta.ColumnMeta;
-import org.apache.kylin.metadata.querymeta.ColumnMetaWithType;
 import org.apache.kylin.metadata.querymeta.SelectedColumnMeta;
 import org.apache.kylin.metadata.querymeta.TableMeta;
 import org.apache.kylin.metadata.querymeta.TableMetaWithType;
 import org.apache.kylin.query.QueryConnection;
+import org.apache.kylin.query.QueryMetaProvider;
 import org.apache.kylin.query.relnode.OLAPContext;
 import org.apache.kylin.query.util.PushDownUtil;
 import org.apache.kylin.query.util.QueryUtil;
@@ -357,7 +351,7 @@ public class QueryService extends BasicService {
 
         try (SetThreadName ignored = new SetThreadName("Query %s", queryContext.getQueryId())) {
             long startTime = System.currentTimeMillis();
-            
+
             SQLResponse sqlResponse = null;
             String sql = sqlRequest.getSql();
             String project = sqlRequest.getProject();
@@ -376,16 +370,16 @@ public class QueryService extends BasicService {
             if (sqlResponse == null && isQueryInspect) {
                 sqlResponse = new SQLResponse(null, null, 0, false, sqlRequest.getSql());
             }
-            
+
             if (sqlResponse == null && isCreateTempStatement) {
                 sqlResponse = new SQLResponse(null, null, 0, false, null);
             }
-            
+
             if (sqlResponse == null && isQueryCacheEnabled) {
                 sqlResponse = searchQueryInCache(sqlRequest);
                 Trace.addTimelineAnnotation("query cache searched");
             }
-            
+
             // real execution if required
             if (sqlResponse == null) {
                 try (QueryRequestLimits limit = new QueryRequestLimits(sqlRequest.getProject())) {
@@ -419,7 +413,7 @@ public class QueryService extends BasicService {
     private SQLResponse queryAndUpdateCache(SQLRequest sqlRequest, long startTime, boolean queryCacheEnabled) {
         KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
         Message msg = MsgPicker.getMsg();
-        
+
         SQLResponse sqlResponse = null;
         try {
             final boolean isSelect = QueryUtil.isSelectStatement(sqlRequest.getSql());
@@ -483,8 +477,7 @@ public class QueryService extends BasicService {
     }
 
     private boolean isQueryCacheEnabled(KylinConfig kylinConfig) {
-        return checkCondition(kylinConfig.isQueryCacheEnabled(),
-                "query cache disabled in KylinConfig") && //
+        return checkCondition(kylinConfig.isQueryCacheEnabled(), "query cache disabled in KylinConfig") && //
                 checkCondition(!BackdoorToggles.getDisableCache(), "query cache disabled in BackdoorToggles");
     }
 
@@ -656,161 +649,12 @@ public class QueryService extends BasicService {
     }
 
     public List<TableMetaWithType> getMetadataV2(String project) throws SQLException, IOException {
-        return getMetadataV2(getCubeManager(), project);
-    }
-
-    @SuppressWarnings("checkstyle:methodlength")
-    protected List<TableMetaWithType> getMetadataV2(CubeManager cubeMgr, String project)
-            throws SQLException, IOException {
-        //Message msg = MsgPicker.getMsg();
-
-        Connection conn = null;
-        ResultSet columnMeta = null;
-        List<TableMetaWithType> tableMetas = null;
-        Map<String, TableMetaWithType> tableMap = null;
-        Map<String, ColumnMetaWithType> columnMap = null;
-        if (StringUtils.isBlank(project)) {
-            return Collections.emptyList();
+        if (null == project) {
+            aclEvaluate.checkIsGlobalAdmin();
+        } else {
+            aclEvaluate.checkProjectReadPermission(project);
         }
-        ResultSet JDBCTableMeta = null;
-        try {
-            conn = QueryConnection.getConnection(project);
-            DatabaseMetaData metaData = conn.getMetaData();
-
-            JDBCTableMeta = metaData.getTables(null, null, null, null);
-
-            tableMetas = new LinkedList<TableMetaWithType>();
-            tableMap = new HashMap<String, TableMetaWithType>();
-            columnMap = new HashMap<String, ColumnMetaWithType>();
-            while (JDBCTableMeta.next()) {
-                String catalogName = JDBCTableMeta.getString(1);
-                String schemaName = JDBCTableMeta.getString(2);
-
-                // Not every JDBC data provider offers full 10 columns, e.g., PostgreSQL has only 5
-                TableMetaWithType tblMeta = new TableMetaWithType(
-                        catalogName == null ? Constant.FakeCatalogName : catalogName,
-                        schemaName == null ? Constant.FakeSchemaName : schemaName, JDBCTableMeta.getString(3),
-                        JDBCTableMeta.getString(4), JDBCTableMeta.getString(5), null, null, null, null, null);
-
-                if (!"metadata".equalsIgnoreCase(tblMeta.getTABLE_SCHEM())) {
-                    tableMetas.add(tblMeta);
-                    tableMap.put(tblMeta.getTABLE_SCHEM() + "#" + tblMeta.getTABLE_NAME(), tblMeta);
-                }
-            }
-
-            columnMeta = metaData.getColumns(null, null, null, null);
-
-            while (columnMeta.next()) {
-                String catalogName = columnMeta.getString(1);
-                String schemaName = columnMeta.getString(2);
-
-                // kylin(optiq) is not strictly following JDBC specification
-                ColumnMetaWithType colmnMeta = new ColumnMetaWithType(
-                        catalogName == null ? Constant.FakeCatalogName : catalogName,
-                        schemaName == null ? Constant.FakeSchemaName : schemaName, columnMeta.getString(3),
-                        columnMeta.getString(4), columnMeta.getInt(5), columnMeta.getString(6), columnMeta.getInt(7),
-                        getInt(columnMeta.getString(8)), columnMeta.getInt(9), columnMeta.getInt(10),
-                        columnMeta.getInt(11), columnMeta.getString(12), columnMeta.getString(13),
-                        getInt(columnMeta.getString(14)), getInt(columnMeta.getString(15)), columnMeta.getInt(16),
-                        columnMeta.getInt(17), columnMeta.getString(18), columnMeta.getString(19),
-                        columnMeta.getString(20), columnMeta.getString(21), getShort(columnMeta.getString(22)),
-                        columnMeta.getString(23));
-
-                if (!"metadata".equalsIgnoreCase(colmnMeta.getTABLE_SCHEM())
-                        && !colmnMeta.getCOLUMN_NAME().toUpperCase().startsWith("_KY_")) {
-                    tableMap.get(colmnMeta.getTABLE_SCHEM() + "#" + colmnMeta.getTABLE_NAME()).addColumn(colmnMeta);
-                    columnMap.put(colmnMeta.getTABLE_SCHEM() + "#" + colmnMeta.getTABLE_NAME() + "#"
-                            + colmnMeta.getCOLUMN_NAME(), colmnMeta);
-                }
-            }
-
-        } finally {
-            close(columnMeta, null, conn);
-            if (JDBCTableMeta != null) {
-                JDBCTableMeta.close();
-            }
-        }
-
-        ProjectInstance projectInstance = getProjectManager().getProject(project);
-        for (String modelName : projectInstance.getModels()) {
-
-            DataModelDesc dataModelDesc = modelService.getModel(modelName, project);
-            if (dataModelDesc != null && !dataModelDesc.isDraft()) {
-
-                // update table type: FACT
-                for (TableRef factTable : dataModelDesc.getFactTables()) {
-                    String factTableName = factTable.getTableIdentity().replace('.', '#');
-                    if (tableMap.containsKey(factTableName)) {
-                        tableMap.get(factTableName).getTYPE().add(TableMetaWithType.tableTypeEnum.FACT);
-                    } else {
-                        // should be used after JDBC exposes all tables and columns
-                        // throw new BadRequestException(msg.getTABLE_META_INCONSISTENT());
-                    }
-                }
-
-                // update table type: LOOKUP
-                for (TableRef lookupTable : dataModelDesc.getLookupTables()) {
-                    String lookupTableName = lookupTable.getTableIdentity().replace('.', '#');
-                    if (tableMap.containsKey(lookupTableName)) {
-                        tableMap.get(lookupTableName).getTYPE().add(TableMetaWithType.tableTypeEnum.LOOKUP);
-                    } else {
-                        // throw new BadRequestException(msg.getTABLE_META_INCONSISTENT());
-                    }
-                }
-
-                // update column type: PK and FK
-                for (JoinTableDesc joinTableDesc : dataModelDesc.getJoinTables()) {
-                    JoinDesc joinDesc = joinTableDesc.getJoin();
-                    for (String pk : joinDesc.getPrimaryKey()) {
-                        String columnIdentity = (dataModelDesc.findTable(pk.substring(0, pk.indexOf(".")))
-                                .getTableIdentity() + pk.substring(pk.indexOf("."))).replace('.', '#');
-                        if (columnMap.containsKey(columnIdentity)) {
-                            columnMap.get(columnIdentity).getTYPE().add(ColumnMetaWithType.columnTypeEnum.PK);
-                        } else {
-                            // throw new BadRequestException(msg.getCOLUMN_META_INCONSISTENT());
-                        }
-                    }
-
-                    for (String fk : joinDesc.getForeignKey()) {
-                        String columnIdentity = (dataModelDesc.findTable(fk.substring(0, fk.indexOf(".")))
-                                .getTableIdentity() + fk.substring(fk.indexOf("."))).replace('.', '#');
-                        if (columnMap.containsKey(columnIdentity)) {
-                            columnMap.get(columnIdentity).getTYPE().add(ColumnMetaWithType.columnTypeEnum.FK);
-                        } else {
-                            // throw new BadRequestException(msg.getCOLUMN_META_INCONSISTENT());
-                        }
-                    }
-                }
-
-                // update column type: DIMENSION AND MEASURE
-                List<ModelDimensionDesc> dimensions = dataModelDesc.getDimensions();
-                for (ModelDimensionDesc dimension : dimensions) {
-                    for (String column : dimension.getColumns()) {
-                        String columnIdentity = (dataModelDesc.findTable(dimension.getTable()).getTableIdentity() + "."
-                                + column).replace('.', '#');
-                        if (columnMap.containsKey(columnIdentity)) {
-                            columnMap.get(columnIdentity).getTYPE().add(ColumnMetaWithType.columnTypeEnum.DIMENSION);
-                        } else {
-                            // throw new BadRequestException(msg.getCOLUMN_META_INCONSISTENT());
-                        }
-
-                    }
-                }
-
-                String[] measures = dataModelDesc.getMetrics();
-                for (String measure : measures) {
-                    String columnIdentity = (dataModelDesc.findTable(measure.substring(0, measure.indexOf(".")))
-                            .getTableIdentity() + measure.substring(measure.indexOf("."))).replace('.', '#');
-                    if (columnMap.containsKey(columnIdentity)) {
-                        columnMap.get(columnIdentity).getTYPE().add(ColumnMetaWithType.columnTypeEnum.MEASURE);
-                    } else {
-                        // throw new BadRequestException(msg.getCOLUMN_META_INCONSISTENT());
-                    }
-                }
-            }
-        }
-
-        return tableMetas;
+        return QueryMetaProvider.getQueryMeta(KylinConfig.getInstanceFromEnv(), project);
     }
 
     protected void processStatementAttr(Statement s, SQLRequest sqlRequest) throws SQLException {
