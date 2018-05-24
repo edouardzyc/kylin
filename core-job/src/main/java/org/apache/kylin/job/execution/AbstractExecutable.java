@@ -28,6 +28,7 @@ import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.MailService;
 import org.apache.kylin.job.exception.ExecuteException;
@@ -432,6 +433,11 @@ public abstract class AbstractExecutable implements Executable, Idempotent {
         return ArrayUtils.isEmpty(jobRetryExceptions) || ArrayUtils.contains(jobRetryExceptions, exceptionName);
     }
 
+    public void overwriteJobConf(Configuration conf, KylinConfig config) {
+        for (Map.Entry<String, String> entry : config.getMRConfigOverride().entrySet()) {
+            conf.set(entry.getKey(), entry.getValue());
+        }
+    }
     @Override
     public String toString() {
         return Objects.toStringHelper(this).add("id", getId()).add("name", getName()).add("state", getStatus()).toString();
