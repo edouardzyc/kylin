@@ -66,6 +66,9 @@ public class TopNMeasureType extends MeasureType<TopNCounter<ByteArray>> {
     public static final String CONFIG_ENCODING_VERSION_PREFIX = "topn.encoding_version.";
     public static final String CONFIG_AGG = "topn.aggregation";
     public static final String CONFIG_ORDER = "topn.order";
+    public static final int MAX_PRECISION = 38;
+    public static final int MIN_PRECISION = 19;
+
 
     public static class Factory extends MeasureTypeFactory<TopNCounter<ByteArray>> {
 
@@ -130,10 +133,25 @@ public class TopNMeasureType extends MeasureType<TopNCounter<ByteArray>> {
         if (sumCol.getType().isIntegerFamily()) {
             return "bigint";
         } else if (sumCol.getType().isDecimal()) {
-            return sumCol.getDatatype();
+            return rewriteDataType(sumCol.getDatatype());
         } else {
             return "double";
         }
+    }
+
+    private String rewriteDataType(String dataType) {
+        DataType result = DataType.getType(dataType);
+        if(null == result){
+            throw new RuntimeException("TopNMeasureType rewriteDataType error, dataType string : " + dataType);
+        }
+        int precision = result.getPrecision();
+        if(precision > MIN_PRECISION){
+            precision = Math.min(result.getPrecision(), MAX_PRECISION);
+        } else {
+            precision = MIN_PRECISION;
+        }
+        result = new DataType(result.getName(), precision, result.getScale());
+        return result.toString();
     }
 
     @Override
