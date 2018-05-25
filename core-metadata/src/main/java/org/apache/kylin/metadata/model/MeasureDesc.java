@@ -47,7 +47,9 @@ public class MeasureDesc implements Serializable {
 
     public List<MeasureDesc> getInternalMeasure(List<MeasureDesc> outerMeasures) {
         List<FunctionDesc> functionDescs = function.getMeasureType().convertToInternalMeasures(function);
-        
+        if (functionDescs.size() == 1)
+            return Lists.newArrayList(this);
+
         // remove dup with known outer measures
         Iterator<FunctionDesc> it = functionDescs.iterator();
         while (it.hasNext()) {
@@ -59,7 +61,7 @@ public class MeasureDesc implements Serializable {
                 }
             }
         }
-        
+
         if (functionDescs.size() == 1 && this.function.equals(functionDescs.get(0))) {
             return Lists.newArrayList(this);
         }

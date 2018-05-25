@@ -75,12 +75,18 @@ public class FunctionRuleTest extends LocalFileMetadataTestCase {
         CubeDesc desc = JsonUtil.readValue(new FileInputStream(f), CubeDesc.class);
 
         MeasureDesc measureDescDuplicated = desc.getOuterMeasures().get(1);
+        measureDescDuplicated.setName(measureDescDuplicated.getName());
         List<MeasureDesc> newMeasures = Lists.newArrayList(desc.getOuterMeasures());
         newMeasures.add(measureDescDuplicated);
         desc.setOuterMeasures(newMeasures);
 
         desc.init(config);
         assertEquals(4, desc.getMeasures().size());
+
+        ValidateContext context = new ValidateContext();
+        new FunctionRule().validate(desc, context);
+        assertEquals(1, context.getResults().length);
+        context.getResults()[0].getMessage().contains("There is duplicated measure");
     }
 
     @Test

@@ -60,7 +60,7 @@ public class FunctionRule implements IValidatorRule<CubeDesc> {
     public void validate(CubeDesc cube, ValidateContext context) {
         List<MeasureDesc> measures = cube.getOuterMeasures();
 
-        if (validateMeasureNamesDuplicated(measures, context)) {
+        if (validateMeasureDuplicated(measures, context)) {
             return;
         }
 
@@ -163,7 +163,7 @@ public class FunctionRule implements IValidatorRule<CubeDesc> {
     /**
      * @param measures
      */
-    private boolean validateMeasureNamesDuplicated(List<MeasureDesc> measures, ValidateContext context) {
+    private boolean validateMeasureDuplicated(List<MeasureDesc> measures, ValidateContext context) {
         Set<String> nameSet = new HashSet<>();
         for (MeasureDesc measure: measures){
             if (nameSet.contains(measure.getName())){
@@ -171,6 +171,16 @@ public class FunctionRule implements IValidatorRule<CubeDesc> {
                 return true;
             } else {
                 nameSet.add(measure.getName());
+            }
+        }
+
+        Set<MeasureDesc> noDupMeasureDescs = new HashSet<>();
+        for (MeasureDesc measureDesc : measures) {
+            if (noDupMeasureDescs.contains(measureDesc)) {
+                context.addResult(ResultLevel.ERROR, "There is duplicated measure: " + measureDesc);
+                return true;
+            } else {
+                noDupMeasureDescs.add(measureDesc);
             }
         }
         return false;
