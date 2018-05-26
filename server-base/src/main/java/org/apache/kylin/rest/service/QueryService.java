@@ -178,6 +178,7 @@ public class QueryService extends BasicService {
         try {
             final String user = SecurityContextHolder.getContext().getAuthentication().getName();
             badQueryDetector.queryStart(Thread.currentThread(), sqlRequest, user);
+            QueryContext.current().setSql(sqlRequest.getSql());
 
             ret = queryWithSqlMassage(sqlRequest);
             return ret;
@@ -312,6 +313,7 @@ public class QueryService extends BasicService {
         stringBuilder.append("Is Prepare: ").append(BackdoorToggles.getPrepareOnly()).append(newLine);
         stringBuilder.append("Is Sparder Enabled: ").append(response.isSparderEnabled()).append(newLine);
         stringBuilder.append("Is Late Decode Enabled: ").append(response.isLateDecodeEnabled()).append(newLine);
+        stringBuilder.append("Is Timeout: ").append(response.isTimeout()).append(newLine);
         stringBuilder.append("Trace URL: ").append(response.getTraceUrl()).append(newLine);
         stringBuilder.append("Message: ").append(response.getExceptionMessage()).append(newLine);
         stringBuilder.append("==========================[QUERY]===============================").append(newLine);
@@ -469,6 +471,7 @@ public class QueryService extends BasicService {
             sqlResponse.setTotalScanBytes(queryContext.getScannedBytes());
             sqlResponse.setSparderEnabled(queryContext.isSparderEnabled());
             sqlResponse.setLateDecodeEnabled(queryContext.isLateDecodeEnabled());
+            sqlResponse.setTimeout(queryContext.isTimeout());
             if (queryCacheEnabled && e.getCause() != null
                     && ExceptionUtils.getRootCause(e) instanceof ResourceLimitExceededException) {
                 Cache exceptionCache = cacheManager.getCache(EXCEPTION_QUERY_CACHE);

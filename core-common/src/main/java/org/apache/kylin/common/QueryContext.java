@@ -52,38 +52,15 @@ public class QueryContext {
     private Set<String> groups;
     private AtomicLong scannedRows = new AtomicLong();
     private AtomicLong scannedBytes = new AtomicLong();
+    private String sql;
     private Object calcitePlan;
-
-    private List<RPCStatistics> rpcStatisticsList = Lists.newCopyOnWriteArrayList();
-    private Map<Integer, CubeSegmentStatisticsResult> cubeSegmentStatisticsResultMap = Maps.newLinkedHashMap();
-
     private boolean hasRuntimeAgg;
     private boolean isSparderEnabled;
     private boolean isLateDecodeEnabled;
+    private boolean isTimeout;
 
-    public boolean isSparderEnabled() {
-        return isSparderEnabled;
-    }
-
-    public void setSparderEnabled(boolean sparderEnabled) {
-        isSparderEnabled = sparderEnabled;
-    }
-
-    public boolean isLateDecodeEnabled() {
-        return isLateDecodeEnabled;
-    }
-
-    public void setLateDecodeEnabled(boolean lateDecodeEnabled) {
-        isLateDecodeEnabled = lateDecodeEnabled;
-    }
-
-    public boolean hasRuntimeAgg() {
-        return hasRuntimeAgg;
-    }
-
-    public void setHasRuntimeAgg(Boolean hasRuntimeAgg) {
-        this.hasRuntimeAgg = hasRuntimeAgg;
-    }
+    private List<RPCStatistics> rpcStatisticsList = Lists.newCopyOnWriteArrayList();
+    private Map<Integer, CubeSegmentStatisticsResult> cubeSegmentStatisticsResultMap = Maps.newLinkedHashMap();
 
     private QueryContext() {
         // use QueryContext.current() instead
@@ -155,6 +132,46 @@ public class QueryContext {
 
     public long addAndGetScannedBytes(long deltaBytes) {
         return scannedBytes.addAndGet(deltaBytes);
+    }
+
+    public String getSql() {
+        return sql;
+    }
+
+    public void setSql(String sql) {
+        this.sql = sql;
+    }
+
+    public boolean isTimeout() {
+        return isTimeout;
+    }
+
+    public void setTimeout(boolean timeout) {
+        isTimeout = timeout;
+    }
+
+    public boolean isSparderEnabled() {
+        return isSparderEnabled;
+    }
+
+    public void setSparderEnabled(boolean sparderEnabled) {
+        isSparderEnabled = sparderEnabled;
+    }
+
+    public boolean isLateDecodeEnabled() {
+        return isLateDecodeEnabled;
+    }
+
+    public void setLateDecodeEnabled(boolean lateDecodeEnabled) {
+        isLateDecodeEnabled = lateDecodeEnabled;
+    }
+
+    public boolean hasRuntimeAgg() {
+        return hasRuntimeAgg;
+    }
+
+    public void setHasRuntimeAgg(Boolean hasRuntimeAgg) {
+        this.hasRuntimeAgg = hasRuntimeAgg;
     }
 
     public void addContext(int ctxId, String type, boolean ifCube) {

@@ -74,9 +74,20 @@ public class SQLResponse implements Serializable {
     protected byte[] queryStatistics;
 
     protected String traceUrl = null;
+
     protected boolean isSparderEnabled;
 
     protected boolean isLateDecodeEnabled;
+
+    protected boolean isTimeout;
+
+    public boolean isTimeout() {
+        return isTimeout;
+    }
+
+    public void setTimeout(boolean timeout) {
+        isTimeout = timeout;
+    }
 
     public boolean isSparderEnabled() {
         return isSparderEnabled;
