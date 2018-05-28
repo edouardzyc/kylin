@@ -26,6 +26,10 @@ import com.google.common.primitives.Shorts;
 public class BytesUtil {
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+    // for there are some extra available code, just like binary {-113, 0}, when using variable-length serialization method to compress a Long number value.
+    // as for binary {-113, 0}, it should represents the 0L according to the #org.apache.kylin.common.util.BytesUtil.writeVLong alogrithm. However, the 0L value
+    // is just use {0} rather than {-113, 0} or {-114, 0, 0}.
+    public static final byte[] VNULL_BYTE_ARRAY = new byte[] { -113, 0 };
 
     public static void writeByte(byte num, byte[] bytes, int offset, int size) {
         for (int i = offset + size - 1; i >= offset; i--) {
@@ -196,13 +200,38 @@ public class BytesUtil {
     // ============================================================================
 
     public static void writeVInt(int i, ByteBuffer out) {
+        writeVLong((long) i, out);
+    }
 
+    public static void writeVLongObject(Long i, ByteBuffer out) {
+        if (i == null) {
+            out.put(VNULL_BYTE_ARRAY);
+            return;
+        }
         writeVLong(i, out);
+    }
 
+    public static Long readVLongObject(ByteBuffer in) {
+        byte firstByte = in.get();
+        int len = decodeVIntSize(firstByte);
+        if (len == 1) {
+            return (long) firstByte;
+        }
+        long i = 0;
+        byte b = 0;
+        for (int idx = 0; idx < len - 1; idx++) {
+            b = in.get();
+            i = i << 8;
+            i = i | (b & 0xFF);
+        }
+
+        if (len == 2 && equalsNullByteArray(firstByte, b))
+            return null;
+
+        return (isNegativeVInt(firstByte) ? (i ^ -1L) : i);
     }
 
     public static void writeVLong(long i, ByteBuffer out) {
-
         if (i >= -112 && i <= 127) {
             out.put((byte) i);
             return;
@@ -235,7 +264,7 @@ public class BytesUtil {
         byte firstByte = in.get();
         int len = decodeVIntSize(firstByte);
         if (len == 1) {
-            return firstByte;
+            return (long) firstByte;
         }
         long i = 0;
         for (int idx = 0; idx < len - 1; idx++) {
@@ -243,6 +272,7 @@ public class BytesUtil {
             i = i << 8;
             i = i | (b & 0xFF);
         }
+
         return (isNegativeVInt(firstByte) ? (i ^ -1L) : i);
     }
 
@@ -455,6 +485,16 @@ public class BytesUtil {
             sb.append(String.format("\\x%02X", b & 0xFF));
         }
         return sb.toString();
+    }
+
+    private static boolean equalsNullByteArray(Byte... bytes) {
+        if (bytes == null || bytes.length < 2)
+            return false;
+
+        if (VNULL_BYTE_ARRAY[0] == bytes[0] && VNULL_BYTE_ARRAY[1] == bytes[1])
+            return true;
+
+        return false;
     }
 
 }

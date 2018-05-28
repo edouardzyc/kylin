@@ -28,10 +28,12 @@ import org.apache.kylin.metadata.model.MeasureDesc;
 import org.apache.kylin.metadata.model.ParameterDesc;
 import org.apache.kylin.metadata.model.TblColRef;
 
+@SuppressWarnings("serial")
 public class BigDecimalIngester extends MeasureIngester<BigDecimal> {
 
     @Override
-    public BigDecimal valueOf(String[] values, MeasureDesc measureDesc, Map<TblColRef, Dictionary<String>> dictionaryMap) {
+    public BigDecimal valueOf(String[] values, MeasureDesc measureDesc,
+            Map<TblColRef, Dictionary<String>> dictionaryMap) {
         ParameterDesc param = measureDesc.getFunction().getParameter();
         if (FunctionDesc.PARAMETER_TYPE_MATH_EXPRESSION.equals(param.getType())) {
             return param.getExpressionParam().getValueOf(values);
@@ -40,9 +42,10 @@ public class BigDecimalIngester extends MeasureIngester<BigDecimal> {
         if (values.length > 1)
             throw new IllegalArgumentException();
 
-        if (values[0] == null || values[0].length() == 0)
-            return new BigDecimal(0);
-        else
+        if (values[0] == null || values[0].length() == 0) {
+            return null;
+        } else {
             return new BigDecimal(values[0]);
+        }
     }
 }

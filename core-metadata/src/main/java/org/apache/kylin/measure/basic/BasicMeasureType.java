@@ -98,7 +98,9 @@ public class BasicMeasureType extends MeasureType {
 
     @Override
     public MeasureAggregator<?> newAggregator() {
-        if (isSum() || isCount()) {
+        if (isCount()) {
+            return new CountAggregator();
+        } else if (isSum()) {
             if (dataType.isDecimal())
                 return new BigDecimalSumAggregator();
             else if (dataType.isIntegerFamily())

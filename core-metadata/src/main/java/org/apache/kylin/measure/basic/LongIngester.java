@@ -44,7 +44,7 @@ public class LongIngester extends MeasureIngester<Long> {
         }
 
         if (values[0] == null || values[0].length() == 0)
-            return new Long(0L);
+            return null;
         else
             return Long.valueOf(values[0]);
     }
