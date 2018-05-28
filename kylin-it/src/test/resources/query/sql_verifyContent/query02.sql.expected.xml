@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
   <table name="expect">
-    <column>message</column>
+    <column>c1</column>
+    <column>c2</column>
     <row>
-      <value>Hello world</value>
+      <null/>
+      <value>Computers Catagory</value>
     </row>
   </table>
 </dataset>

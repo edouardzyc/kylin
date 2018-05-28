@@ -76,7 +76,6 @@ import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.SortedTable;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.datatype.DataTypeException;
-import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.dataset.xml.XmlDataSet;
 import org.dbunit.ext.h2.H2Connection;
 import org.dbunit.ext.h2.H2DataTypeFactory;
@@ -430,6 +429,7 @@ public class KylinTestBase {
         return Pair.newPair(row, col);
     }
 
+    // TODO this function should be deprecated and use execAndVerifyResult
     protected void verifyResultContent(String queryFolder) throws Exception {
         logger.info("---------- verify result content in folder: " + queryFolder);
 
@@ -439,7 +439,7 @@ public class KylinTestBase {
             String sql = getTextFromFile(sqlFile);
 
             File expectResultFile = new File(sqlFile.getParent(), sqlFile.getName() + ".expected.xml");
-            IDataSet expect = new FlatXmlDataSetBuilder().build(expectResultFile);
+            IDataSet expect = new XmlDataSet(new FileInputStream(expectResultFile));
             // Get expected table named "expect". FIXME Only support default table name
             ITable expectTable = expect.getTable("expect");
 
@@ -694,21 +694,6 @@ public class KylinTestBase {
         }
     }
 
-    protected void verifyResult(ITable kylinTable, String queryName, File expectResultFile) throws Exception {
-        if (!isVerifyTestResultEnabled()) {
-            return;
-        }
-        FileInputStream in = new FileInputStream(expectResultFile);
-        try {
-            IDataSet expectResult = new XmlDataSet(in);
-            ITable expectTable = expectResult.getTable(resultTableName + queryName);
-            // compare the result
-            assertTableEquals(expectTable, kylinTable);
-        } finally {
-            in.close();
-        }
-    }
-
     protected void execAndCompDynamicQuery(String queryFolder, String[] exclusiveQuerys, boolean needSort)
             throws Exception {
         logger.info("---------- test folder: " + queryFolder);
@@ -931,10 +916,6 @@ public class KylinTestBase {
         return false;
     }
 
-    protected boolean isVerifyTestResultEnabled() {
-        return false;
-    }
-
     private void verifyTestQueryStats(File sqlFile, QueryContext queryContext) {
         if (!isVerifyTestQueryStatsEnabled()) {
             return;
@@ -947,6 +928,25 @@ public class KylinTestBase {
             Assert.assertEquals(expected, actual);
         } catch (IOException e) {
             logger.error("Fail to compare query stats of {}", sqlFile.getPath(), e);
+        }
+    }
+
+    protected boolean isVerifyTestResultEnabled() {
+        return false;
+    }
+
+    protected void verifyResult(ITable kylinTable, String queryName, File expectResultFile) throws Exception {
+        if (!isVerifyTestResultEnabled()) {
+            return;
+        }
+        FileInputStream in = new FileInputStream(expectResultFile);
+        try {
+            IDataSet expectResult = new XmlDataSet(in);
+            ITable expectTable = expectResult.getTable(resultTableName + queryName);
+            // compare the result
+            assertTableEquals(expectTable, kylinTable);
+        } finally {
+            in.close();
         }
     }
 }
