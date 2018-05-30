@@ -990,6 +990,8 @@ public class QueryService extends BasicService {
                 isPushDown);
         response.setTotalScanCount(QueryContext.current().getScannedRows());
         response.setTotalScanBytes(QueryContext.current().getScannedBytes());
+        response.setLateDecodeEnabled(QueryContext.current().isLateDecodeEnabled());
+        response.setSparderEnabled(QueryContext.current().isSparderEnabled());
         return response;
     }
 
