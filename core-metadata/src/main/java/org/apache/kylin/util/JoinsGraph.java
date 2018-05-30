@@ -242,7 +242,7 @@ public class JoinsGraph implements Serializable {
     public List<TableRef> otherSide(TableRef thisSide) {
         List<Edge> edges = node2Edges.get(thisSide);
         if (edges == null) {
-            return null;
+            return Lists.newArrayList();
         }
 
         List<TableRef> result = Lists.newArrayList();
