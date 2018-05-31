@@ -46,6 +46,7 @@ import com.google.common.collect.Sets;
 public class BaseCuboidBuilder implements java.io.Serializable {
 
     protected static final Logger logger = LoggerFactory.getLogger(BaseCuboidBuilder.class);
+    public static final String SEQUENCEFILE_DELIMITER = "\\01";
     protected String cubeName;
     protected Cuboid baseCuboid;
     protected CubeDesc cubeDesc;
