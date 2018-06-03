@@ -29,8 +29,8 @@ import org.apache.kylin.common.QueryContext;
 import org.apache.kylin.common.QueryContext.CubeSegmentStatistics;
 import org.apache.kylin.common.QueryContext.CubeSegmentStatisticsResult;
 import org.apache.kylin.cube.CubeDescManager;
+import org.apache.kylin.cube.cuboid.Cuboid;
 import org.apache.kylin.cube.model.CubeDesc;
-import org.apache.kylin.cube.model.RowKeyColDesc;
 import org.apache.kylin.metadata.model.TblColRef;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -71,19 +71,12 @@ public class TestQueryStats {
 
 
     private List<String> translateIdToColumns(CubeDesc cubeDesc, long cuboidID) {
-        List<String> dimesnions = Lists.newArrayList();
-        if (cubeDesc == null) {
-            return dimesnions;
+        List<String> dims = Lists.newArrayList();
+        if (cubeDesc != null) {
+            for (TblColRef col : Cuboid.translateIdToColumns(cubeDesc, cuboidID))
+                dims.add(col.getIdentity());
         }
-        RowKeyColDesc[] allColumns = cubeDesc.getRowkey().getRowKeyColumns();
-        for (int i = 0; i < allColumns.length; i++) {
-            long bitmask = 1L << allColumns[i].getBitIndex();
-            if ((cuboidID & bitmask) != 0) {
-                TblColRef colRef = allColumns[i].getColRef();
-                dimesnions.add(colRef.getIdentity());
-            }
-        }
-        return dimesnions;
+        return dims;
     }
     
     @Override

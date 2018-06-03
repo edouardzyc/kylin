@@ -108,6 +108,20 @@ public class Cuboid implements Comparable<Cuboid>, Serializable {
     public static Cuboid getBaseCuboid(CubeDesc cube) {
         return findById(cube.getInitialCuboidScheduler(), getBaseCuboidId(cube));
     }
+    
+    public static List<TblColRef> translateIdToColumns(CubeDesc cube, long cuboidID) {
+        List<TblColRef> dimesnions = new ArrayList<TblColRef>();
+        RowKeyColDesc[] allColumns = cube.getRowkey().getRowKeyColumns();
+        for (int i = 0; i < allColumns.length; i++) {
+            // NOTE: the order of column in list!!!
+            long bitmask = 1L << allColumns[i].getBitIndex();
+            if ((cuboidID & bitmask) != 0) {
+                TblColRef colRef = allColumns[i].getColRef();
+                dimesnions.add(colRef);
+            }
+        }
+        return dimesnions;
+    }
 
     // ============================================================================
 
@@ -126,22 +140,8 @@ public class Cuboid implements Comparable<Cuboid>, Serializable {
         this.inputID = originalID;
         this.id = validID;
         this.idBytes = Bytes.toBytes(id);
-        this.dimensionColumns = translateIdToColumns(this.id);
+        this.dimensionColumns = translateIdToColumns(cubeDesc, this.id);
         this.requirePostAggregation = calcExtraAggregation(this.inputID, this.id) != 0;
-    }
-
-    private List<TblColRef> translateIdToColumns(long cuboidID) {
-        List<TblColRef> dimesnions = new ArrayList<TblColRef>();
-        RowKeyColDesc[] allColumns = cubeDesc.getRowkey().getRowKeyColumns();
-        for (int i = 0; i < allColumns.length; i++) {
-            // NOTE: the order of column in list!!!
-            long bitmask = 1L << allColumns[i].getBitIndex();
-            if ((cuboidID & bitmask) != 0) {
-                TblColRef colRef = allColumns[i].getColRef();
-                dimesnions.add(colRef);
-            }
-        }
-        return dimesnions;
     }
 
     private long calcExtraAggregation(long inputID, long id) {
@@ -183,7 +183,7 @@ public class Cuboid implements Comparable<Cuboid>, Serializable {
 
     public List<TblColRef> getAggregationColumns() {
         long aggrColsID = eliminateHierarchyAggregation(id);
-        return translateIdToColumns(aggrColsID);
+        return translateIdToColumns(cubeDesc, aggrColsID);
     }
 
     public long getId() {
