@@ -69,6 +69,12 @@ import org.apache.calcite.util.NumberUtil;
  * OVERRIDE POINT:
  * - more power() overloads
  * - refined org.apache.calcite.runtime.SqlFunctions#addMonths(int, int)
+ * - corner case subString()
+ * - corner case trim_()
+ * - upper()
+ * - lower()
+ * - charLength()
+ * - addMonths()
  */
 
 @SuppressWarnings("UnnecessaryUnboxing")
@@ -125,8 +131,12 @@ public class SqlFunctions {
     private SqlFunctions() {
     }
 
-    /** SQL SUBSTRING(string FROM ... FOR ...) function. */
+    /** SQL SUBSTRING(string FROM ... FOR ...) function * */
+    // override
     public static String substring(String s, int from, int for_) {
+        if (s == null) {
+            return null;
+        }
         return s.substring(from - 1, Math.min(from - 1 + for_, s.length()));
     }
 
@@ -146,6 +156,7 @@ public class SqlFunctions {
     }
 
     /** SQL UPPER(string) function. */
+    //overrivde
     public static String upper(String s) {
         if (s == null)
             return "";
@@ -153,6 +164,7 @@ public class SqlFunctions {
     }
 
     /** SQL LOWER(string) function. */
+    //override
     public static String lower(String s) {
         if (s == null)
             return "";
@@ -230,7 +242,11 @@ public class SqlFunctions {
     }
 
     /** SQL {@code TRIM} function. */
+    //override
     private static String trim_(String s, boolean left, boolean right, char c) {
+        if (s == null) {
+            return null;
+        }
         int j = s.length();
         if (right) {
             for (;;) {
@@ -2149,6 +2165,7 @@ public class SqlFunctions {
 
     /** Adds a given number of months to a date, represented as the number of
      * days since the epoch. */
+    //override
     public static int addMonths(int date, int m) {
         int y0 = (int) DateTimeUtils.unixDateExtract(TimeUnitRange.YEAR, date);
         int m0 = (int) DateTimeUtils.unixDateExtract(TimeUnitRange.MONTH, date);
