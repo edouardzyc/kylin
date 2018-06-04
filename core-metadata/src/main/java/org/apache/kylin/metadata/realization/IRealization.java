@@ -65,4 +65,6 @@ public interface IRealization extends IStorageAware {
     public KylinConfig getConfig();
 
     public int getCost();
+
+    public int getCost(SQLDigest sqlDigest);
 }

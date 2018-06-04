@@ -19,6 +19,7 @@
 package org.apache.kylin.query.routing;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.debug.BackdoorToggles;
@@ -41,6 +41,7 @@ import org.apache.kylin.metadata.model.TblColRef;
 import org.apache.kylin.metadata.project.ProjectManager;
 import org.apache.kylin.metadata.realization.IRealization;
 import org.apache.kylin.metadata.realization.NoRealizationFoundException;
+import org.apache.kylin.metadata.realization.RealizationType;
 import org.apache.kylin.query.relnode.OLAPContext;
 import org.apache.kylin.query.routing.rules.RemoveBlackoutRealizationsRule;
 import org.apache.kylin.util.JoinsGraph;
@@ -60,7 +61,6 @@ public class RealizationChooser {
     // select models for given contexts, return realization candidates for each context
     public static void selectRealization(List<OLAPContext> contexts) {
         // try different model for different context
-
         for (OLAPContext ctx : contexts) {
             ctx.realizationCheck = new RealizationCheck();
             attemptSelectRealization(ctx);
@@ -69,8 +69,8 @@ public class RealizationChooser {
     }
 
     private static void attemptSelectRealization(OLAPContext context) {
+        // step1: collect realization info
         Map<DataModelDesc, Set<IRealization>> modelMap = makeOrderedModelMap(context);
-
         if (modelMap.size() == 0) {
             throw new NoRealizationFoundException("No model found for " + toErrorMsg(context));
         }
@@ -88,26 +88,36 @@ public class RealizationChooser {
             }
         }
 
+        // step2: model match
+        Set<IRealization> orderedRealizations = null;
+        final Map<DataModelDesc, Map<String, String>> model2aliasMap = Maps.newHashMap();
         for (Map.Entry<DataModelDesc, Set<IRealization>> entry : modelMap.entrySet()) {
             final DataModelDesc model = entry.getKey();
-            final Map<String, String> aliasMap = matches(model, context);
+            Map<String, String> aliasMap = matches(model, context);
             if (aliasMap != null) {
-                context.fixModel(model, aliasMap);
-
-                IRealization realization = QueryRouter.selectRealization(context, entry.getValue());
-                if (realization == null) {
-                    logger.info("Give up on model {} because no suitable realization is found", model);
-                    context.unfixModel();
-                    continue;
+                model2aliasMap.put(model, aliasMap);
+                if (orderedRealizations == null) {
+                    orderedRealizations = sortRealizationByCostAndType(context, entry.getValue());
+                } else {
+                    orderedRealizations.addAll(sortRealizationByCostAndType(context, entry.getValue()));
                 }
-
-                context.realization = realization;
-                return;
             }
         }
 
+        // step3: select realization order by cost
+        if (orderedRealizations == null)
+            throw new NoRealizationFoundException("No realization found for " + toErrorMsg(context));
+        for (IRealization realization : orderedRealizations) {
+            context.fixModel(realization.getModel(), model2aliasMap.get(realization.getModel()));
+            IRealization candidate = QueryRouter.selectRealization(context, Sets.newHashSet(realization));
+            if (candidate == null) {
+                context.unfixModel();
+                continue;
+            }
+            context.realization = candidate;
+            return;
+        }
         throw new NoRealizationFoundException("No realization found for " + toErrorMsg(context));
-
     }
 
     private static String toErrorMsg(OLAPContext ctx) {
@@ -128,11 +138,8 @@ public class RealizationChooser {
     }
 
     private static Map<String, String> matches(DataModelDesc model, OLAPContext ctx) {
-        //        Map<String, String> result = Maps.newHashMap();
-
-        TableRef firstTable = ctx.firstTableScan.getTableRef();
-
         Map<String, String> matchUp = Maps.newHashMap();
+        TableRef firstTable = ctx.firstTableScan.getTableRef();
         boolean matched;
 
         if (ctx.joins.isEmpty() && model.isLookupTable(firstTable.getTableIdentity())) {
@@ -163,7 +170,6 @@ public class RealizationChooser {
                     RealizationCheck.IncapableReason.create(RealizationCheck.IncapableType.MODEL_UNMATCHED_JOIN));
             return null;
         }
-
         ctx.realizationCheck.addCapableModel(model, matchUp);
         return matchUp;
     }
@@ -216,9 +222,7 @@ public class RealizationChooser {
         Set<IRealization> realizations = ProjectManager.getInstance(kylinConfig).getRealizationsByTable(projectName,
                 tableName);
 
-        final Map<DataModelDesc, Set<IRealization>> models = Maps.newHashMap();
-        final Map<DataModelDesc, RealizationCost> costs = Maps.newHashMap();
-
+        final Map<DataModelDesc, Set<IRealization>> model2Realizations = Maps.newHashMap();
         for (IRealization real : realizations) {
             if (real.isReady() == false) {
                 context.realizationCheck.addIncapableCube(real,
@@ -235,38 +239,14 @@ public class RealizationChooser {
                         .create(RealizationCheck.IncapableType.CUBE_BLACK_OUT_REALIZATION));
                 continue;
             }
-
-            RealizationCost cost = new RealizationCost(real);
-            DataModelDesc m = real.getModel();
-            Set<IRealization> set = models.get(m);
-            if (set == null) {
-                set = Sets.newHashSet();
-                set.add(real);
-                models.put(m, set);
-                costs.put(m, cost);
+            if (model2Realizations.get(real.getModel()) == null || model2Realizations.size() == 0) {
+                model2Realizations.put(real.getModel(), Sets.<IRealization> newHashSet(real));
             } else {
-                set.add(real);
-                RealizationCost curCost = costs.get(m);
-                if (cost.compareTo(curCost) < 0)
-                    costs.put(m, cost);
+                model2Realizations.get(real.getModel()).add(real);
             }
         }
 
-        // order model by cheapest realization cost
-        TreeMap<DataModelDesc, Set<IRealization>> result = Maps.newTreeMap(new Comparator<DataModelDesc>() {
-            @Override
-            public int compare(DataModelDesc o1, DataModelDesc o2) {
-                RealizationCost c1 = costs.get(o1);
-                RealizationCost c2 = costs.get(o2);
-                int comp = c1.compareTo(c2);
-                if (comp == 0)
-                    comp = o1.getName().compareTo(o2.getName());
-                return comp;
-            }
-        });
-        result.putAll(models);
-
-        return result;
+        return model2Realizations;
     }
 
     private static boolean containsAll(Set<ColumnDesc> allColumnDescs, Set<TblColRef> allColumns) {
@@ -286,23 +266,27 @@ public class RealizationChooser {
         return notContainCols;
     }
 
-    private static class RealizationCost implements Comparable<RealizationCost> {
-        final public int priority;
-        final public int cost;
-
-        public RealizationCost(IRealization real) {
-            // ref Candidate.PRIORITIES
-            this.priority = Candidate.PRIORITIES.get(real.getType());
-            this.cost = real.getCost();
+    private static Set<IRealization> sortRealizationByCostAndType(final OLAPContext context,
+            Collection<? extends IRealization> realizations) {
+        final Map<RealizationType, Integer> weightOfRealization = Maps.newHashMap(Candidate.PRIORITIES);
+        if (context.hasAgg) {
+            weightOfRealization.put(RealizationType.INVERTED_INDEX,
+                    weightOfRealization.get(RealizationType.INVERTED_INDEX) + 1);
+        } else {
+            weightOfRealization.put(RealizationType.CUBE, weightOfRealization.get(RealizationType.CUBE) + 1);
         }
+        Set<IRealization> orderedRealizations = Sets.newTreeSet(new Comparator<IRealization>() {
+            @Override
+            public int compare(IRealization o1, IRealization o2) {
+                int res = weightOfRealization.get(o1.getType()) - weightOfRealization.get(o2.getType()) == 0
+                        ? o1.getCost(context.getSQLDigest()) - o2.getCost(context.getSQLDigest())
+                        : weightOfRealization.get(o1.getType()) - weightOfRealization.get(o2.getType());
+                return res == 0 ? o1.getName().compareTo(o2.getName()) : res;
+            }
+        });
 
-        @Override
-        public int compareTo(RealizationCost o) {
-            int comp = this.priority - o.priority;
-            if (comp != 0)
-                return comp;
-            else
-                return this.cost - o.cost;
-        }
+        orderedRealizations.addAll(realizations);
+        return orderedRealizations;
     }
+
 }
