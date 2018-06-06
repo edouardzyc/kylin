@@ -101,6 +101,7 @@
         <commons-lang3.version>3.4</commons-lang3.version>
         <commons-email.version>1.5</commons-email.version>
         <commons-validator.version>1.4.0</commons-validator.version>
+        <commons-compress>1.17</commons-compress>
 
         <!-- Utility -->
         <log4j.version>1.2.17</log4j.version>
@@ -668,7 +669,11 @@
                 <artifactId>commons-validator</artifactId>
                 <version>${commons-validator.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${commons-compress}</version>
+            </dependency>
             <!-- Logging -->
             <dependency>
                 <groupId>log4j</groupId>
@@ -847,7 +852,7 @@
                 <artifactId>spring-security-saml2-core</artifactId>
                 <version>${spring.framework.security.extensions.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-server</artifactId>
