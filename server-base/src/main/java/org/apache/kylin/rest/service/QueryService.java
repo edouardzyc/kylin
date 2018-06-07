@@ -58,6 +58,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.QueryContext;
+import org.apache.kylin.common.ServerMode;
 import org.apache.kylin.common.debug.BackdoorToggles;
 import org.apache.kylin.common.exceptions.ResourceLimitExceededException;
 import org.apache.kylin.common.htrace.HtraceInit;
@@ -327,10 +328,8 @@ public class QueryService extends BasicService {
         sqlRequest.setUsername(getUserName());
 
         KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
-        String serverMode = kylinConfig.getServerMode();
-        if (!(Constant.SERVER_MODE_QUERY.equals(serverMode.toLowerCase())
-                || Constant.SERVER_MODE_ALL.equals(serverMode.toLowerCase()))) {
-            throw new BadRequestException(String.format(msg.getQUERY_NOT_ALLOWED(), serverMode));
+        if (!ServerMode.isQuery(kylinConfig)) {
+            throw new BadRequestException(String.format(msg.getQUERY_NOT_ALLOWED(), kylinConfig.getServerMode()));
         }
         if (StringUtils.isBlank(sqlRequest.getProject())) {
             throw new BadRequestException(msg.getEMPTY_PROJECT_NAME());

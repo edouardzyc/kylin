@@ -46,8 +46,4 @@ public class Constant {
             " or hasPermission(filterObject, 'OPERATION')" +
             " or hasPermission(filterObject, 'READ')";
 
-    public final static String SERVER_MODE_QUERY = "query";
-    public final static String SERVER_MODE_JOB = "job";
-    public final static String SERVER_MODE_ALL = "all";
-
 }

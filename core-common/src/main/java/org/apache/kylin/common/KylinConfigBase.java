@@ -1457,7 +1457,7 @@ abstract public class KylinConfigBase implements Serializable {
     // ============================================================================
 
     public String getServerMode() {
-        return this.getOptional("kylin.server.mode", "all");
+        return this.getOptional("kylin.server.mode", "all").toLowerCase();
     }
 
     public String[] getRestServers() {

@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.ServerMode;
 import org.apache.kylin.common.persistence.RootPersistentEntity;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
@@ -515,9 +516,7 @@ public class CubeService extends BasicService implements InitializingBean {
 
     public void updateOnNewSegmentReady(String cubeName) {
         final KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
-        String serverMode = kylinConfig.getServerMode();
-        if (Constant.SERVER_MODE_JOB.equals(serverMode.toLowerCase())
-                || Constant.SERVER_MODE_ALL.equals(serverMode.toLowerCase())) {
+        if (ServerMode.isJob(kylinConfig)) {
             CubeInstance cube = getCubeManager().getCube(cubeName);
             if (cube != null) {
                 CubeSegment seg = cube.getLatestBuiltSegment();

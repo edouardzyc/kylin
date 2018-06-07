@@ -34,6 +34,7 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.ServerMode;
 import org.apache.kylin.common.StorageURL;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.persistence.StringEntity;
@@ -74,7 +75,7 @@ public class AclTableMigrationTool {
             logger.info("Do not need to migrate acl table data");
             return;
         } else {
-            if (!kylinConfig.getServerMode().equals("all")) {
+            if (!ServerMode.isAll(kylinConfig)) {
                 throw new IllegalStateException(
                         "Please make sure that you have config kylin.server.mode=all before migrating data");
             }

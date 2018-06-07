@@ -34,6 +34,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.ServerMode;
 import org.apache.kylin.common.lock.DistributedLock;
 import org.apache.kylin.common.util.SetThreadName;
 import org.apache.kylin.job.Scheduler;
@@ -240,9 +241,9 @@ public class DistributedScheduler implements Scheduler<AbstractExecutable>, Conn
 
     @Override
     public synchronized void init(JobEngineConfig jobEngineConfig, JobLock jobLock) throws SchedulerException {
-        String serverMode = jobEngineConfig.getConfig().getServerMode();
-        if (!("job".equals(serverMode.toLowerCase()) || "all".equals(serverMode.toLowerCase()))) {
-            logger.info("server mode: " + serverMode + ", no need to run job scheduler");
+        KylinConfig kylinConfig = jobEngineConfig.getConfig();
+        if (!ServerMode.isJob(kylinConfig)) {
+            logger.info("server mode: " + kylinConfig.getServerMode() + ", no need to run job scheduler");
             return;
         }
         logger.info("Initializing Job Engine ....");
