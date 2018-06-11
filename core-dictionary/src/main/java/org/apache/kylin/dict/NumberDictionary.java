@@ -19,6 +19,8 @@
 package org.apache.kylin.dict;
 
 
+import java.util.List;
+
 import org.apache.kylin.common.util.ClassUtil;
 
 /**
@@ -53,5 +55,21 @@ public class NumberDictionary<T> extends TrieDictionary<T> {
         ((Number2BytesConverter)this.bytesConvert).setMaxDigitsBeforeDecimalPoint(Number2BytesConverter.MAX_DIGITS_BEFORE_DECIMAL_POINT_LEGACY);
     }
 
+    @Override
+    protected int getIdFromValueBytesWithoutCache(byte[] value, int offset, int len, int roundingFlag) {
+        
+        int id = super.getIdFromValueBytesWithoutCache(value, offset, len, roundingFlag);
+        
+        // for backward compatibility, try some alternative number forms
+        if (id < 0) {
+            String str = bytesConvert.convertFromBytes(value, offset, len).toString();
+            List<byte[]> alts = ((Number2BytesConverter) bytesConvert).alternativeByteForms(str);
+            for (int i = 0; i < alts.size() && id < 0; i++) {
+                byte[] alt = alts.get(i);
+                id = super.getIdFromValueBytesWithoutCache(alt, 0, alt.length, roundingFlag);
+            }
+        }
+        return id;
+    }
 
 }

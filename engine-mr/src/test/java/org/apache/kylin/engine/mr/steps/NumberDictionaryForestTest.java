@@ -35,7 +35,6 @@ import java.util.Random;
 
 import org.apache.hadoop.io.Text;
 import org.apache.kylin.common.util.Bytes;
-import org.apache.kylin.dict.Number2BytesConverter;
 import org.apache.kylin.dict.NumberDictionary;
 import org.apache.kylin.dict.NumberDictionaryBuilder;
 import org.apache.kylin.dict.NumberDictionaryForestBuilder;
@@ -293,23 +292,4 @@ public class NumberDictionaryForestTest {
         return true;
     }
     
-    @Test
-    public void testNormalizeNumber() {
-        assertEquals("0", Number2BytesConverter.normalizeNumber("+0000.000"));
-        assertEquals("0", Number2BytesConverter.normalizeNumber("-0000.000"));
-        assertEquals("0", Number2BytesConverter.normalizeNumber("00.000"));
-        assertEquals("123", Number2BytesConverter.normalizeNumber("00123.000"));
-        assertEquals("-123", Number2BytesConverter.normalizeNumber("-0123"));
-        assertEquals("-123.78", Number2BytesConverter.normalizeNumber("-0123.780"));
-        assertEquals("200", Number2BytesConverter.normalizeNumber("200"));
-        assertEquals("200", Number2BytesConverter.normalizeNumber("200.00"));
-        assertEquals("200.01", Number2BytesConverter.normalizeNumber("200.010"));
-        
-        for (int i = -100; i < 101; i++) {
-            String expected = "" + i;
-            int cut = expected.startsWith("-") ? 1 : 0;
-            String str = expected.substring(0, cut) + "00" + expected.substring(cut) + ".000";
-            assertEquals(expected, Number2BytesConverter.normalizeNumber(str));
-        }
-    }
 }

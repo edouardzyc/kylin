@@ -19,6 +19,8 @@ package org.apache.kylin.dict;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.kylin.common.util.Bytes;
@@ -69,13 +71,33 @@ public class Number2BytesConverter implements BytesConverter<String>, Serializab
     @Override
     public byte[] convertToBytes(String v) {
         v = normalizeNumber(v);
+        return numToBytes(v);
+    }
+
+    // some alternative forms in addition to the normalized
+    public List<byte[]> alternativeByteForms(String v) {
+        List<byte[]> r = new ArrayList<>();
+        
+        v = normalizeNumber(v);
+        if (v.indexOf('.') < 0)
+            v += ".";
+        
+        v += "0";
+        r.add(numToBytes(v));
+        v += "0";
+        r.add(numToBytes(v));
+        return r;
+    }
+
+    private byte[] numToBytes(String v) {
         NumberBytesCodec codec = getCodec(this.maxDigitsBeforeDecimalPoint);
         byte[] num = Bytes.toBytes(v);
         codec.encodeNumber(num, 0, num.length);
         return Bytes.copy(codec.buf, codec.bufOffset, codec.bufLen);
     }
-
-    public static String normalizeNumber(String v) {
+    
+    // visibility for test
+    String normalizeNumber(String v) {
         boolean badBegin = (v.startsWith("0") && v.length() > 1 && v.charAt(1) != '.') //
                 || (v.startsWith("-0") && v.length() > 2 && v.charAt(2) != '.') //
                 || v.startsWith("+");
@@ -191,30 +213,6 @@ public class Number2BytesConverter implements BytesConverter<String>, Serializab
 
             bufOffset = start;
             bufLen = buf.length - start;
-
-            // remove 0 in tail after the decimal point
-            if (decimalPoint != end) {
-                if (negative == true) {
-                    while (buf[bufOffset + bufLen - 2] == '9' && (bufOffset + bufLen - 2 > decimalPoint)) {
-                        bufLen--;
-                    }
-
-                    if (bufOffset + bufLen - 2 == decimalPoint) {
-                        bufLen--;
-                    }
-
-                    buf[bufOffset + bufLen - 1] = ';';
-                } else {
-                    while (buf[bufOffset + bufLen - 1] == '0' && (bufOffset + bufLen - 1 > decimalPoint)) {
-                        bufLen--;
-                    }
-
-                    if (bufOffset + bufLen - 1 == decimalPoint) {
-                        bufLen--;
-                    }
-
-                }
-            }
         }
 
         int decodeNumber(byte[] returnValue, int offset) {

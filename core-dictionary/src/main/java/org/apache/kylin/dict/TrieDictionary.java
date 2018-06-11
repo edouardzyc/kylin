@@ -51,7 +51,6 @@ import com.google.common.base.Preconditions;
  *
  * @author yangli9
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
 public class TrieDictionary<T> extends CacheDictionary<T> {
     private static final long serialVersionUID = 1L;
 

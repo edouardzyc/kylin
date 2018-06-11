@@ -31,10 +31,7 @@ import java.util.Set;
 
 import org.apache.kylin.common.util.Bytes;
 import org.apache.kylin.common.util.Dictionary;
-import org.apache.kylin.common.util.LocalFileMetadataTestCase;
 import org.apache.kylin.metadata.datatype.DataType;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -43,20 +40,11 @@ import com.google.common.collect.Sets;
 
 /**
  */
-public class NumberDictionaryTest extends LocalFileMetadataTestCase {
+@SuppressWarnings("deprecation")
+public class NumberDictionaryTest {
 
     Number2BytesConverter.NumberBytesCodec codec = new Number2BytesConverter.NumberBytesCodec(MAX_DIGITS_BEFORE_DECIMAL_POINT);
     Random rand = new Random();
-
-    @Before
-    public void setup() throws Exception {
-        createTestMetadata();
-    }
-
-    @After
-    public void tearDown() {
-        cleanupTestMetadata();
-    }
 
     @Test
     public void testMinMax() {
@@ -96,10 +84,10 @@ public class NumberDictionaryTest extends LocalFileMetadataTestCase {
         checkCodec("-0.0045454354354354359999999999877218", "-9999999999999999999.9954545645645645640000000000122781;");
         checkCodec("-0.009999999999877218", "-9999999999999999999.990000000000122781;");
         checkCodec("12343434372493274.438403840384023840253554345345345345", "00012343434372493274.438403840384023840253554345345345345");
-        assertEquals("00000000000000000052.57", encodeNumber("52.5700"));
-        assertEquals("00000000000000000000", encodeNumber("0.00"));
-        assertEquals("00000000000000000000", encodeNumber("0.0"));
-        assertEquals("-9999999999999987654.876;", encodeNumber("-12345.12300"));
+        assertEquals("00000000000000000052.5700", encodeNumber("52.5700"));
+        assertEquals("00000000000000000000.00", encodeNumber("0.00"));
+        assertEquals("00000000000000000000.0", encodeNumber("0.0"));
+        assertEquals("-9999999999999987654.87699;", encodeNumber("-12345.12300"));
     }
 
     private void checkCodec(String number, String code) {
