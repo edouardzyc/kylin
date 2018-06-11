@@ -23,9 +23,11 @@ import static org.apache.calcite.sql.SqlDialect.CALCITE;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -68,12 +70,14 @@ import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.DefaultDataSet;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.SortedTable;
 import org.dbunit.dataset.datatype.DataType;
 import org.dbunit.dataset.datatype.DataTypeException;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.dataset.xml.XmlDataSet;
 import org.dbunit.ext.h2.H2Connection;
 import org.dbunit.ext.h2.H2DataTypeFactory;
 import org.junit.Assert;
@@ -654,7 +658,7 @@ public class KylinTestBase {
                 logger.info("execAndCompQuery failed on: " + sqlFile.getAbsolutePath());
                 throw t;
             }
-            
+
             QueryContext queryContext = QueryContext.current();
             dumpTestQueryStats(sqlFile, queryContext);
             verifyTestQueryStats(sqlFile, queryContext);
@@ -663,6 +667,45 @@ public class KylinTestBase {
             if (kylinTable.getRowCount() == 0) {
                 zeroResultQueries.add(sql1);
             }
+        }
+    }
+
+    protected void execAndVerifyResult(String queryFolder) throws Exception {
+        if(!isVerifyTestResultEnabled()) {
+            batchExecuteQuery(queryFolder);
+            return;
+        }
+        List<File> sqlFiles = getFilesFromFolder(new File(queryFolder), ".sql");
+        IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
+        for (File sqlFile : sqlFiles) {
+            String queryName = StringUtils.split(sqlFile.getName(), '.')[0];
+            String sql = getTextFromFile(sqlFile);
+            // execute Kylin
+            logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
+            QueryContext.reset();
+            ITable kylinTable = executeQuery(kylinConn, queryName, sql, true);
+            File expectResultFile = new File(sqlFile.getParent(), sqlFile.getName() + getTestResultFilePostFix());
+            dumpResult(kylinTable, expectResultFile);
+            verifyResult(kylinTable, queryName, expectResultFile);
+
+            QueryContext queryContext = QueryContext.current();
+            dumpTestQueryStats(sqlFile, queryContext);
+            verifyTestQueryStats(sqlFile, queryContext);
+        }
+    }
+
+    protected void verifyResult(ITable kylinTable, String queryName, File expectResultFile) throws Exception {
+        if (!isVerifyTestResultEnabled()) {
+            return;
+        }
+        FileInputStream in = new FileInputStream(expectResultFile);
+        try {
+            IDataSet expectResult = new XmlDataSet(in);
+            ITable expectTable = expectResult.getTable(resultTableName + queryName);
+            // compare the result
+            assertTableEquals(expectTable, kylinTable);
+        } finally {
+            in.close();
         }
     }
 
@@ -841,6 +884,10 @@ public class KylinTestBase {
         return ".stats";
     }
 
+    protected String getTestResultFilePostFix() {
+        return  ".expected.xml";
+    }
+
     protected boolean isDumpTestQueryStatsEnabled() {
         return false;
     }
@@ -860,7 +907,31 @@ public class KylinTestBase {
         }
     }
 
+    protected void dumpResult(ITable kylinTable, File expectResultFile) throws Exception{
+        if (!isDumpTestQueryStatsEnabled()) {
+            return;
+        }
+        if (!expectResultFile.exists()) {
+            expectResultFile.createNewFile();
+        }
+        OutputStream stream = null;
+        try {
+            IDataSet expect = new DefaultDataSet(kylinTable);
+            stream = new FileOutputStream(expectResultFile);
+            XmlDataSet.write(expect, stream);
+
+        } catch (Exception e) {
+            logger.error("Fail to dump kylin query result", e);
+        } finally {
+            stream.close();
+        }
+    }
+
     protected boolean isVerifyTestQueryStatsEnabled() {
+        return false;
+    }
+
+    protected boolean isVerifyTestResultEnabled() {
         return false;
     }
 

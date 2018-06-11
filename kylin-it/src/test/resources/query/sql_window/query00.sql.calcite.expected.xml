@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <table name="query result of query00">
+    <column>LSTG_FORMAT_NAME</column>
+    <column>GMV</column>
+    <column>EXPR$2</column>
+    <row>
+      <value>ABIN</value>
+      <value>876238.04</value>
+      <value>5</value>
+    </row>
+    <row>
+      <value>Auction</value>
+      <value>889421.36</value>
+      <value>4</value>
+    </row>
+    <row>
+      <value>FP-GTC</value>
+      <value>875851.04</value>
+      <value>3</value>
+    </row>
+    <row>
+      <value><![CDATA[FP-non GTC]]></value>
+      <value>934428.89</value>
+      <value>1</value>
+    </row>
+    <row>
+      <value>Others</value>
+      <value>943832.78</value>
+      <value>2</value>
+    </row>
+  </table>
+</dataset>

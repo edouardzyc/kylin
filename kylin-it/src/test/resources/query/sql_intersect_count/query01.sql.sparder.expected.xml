@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <table name="query result of query01">
+    <column>CAL_DT</column>
+    <column>FIRST_DAY</column>
+    <column>SECOND_DAY</column>
+    <column>THIRD_DAY</column>
+    <column>RETENTION_ONEDAY</column>
+    <column>RETENTION_TWODAY</column>
+    <row>
+      <value>2012-01-01</value>
+      <value>10</value>
+      <value>0</value>
+      <value>0</value>
+      <value>0</value>
+      <value>0</value>
+    </row>
+    <row>
+      <value>2012-01-02</value>
+      <value>0</value>
+      <value>11</value>
+      <value>0</value>
+      <value>0</value>
+      <value>0</value>
+    </row>
+    <row>
+      <value>2012-01-03</value>
+      <value>0</value>
+      <value>0</value>
+      <value>12</value>
+      <value>0</value>
+      <value>0</value>
+    </row>
+  </table>
+</dataset>

@@ -18,13 +18,16 @@
 
 package org.apache.kylin.query;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.KylinVersion;
@@ -34,6 +37,8 @@ import org.apache.kylin.gridtable.StorageSideBehavior;
 import org.apache.kylin.metadata.realization.RealizationType;
 import org.apache.kylin.query.routing.Candidate;
 import org.apache.kylin.query.routing.rules.RemoveBlackoutRealizationsRule;
+import org.apache.kylin.rest.response.SQLResponse;
+import org.apache.kylin.rest.util.TableauInterceptor;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.ITable;
@@ -159,16 +164,26 @@ public class ITKylinQueryTest extends KylinTestBase {
         executeQuery(kylinConn, queryFileName, sql, true);
     }
 
-    @Ignore
     @Test
     public void testTableauProbing() throws Exception {
-        batchExecuteQuery(getQueryFolderPrefix() + "src/test/resources/query/tableau_probing");
+        List<File> sqlFiles = getFilesFromFolder(
+                new File(getQueryFolderPrefix() + "src/test/resources/query/tableau_probing"), ".sql");
+        for (File sqlFile : sqlFiles) {
+            List<String> lines = Files.readLines(sqlFile, Charset.defaultCharset());
+            String sql = lines.get(lines.size()-1);
+            if(sql.startsWith("SELECT")) {
+                SQLResponse response = TableauInterceptor.tableauIntercept(sql);
+                assertNotNull(response);
+            } else {
+                throw new RuntimeException("Expecting SELECT query");
+            }
+        }
     }
 
     //h2 cannot run these queries
     @Test
     public void testH2Uncapable() throws Exception {
-        batchExecuteQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_h2_uncapable");
+        execAndVerifyResult(getQueryFolderPrefix() + "src/test/resources/query/sql_h2_uncapable");
     }
 
     @Test
@@ -262,7 +277,7 @@ public class ITKylinQueryTest extends KylinTestBase {
     @Test
     public void testDistinctCountQuery() throws Exception {
         if ("left".equalsIgnoreCase(joinType)) {
-            batchExecuteQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_distinct");
+            execAndCompQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_distinct", null, true);
         }
     }
 
@@ -284,7 +299,7 @@ public class ITKylinQueryTest extends KylinTestBase {
     public void testIntersectCountQuery() throws Exception {
         // cannot compare coz H2 does not support intersect count yet..
         if ("left".equalsIgnoreCase(joinType)) {
-            this.batchExecuteQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_intersect_count");
+            this.execAndVerifyResult(getQueryFolderPrefix() + "src/test/resources/query/sql_intersect_count");
         }
     }
 
@@ -364,6 +379,7 @@ public class ITKylinQueryTest extends KylinTestBase {
     public void testLimitEnabled() throws Exception {
         List<File> sqlFiles = getFilesFromFolder(
                 new File(getQueryFolderPrefix() + "src/test/resources/query/sql_limit"), ".sql");
+        this.execAndVerifyResult(getQueryFolderPrefix() + "src/test/resources/query/sql_limit");
         for (File sqlFile : sqlFiles) {
             runSQL(sqlFile, false, false);
             assertTrue(checkFinalPushDownLimit());
@@ -383,13 +399,13 @@ public class ITKylinQueryTest extends KylinTestBase {
     @Test
     public void testGroupingQuery() throws Exception {
         // cannot compare coz H2 does not support grouping set yet..
-        this.batchExecuteQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_grouping");
+        this.execAndVerifyResult(getQueryFolderPrefix() + "src/test/resources/query/sql_grouping");
     }
 
     @Test
     public void testWindowQuery() throws Exception {
         // cannot compare coz H2 does not support window function yet..
-        this.batchExecuteQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_window");
+        this.execAndVerifyResult(getQueryFolderPrefix() + "src/test/resources/query/sql_window");
     }
 
     @Test
@@ -412,7 +428,7 @@ public class ITKylinQueryTest extends KylinTestBase {
 
     @Test
     public void testPercentileQuery() throws Exception {
-        batchExecuteQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_percentile");
+        execAndVerifyResult(getQueryFolderPrefix() + "src/test/resources/query/sql_percentile");
     }
 
 
