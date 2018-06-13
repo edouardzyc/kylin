@@ -1322,7 +1322,7 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public int getBadQueryDefaultDetectIntervalSeconds() {
-        int time =(int) (getQueryTimeoutSeconds() * getBadQueryDefaultAlertingCoefficient()); // half of query timeout
+        int time =(int) (getQueryTimeoutSeconds() * getBadQueryDefaultAlertingCoefficient()); // default is half of query timeout
         if (time == 0) {
             time = 60; // 60 sec
         }
@@ -1385,9 +1385,9 @@ abstract public class KylinConfigBase implements Serializable {
 
     public int getQueryTimeoutSeconds() {
         int time = Integer.parseInt(this.getOptional("kylin.query.timeout-seconds", "300"));
-        if (time != 0 && time <= 60) {
-            logger.warn("query timeout seconds less than 60 sec, set to 60 sec.");
-            time = 60;
+        if (time != 0 && time <= 30) {
+            logger.warn("query timeout seconds less than 30 sec, set to 30 sec.");
+            time = 30;
         }
         return time;
     }
