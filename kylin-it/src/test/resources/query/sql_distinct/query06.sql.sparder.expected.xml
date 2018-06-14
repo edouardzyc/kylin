@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <table name="query result of query06">
+    <column>LSTG_FORMAT_NAME</column>
+    <column>GMV</column>
+    <column>TRANS_CNT</column>
+    <column>DIST_SELLER</column>
+    <row>
+      <value>FP-GTC</value>
+      <value>875851.0400</value>
+      <value>1936</value>
+      <value>868</value>
+    </row>
+  </table>
+</dataset>

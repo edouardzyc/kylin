@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <table name="query result of query05">
+    <column>LSTG_FORMAT_NAME</column>
+    <column>GMV</column>
+    <column>TRANS_CNT</column>
+    <column>DIST_SELLER</column>
+    <row>
+      <value>ABIN</value>
+      <value>876238.0400</value>
+      <value>1998</value>
+      <value>861</value>
+    </row>
+    <row>
+      <value>Auction</value>
+      <value>889421.3600</value>
+      <value>1966</value>
+      <value>862</value>
+    </row>
+    <row>
+      <value>FP-GTC</value>
+      <value>875851.0400</value>
+      <value>1936</value>
+      <value>868</value>
+    </row>
+    <row>
+      <value><![CDATA[FP-non GTC]]></value>
+      <value>934428.8900</value>
+      <value>2048</value>
+      <value>874</value>
+    </row>
+    <row>
+      <value>Others</value>
+      <value>943832.7800</value>
+      <value>2052</value>
+      <value>876</value>
+    </row>
+  </table>
+</dataset>

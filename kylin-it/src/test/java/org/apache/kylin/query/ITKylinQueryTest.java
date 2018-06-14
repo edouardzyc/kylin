@@ -277,7 +277,7 @@ public class ITKylinQueryTest extends KylinTestBase {
     @Test
     public void testDistinctCountQuery() throws Exception {
         if ("left".equalsIgnoreCase(joinType)) {
-            execAndCompQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_distinct", null, true);
+            execAndVerifyResult(getQueryFolderPrefix() + "src/test/resources/query/sql_distinct");
         }
     }
 
