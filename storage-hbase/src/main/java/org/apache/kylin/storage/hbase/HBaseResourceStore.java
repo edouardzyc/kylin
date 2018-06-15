@@ -55,6 +55,8 @@ import org.apache.kylin.common.persistence.RawResource;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.persistence.StringEntity;
 import org.apache.kylin.common.persistence.WriteConflictException;
+import org.apache.kylin.common.persistence.BrokenEntity;
+import org.apache.kylin.common.persistence.BrokenInputStream;
 import org.apache.kylin.common.util.Bytes;
 import org.apache.kylin.common.util.BytesUtil;
 import org.apache.kylin.common.util.HadoopUtil;
@@ -65,7 +67,7 @@ import com.google.common.collect.Lists;
 
 public class HBaseResourceStore extends ResourceStore {
 
-    private static final Logger logger = LoggerFactory.getLogger(HBaseResourceStore.class);
+    private static Logger logger = LoggerFactory.getLogger(HBaseResourceStore.class);
 
     private static final String FAMILY = "f";
 
@@ -215,6 +217,12 @@ public class HBaseResourceStore extends ResourceStore {
     @Override
     protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive)
             throws IOException {
+        return getAllResourcesImpl(folderPath, timeStart, timeEndExclusive, false);
+    }
+
+    @Override
+    protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive,
+            final boolean isAllowBroken) throws IOException {
         FilterList filter = generateTimeFilterList(timeStart, timeEndExclusive);
         final List<RawResource> result = Lists.newArrayList();
         try {
@@ -223,7 +231,18 @@ public class HBaseResourceStore extends ResourceStore {
                 public void visit(String childPath, String fullPath, Result hbaseResult) throws IOException {
                     // is a direct child (not grand child)?
                     if (childPath.equals(fullPath))
-                        result.add(new RawResource(getInputStream(childPath, hbaseResult), getTimestamp(hbaseResult)));
+                        try {
+                            result.add(
+                                    new RawResource(getInputStream(childPath, hbaseResult), getTimestamp(hbaseResult)));
+                        } catch (IOException ex) {
+                            if (!isAllowBroken) {
+                                throw ex;
+                            }
+
+                            final BrokenEntity brokenEntity = new BrokenEntity(childPath, ex.getMessage());
+                            result.add(new RawResource(new BrokenInputStream(brokenEntity), getTimestamp(hbaseResult)));
+                            logger.warn(ex.getMessage());
+                        }
                 }
             });
         } catch (IOException e) {
@@ -257,12 +276,17 @@ public class HBaseResourceStore extends ResourceStore {
         byte[] value = r.getValue(B_FAMILY, B_COLUMN);
         if (value.length == 0) {
             Path redirectPath = bigCellHDFSPath(resPath);
-            FileSystem fileSystem = HadoopUtil.getFileSystem(redirectPath, HBaseConnection.getCurrentHBaseConfiguration());
 
             try {
+                FileSystem fileSystem = HadoopUtil.getFileSystem(redirectPath,
+                        HBaseConnection.getCurrentHBaseConfiguration());
                 return fileSystem.open(redirectPath);
-            } catch (IOException ex) {
-                throw new IOException("Failed to read resource at " + resPath, ex);
+            } catch (RuntimeException | IOException ex) {
+                if (ex instanceof IOException || ((RuntimeException) ex).getCause() instanceof IOException) {
+                    throw new IOException("Failed to read resource at " + resPath, ex);
+                }
+
+                throw ex;
             }
         } else {
             return new ByteArrayInputStream(value);
@@ -279,11 +303,29 @@ public class HBaseResourceStore extends ResourceStore {
 
     @Override
     protected RawResource getResourceImpl(String resPath) throws IOException {
+        return getResourceImpl(resPath, false);
+    }
+
+    protected RawResource getResourceImpl(String resPath, final boolean isAllowBroken) throws IOException {
         Result r = getFromHTable(resPath, true, true);
         if (r == null)
             return null;
-        else
-            return new RawResource(getInputStream(resPath, r), getTimestamp(r));
+        else {
+            RawResource result;
+            try {
+                result = new RawResource(getInputStream(resPath, r), getTimestamp(r));
+                return result;
+            } catch (IOException e) {
+                if (!isAllowBroken) {
+                    throw e;
+                }
+
+                final BrokenEntity brokenEntity = new BrokenEntity(resPath, e.getMessage());
+                result = new RawResource(new BrokenInputStream(brokenEntity), getTimestamp(r));
+                logger.warn(e.getMessage());
+                return result;
+            }
+        }
     }
 
     @Override
@@ -350,7 +392,8 @@ public class HBaseResourceStore extends ResourceStore {
 
             if (hdfsResourceExist) { // remove hdfs cell value
                 Path redirectPath = bigCellHDFSPath(resPath);
-                FileSystem fileSystem = HadoopUtil.getFileSystem(redirectPath, HBaseConnection.getCurrentHBaseConfiguration());
+                FileSystem fileSystem = HadoopUtil.getFileSystem(redirectPath,
+                        HBaseConnection.getCurrentHBaseConfiguration());
 
                 if (fileSystem.exists(redirectPath)) {
                     fileSystem.delete(redirectPath, true);
@@ -418,7 +461,7 @@ public class HBaseResourceStore extends ResourceStore {
     public Path bigCellHDFSPath(String resPath) {
         String hdfsWorkingDirectory = this.kylinConfig.getHdfsWorkingDirectory();
         Path redirectPath = new Path(hdfsWorkingDirectory, "resources" + resPath);
-        redirectPath =  Path.getPathWithoutSchemeAndAuthority(redirectPath);
+        redirectPath = Path.getPathWithoutSchemeAndAuthority(redirectPath);
         return redirectPath;
     }
 
