@@ -93,8 +93,7 @@ abstract public class ResourceStore {
             Class<? extends ResourceStore> cls = ClassUtil.forName(clsName, ResourceStore.class);
             ResourceStore store = cls.getConstructor(KylinConfig.class).newInstance(kylinConfig);
             if (!store.exists(METASTORE_UUID_TAG)) {
-                store.putResource(METASTORE_UUID_TAG, new StringEntity(store.createMetaStoreUUID()), 0,
-                        StringEntity.serializer);
+                store.putResource(METASTORE_UUID_TAG, new StringEntity(store.createMetaStoreUUID()), 0, StringEntity.serializer);
             }
             return store;
         } catch (Throwable e) {
@@ -123,7 +122,7 @@ abstract public class ResourceStore {
     protected ResourceStore(KylinConfig kylinConfig) {
         this.kylinConfig = kylinConfig;
     }
-
+    
     final public KylinConfig getConfig() {
         return kylinConfig;
     }
@@ -155,11 +154,9 @@ abstract public class ResourceStore {
 
     public String getMetaStoreUUID() throws IOException {
         if (!exists(ResourceStore.METASTORE_UUID_TAG)) {
-            putResource(ResourceStore.METASTORE_UUID_TAG, new StringEntity(createMetaStoreUUID()), 0,
-                    StringEntity.serializer);
+            putResource(ResourceStore.METASTORE_UUID_TAG, new StringEntity(createMetaStoreUUID()), 0, StringEntity.serializer);
         }
-        StringEntity entity = getResource(ResourceStore.METASTORE_UUID_TAG, StringEntity.class,
-                StringEntity.serializer);
+        StringEntity entity = getResource(ResourceStore.METASTORE_UUID_TAG, StringEntity.class, StringEntity.serializer);
         return entity.toString();
     }
 
@@ -175,15 +172,9 @@ abstract public class ResourceStore {
     /**
      * Read a resource, return null in case of not found or is a folder.
      */
-    final public <T extends RootPersistentEntity> T getResource(String resPath, Class<T> clz, Serializer<T> serializer)
-            throws IOException {
-        return getResource(resPath, clz, serializer, false);
-    }
-
-    final public <T extends RootPersistentEntity> T getResource(String resPath, Class<T> clz, Serializer<T> serializer,
-            final boolean isAllowBroken) throws IOException {
+    final public <T extends RootPersistentEntity> T getResource(String resPath, Class<T> clz, Serializer<T> serializer) throws IOException {
         resPath = norm(resPath);
-        RawResource res = getResourceImpl(resPath, isAllowBroken);
+        RawResource res = getResourceImpl(resPath);
         if (res == null)
             return null;
 
@@ -199,11 +190,7 @@ abstract public class ResourceStore {
     }
 
     final public RawResource getResource(String resPath) throws IOException {
-        return getResourceImpl(norm(resPath), false);
-    }
-
-    final public RawResource getResource(String resPath, boolean isAllowBroken) throws IOException {
-        return getResourceImpl(norm(resPath), isAllowBroken);
+        return getResourceImpl(norm(resPath));
     }
 
     final public long getResourceTimestamp(String resPath) throws IOException {
@@ -213,28 +200,15 @@ abstract public class ResourceStore {
     /**
      * Read all resources under a folder. Return empty list if folder not exist.
      */
-    final public <T extends RootPersistentEntity> List<T> getAllResources(String folderPath, Class<T> clazz,
-            Serializer<T> serializer) throws IOException {
-        return getAllResources(folderPath, Long.MIN_VALUE, Long.MAX_VALUE, clazz, serializer, false);
-    }
-
-    final public <T extends RootPersistentEntity> List<T> getAllResources(String folderPath, Class<T> clazz,
-            Serializer<T> serializer, boolean isAllowBroken) throws IOException {
-        return getAllResources(folderPath, Long.MIN_VALUE, Long.MAX_VALUE, clazz, serializer, isAllowBroken);
+    final public <T extends RootPersistentEntity> List<T> getAllResources(String folderPath, Class<T> clazz, Serializer<T> serializer) throws IOException {
+        return getAllResources(folderPath, Long.MIN_VALUE, Long.MAX_VALUE, clazz, serializer);
     }
 
     /**
      * Read all resources under a folder having last modified time between given range. Return empty list if folder not exist.
      */
-    final public <T extends RootPersistentEntity> List<T> getAllResources(String folderPath, long timeStart,
-            long timeEndExclusive, Class<T> clazz, Serializer<T> serializer) throws IOException {
-        return getAllResources(folderPath, timeStart, timeEndExclusive, clazz, serializer, false);
-    }
-
-    final public <T extends RootPersistentEntity> List<T> getAllResources(String folderPath, long timeStart,
-            long timeEndExclusive, Class<T> clazz, Serializer<T> serializer, boolean isAllowBroken) throws IOException {
-        final List<RawResource> allResources = getAllResourcesImpl(folderPath, timeStart, timeEndExclusive,
-                isAllowBroken);
+    final public <T extends RootPersistentEntity> List<T> getAllResources(String folderPath, long timeStart, long timeEndExclusive, Class<T> clazz, Serializer<T> serializer) throws IOException {
+        final List<RawResource> allResources = getAllResourcesImpl(folderPath, timeStart, timeEndExclusive);
         if (allResources == null || allResources.isEmpty()) {
             return Collections.emptyList();
         }
@@ -257,22 +231,12 @@ abstract public class ResourceStore {
     /**
      * return empty list if given path is not a folder or not exists
      */
-    abstract protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive)
-            throws IOException;
-
-    protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive,
-            boolean isAllowBroken) throws IOException {
-        return getAllResourcesImpl(folderPath, timeStart, timeEndExclusive);
-    }
+    abstract protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive) throws IOException;
 
     /**
      * returns null if not exists
      */
     abstract protected RawResource getResourceImpl(String resPath) throws IOException;
-
-    protected RawResource getResourceImpl(String resPath, boolean isAllowBroken) throws IOException {
-        return getResourceImpl(resPath);
-    }
 
     /**
      * returns 0 if not exists
