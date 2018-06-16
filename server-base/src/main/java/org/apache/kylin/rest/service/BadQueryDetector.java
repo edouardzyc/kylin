@@ -38,19 +38,32 @@ public class BadQueryDetector extends Thread {
 
     private static final Logger logger = LoggerFactory.getLogger(BadQueryDetector.class);
     public static final int ONE_MB = 1024 * 1024;
+    
+    public static BadQueryDetector getInstance(KylinConfig config) {
+        return config.getManager(BadQueryDetector.class);
+    }
 
+    // called by reflection
+    static BadQueryDetector newInstance(KylinConfig config) throws IOException {
+        BadQueryDetector inst = new BadQueryDetector(config);
+        inst.start();
+        return inst;
+    }
+
+    // ============================================================================
+    
     private final ConcurrentMap<Thread, Entry> runningQueries = Maps.newConcurrentMap();
     private final long detectionInterval;
     private final int alertMB;
     private final int alertRunningSec;
-    private KylinConfig kylinConfig;
+    private final KylinConfig kylinConfig;
     private ArrayList<Notifier> notifiers = new ArrayList<>();
     private int queryTimeoutSeconds;
 
-    public BadQueryDetector() {
+    private BadQueryDetector(KylinConfig config) {
         super("BadQueryDetector");
         this.setDaemon(true);
-        this.kylinConfig = KylinConfig.getInstanceFromEnv();
+        this.kylinConfig = config;
         this.detectionInterval = kylinConfig.getBadQueryDefaultDetectIntervalSeconds() * 1000L;
         this.alertMB = 100;
         this.alertRunningSec = kylinConfig.getBadQueryDefaultAlertingSeconds();
@@ -59,6 +72,7 @@ public class BadQueryDetector extends Thread {
         initNotifiers();
     }
 
+    // for test only
     public BadQueryDetector(long detectionInterval, int alertMB, int alertRunningSec, int queryTimeoutSeconds) {
         super("BadQueryDetector");
         this.setDaemon(true);

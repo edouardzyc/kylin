@@ -126,8 +126,7 @@ public class QueryService extends BasicService {
     public static final String EXCEPTION_QUERY_CACHE = "ExceptionQueryCache";
     public static final String QUERY_STORE_PATH_PREFIX = "/query/";
     private static final Logger logger = LoggerFactory.getLogger(QueryService.class);
-    final BadQueryDetector badQueryDetector = new BadQueryDetector();
-    final ResourceStore queryStore;
+    private final ResourceStore queryStore;
 
     @Autowired
     protected CacheManager cacheManager;
@@ -145,7 +144,6 @@ public class QueryService extends BasicService {
 
     public QueryService() {
         queryStore = ResourceStore.getStore(getConfig());
-        badQueryDetector.start();
     }
 
     protected static void close(ResultSet resultSet, Statement stat, Connection conn) {
@@ -170,6 +168,7 @@ public class QueryService extends BasicService {
 
     public SQLResponse query(SQLRequest sqlRequest) throws Exception {
         SQLResponse ret = null;
+        BadQueryDetector badQueryDetector = BadQueryDetector.getInstance(getConfig());
         try {
             final String user = SecurityContextHolder.getContext().getAuthentication().getName();
             badQueryDetector.queryStart(Thread.currentThread(), sqlRequest, user);
