@@ -72,6 +72,11 @@ public class FileResourceStore extends ResourceStore {
                 Collection<File> files = FileUtils.listFiles(file, null, true);
                 for (File f : files) {
                     String path = f.getAbsolutePath();
+                    
+                    // fix path on windows
+                    if (path.length() > 2 && path.charAt(1) == ':' && path.charAt(2) == '\\')
+                        path = path.replace('\\', '/');
+                    
                     String[] split = path.split(prefix);
                     Preconditions.checkArgument(split.length == 2);
                     r.add(prefix + split[1]);
