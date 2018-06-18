@@ -20,10 +20,12 @@ package org.apache.kylin.engine.mr.steps;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.cube.CubeSegment;
+import org.apache.kylin.cube.DimensionRangeInfo;
 import org.apache.kylin.engine.mr.CubingJob;
 import org.apache.kylin.engine.mr.exception.SegmentNotFoundException;
 import org.apache.kylin.job.exception.ExecuteException;
@@ -39,7 +41,6 @@ import org.slf4j.LoggerFactory;
 public class UpdateCubeInfoAfterMergeStep extends AbstractExecutable {
 
     private static final Logger logger = LoggerFactory.getLogger(UpdateCubeInfoAfterMergeStep.class);
-
 
     public UpdateCubeInfoAfterMergeStep() {
         super();
@@ -69,8 +70,19 @@ public class UpdateCubeInfoAfterMergeStep extends AbstractExecutable {
 
         boolean isOffsetCube = mergedSegment.isOffsetCube();
         Long tsStartMin = Long.MAX_VALUE, tsEndMax = 0L;
+        Map<String, DimensionRangeInfo> mergedSegDimRangeMap = null;
         for (String id : mergingSegmentIds) {
             CubeSegment segment = cube.getSegmentById(id);
+            Map<String, DimensionRangeInfo> segDimRangeMap = segment.getDimensionRangeInfoMap();
+            if (segDimRangeMap.isEmpty()) {
+                continue;
+            }
+            if (mergedSegDimRangeMap == null) {
+                mergedSegDimRangeMap = segDimRangeMap;
+            } else {
+                mergedSegDimRangeMap = DimensionRangeInfo.mergeRangeMap(cube.getModel(), segDimRangeMap,
+                        mergedSegDimRangeMap);
+            }
             sourceCount += segment.getInputRecords();
             sourceSize += segment.getInputRecordsSize();
             tsStartMin = Math.min(tsStartMin, segment.getTSRange().start.v);
@@ -83,8 +95,9 @@ public class UpdateCubeInfoAfterMergeStep extends AbstractExecutable {
         mergedSegment.setInputRecordsSize(sourceSize);
         mergedSegment.setLastBuildJobID(CubingExecutableUtil.getCubingJobId(this.getParams()));
         mergedSegment.setLastBuildTime(System.currentTimeMillis());
+        mergedSegment.setDimensionRangeInfoMap(mergedSegDimRangeMap);
 
-        if (isOffsetCube == true) {
+        if (isOffsetCube) {
             SegmentRange.TSRange tsRange = new SegmentRange.TSRange(tsStartMin, tsEndMax);
             mergedSegment.setTSRange(tsRange);
         }
