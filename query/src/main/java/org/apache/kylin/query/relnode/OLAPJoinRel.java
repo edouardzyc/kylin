@@ -333,7 +333,7 @@ public class OLAPJoinRel extends EnumerableJoin implements OLAPRel {
 
         this.rowType = this.deriveRowType();
 
-        if (this.isTopJoin && RewriteImplementor.needRewrite(this.context)) {
+        if (RewriteImplementor.needRewrite(this.context)) {
             if (this.context.hasPrecalculatedFields()) {
 
                 // find missed rewrite fields
