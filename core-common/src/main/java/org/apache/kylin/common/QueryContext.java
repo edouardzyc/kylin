@@ -73,7 +73,7 @@ public class QueryContext {
     private boolean isTimeout;
 
     private List<RPCStatistics> rpcStatisticsList = Lists.newCopyOnWriteArrayList();
-    private Map<Integer, CubeSegmentStatisticsResult> cubeSegmentStatisticsResultMap = Maps.newLinkedHashMap();
+    private Map<Integer, CubeSegmentStatisticsResult> cubeSegmentStatisticsResultMap = Maps.newTreeMap();
 
     private QueryContext() {
         // use QueryContext.current() instead
@@ -554,7 +554,7 @@ public class QueryContext {
         }
     }
 
-    public static class CubeSegmentStatisticsResult implements Serializable {
+    public static class CubeSegmentStatisticsResult implements Serializable, Comparable<CubeSegmentStatisticsResult> {
         protected static final long serialVersionUID = 1L;
 
         private String queryType;
@@ -610,6 +610,17 @@ public class QueryContext {
             return "CubeSegmentStatisticsResult [queryType=" + queryType + ",realization=" + realization
                     + ",realizationType=" + realizationType + ",cubeSegmentStatisticsMap=" + cubeSegmentStatisticsMap
                     + "]";
+        }
+
+        @Override
+        public int compareTo(CubeSegmentStatisticsResult o) {
+            if (o == null || o.realizationType == null || o.realization == null)
+                return 1;
+            if (realizationType == null || realization == null)
+                return -1;
+
+            int res = realizationType.compareTo(o.realizationType);
+            return res == 0 ? realization.compareTo(o.realization) : res;
         }
     }
 }

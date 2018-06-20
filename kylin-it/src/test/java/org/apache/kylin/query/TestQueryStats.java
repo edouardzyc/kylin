@@ -40,10 +40,10 @@ public class TestQueryStats {
 
     @JsonProperty("realizations")
     private List<RealizationStats> realizationStatsList;
-    
+
     public TestQueryStats() {
     }
-    
+
     public TestQueryStats(KylinConfig config, String project, QueryContext queryContext) {
         realizationStatsList = Lists.newArrayList();
         for (CubeSegmentStatisticsResult cssResult : queryContext.getCubeSegmentStatisticsResultList()) {
@@ -55,8 +55,8 @@ public class TestQueryStats {
             if (cssResult.getCubeSegmentStatisticsMap() == null) {
                 continue;
             }
-            for (Entry<String, Map<String, CubeSegmentStatistics>> cubeEntry : cssResult
-                    .getCubeSegmentStatisticsMap().entrySet()) {
+            for (Entry<String, Map<String, CubeSegmentStatistics>> cubeEntry : cssResult.getCubeSegmentStatisticsMap()
+                    .entrySet()) {
                 for (Entry<String, CubeSegmentStatistics> segmentEntry : cubeEntry.getValue().entrySet()) {
                     CubeSegmentStatistics css = segmentEntry.getValue();
                     CubeDesc cubeDesc = CubeDescManager.getInstance(config).getCubeDesc(css.getCubeName());
@@ -69,7 +69,6 @@ public class TestQueryStats {
         }
     }
 
-
     private List<String> translateIdToColumns(CubeDesc cubeDesc, long cuboidID) {
         List<String> dims = Lists.newArrayList();
         if (cubeDesc != null) {
@@ -78,7 +77,7 @@ public class TestQueryStats {
         }
         return dims;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof TestQueryStats)) {
@@ -94,7 +93,7 @@ public class TestQueryStats {
         result = 31 * result + realizationStatsList.hashCode();
         return result;
     }
-    
+
     public static class RealizationStats implements Serializable {
         protected static final long serialVersionUID = 1L;
 
@@ -108,7 +107,7 @@ public class TestQueryStats {
         private List<String> sourceCuboidCols = Lists.newArrayList();;
         @JsonProperty("target_cuboid_cols")
         private List<String> targetCuboidCols = Lists.newArrayList();;
-        
+
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof RealizationStats)) {

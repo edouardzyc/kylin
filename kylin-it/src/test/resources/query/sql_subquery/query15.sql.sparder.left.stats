@@ -1,15 +1,15 @@
 {
   "realizations" : [ {
-    "query_type" : "LOOKUP_TABLE",
-    "realization" : null,
-    "realization_type" : null,
-    "source_cuboid_cols" : [ ],
-    "target_cuboid_cols" : [ ]
-  }, {
     "query_type" : "OLAP",
     "realization" : "ci_left_join_cube",
     "realization_type" : "CUBE",
     "source_cuboid_cols" : [ "TEST_KYLIN_FACT.CAL_DT", "TEST_KYLIN_FACT.LSTG_FORMAT_NAME" ],
     "target_cuboid_cols" : [ "TEST_KYLIN_FACT.CAL_DT", "TEST_KYLIN_FACT.LSTG_FORMAT_NAME", "TEST_KYLIN_FACT.LSTG_SITE_ID", "TEST_KYLIN_FACT.SLR_SEGMENT_CD", "TEST_KYLIN_FACT.LEFTJOIN_SELLER_COUNTRY_ABBR", "TEST_KYLIN_FACT.LEFTJOIN_BUYER_COUNTRY_ABBR", "TEST_KYLIN_FACT.LEFTJOIN_SELLER_ID_AND_COUNTRY_NAME", "TEST_KYLIN_FACT.LEFTJOIN_BUYER_ID_AND_COUNTRY_NAME" ]
+  }, {
+    "query_type" : "LOOKUP_TABLE",
+    "realization" : null,
+    "realization_type" : null,
+    "source_cuboid_cols" : [ ],
+    "target_cuboid_cols" : [ ]
   } ]
 }
