@@ -4,812 +4,812 @@
     <column>CAL_DT</column>
     <column>LSTG_FORMAT_NAME</column>
     <column>GMV</column>
-    <column>last_day</column>
-    <column>last_year</column>
+    <column>LAST_DAY</column>
+    <column>LAST_YEAR</column>
     <row>
       <value>2013-01-07</value>
       <value>ABIN</value>
       <value>-31.9700</value>
-      <value>100.000000000</value>
-      <value>1630.9600</value>
+      <value>-7.022052363</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-07</value>
       <value>ABIN</value>
       <value>236.9600</value>
-      <value>100.000000000</value>
-      <value>1630.9600</value>
+      <value>-493.872446853</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-07</value>
       <value>FP-GTC</value>
       <value>484.4400</value>
-      <value>100.000000000</value>
-      <value>990.0600</value>
+      <value>189.094031773</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-07</value>
       <value>FP-GTC</value>
       <value>674.9300</value>
-      <value>100.000000000</value>
-      <value>990.0600</value>
+      <value>189.491268460</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-07</value>
       <value>FP-GTC</value>
       <value>677.6100</value>
-      <value>100.000000000</value>
-      <value>990.0600</value>
+      <value>2646.914062500</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-07</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>540.4000</value>
-      <value>100.000000000</value>
-      <value>1337.0100</value>
+      <value>320.693133939</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-07</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>657.6300</value>
-      <value>100.000000000</value>
-      <value>1337.0100</value>
+      <value>130.845602865</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-07</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>662.9300</value>
-      <value>100.000000000</value>
-      <value>1337.0100</value>
+      <value>341.487662906</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-07</value>
       <value>Others</value>
       <value>363.9100</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>-1721.428571429</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-07</value>
       <value>Others</value>
       <value>649.4500</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>112.016626996</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-07</value>
       <value>Others</value>
       <value>912.4500</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>111.977664601</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value>ABIN</value>
       <value>698.2800</value>
-      <value>100.000000000</value>
-      <value>1630.9600</value>
+      <value>-1455.356398499</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value>ABIN</value>
       <value>879.9500</value>
-      <value>100.000000000</value>
-      <value>1630.9600</value>
+      <value>151.511760047</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value>ABIN</value>
       <value>91.2600</value>
-      <value>100.000000000</value>
-      <value>1630.9600</value>
+      <value>20.119047619</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value>ABIN</value>
       <value>941.5800</value>
-      <value>100.000000000</value>
-      <value>1630.9600</value>
+      <value>206.813389562</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value>Auction</value>
       <value>1037.7600</value>
-      <value>100.000000000</value>
-      <value>1180.9200</value>
+      <value>112.144200220</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value>Auction</value>
       <value>1180.9200</value>
-      <value>100.000000000</value>
-      <value>1180.9200</value>
+      <value>407.115523839</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value>FP-GTC</value>
       <value>402.8800</value>
-      <value>100.000000000</value>
-      <value>990.0600</value>
+      <value>49.817610763</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value>FP-GTC</value>
       <value>85.5800</value>
-      <value>17.665758401</value>
-      <value>990.0600</value>
+      <value>33.404894805</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value>FP-GTC</value>
       <value>940.4700</value>
-      <value>100.000000000</value>
-      <value>990.0600</value>
+      <value>-997.528638099</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>-6.2800</value>
-      <value>100.000000000</value>
-      <value>1128.6000</value>
+      <value>-0.949730809</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>159.6200</value>
-      <value>100.000000000</value>
-      <value>1128.6000</value>
+      <value>68.477048477</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>683.3200</value>
-      <value>100.000000000</value>
-      <value>1128.6000</value>
+      <value>60.778994370</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>94.9100</value>
-      <value>100.000000000</value>
-      <value>1128.6000</value>
+      <value>87.806457582</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value>Others</value>
       <value>363.8300</value>
-      <value>39.873965697</value>
-      <value>912.4500</value>
+      <value>44.649935571</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value>Others</value>
       <value>668.1800</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>91.973736734</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-08</value>
       <value>Others</value>
       <value>742.9100</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>128.136534548</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-09</value>
       <value>ABIN</value>
       <value>170.5400</value>
-      <value>100.000000000</value>
-      <value>1630.9600</value>
+      <value>19.939902019</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-09</value>
       <value>ABIN</value>
       <value>307.2900</value>
-      <value>44.006702183</value>
-      <value>1630.9600</value>
+      <value>-640.454355982</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-09</value>
       <value>ABIN</value>
       <value>558.6400</value>
-      <value>100.000000000</value>
-      <value>1630.9600</value>
+      <value>134.024279065</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-09</value>
       <value>ABIN</value>
       <value>638.9400</value>
-      <value>67.858280762</value>
-      <value>1630.9600</value>
+      <value>140.340010543</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-09</value>
       <value>Auction</value>
       <value>1018.1400</value>
-      <value>86.215831724</value>
-      <value>1180.9200</value>
+      <value>350.998034957</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-09</value>
       <value>Auction</value>
       <value>1083.9600</value>
-      <value>100.000000000</value>
-      <value>1180.9200</value>
+      <value>110.558524744</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-09</value>
       <value>FP-GTC</value>
       <value>670.6700</value>
-      <value>100.000000000</value>
-      <value>990.0600</value>
+      <value>82.930840474</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-09</value>
       <value>FP-GTC</value>
       <value>87.5600</value>
-      <value>9.310238498</value>
-      <value>990.0600</value>
+      <value>-92.872295291</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-09</value>
       <value>FP-GTC</value>
       <value>975.0900</value>
-      <value>100.000000000</value>
-      <value>990.0600</value>
+      <value>-3596.790852084</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-09</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>936.9200</value>
-      <value>100.000000000</value>
-      <value>1128.6000</value>
+      <value>409.797489393</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-09</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>968.7500</value>
-      <value>100.000000000</value>
-      <value>1128.6000</value>
+      <value>499.021274404</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-09</value>
       <value>Others</value>
       <value>169.8600</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>32.007989749</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-09</value>
       <value>Others</value>
       <value>84.2000</value>
-      <value>23.142676525</value>
-      <value>912.4500</value>
+      <value>10.333190158</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-10</value>
       <value>ABIN</value>
       <value>-7.2600</value>
-      <value>-4.257065791</value>
-      <value>1630.9600</value>
+      <value>-0.848854748</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-10</value>
       <value>ABIN</value>
       <value>722.3300</value>
-      <value>100.000000000</value>
-      <value>1630.9600</value>
+      <value>159.243827160</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-10</value>
       <value>Auction</value>
       <value>356.1800</value>
-      <value>100.000000000</value>
-      <value>1180.9200</value>
+      <value>195.081608062</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-10</value>
       <value>Auction</value>
       <value>858.9400</value>
-      <value>79.240931400</value>
-      <value>1180.9200</value>
+      <value>87.607604749</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-10</value>
       <value>FP-GTC</value>
       <value>341.3700</value>
-      <value>100.000000000</value>
-      <value>990.0600</value>
+      <value>95.841990005</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-10</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>155.7000</value>
-      <value>100.000000000</value>
-      <value>992.5900</value>
+      <value>92.398077265</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-10</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>577.4100</value>
-      <value>100.000000000</value>
-      <value>992.5900</value>
+      <value>534.193727449</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-10</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>606.3300</value>
-      <value>64.715237160</value>
-      <value>992.5900</value>
+      <value>265.201417137</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-10</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>777.5300</value>
-      <value>100.000000000</value>
-      <value>992.5900</value>
+      <value>333.560703561</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-10</value>
       <value>Others</value>
       <value>361.6900</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>68.155950856</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-10</value>
       <value>Others</value>
       <value>699.6700</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>85.864883107</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-11</value>
       <value>ABIN</value>
       <value>-78.3900</value>
-      <value>100.000000000</value>
-      <value>996.6500</value>
+      <value>-9.165848183</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-11</value>
       <value>ABIN</value>
       <value>116.4500</value>
-      <value>100.000000000</value>
-      <value>996.6500</value>
+      <value>13.615583383</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-11</value>
       <value>Auction</value>
       <value>1171.1400</value>
-      <value>100.000000000</value>
-      <value>1180.9200</value>
+      <value>404.175869685</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-11</value>
       <value>Auction</value>
       <value>657.5300</value>
-      <value>100.000000000</value>
-      <value>1180.9200</value>
+      <value>-756.912628065</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-11</value>
       <value>Auction</value>
       <value>676.5800</value>
-      <value>100.000000000</value>
-      <value>1180.9200</value>
+      <value>73.113747866</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-11</value>
       <value>FP-GTC</value>
       <value>379.0300</value>
-      <value>100.000000000</value>
-      <value>975.0900</value>
+      <value>1480.585937500</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>253.8100</value>
-      <value>100.000000000</value>
-      <value>992.5900</value>
+      <value>150.620141238</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-11</value>
       <value>Others</value>
       <value>194.9000</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>79.831244368</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-11</value>
       <value>Others</value>
       <value>860.4600</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>148.411466418</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-12</value>
       <value>ABIN</value>
       <value>348.3900</value>
-      <value>100.000000000</value>
-      <value>983.5300</value>
+      <value>44.019205256</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-12</value>
       <value>Auction</value>
       <value>186.7200</value>
-      <value>15.943439725</value>
-      <value>1180.9200</value>
+      <value>64.439536168</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-12</value>
       <value>Auction</value>
       <value>188.2300</value>
-      <value>100.000000000</value>
-      <value>1180.9200</value>
+      <value>45.743517461</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-12</value>
       <value>Auction</value>
       <value>517.1800</value>
-      <value>100.000000000</value>
-      <value>1180.9200</value>
+      <value>178.294894336</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-12</value>
       <value>FP-GTC</value>
       <value>253.9000</value>
-      <value>100.000000000</value>
-      <value>975.0900</value>
+      <value>71.284182155</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1310.2600</value>
-      <value>100.000000000</value>
-      <value>1310.2600</value>
+      <value>1212.193542418</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>455.5800</value>
-      <value>100.000000000</value>
-      <value>1310.2600</value>
+      <value>199.265188295</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>569.6100</value>
-      <value>100.000000000</value>
-      <value>1310.2600</value>
+      <value>50.664875875</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>994.8300</value>
-      <value>100.000000000</value>
-      <value>1310.2600</value>
+      <value>512.455571009</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-12</value>
       <value>Others</value>
       <value>328.3600</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>-1553.263954588</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-12</value>
       <value>Others</value>
       <value>574.2300</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>108.206452099</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-12</value>
       <value>Others</value>
       <value>616.3300</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>36.537982713</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value>ABIN</value>
       <value>338.1400</value>
-      <value>100.000000000</value>
-      <value>983.5300</value>
+      <value>-704.751979992</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value>ABIN</value>
       <value>473.5500</value>
-      <value>100.000000000</value>
-      <value>983.5300</value>
+      <value>81.536898654</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value>Auction</value>
       <value>394.6800</value>
-      <value>100.000000000</value>
-      <value>1180.9200</value>
+      <value>95.914846047</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value>FP-GTC</value>
       <value>313.6100</value>
-      <value>100.000000000</value>
-      <value>975.0900</value>
+      <value>103.975200584</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value>FP-GTC</value>
       <value>580.6600</value>
-      <value>100.000000000</value>
-      <value>975.0900</value>
+      <value>79.894878780</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1066.2700</value>
-      <value>100.000000000</value>
-      <value>1310.2600</value>
+      <value>466.373616761</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>111.1600</value>
-      <value>100.000000000</value>
-      <value>1310.2600</value>
+      <value>22.116991643</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1257.6800</value>
-      <value>100.000000000</value>
-      <value>1310.2600</value>
+      <value>746.353332146</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>598.9400</value>
-      <value>45.711538168</value>
-      <value>1310.2600</value>
+      <value>554.112313813</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>643.8500</value>
-      <value>64.719600334</value>
-      <value>1310.2600</value>
+      <value>331.659197445</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>879.6900</value>
-      <value>100.000000000</value>
-      <value>1310.2600</value>
+      <value>78.245439263</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value>Others</value>
       <value>160.4100</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>27.667391079</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value>Others</value>
       <value>439.8900</value>
-      <value>71.372479029</value>
-      <value>912.4500</value>
+      <value>26.078064050</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-13</value>
       <value>Others</value>
       <value>877.3400</value>
-      <value>100.000000000</value>
-      <value>912.4500</value>
+      <value>113.726100201</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value>ABIN</value>
       <value>1628.0200</value>
-      <value>100.000000000</value>
-      <value>1628.0200</value>
+      <value>357.586540151</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value>ABIN</value>
       <value>590.1400</value>
-      <value>100.000000000</value>
-      <value>1628.0200</value>
+      <value>101.611625745</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value>Auction</value>
       <value>456.4000</value>
-      <value>100.000000000</value>
-      <value>1180.9200</value>
+      <value>157.509663170</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value>Auction</value>
       <value>7.6200</value>
-      <value>100.000000000</value>
-      <value>1180.9200</value>
+      <value>0.812375398</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value>FP-GTC</value>
       <value>136.2500</value>
-      <value>100.000000000</value>
-      <value>975.0900</value>
+      <value>38.253130440</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value>FP-GTC</value>
       <value>404.6600</value>
-      <value>69.689663486</value>
-      <value>975.0900</value>
+      <value>55.678472165</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value>FP-GTC</value>
       <value>581.1700</value>
-      <value>100.000000000</value>
-      <value>975.0900</value>
+      <value>2270.195312500</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value>FP-GTC</value>
       <value>762.9400</value>
-      <value>100.000000000</value>
-      <value>975.0900</value>
+      <value>297.802412272</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value>FP-GTC</value>
       <value>766.9300</value>
-      <value>100.000000000</value>
-      <value>975.0900</value>
+      <value>94.833747573</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>364.5100</value>
-      <value>100.000000000</value>
-      <value>1310.2600</value>
+      <value>55.125219285</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>713.7100</value>
-      <value>100.000000000</value>
-      <value>1310.2600</value>
+      <value>660.292348968</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>846.7400</value>
-      <value>100.000000000</value>
-      <value>1310.2600</value>
+      <value>436.171637562</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value>Others</value>
       <value>237.3500</value>
-      <value>53.956670986</value>
-      <value>992.1700</value>
+      <value>14.070855219</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value>Others</value>
       <value>364.1100</value>
-      <value>100.000000000</value>
-      <value>992.1700</value>
+      <value>-1722.374645222</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value>Others</value>
       <value>951.3300</value>
-      <value>100.000000000</value>
-      <value>992.1700</value>
+      <value>164.084652799</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-14</value>
       <value>Others</value>
       <value>992.1700</value>
-      <value>100.000000000</value>
-      <value>992.1700</value>
+      <value>136.570358849</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-15</value>
       <value>ABIN</value>
       <value>-21.9800</value>
-      <value>100.000000000</value>
-      <value>1628.0200</value>
+      <value>-2.570038820</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-15</value>
       <value>ABIN</value>
       <value>1208.9900</value>
-      <value>74.261372710</value>
-      <value>1628.0200</value>
+      <value>265.548673344</value>
+      <value>-47.9800</value>
     </row>
     <row>
       <value>2013-01-15</value>
       <value>Auction</value>
       <value>76.2500</value>
-      <value>16.706836109</value>
-      <value>1180.9200</value>
+      <value>26.314881281</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-15</value>
       <value>Auction</value>
       <value>890.4700</value>
-      <value>100.000000000</value>
-      <value>1180.9200</value>
+      <value>216.401370629</value>
+      <value>-86.8700</value>
     </row>
     <row>
       <value>2013-01-15</value>
       <value>FP-GTC</value>
       <value>511.5500</value>
-      <value>100.000000000</value>
-      <value>975.0900</value>
+      <value>143.621202763</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-15</value>
       <value>FP-GTC</value>
       <value>560.0900</value>
-      <value>100.000000000</value>
-      <value>975.0900</value>
+      <value>185.693919501</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-15</value>
       <value>FP-GTC</value>
       <value>617.1300</value>
-      <value>80.888405379</value>
-      <value>975.0900</value>
+      <value>240.887622468</value>
+      <value>-27.1100</value>
     </row>
     <row>
       <value>2013-01-15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>228.2200</value>
-      <value>100.000000000</value>
-      <value>1310.2600</value>
+      <value>135.434098867</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>707.4600</value>
-      <value>100.000000000</value>
-      <value>1310.2600</value>
+      <value>62.926165423</value>
+      <value>1124.2700</value>
     </row>
     <row>
       <value>2013-01-15</value>
       <value>Others</value>
       <value>1332.8100</value>
-      <value>100.000000000</value>
-      <value>1332.8100</value>
+      <value>251.151352981</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-15</value>
       <value>Others</value>
       <value>357.9200</value>
-      <value>98.299964297</value>
-      <value>1332.8100</value>
+      <value>-1693.093661306</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-15</value>
       <value>Others</value>
       <value>558.4500</value>
-      <value>100.000000000</value>
-      <value>1332.8100</value>
+      <value>33.106674097</value>
+      <value>814.8500</value>
     </row>
     <row>
       <value>2013-01-15</value>
       <value>Others</value>
       <value>628.7700</value>
-      <value>66.093784491</value>
-      <value>1332.8100</value>
+      <value>108.449756804</value>
+      <value>814.8500</value>
     </row>
   </table>
 </dataset>
