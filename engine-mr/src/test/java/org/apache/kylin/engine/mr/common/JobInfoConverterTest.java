@@ -19,6 +19,7 @@
 package org.apache.kylin.engine.mr.common;
 
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.kylin.engine.mr.CubingJob;
 import org.apache.kylin.job.JobInstance;
@@ -37,9 +38,18 @@ public class JobInfoConverterTest {
     @Test
     public void testParseToJobInstance() {
         TestJob task = new TestJob();
-        JobInstance instance = JobInfoConverter.parseToJobInstanceQuietly(task, Maps.<String, Output> newHashMap());
+
+        task.setId(UUID.randomUUID().toString());
+        Map<String, Output> outputs = Maps.<String, Output> newHashMap();
+
+        task.setParam("model_name", "kylin_test_model");
+
+        outputs.put(task.getId(), new TestOutput());
+
+        JobInstance instance = JobInfoConverter.parseToJobInstanceQuietly(task, outputs);
         // no exception thrown is expected
-        Assert.assertTrue(instance == null);
+        Assert.assertTrue(instance != null);
+        Assert.assertEquals(instance.getDisplayCubeName(), "kylin_test_model");
     }
 
     @Test

@@ -29,9 +29,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.HiveCmdBuilder;
 import org.apache.kylin.common.util.Pair;
-import org.apache.kylin.cube.CubeInstance;
-import org.apache.kylin.cube.CubeManager;
-import org.apache.kylin.engine.mr.steps.CubingExecutableUtil;
 import org.apache.kylin.job.common.PatternedLogger;
 import org.apache.kylin.job.constant.ExecutableConstants;
 import org.apache.kylin.job.exception.ExecuteException;
@@ -85,19 +82,9 @@ public class CreateFlatHiveTableStep extends AbstractExecutable {
         return length;
     }
 
-    private KylinConfig getCubeSpecificConfig() {
-        String cubeName = CubingExecutableUtil.getCubeName(getParams());
-        CubeManager manager = CubeManager.getInstance(KylinConfig.getInstanceFromEnv());
-        CubeInstance cube = manager.getCube(cubeName);
-        if (cube == null) {
-            return KylinConfig.getInstanceFromEnv();
-        }
-        return cube.getConfig();
-    }
-
     @Override
     protected ExecuteResult doWork(ExecutableContext context) throws ExecuteException {
-        KylinConfig config = getCubeSpecificConfig();
+        KylinConfig config = getConfig();
         try {
             createFlatHiveTable(config);
             return new ExecuteResult(ExecuteResult.State.SUCCEED, stepLogger.getBufferedLog());

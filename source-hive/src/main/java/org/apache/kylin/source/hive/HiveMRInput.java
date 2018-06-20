@@ -161,11 +161,13 @@ public class HiveMRInput implements IMRInput {
 
         @Override
         public void addStepPhase1_DoCreateFlatTable(DefaultChainedExecutable jobFlow) {
-            final String cubeName = CubingExecutableUtil.getCubeName(jobFlow.getParams());
+            String cubeName = CubingExecutableUtil.getCubeName(jobFlow.getParams());
+            String modelName = jobFlow.getParam("model_name");
+
             final String hiveInitStatements = JoinedFlatTable.generateHiveInitStatements(flatTableDatabase);
             final String jobWorkingDir = getJobWorkingDir(jobFlow);
 
-            jobFlow.addTask(createFlatHiveTableStep(hiveInitStatements, jobWorkingDir, cubeName));
+            jobFlow.addTask(createFlatHiveTableStep(hiveInitStatements, jobWorkingDir, cubeName, modelName));
         }
 
         protected void addStepPhase1_DoMaterializeLookupTable(DefaultChainedExecutable jobFlow) {
@@ -266,7 +268,7 @@ public class HiveMRInput implements IMRInput {
         }
 
         private AbstractExecutable createFlatHiveTableStep(String hiveInitStatements, String jobWorkingDir,
-                String cubeName) {
+                String cubeName, String modelName) {
             //from hive to hive
             final String dropTableHql = JoinedFlatTable.generateDropTableStatement(flatDesc);
             final String createTableHql = JoinedFlatTable.generateCreateTableStatement(flatDesc, jobWorkingDir);
@@ -280,8 +282,16 @@ public class HiveMRInput implements IMRInput {
             CreateFlatHiveTableStep step = new CreateFlatHiveTableStep();
             step.setInitStatement(hiveInitStatements);
             step.setCreateTableStatement(dropTableHql + createTableHql + insertDataHqls);
-            CubingExecutableUtil.setCubeName(cubeName, step.getParams());
             step.setName(ExecutableConstants.STEP_NAME_CREATE_FLAT_HIVE_TABLE);
+
+            if (cubeName != null) {
+                CubingExecutableUtil.setCubeName(cubeName, step.getParams());
+            }
+
+            if (modelName != null){
+                step.setParam("model_name", modelName);
+            }
+
             return step;
         }
 

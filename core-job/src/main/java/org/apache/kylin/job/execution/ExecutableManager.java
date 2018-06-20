@@ -31,6 +31,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.ClassUtil;
+import org.apache.kylin.cube.CubeInstance;
+import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.job.constant.ExecutableConstants;
 import org.apache.kylin.job.dao.ExecutableDao;
 import org.apache.kylin.job.dao.ExecutableOutputPO;
@@ -39,6 +41,8 @@ import org.apache.kylin.job.exception.IllegalStateTranferException;
 import org.apache.kylin.job.exception.PersistentException;
 import org.apache.kylin.metadata.TableMetadataManager;
 import org.apache.kylin.metadata.model.TableExtDesc;
+import org.apache.kylin.metadata.project.ProjectInstance;
+import org.apache.kylin.metadata.project.ProjectManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -492,6 +496,46 @@ public class ExecutableManager {
         addJobInfo(id, info);
     }
 
+    private KylinConfig getOverrideConfig(ExecutablePO executablePO) {
+
+        Map<String, String> params = executablePO.getParams();
+        String cubeName = params.get("cubeName");
+        String modelName = params.get("model_name");
+        String projectName = params.get("projectName");
+
+        if (cubeName != null) {
+            CubeManager cubeManager = CubeManager.getInstance(config);
+            CubeInstance cubeInstance = cubeManager.getCube(cubeName);
+
+            if (cubeInstance != null) {
+                return cubeInstance.getConfig();
+            }
+
+        }
+
+        ProjectManager projectManager = ProjectManager.getInstance(config);
+
+        if (projectName != null) {
+            ProjectInstance projectInstance = projectManager.getProject(projectName);
+
+            if (projectInstance != null) {
+                return projectInstance.getConfig();
+            }
+        }
+
+        if (modelName != null) {
+
+            try {
+                ProjectInstance projectInstance = projectManager.getProjectOfModel(modelName);
+                return projectInstance.getConfig();
+            } catch (IllegalStateException ex) {
+                return config;
+            }
+        }
+
+        return config;
+    }
+
     private AbstractExecutable parseTo(ExecutablePO executablePO) {
         if (executablePO == null) {
             logger.warn("executablePO is null");
@@ -499,7 +543,7 @@ public class ExecutableManager {
         }
         String type = executablePO.getType();
         AbstractExecutable result = newExecutable(type);
-        result.initConfig(config);
+        result.initConfig(getOverrideConfig(executablePO));
         result.setId(executablePO.getUuid());
         result.setName(executablePO.getName());
         result.setParams(executablePO.getParams());
@@ -568,7 +612,7 @@ public class ExecutableManager {
         }
         ExecutableState state = exeMgt.getOutput(jobID).getState();
         if (ExecutableState.RUNNING == state || ExecutableState.READY == state || ExecutableState.STOPPED == state
-            || ExecutableState.ERROR == state) {
+                || ExecutableState.ERROR == state) {
             return jobID;
         }
         return null;

@@ -70,19 +70,31 @@ public class JobInfoConverter {
             return null;
         }
 
-        CubingJob cubeJob = (CubingJob) job;
-        CubeInstance cube = CubeManager.getInstance(KylinConfig.getInstanceFromEnv())
-                .getCube(CubingExecutableUtil.getCubeName(cubeJob.getParams()));
-
         final JobInstance result = new JobInstance();
-        result.setName(job.getName());
-        result.setRelatedCube(cube != null ? cube.getName() : CubingExecutableUtil.getCubeName(cubeJob.getParams()));
-        String displayName = cube != null ? cube.getDisplayName()
-                : CubingExecutableUtil.getDisplayName(cubeJob.getParams());
-        if (displayName == null) {
-            displayName = CubingExecutableUtil.getCubeName(cubeJob.getParams());
+
+        CubingJob cubeJob = job;
+        String cubeName = CubingExecutableUtil.getCubeName(cubeJob.getParams());
+
+        if (cubeName == null) {
+            String modelName = cubeJob.getParam("model_name");
+
+            if (modelName != null) {
+                result.setRelatedCube(modelName);
+                result.setDisplayCubeName(modelName);
+            }
+        } else {
+
+            CubeInstance cube = CubeManager.getInstance(KylinConfig.getInstanceFromEnv()).getCube(cubeName);
+            if (cube != null) {
+                result.setRelatedCube(cube.getName());
+                result.setDisplayCubeName(cube.getDisplayName());
+            } else {
+                result.setRelatedCube(cubeName);
+                result.setDisplayCubeName(cubeName);
+            }
         }
-        result.setDisplayCubeName(displayName);
+
+        result.setName(job.getName());
         result.setRelatedSegment(CubingExecutableUtil.getSegmentId(cubeJob.getParams()));
         result.setLastModified(output.getLastModified());
         result.setSubmitter(job.getSubmitter());

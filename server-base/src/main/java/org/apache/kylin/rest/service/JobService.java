@@ -460,19 +460,31 @@ public class JobService extends BasicService implements InitializingBean {
             throw new BadRequestException(String.format(msg.getILLEGAL_JOB_TYPE(), job.getId()));
         }
 
-        CubingJob cubeJob = (CubingJob) job;
-        CubeInstance cube = CubeManager.getInstance(KylinConfig.getInstanceFromEnv())
-                .getCube(CubingExecutableUtil.getCubeName(cubeJob.getParams()));
         final JobInstance result = new JobInstance();
-        result.setName(job.getName());
-        if (cube != null) {
-            result.setRelatedCube(cube.getName());
-            result.setDisplayCubeName(cube.getDisplayName());
+
+        CubingJob cubeJob = (CubingJob) job;
+        String cubeName = CubingExecutableUtil.getCubeName(cubeJob.getParams());
+
+        if (cubeName == null) {
+            String modelName = cubeJob.getParam("model_name");
+
+            if (modelName != null) {
+                result.setRelatedCube(modelName);
+                result.setDisplayCubeName(modelName);
+            }
         } else {
-            String cubeName = CubingExecutableUtil.getCubeName(cubeJob.getParams());
-            result.setRelatedCube(cubeName);
-            result.setDisplayCubeName(cubeName);
+
+            CubeInstance cube = CubeManager.getInstance(KylinConfig.getInstanceFromEnv()).getCube(cubeName);
+            if (cube != null) {
+                result.setRelatedCube(cube.getName());
+                result.setDisplayCubeName(cube.getDisplayName());
+            } else {
+                result.setRelatedCube(cubeName);
+                result.setDisplayCubeName(cubeName);
+            }
         }
+
+        result.setName(job.getName());
         result.setRelatedSegment(CubingExecutableUtil.getSegmentId(cubeJob.getParams()));
         result.setLastModified(cubeJob.getLastModified());
         result.setSubmitter(cubeJob.getSubmitter());
