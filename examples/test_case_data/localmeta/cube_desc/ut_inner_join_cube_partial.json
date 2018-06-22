@@ -1,4 +1,5 @@
 {
+  "uuid": "901ed15e-7769-4c66-b7ae-fbdc971cd192",
   "name": "ut_inner_join_cube_partial",
   "model_name": "ci_inner_join_model",
   "description": "",
@@ -129,7 +130,21 @@
       "column": "NAME"
     }
   ],
-  "measures": [],
+  "measures": [
+    {
+      "name": "_COUNT_",
+      "function": {
+        "expression": "COUNT",
+        "parameter": {
+          "type": "constant",
+          "value": "1",
+          "next_parameter": null
+        },
+        "returntype": "bigint"
+      },
+      "dependent_measure_ref": null
+    }
+  ],
   "dictionaries": [],
   "rowkey": {
     "rowkey_columns": [
@@ -222,7 +237,13 @@
   "signature": null,
   "null_string": null,
   "hbase_mapping": {
-    "column_family": []
+    "column_family": [ {
+      "name" : "F1",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "_COUNT_" ]
+      } ]
+    } ]
   },
   "aggregation_groups": [
     {

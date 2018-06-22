@@ -86,11 +86,11 @@ public class CuboidSchedulerTest extends LocalFileMetadataTestCase {
     }
 
     private CubeDesc getStreamingCubeDesc() {
-        return getCubeDescManager().getCubeDesc("test_streaming_table_cube_desc");
+        return getCubeDescManager().getCubeDesc("test_streaming_table_cube");
     }
 
     private CubeDesc getFiftyDimCubeDesc() {
-        return getCubeDescManager().getCubeDesc("fifty_dim");
+        return getCubeDescManager().getCubeDesc("fifty_dim_full_build_cube");
     }
 
     private CubeDesc getTwentyDimCubeDesc() {

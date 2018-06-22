@@ -31,6 +31,51 @@
       "name": "fifty_dim_full_build_cube",
       "type": "CUBE",
       "realization": "fifty_dim_full_build_cube"
+    },
+    {
+      "name": "ssb_cube1",
+      "type": "CUBE",
+      "realization": "ssb_cube1"
+    },
+    {
+      "name": "ssb_cube2",
+      "type": "CUBE",
+      "realization": "ssb_cube2"
+    },
+    {
+      "name": "ssb_cube3",
+      "type": "CUBE",
+      "realization": "ssb_cube3"
+    },
+    {
+      "name": "test_kylin_cube_with_slr_desc",
+      "type": "CUBE",
+      "realization": "test_kylin_cube_with_slr_desc"
+    },
+    {
+      "name": "test_kylin_cube_with_slr_left_join_desc",
+      "type": "CUBE",
+      "realization": "test_kylin_cube_with_slr_left_join_desc"
+    },
+    {
+      "name": "test_kylin_cube_without_slr_desc",
+      "type": "CUBE",
+      "realization": "test_kylin_cube_without_slr_desc"
+    },
+    {
+      "name": "test_kylin_cube_without_slr_left_join_desc",
+      "type": "CUBE",
+      "realization": "test_kylin_cube_without_slr_left_join_desc"
+    },
+    {
+      "name": "ut_inner_join_cube_partial",
+      "type": "CUBE",
+      "realization": "ut_inner_join_cube_partial"
+    },
+    {
+      "name": "ssb_cube_with_dimention_range",
+      "type": "CUBE",
+      "realization": "ssb_cube_with_dimention_range"
     }
   ],
   "tables": [
@@ -62,7 +107,7 @@
     "twenty_dim",
     "ut_large_dimension_number"
   ],
-  "override_kylin_properties" :{
+  "override_kylin_properties": {
     "kylin.storage.hbase.owner-tag": "kylin@kylin.apache.org"
   }
 }
