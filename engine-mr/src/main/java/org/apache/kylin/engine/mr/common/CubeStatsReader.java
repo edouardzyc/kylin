@@ -248,7 +248,8 @@ public class CubeStatsReader {
         for (MeasureDesc measureDesc : cubeSegment.getCubeDesc().getMeasures()) {
             DataType returnType = measureDesc.getFunction().getReturnDataType();
             if (measureDesc.getFunction().getExpression().equals(FunctionDesc.FUNC_COUNT_DISTINCT)) {
-                countDistinctSpace += returnType.getStorageBytesEstimate();
+                long estimateDistinctCount = estimateDistinctCount(measureDesc, cubeSegment, cuboidId, baseCuboidCount, rowCount, sourceRowCount);
+                countDistinctSpace += returnType.getStorageBytesEstimate(estimateDistinctCount);
             } else if (measureDesc.getFunction().getExpression().equals(FunctionDesc.FUNC_PERCENTILE)) {
                 percentileSpace += returnType.getStorageBytesEstimate(baseCuboidCount * 1.0 / rowCount);
             } else if (measureDesc.getFunction().getExpression().equals(TopNMeasureType.FUNC_TOP_N)) {
@@ -270,11 +271,28 @@ public class CubeStatsReader {
         return ret;
     }
 
+    private static long estimateDistinctCount(MeasureDesc measureDesc, CubeSegment cubeSegment, long cuboidId,
+                                              long baseCuboidCount, long cuboidRowCount, long sourceRowCount) {
+        if(cuboidRowCount == 0){
+            return Long.MAX_VALUE;
+        }
+        ParameterDesc parameter = measureDesc.getFunction().getParameter();
+
+        Set<String> columns = new HashSet<>();
+        while (parameter != null) {
+            if (FunctionDesc.PARAMETER_TYPE_COLUMN.equals(parameter.getType())) {
+                columns.add(parameter.getValue());
+            }
+            parameter = parameter.getNextParameter();
+        }
+
+        return calcEstimateCount(cubeSegment, cuboidId, columns, baseCuboidCount, cuboidRowCount, sourceRowCount);
+    }
+
     private static long estimateTopNCount(MeasureDesc measureDesc, CubeSegment cubeSegment, long cuboidId,
             long baseCuboidCount, long cuboidRowCount, long sourceRowCount) {
-        long estimateTopNCount = Long.MAX_VALUE;
         if(cuboidRowCount == 0){
-            return estimateTopNCount;
+            return Long.MAX_VALUE;
         }
         ParameterDesc parameter = measureDesc.getFunction().getParameter();
         if (parameter != null) {
@@ -288,6 +306,12 @@ public class CubeStatsReader {
             }
             parameter = parameter.getNextParameter();
         }
+
+        return calcEstimateCount(cubeSegment, cuboidId, columns, baseCuboidCount, cuboidRowCount, sourceRowCount);
+    }
+
+    private static long calcEstimateCount(CubeSegment cubeSegment, long cuboidId, Set<String> columns, long baseCuboidCount, long cuboidRowCount, long sourceRowCount) {
+        long estimateCount = Long.MAX_VALUE;
         Set<String> dimensionColumnNames = new HashSet<>();
         Cuboid cuboid = Cuboid.findById(cubeSegment.getCubeDesc().getInitialCuboidScheduler(), cuboidId);
         KylinConfig kylinConf = cubeSegment.getConfig();
@@ -303,7 +327,7 @@ public class CubeStatsReader {
         columns.addAll(dimensionColumnNames);
 
         if (CollectionUtils.isEmpty(diffColumns)) {
-            estimateTopNCount = 1L;
+            estimateCount = 1L;
         } else {
             Map<String, Long> columnCardinalityMap = getColumnCardinalityMap(cubeSegment, kylinConf,
                     cuboid.getCubeDesc().getModelName(), columns);
@@ -313,7 +337,7 @@ public class CubeStatsReader {
                 Long columnCardinality = columnCardinalityMap.get(column);
                 if (columnCardinality == null || columnCardinality < 0) {
                     if (sourceRowCount == 0) {
-                        return estimateTopNCount;
+                        return estimateCount;
                     } else {
                         // if missing the columnCardinality use flat table sourceRowCount / cuboidRowCount
                         long estimateTopNCountWithOutModelStats = sourceRowCount / cuboidRowCount;
@@ -322,17 +346,17 @@ public class CubeStatsReader {
                 }
             }
 
-            // suppose on row key we have A,B, in top N we have group by C sum(D), we denote it as AB|C
+            // suppose on row key we have A,B, group by C , we denote it as AB|C
             // then each topn counter's row num can be estimated as |A*B*C|/|A*B|,
             // which can be estimated as min(baseCuboidCount, |A|*|B|*|C|)) / cuboidRowCount
             long allColumnsCardinality = calcAllColumnsCardinality(columnCardinalityMap, columns);
-            estimateTopNCount = Math.min(allColumnsCardinality, baseCuboidCount) / cuboidRowCount;
-            if (estimateTopNCount == 0) {
-                estimateTopNCount = 1L;
+            estimateCount = Math.min(allColumnsCardinality, baseCuboidCount) / cuboidRowCount;
+            if (estimateCount == 0) {
+                estimateCount = 1L;
             }
         }
 
-        return estimateTopNCount;
+        return estimateCount;
     }
 
     private static long calcAllColumnsCardinality(Map<String, Long> columnCardinalityMap, Set<String> columns) {

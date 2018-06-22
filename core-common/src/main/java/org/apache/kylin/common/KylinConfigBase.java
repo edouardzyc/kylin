@@ -460,7 +460,7 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public double getJobCuboidSizeCountDistinctRatio() {
-        return Double.parseDouble(getOptional("kylin.cube.size-estimate-countdistinct-ratio", "0.05"));
+        return Double.parseDouble(getOptional("kylin.cube.size-estimate-countdistinct-ratio", "0.5"));
     }
 
     public String getCubeAlgorithm() {
