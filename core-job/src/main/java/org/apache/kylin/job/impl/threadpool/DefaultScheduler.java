@@ -19,6 +19,7 @@
 package org.apache.kylin.job.impl.threadpool;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
@@ -41,11 +42,14 @@ import org.apache.kylin.job.engine.JobEngineConfig;
 import org.apache.kylin.job.exception.ExecuteException;
 import org.apache.kylin.job.exception.SchedulerException;
 import org.apache.kylin.job.execution.AbstractExecutable;
+import org.apache.kylin.job.execution.CheckpointExecutable;
 import org.apache.kylin.job.execution.Executable;
 import org.apache.kylin.job.execution.ExecutableManager;
 import org.apache.kylin.job.execution.ExecutableState;
 import org.apache.kylin.job.execution.Output;
 import org.apache.kylin.job.lock.JobLock;
+import org.apache.kylin.metadata.suite.SuiteInfoInstance;
+import org.apache.kylin.metadata.suite.SuiteInfoManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +67,7 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
         }
         return INSTANCE;
     }
-    
+
     public synchronized static DefaultScheduler createInstance() {
         destroyInstance();
         INSTANCE = new DefaultScheduler();
@@ -84,7 +88,7 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
     }
 
     // ============================================================================
-    
+
     private JobLock jobLock;
     private ExecutableManager executableManager;
     private Runnable fetcher;
@@ -133,7 +137,7 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
                     , System.identityHashCode(DefaultScheduler.this)//
                     , System.identityHashCode(this)//
             )) {//
-                // logger.debug("Job Fetcher is running...");
+                    // logger.debug("Job Fetcher is running...");
                 Map<String, Executable> runningJobs = context.getRunningJobs();
 
                 // fetch job from jobPriorityQueue first to reduce chance to scan job list
@@ -172,6 +176,19 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
                     }
 
                     AbstractExecutable executable = executableManager.getJob(id);
+
+                    if (jobEngineConfig.getConfig().getSuiteId() != null) {
+                        SuiteInfoManager suiteInfoManager = SuiteInfoManager.getInstance(jobEngineConfig.getConfig());
+                        String projectName = executable.getParam(CheckpointExecutable.PROJECT_INSTANCE_NAME);
+
+                        if (projectName != null) {
+                            List<String> projects = suiteInfoManager
+                                    .getSuiteInfo(jobEngineConfig.getConfig().getSuiteId()).getProjects();
+                            if (!projects.contains(projectName)) {
+                                continue;
+                            }
+                        }
+                    }
                     if (!executable.isReady()) {
                         final Output output = executableManager.getOutput(id);
                         // logger.debug("Job id:" + id + " not runnable");
@@ -202,10 +219,11 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
                     addToJobPool(executableWithPriority.getFirst(), executableWithPriority.getSecond());
                 }
 
-                logger.info("Priority Job Fetcher: " + nRunning + " running, " + runningJobs.size() + " actual running, "
-                        + nStopped + " stopped, " + nReady + " ready, " + jobPriorityQueue.size() + " waiting, " //
-                        + nSUCCEED + " already succeed, " + nError + " error, " + nDiscarded + " discarded, " + nOthers
-                        + " others");
+                logger.info(
+                        "Priority Job Fetcher: " + nRunning + " running, " + runningJobs.size() + " actual running, "
+                                + nStopped + " stopped, " + nReady + " ready, " + jobPriorityQueue.size() + " waiting, " //
+                                + nSUCCEED + " already succeed, " + nError + " error, " + nDiscarded + " discarded, "
+                                + nOthers + " others");
             } catch (Throwable th) {
                 logger.warn("Priority Job Fetcher caught a exception " + th);
             }
@@ -221,7 +239,7 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
                     , System.identityHashCode(DefaultScheduler.this)//
                     , System.identityHashCode(this)//
             )) {//
-                // logger.debug("Job Fetcher is running...");
+                    // logger.debug("Job Fetcher is running...");
                 Map<String, Executable> runningJobs = context.getRunningJobs();
                 if (isJobPoolFull()) {
                     return;
@@ -238,6 +256,19 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
                         continue;
                     }
                     final AbstractExecutable executable = executableManager.getJob(id);
+
+                    if (jobEngineConfig.getConfig().getSuiteId() != null) {
+                        SuiteInfoManager suiteInfoManager = SuiteInfoManager.getInstance(jobEngineConfig.getConfig());
+                        String projectName = executable.getParam(CheckpointExecutable.PROJECT_INSTANCE_NAME);
+
+                        if (projectName != null) {
+                            SuiteInfoInstance suiteInfoInstance = suiteInfoManager
+                                    .getSuiteInfo(jobEngineConfig.getConfig().getSuiteId());
+                            if (suiteInfoInstance == null || !suiteInfoInstance.getProjects().contains(projectName)) {
+                                continue;
+                            }
+                        }
+                    }
                     if (!executable.isReady()) {
                         final Output output = executableManager.getOutput(id);
                         // logger.debug("Job id:" + id + " not runnable");

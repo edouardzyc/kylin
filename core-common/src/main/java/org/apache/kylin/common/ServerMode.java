@@ -20,12 +20,11 @@ package org.apache.kylin.common;
 
 public enum ServerMode {
 
-    MASTER("master"), ALL("all"), JOB("job"), QUERY("query")
-    ;
+    MASTER("master"), ALL("all"), JOB("job"), QUERY("query");
 
     private final String name;
 
-    ServerMode(String name){
+    ServerMode(String name) {
         this.name = name;
     }
 
@@ -33,7 +32,7 @@ public enum ServerMode {
         return name;
     }
 
-    private static void validate(KylinConfig config){
+    private static void validate(KylinConfig config) {
         assert config != null;
     }
 
@@ -42,32 +41,35 @@ public enum ServerMode {
         return serverMode.getName().equals(config.getServerMode());
     }
 
-    public static boolean isMaster(KylinConfig config){
+    public static boolean isMaster(KylinConfig config) {
         return match(MASTER, config);
     }
 
-    public static boolean isJob(KylinConfig config){
+    public static boolean isJob(KylinConfig config) {
         return isJobOnly(config) || isAll(config);
     }
 
-    public static boolean isJobOnly(KylinConfig config){
+    public static boolean isJobOnly(KylinConfig config) {
         return match(JOB, config);
     }
 
-    public static boolean isQueryOnly(KylinConfig config){
+    public static boolean isQueryOnly(KylinConfig config) {
         return match(QUERY, config);
     }
 
-    public static boolean isQuery(KylinConfig config){
+    public static boolean isQuery(KylinConfig config) {
         return isQueryOnly(config) || isAll(config);
     }
 
-    public static boolean isAll(KylinConfig config){
+    public static boolean isAll(KylinConfig config) {
         return match(ALL, config);
     }
 
     public static boolean isQuery(String serverMode) {
         return ALL.name.equals(serverMode) || QUERY.name.equals(serverMode);
     }
-}
 
+    public static boolean isMaster(String serverMode) {
+        return MASTER.name.equals(serverMode);
+    }
+}

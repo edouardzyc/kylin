@@ -25,6 +25,8 @@ public class ProjectRequest {
 
     private String projectDescData;
 
+    private String suiteId;
+
     public ProjectRequest() {
     }
 
@@ -44,4 +46,11 @@ public class ProjectRequest {
         this.formerProjectName = formerProjectName;
     }
 
+    public String getSuiteId() {
+        return suiteId;
+    }
+
+    public void setSuiteId(String suiteId) {
+        this.suiteId = suiteId;
+    }
 }

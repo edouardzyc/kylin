@@ -1661,4 +1661,11 @@ abstract public class KylinConfigBase implements Serializable {
     public double getJobCuboidSizeTopNRatio() {
         return Double.parseDouble(getOptional("kylin.cube.size-estimate-topn-ratio", "0.5"));
     }
+
+    // ============================================================================
+    // Suite
+    // ============================================================================
+    public String getSuiteId() {
+        return getOptional("kylin.suite.id");
+    }
 }

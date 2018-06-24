@@ -28,6 +28,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.Lists;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.job.BaseTestExecutable;
 import org.apache.kylin.job.ErrorTestExecutable;
@@ -38,9 +39,12 @@ import org.apache.kylin.job.RunningTestExecutable;
 import org.apache.kylin.job.SelfStopExecutable;
 import org.apache.kylin.job.SucceedTestExecutable;
 import org.apache.kylin.job.execution.AbstractExecutable;
+import org.apache.kylin.job.execution.CheckpointExecutable;
 import org.apache.kylin.job.execution.DefaultChainedExecutable;
 import org.apache.kylin.job.execution.ExecutableManager;
 import org.apache.kylin.job.execution.ExecutableState;
+import org.apache.kylin.metadata.suite.SuiteInfoInstance;
+import org.apache.kylin.metadata.suite.SuiteInfoManager;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -59,6 +63,7 @@ public class DefaultSchedulerTest extends BaseSchedulerTest {
         super.after();
         System.clearProperty("kylin.job.retry");
         System.clearProperty("kylin.job.retry-exception-classes");
+        System.clearProperty("kylin.suite.id");
     }
 
     @Rule
@@ -246,5 +251,34 @@ public class DefaultSchedulerTest extends BaseSchedulerTest {
         System.setProperty("kylin.job.retry-exception-classes", "java.io.FileNotFoundException");
         Assert.assertTrue(AbstractExecutable.needRetry(1, new FileNotFoundException()));
         Assert.assertFalse(AbstractExecutable.needRetry(1, new Exception("")));
+    }
+
+    @Test
+    public void testScheduleInSuite() {
+        String suiteId = "test-schedule-suite";
+        System.setProperty("kylin.suite.id", suiteId);
+        SuiteInfoManager mgr = SuiteInfoManager.getInstance(getTestConfig());
+
+        String[] projects = {"default"};
+        SuiteInfoInstance suiteInfo = new SuiteInfoInstance(suiteId, Lists.newArrayList(projects));
+        mgr.saveSuite(suiteInfo, true);
+
+        DefaultChainedExecutable job1 = new DefaultChainedExecutable();
+        job1.setParam(CheckpointExecutable.PROJECT_INSTANCE_NAME, "default");
+        BaseTestExecutable task1 = new SucceedTestExecutable();
+        job1.addTask(task1);
+        execMgr.addJob(job1);
+        waitForJobFinish(job1.getId(), 10000);
+        Assert.assertEquals(ExecutableState.SUCCEED, execMgr.getOutput(job1.getId()).getState());
+        Assert.assertEquals(ExecutableState.SUCCEED, execMgr.getOutput(task1.getId()).getState());
+
+        DefaultChainedExecutable job2 = new DefaultChainedExecutable();
+        job2.setParam(CheckpointExecutable.PROJECT_INSTANCE_NAME, "not_default");
+        BaseTestExecutable task2 = new SucceedTestExecutable();
+        job2.addTask(task2);
+        execMgr.addJob(job2);
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage("too long wait time");
+        waitForJobFinish(job2.getId(), 10000);
     }
 }

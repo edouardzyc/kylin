@@ -36,7 +36,7 @@ public class CheckpointExecutable extends DefaultChainedExecutable {
     public static final Integer DEFAULT_PRIORITY = 30;
 
     private static final String DEPLOY_ENV_NAME = "envName";
-    private static final String PROJECT_INSTANCE_NAME = "projectName";
+    public static final String PROJECT_INSTANCE_NAME = "projectName";
     private static final String CUBE_NAME = "cubeName";
 
     private final List<AbstractExecutable> subTasksForCheck = Lists.newArrayList();
