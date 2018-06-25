@@ -16,8 +16,8 @@
 -- limitations under the License.
 --
 select cal_dt, lstg_format_name, sum(price) as GMV,
-(case lag(sum(price), 1, 0.0) over(partition by lstg_format_name order by cal_dt)
-when 0.0 then 0 else sum(price)/lag(sum(price), 1, 0.0) over(partition by lstg_format_name order by cal_dt) end) as "prev"
+(case lag(sum(price), 1, 0.0) over(partition by lstg_format_name order by cal_dt, lstg_format_name)
+when 0.0 then 0 else sum(price)/lag(sum(price), 1, 0.0) over(partition by lstg_format_name order by cal_dt, lstg_format_name) end) as "prev"
 from test_kylin_fact
 where cal_dt < '2012-02-01'
 group by cal_dt, lstg_format_name

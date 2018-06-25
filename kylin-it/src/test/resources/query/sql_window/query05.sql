@@ -16,11 +16,11 @@
 -- limitations under the License.
 --
 select cal_dt, lstg_format_name, sum(price) as GMV,
-first_value(sum(price)) over(partition by lstg_format_name order by cal_dt) as "first",
-last_value(sum(price)) over(partition by lstg_format_name order by cal_dt) as "current",
-lag(sum(price), 1, 0.0) over(partition by lstg_format_name order by cal_dt) as "prev",
-lead(sum(price), 1, 0.0) over(partition by lstg_format_name order by cal_dt) as "next",
-ntile(4) over (partition by lstg_format_name order by cal_dt) as "quarter"
+first_value(sum(price)) over(partition by lstg_format_name order by cal_dt, lstg_format_name) as "first",
+last_value(sum(price)) over(partition by lstg_format_name order by cal_dt, lstg_format_name) as "current",
+lag(sum(price), 1, 0.0) over(partition by lstg_format_name order by cal_dt, lstg_format_name) as "prev",
+lead(sum(price), 1, 0.0) over(partition by lstg_format_name order by cal_dt, lstg_format_name) as "next",
+ntile(4) over (partition by lstg_format_name order by cal_dt, lstg_format_name) as "quarter"
 from test_kylin_fact
 where cal_dt < '2012-02-01'
 group by cal_dt, lstg_format_name

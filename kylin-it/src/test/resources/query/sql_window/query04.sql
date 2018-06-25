@@ -16,7 +16,7 @@
 -- limitations under the License.
 --
 select cal_dt, lstg_format_name, sum(price),
-rank() over(partition by lstg_format_name order by cal_dt) as "RANK",
-dense_rank() over(partition by lstg_format_name order by cal_dt) as "DENSE_RANK"
+rank() over(partition by lstg_format_name order by cal_dt, lstg_format_name) as "RANK",
+dense_rank() over(partition by lstg_format_name order by cal_dt, lstg_format_name) as "DENSE_RANK"
 from test_kylin_fact
 group by cal_dt, lstg_format_name
