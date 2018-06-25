@@ -7,8 +7,8 @@
     "target_cuboid_cols" : [ "TEST_KYLIN_FACT.CAL_DT" ]
   }, {
     "query_type" : "OLAP",
-    "realization" : "ci_inner_join_hybrid",
-    "realization_type" : "HYBRID",
+    "realization" : "ci_left_join_cube",
+    "realization_type" : "CUBE",
     "source_cuboid_cols" : [ "TEST_KYLIN_FACT.CAL_DT" ],
     "target_cuboid_cols" : [ "TEST_KYLIN_FACT.CAL_DT" ]
   } ]

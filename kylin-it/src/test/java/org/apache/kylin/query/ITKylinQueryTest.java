@@ -237,7 +237,7 @@ public class ITKylinQueryTest extends KylinTestBase {
 
     @Test
     public void testOrderByQuery() throws Exception {
-        execAndCompQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_orderby", null, true);
+        execAndCompQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_orderby", null, false);
         // FIXME
         // as of optiq 0.8, we lost metadata type with "order by" clause, e.g. sql_orderby/query01.sql
         // thus, temporarily the "order by" clause was cross out, and the needSort is set to true
@@ -276,40 +276,28 @@ public class ITKylinQueryTest extends KylinTestBase {
 
     @Test
     public void testDistinctCountQuery() throws Exception {
-        if ("left".equalsIgnoreCase(joinType)) {
-            execAndVerifyResult(getQueryFolderPrefix() + "src/test/resources/query/sql_distinct");
-        }
+        execAndVerifyResult(getQueryFolderPrefix() + "src/test/resources/query/sql_distinct");
     }
 
     @Test
     public void testTopNQuery() throws Exception {
-        if ("left".equalsIgnoreCase(joinType)) {
-            this.execAndCompQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_topn", null, true);
-        }
+        this.execAndCompQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_topn", null, true);
     }
 
     @Test
     public void testPreciselyDistinctCountQuery() throws Exception {
-        if ("left".equalsIgnoreCase(joinType)) {
-            execAndCompQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_distinct_precisely", null, true);
-        }
+        this.execAndCompQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_distinct_precisely", null, true);
     }
 
     @Test
     public void testIntersectCountQuery() throws Exception {
         // cannot compare coz H2 does not support intersect count yet..
-        if ("left".equalsIgnoreCase(joinType)) {
-            this.execAndVerifyResult(getQueryFolderPrefix() + "src/test/resources/query/sql_intersect_count");
-        }
+        this.execAndVerifyResult(getQueryFolderPrefix() + "src/test/resources/query/sql_intersect_count");
     }
 
     @Test
     public void testMultiModelQuery() throws Exception {
-        if ("left".equalsIgnoreCase(joinType)) {
-            joinType = "default";
-            execAndCompQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_multi_model", null, true);
-            joinType = "left";
-        }
+        execAndCompQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_multi_model", null, true);
     }
 
     @Test
