@@ -123,6 +123,14 @@ public class JobEngineConfig {
         return config.getHdfsWorkingDirectory();
     }
 
+    public String getHdfsWorkingDirectory(String project) {
+        if(config.isProjectIsolationEnabled()){
+            return config.getHdfsWorkingDirectory() + project + "/";
+        } else {
+            return config.getHdfsWorkingDirectory();
+        }
+    }
+
     /**
      * @return the maxConcurrentJobLimit
      */

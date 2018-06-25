@@ -62,6 +62,7 @@ import com.google.common.collect.Sets;
 public class HiveMRInput implements IMRInput {
 
     private static final Logger logger = LoggerFactory.getLogger(HiveMRInput.class);
+    public static final String PROJECT_INSTANCE_NAME = "projectName";
 
     public static String getTableNameForHCat(TableDesc table) {
         String tableName = (table.isView()) ? table.getMaterializedName() : table.getName();
@@ -181,8 +182,16 @@ public class HiveMRInput implements IMRInput {
         }
 
         protected String getJobWorkingDir(DefaultChainedExecutable jobFlow) {
+            final KylinConfig cubeConfig = KylinConfig.getInstanceFromEnv();
 
-            String jobWorkingDir = JobBuilderSupport.getJobWorkingDir(hdfsWorkingDir, jobFlow.getId());
+            String jobWorkingDir = null;
+            if (cubeConfig.isProjectIsolationEnabled()) {
+                final String projectName = jobFlow.getParam(PROJECT_INSTANCE_NAME);
+                jobWorkingDir = JobBuilderSupport.getJobWorkingDir(hdfsWorkingDir, projectName, jobFlow.getId());
+            } else {
+                jobWorkingDir = JobBuilderSupport.getJobWorkingDir(hdfsWorkingDir, jobFlow.getId());
+            }
+
             if (KylinConfig.getInstanceFromEnv().getHiveTableDirCreateFirst()) {
                 // Create work dir to avoid hive create it,
                 // the difference is that the owners are different.

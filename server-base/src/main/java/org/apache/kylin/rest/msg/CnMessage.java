@@ -423,4 +423,8 @@ public class CnMessage extends Message {
     public String getHBASE_FAIL_WITHOUT_DETAIL() {
         return "HBase 遇到错误";
     }
+
+    public String getPath_NOT_EXIST(){
+        return "文件 '%s' 目录不存在，请联系管理员创建!";
+    }
 }

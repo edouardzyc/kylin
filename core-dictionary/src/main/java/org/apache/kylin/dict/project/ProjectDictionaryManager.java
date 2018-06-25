@@ -95,8 +95,8 @@ public class ProjectDictionaryManager {
                             long estimateMB = estimateBytes / (1024 * 1024);
                             usedMem.addAndGet(-estimateMB);
                             logger.info("DictionaryInfoCache entry with key {} is removed due to {} ",
-                                    notification.getKey(), notification.getCause() + ", release size : " + estimateMB + " M,"
-                                            + " Current use memory: " + usedMem);
+                                    notification.getKey(), notification.getCause() + ", release size : " + estimateMB
+                                            + " M," + " Current use memory: " + usedMem);
                         }
                     })
             .build(new CacheLoader<String, ProjectDictionaryInfo>() {
@@ -387,19 +387,19 @@ public class ProjectDictionaryManager {
         long version = mvc.acquireMyVersion();
         if (version == 0) {
             logger.info("Create project dictionary : " + sourceIdentify);
-            return createDictionary(sourceIdentify, dictionaryInfo, mvc, version);
+            return createDictionary(project, sourceIdentify, dictionaryInfo, mvc, version);
         } else {
             logger.info("Append a new project dictionary with version : " + version);
-            return appendDictionary(sourceIdentify, dictionaryInfo, mvc, version);
+            return appendDictionary(project, sourceIdentify, dictionaryInfo, mvc, version);
         }
     }
 
-    private SegProjectDict appendDictionary(String sourceIdentify, DictionaryInfo dictionaryInfo, VersionControl mvc,
-            long versionEntry) throws IOException {
+    private SegProjectDict appendDictionary(String project, String sourceIdentify, DictionaryInfo dictionaryInfo,
+            VersionControl mvc, long versionEntry) throws IOException {
         checkInterrupted(sourceIdentify);
 
         logger.info("Append project dictionary with column: " + sourceIdentify);
-        String s = eatAndUpgradeDictionary(dictionaryInfo, sourceIdentify, versionEntry);
+        String s = eatAndUpgradeDictionary(project, dictionaryInfo, sourceIdentify, versionEntry);
         mvc.commit(true);
         return new SegProjectDict(sourceIdentify, versionEntry, s, dictionaryInfo.getDictionaryObject().getSizeOfId());
     }
@@ -416,19 +416,20 @@ public class ProjectDictionaryManager {
         }
     }
 
-    private SegProjectDict createDictionary(String sourceIdentify, DictionaryInfo dictionaryInfo, VersionControl mvc,
-            long version) throws IOException {
+    private SegProjectDict createDictionary(String project, String sourceIdentify, DictionaryInfo dictionaryInfo,
+            VersionControl mvc, long version) throws IOException {
         checkInterrupted(sourceIdentify);
         logger.info("create project dictionary : " + sourceIdentify);
         ProjectDictionaryInfo warp = ProjectDictionaryInfo.wrap(dictionaryInfo, version);
-        saveDictionary(sourceIdentify, warp);
+        saveDictionary(project, sourceIdentify, warp);
         mvc.commit(true);
         ProjectDictionaryVersionInfo versionInfo = versionCache.get(PathBuilder.versionKey(sourceIdentify));
         versionCheckPoint(sourceIdentify, version, versionInfo, dictionaryInfo.getDictionaryObject().getSizeOfId());
         return new SegProjectDict(sourceIdentify, version, dictionaryInfo.getDictionaryObject().getSizeOfId());
     }
 
-    protected void saveDictionary(String sourceIdentify, ProjectDictionaryInfo dictionaryInfo) throws IOException {
+    protected void saveDictionary(String project, String sourceIdentify, ProjectDictionaryInfo dictionaryInfo)
+            throws IOException {
         checkInterrupted(sourceIdentify);
         String path = PathBuilder.dataPath(sourceIdentify, dictionaryInfo.getDictionaryVersion());
         logger.info("Saving dictionary at " + path + "version is :" + dictionaryInfo.getDictionaryObject());
@@ -443,8 +444,13 @@ public class ProjectDictionaryManager {
         }
         // if a failed segment is followed by another segment, project dict may need overwrite
         getStore().putResource(path, inputStream, System.currentTimeMillis());
-        Path sDictDir = new Path(
-                KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory() + PathBuilder.SPARDER_DICT_ROOT);
+        KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
+        Path sDictDir = null;
+        if (kylinConfig.isProjectIsolationEnabled()) {
+            sDictDir = new Path(kylinConfig.getHdfsWorkingDirectory() + project + "/" + PathBuilder.SPARDER_DICT_ROOT);
+        } else {
+            sDictDir = new Path(kylinConfig.getHdfsWorkingDirectory() + PathBuilder.SPARDER_DICT_ROOT);
+        }
         FileSystem workingFileSystem = HadoopUtil.getWorkingFileSystem();
         if (!workingFileSystem.exists(sDictDir)) {
             workingFileSystem.mkdirs(sDictDir);
@@ -458,14 +464,14 @@ public class ProjectDictionaryManager {
         dictionaryInfoCache.put(newKey, dictionaryInfo);
     }
 
-    private String eatAndUpgradeDictionary(DictionaryInfo originDict, String sourceIdentify, long toVersion)
-            throws IOException {
+    private String eatAndUpgradeDictionary(String project, DictionaryInfo originDict, String sourceIdentify,
+            long toVersion) throws IOException {
         ProjectDictionaryInfo previousDictionary = loadDictByVersion(sourceIdentify, toVersion - 1);
         DictionaryInfo mergedDictionary = dictionaryManager
                 .mergeDictionary(Lists.newArrayList(previousDictionary, originDict));
         ProjectDictionaryInfo warp = ProjectDictionaryInfo.wrap(mergedDictionary, toVersion);
         // patch 1
-        saveDictionary(sourceIdentify, warp);
+        saveDictionary(project, sourceIdentify, warp);
         int[] lastPatch = ProjectDictionaryHelper.genOffset(previousDictionary, mergedDictionary);
         long beforeVersion = toVersion - 1;
         for (int currentVersion = 0; currentVersion < toVersion; currentVersion++) {

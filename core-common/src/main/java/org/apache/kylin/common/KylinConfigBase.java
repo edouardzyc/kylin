@@ -398,7 +398,7 @@ abstract public class KylinConfigBase implements Serializable {
 
     public int getCachedDictMaxMemory() {
         return Integer.parseInt(getOptional("kylin.dictionary.max-cache-memory",
-                (int) ((Runtime.getRuntime().totalMemory() / (1024 * 1024))* 0.15)  + ""));
+                (int) ((Runtime.getRuntime().totalMemory() / (1024 * 1024)) * 0.15) + ""));
     }
 
     public boolean isGrowingDictEnabled() {
@@ -1268,6 +1268,10 @@ abstract public class KylinConfigBase implements Serializable {
         return Boolean.parseBoolean(getOptional("kylin.query.stream-aggregate-enabled", "true"));
     }
 
+    public boolean isProjectIsolationEnabled() {
+        return Boolean.parseBoolean(getOptional("kylin.metadata.project-isolation-enable", "false"));
+    }
+
     @Deprecated //Limit is good even it's large. This config is meaning less since we already have scan threshold
     public int getStoragePushDownLimitMax() {
         return Integer.parseInt(getOptional("kylin.query.max-limit-pushdown", "10000"));
@@ -1317,12 +1321,13 @@ abstract public class KylinConfigBase implements Serializable {
     public int getBadQueryDefaultAlertingSeconds() {
         return Integer.parseInt(getOptional("kylin.query.badquery-alerting-seconds", "90"));
     }
+
     public double getBadQueryDefaultAlertingCoefficient() {
         return Double.parseDouble(getOptional("kylin.query.timeout-seconds-coefficient", "0.5"));
     }
 
     public int getBadQueryDefaultDetectIntervalSeconds() {
-        int time =(int) (getQueryTimeoutSeconds() * getBadQueryDefaultAlertingCoefficient()); // default is half of query timeout
+        int time = (int) (getQueryTimeoutSeconds() * getBadQueryDefaultAlertingCoefficient()); // default is half of query timeout
         if (time == 0) {
             time = 60; // 60 sec
         }

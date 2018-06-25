@@ -431,4 +431,8 @@ public class Message {
     public String getHBASE_FAIL_WITHOUT_DETAIL() {
         return "HBase failed.";
     }
+
+    public String getPath_NOT_EXIST(){
+        return "File '%s' doesn’t exist, please contact your administrator to create it.";
+    }
 }
