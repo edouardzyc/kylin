@@ -21,6 +21,7 @@ package org.apache.kylin.engine.mr.steps;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
@@ -49,7 +50,9 @@ abstract public class FactDistinctColumnsMapperBase<KEYIN, VALUEIN> extends Kyli
     protected CubeDesc cubeDesc;
     protected long baseCuboidId;
     protected IMRTableInputFormat flatTableInputFormat;
-    protected List<TblColRef> allDimDictCols;
+    protected List<TblColRef> allCols;
+    protected Set<String> allDicCols;
+    protected Set<String> allDimCols;
 
     protected Text outputKey = new Text();
     //protected SelfDefineSortableKey sortableKey = new SelfDefineSortableKey();
@@ -73,14 +76,16 @@ abstract public class FactDistinctColumnsMapperBase<KEYIN, VALUEIN> extends Kyli
         cubeDesc = cube.getDescriptor();
         baseCuboidId = Cuboid.getBaseCuboidId(cubeDesc);
         reducerMapping = new FactDistinctColumnsReducerMapping(cube);
-        allDimDictCols = reducerMapping.getAllDimDictCols();
+        allCols = reducerMapping.getAllDimDictCols();
+        allDicCols = reducerMapping.getAllDicCols();
+        allDimCols = reducerMapping.getAllDimCols();
 
         flatTableInputFormat = MRUtil.getBatchCubingInputSide(cubeSeg).getFlatTableInputFormat();
 
         intermediateTableDesc = new CubeJoinedFlatTableEnrich(EngineFactory.getJoinedFlatTableDesc(cubeSeg), cubeDesc);
-        columnIndex = new int[allDimDictCols.size()];
-        for (int i = 0; i < allDimDictCols.size(); i++) {
-            TblColRef colRef = allDimDictCols.get(i);
+        columnIndex = new int[allCols.size()];
+        for (int i = 0; i < allCols.size(); i++) {
+            TblColRef colRef = allCols.get(i);
             int columnIndexOnFlatTbl = intermediateTableDesc.getColumnIndex(colRef);
             columnIndex[i] = columnIndexOnFlatTbl;
         }

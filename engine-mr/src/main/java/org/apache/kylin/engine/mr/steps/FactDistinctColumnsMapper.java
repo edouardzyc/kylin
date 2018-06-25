@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -30,6 +31,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.kylin.common.KylinVersion;
 import org.apache.kylin.common.util.Bytes;
 import org.apache.kylin.common.util.StringUtil;
+import org.apache.kylin.cube.DimensionRangeInfo;
 import org.apache.kylin.cube.cuboid.CuboidUtil;
 import org.apache.kylin.engine.mr.common.BatchConstants;
 import org.apache.kylin.engine.mr.common.StatisticsDecisionUtil;
@@ -40,6 +42,7 @@ import org.apache.kylin.metadata.datatype.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
@@ -62,6 +65,8 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
     private int rowCount = 0;
     private int samplingPercentage;
     private ByteBuffer tmpbuf;
+    private Map<Integer, Set<String>> dicValueSetMap = Maps.newHashMap();
+    private Map<Integer, DimensionRangeInfo> dimensionRangeInfoMap = Maps.newHashMap();
 
     private CuboidStatCalculator[] cuboidStatCalculators;
 
@@ -156,30 +161,36 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
 
         for (String[] row : rowCollection) {
             context.getCounter(RawDataCounter.BYTES).increment(countSizeInBytes(row));
-            for (int i = 0; i < allDimDictCols.size(); i++) {
+            for (int i = 0; i < allCols.size(); i++) {
                 String fieldValue = row[columnIndex[i]];
                 if (fieldValue == null)
                     continue;
 
-                int reducerIndex = reducerMapping.getReducerIdForCol(i, fieldValue);
-                
-                tmpbuf.clear();
-                byte[] valueBytes = Bytes.toBytes(fieldValue);
-                int size = valueBytes.length + 1;
-                if (size >= tmpbuf.capacity()) {
-                    tmpbuf = ByteBuffer.allocate(countNewSize(tmpbuf.capacity(), size));
-                }
-                tmpbuf.put(Bytes.toBytes(reducerIndex)[3]);
-                tmpbuf.put(valueBytes);
-                outputKey.set(tmpbuf.array(), 0, tmpbuf.position());
-                DataType type = allDimDictCols.get(i).getType();
-                sortableKey.init(outputKey, type);
-                context.write(sortableKey, EMPTY_TEXT);
+                final DataType type = allCols.get(i).getType();
+                final String colId = allCols.get(i).getIdentity();
 
-                // log a few rows for troubleshooting
-                if (rowCount < 10) {
-                    logger.info(
-                            "Sample output: " + allDimDictCols.get(i) + " '" + fieldValue + "' => reducer " + reducerIndex);
+                //for dic column, de dup before write value; for dim not dic column, hold util doCleanup()
+                if (allDicCols.contains(colId)) {
+                    Set<String> dicValueSet = dicValueSetMap.get(i);
+                    if (dicValueSet == null) {
+                        dicValueSet = Sets.newHashSet();
+                        dicValueSetMap.put(i, dicValueSet);
+                    }
+                    if (dicValueSet.add(fieldValue)) {
+                        writeFieldValue(context, type, i, fieldValue);
+                    }
+                } else {
+                    DimensionRangeInfo old = dimensionRangeInfoMap.get(i);
+                    if (old == null) {
+                        old = new DimensionRangeInfo(fieldValue, fieldValue);
+                        dimensionRangeInfoMap.put(i, old);
+                    } else {
+                        if (type.getOrder().compare(fieldValue, old.getMax()) > 0) {
+                            old.setMax(fieldValue);
+                        } else if (type.getOrder().compare(fieldValue, old.getMin()) < 0) {
+                            old.setMin(fieldValue);
+                        }
+                    }
                 }
             }
 
@@ -231,6 +242,12 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
                 context.write(sortableKey, outputValue);
             }
         }
+        for (Integer colIndex : dimensionRangeInfoMap.keySet()) {
+            DimensionRangeInfo rangeInfo = dimensionRangeInfoMap.get(colIndex);
+            DataType dataType = allCols.get(colIndex).getType();
+            writeFieldValue(context, dataType, colIndex, rangeInfo.getMin());
+            writeFieldValue(context, dataType, colIndex, rangeInfo.getMax());
+        }
     }
 
     private int countNewSize(int oldSize, int dataSize) {
@@ -239,6 +256,26 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
             newSize = newSize * 2;
         }
         return newSize;
+    }
+
+    private void writeFieldValue(Context context, DataType type, Integer colIndex, String value)
+            throws IOException, InterruptedException {
+        int reducerIndex = reducerMapping.getReducerIdForCol(colIndex, value);
+        tmpbuf.clear();
+        byte[] valueBytes = Bytes.toBytes(value);
+        int size = valueBytes.length + 1;
+        if (size >= tmpbuf.capacity()) {
+            tmpbuf = ByteBuffer.allocate(countNewSize(tmpbuf.capacity(), size));
+        }
+        tmpbuf.put(Bytes.toBytes(reducerIndex)[3]);
+        tmpbuf.put(valueBytes);
+        outputKey.set(tmpbuf.array(), 0, tmpbuf.position());
+        sortableKey.init(outputKey, type);
+        context.write(sortableKey, EMPTY_TEXT);
+        // log a few rows for troubleshooting
+        if (rowCount < 10) {
+            logger.info("Sample output: " + allCols.get(colIndex) + " '" + value + "' => reducer " + reducerIndex);
+        }
     }
 
     public static class CuboidStatCalculator implements Runnable {

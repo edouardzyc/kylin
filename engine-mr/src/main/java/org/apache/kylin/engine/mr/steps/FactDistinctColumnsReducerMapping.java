@@ -21,6 +21,7 @@ package org.apache.kylin.engine.mr.steps;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.model.CubeDesc;
 import org.apache.kylin.engine.mr.common.MapReduceUtil;
@@ -41,7 +42,9 @@ public class FactDistinctColumnsReducerMapping {
     final private int nDimReducers;
     final private int nTotalReducers;
 
-    final private List<TblColRef> allDimDictCols = Lists.newArrayList();
+    private List<TblColRef> allDimDictCols;
+    final private Set<String> allDicCols = Sets.newHashSet();
+    final private Set<String> allDimCols = Sets.newHashSet();
     final private int[] colIdToReducerBeginId;
     final private int[] reducerRolePlay; // >=0 for dict col id, <0 for partition col and hll counter (using markers)
 
@@ -51,16 +54,20 @@ public class FactDistinctColumnsReducerMapping {
 
     private FactDistinctColumnsReducerMapping(CubeInstance cube, int cuboidRowCounterReducerNum) {
         CubeDesc desc = cube.getDescriptor();
-        Set<TblColRef> allCols = cube.getAllColumns();
+        Set<TblColRef> allDimDictColSet = Sets.newHashSet();// all dimension with dictionary column
         Set<TblColRef> dictCols = desc.getAllColumnsNeedDictionaryBuilt();
-        List<TblColRef> dimCols = desc.listDimensionColumnsExcludingDerived(true);
-        for (TblColRef colRef : allCols) {
+        List<TblColRef> dimCols = cube.getDescriptor().listDimensionColumnsExcludingDerived(true);
+        for (TblColRef colRef : cube.getAllColumns()) {
             if (dictCols.contains(colRef)) {
-                allDimDictCols.add(colRef);
-            } else if (dimCols.indexOf(colRef) >= 0){
-                allDimDictCols.add(colRef);
+                allDicCols.add(colRef.getIdentity());
+                allDimDictColSet.add(colRef);
+            }
+            if (dimCols.indexOf(colRef) >= 0){
+                allDimCols.add(colRef.getIdentity());
+                allDimDictColSet.add(colRef);
             }
         }
+        allDimDictCols = Lists.newArrayList(allDimDictColSet);
 
         colIdToReducerBeginId = new int[allDimDictCols.size() + 1];
 
@@ -96,7 +103,15 @@ public class FactDistinctColumnsReducerMapping {
     public List<TblColRef> getAllDimDictCols() {
         return allDimDictCols;
     }
-    
+
+    public Set<String> getAllDicCols() {
+        return allDicCols;
+    }
+
+    public Set<String> getAllDimCols() {
+        return allDimCols;
+    }
+
     public int getTotalReducerNum() {
         return nTotalReducers;
     }
