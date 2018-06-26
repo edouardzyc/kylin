@@ -19,11 +19,13 @@
 package org.apache.kylin.common;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.kylin.common.exceptions.KylinTimeoutException;
@@ -69,8 +71,14 @@ public class QueryContext {
     private Object calcitePlan;
     private boolean hasRuntimeAgg;
     private boolean isSparderEnabled;
+    // sparder may enabled but eventually go to calcite.
+    private boolean isSparderUsed;
     private boolean isLateDecodeEnabled;
     private boolean isTimeout;
+    private Set<Future> allRunningTasks = new HashSet<>();
+
+    public boolean switchToSparder = false;
+    private boolean isHighPriorityQuery = false;
 
     private List<RPCStatistics> rpcStatisticsList = Lists.newCopyOnWriteArrayList();
     private Map<Integer, CubeSegmentStatisticsResult> cubeSegmentStatisticsResultMap = Maps.newTreeMap();
@@ -79,6 +87,26 @@ public class QueryContext {
         // use QueryContext.current() instead
         queryStartMillis = System.currentTimeMillis();
         queryId = UUID.randomUUID().toString();
+    }
+
+    public Set<Future> getAllRunningTasks() {
+        return allRunningTasks;
+    }
+
+    public void addRunningTasks(Future task) {
+        this.allRunningTasks.add(task);
+    }
+
+    public void removeRunningTask(Future task) {
+        this.allRunningTasks.remove(task);
+    }
+
+    public boolean isHighPriorityQuery() {
+        return isHighPriorityQuery;
+    }
+
+    public void markHighPriorityQuery() {
+        isHighPriorityQuery = true;
     }
 
     public long getQueryStartMillis() {
@@ -169,6 +197,14 @@ public class QueryContext {
 
     public void setSparderEnabled(boolean sparderEnabled) {
         isSparderEnabled = sparderEnabled;
+    }
+
+    public boolean isSparderUsed() {
+        return isSparderUsed;
+    }
+
+    public void setIsSparderUsed(boolean isSparderUsed) {
+        this.isSparderUsed = isSparderUsed;
     }
 
     public boolean isLateDecodeEnabled() {

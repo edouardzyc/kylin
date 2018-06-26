@@ -60,6 +60,7 @@ import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.QueryContext;
 import org.apache.kylin.common.ServerMode;
 import org.apache.kylin.common.debug.BackdoorToggles;
+import org.apache.kylin.common.exceptions.BigQueryException;
 import org.apache.kylin.common.exceptions.ResourceLimitExceededException;
 import org.apache.kylin.common.htrace.HtraceInit;
 import org.apache.kylin.common.persistence.ResourceStore;
@@ -105,6 +106,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -175,6 +177,12 @@ public class QueryService extends BasicService {
             final String user = SecurityContextHolder.getContext().getAuthentication().getName();
             badQueryDetector.queryStart(Thread.currentThread(), sqlRequest, user);
             QueryContext.current().setSql(sqlRequest.getSql());
+            if (SecurityContextHolder.getContext() //
+                    .getAuthentication() //
+                    .getAuthorities() //
+                    .contains(new SimpleGrantedAuthority(Constant.ROLE_QUERY_VIP))) { //
+                QueryContext.current().markHighPriorityQuery();
+            }
 
             ret = queryWithSqlMassage(sqlRequest);
             return ret;
@@ -469,7 +477,7 @@ public class QueryService extends BasicService {
             QueryContext queryContext = QueryContext.current();
             sqlResponse.setTotalScanCount(queryContext.getScannedRows());
             sqlResponse.setTotalScanBytes(queryContext.getScannedBytes());
-            sqlResponse.setSparderEnabled(queryContext.isSparderEnabled());
+            sqlResponse.setSparderEnabled(queryContext.isSparderUsed());
             sqlResponse.setLateDecodeEnabled(queryContext.isLateDecodeEnabled());
             sqlResponse.setTimeout(queryContext.isTimeout());
             if (queryCacheEnabled && e.getCause() != null
@@ -732,23 +740,27 @@ public class QueryService extends BasicService {
             }
 
         } catch (SQLException sqlException) {
-            Pair<List<List<String>>, List<SelectedColumnMeta>> r = null;
-            try {
-                r = PushDownUtil.tryPushDownSelectQuery(sqlRequest.getProject(), correctedSql, conn.getSchema(),
-                        sqlException, BackdoorToggles.getPrepareOnly());
-            } catch (Exception e2) {
-                logger.error("pushdown engine failed current query too", e2);
-                //exception in pushdown, throw it instead of exception in calcite
-                throw e2;
+            if (sqlException.getCause().getCause() instanceof BigQueryException) {
+                QueryContext.current().switchToSparder = true;
+                return execute(correctedSql, sqlRequest, conn);
+            } else {
+                Pair<List<List<String>>, List<SelectedColumnMeta>> r = null;
+                try {
+                    r = PushDownUtil.tryPushDownSelectQuery(sqlRequest.getProject(), correctedSql, conn.getSchema(),
+                            sqlException, BackdoorToggles.getPrepareOnly());
+                } catch (Exception e2) {
+                    logger.error("pushdown engine failed current query too", e2);
+                    //exception in pushdown, throw it instead of exception in calcite
+                    throw e2;
+                }
+
+                if (r == null)
+                    throw sqlException;
+
+                isPushDown = true;
+                results = r.getFirst();
+                columnMetas = r.getSecond();
             }
-
-            if (r == null)
-                throw sqlException;
-
-            isPushDown = true;
-            results = r.getFirst();
-            columnMetas = r.getSecond();
-
         } finally {
             close(resultSet, stat, null); //conn is passed in, not my duty to close
         }
@@ -841,7 +853,7 @@ public class QueryService extends BasicService {
         response.setTotalScanCount(QueryContext.current().getScannedRows());
         response.setTotalScanBytes(QueryContext.current().getScannedBytes());
         response.setLateDecodeEnabled(QueryContext.current().isLateDecodeEnabled());
-        response.setSparderEnabled(QueryContext.current().isSparderEnabled());
+        response.setSparderEnabled(QueryContext.current().isSparderUsed());
         return response;
     }
 
