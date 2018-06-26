@@ -81,6 +81,26 @@ public class SQLResponse implements Serializable {
 
     protected boolean isTimeout;
 
+    protected String server;
+
+    protected String suiteId;
+
+    public String getServer() {
+        return server;
+    }
+
+    public void setServer(String server) {
+        this.server = server;
+    }
+
+    public String getSuiteId() {
+        return suiteId;
+    }
+
+    public void setSuiteId(String suiteId) {
+        this.suiteId = suiteId;
+    }
+
     public boolean isTimeout() {
         return isTimeout;
     }

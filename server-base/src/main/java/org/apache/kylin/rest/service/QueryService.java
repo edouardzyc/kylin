@@ -142,6 +142,8 @@ public class QueryService extends BasicService {
     @Autowired
     private AclEvaluate aclEvaluate;
 
+    private String restAddress = KylinConfig.getInstanceFromEnv().getServerRestAddress();
+
     public QueryService() {
         queryStore = ResourceStore.getStore(getConfig());
     }
@@ -396,6 +398,12 @@ public class QueryService extends BasicService {
             }
             if (sqlResponse.getIsException())
                 throw new InternalErrorException(sqlResponse.getExceptionMessage());
+
+            String suiteId = kylinConfig.getSuiteId();
+            if (suiteId != null && !suiteId.equals("")){
+                sqlResponse.setSuiteId(suiteId);
+            }
+            sqlResponse.setServer(restAddress);
 
             return sqlResponse;
 

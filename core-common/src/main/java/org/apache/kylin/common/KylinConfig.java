@@ -530,4 +530,8 @@ public class KylinConfig extends KylinConfigBase {
             return this.base() == ((KylinConfig) another).base();
     }
 
+    public String getServerRestAddress() {
+        return System.getProperty("KYLIN_REST_ADDRESS");
+    }
+
 }
