@@ -27,6 +27,8 @@ public class UpdateConfigRequest {
 
     private String value;
 
+    private String server;
+
     public String getKey() {
         return key;
     }
@@ -43,4 +45,11 @@ public class UpdateConfigRequest {
         this.value = value;
     }
 
+    public String getServer() {
+        return server;
+    }
+
+    public void setServer(String server) {
+        this.server = server;
+    }
 }
