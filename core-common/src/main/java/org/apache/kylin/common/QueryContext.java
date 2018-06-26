@@ -195,7 +195,7 @@ public class QueryContext {
         return isSparderEnabled;
     }
 
-    public void setSparderEnabled(boolean sparderEnabled) {
+    public void setSparderAppliable(boolean sparderEnabled) {
         isSparderEnabled = sparderEnabled;
     }
 

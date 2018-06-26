@@ -315,7 +315,7 @@ public class QueryService extends BasicService {
         stringBuilder.append("Storage cache used: ").append(storageCacheUsed).append(newLine);
         stringBuilder.append("Is Query Push-Down: ").append(isPushDown).append(newLine);
         stringBuilder.append("Is Prepare: ").append(BackdoorToggles.getPrepareOnly()).append(newLine);
-        stringBuilder.append("Is Sparder Enabled: ").append(response.isSparderEnabled()).append(newLine);
+        stringBuilder.append("Is Sparder Used: ").append(response.isSparderUsed()).append(newLine);
         stringBuilder.append("Is Late Decode Enabled: ").append(response.isLateDecodeEnabled()).append(newLine);
         stringBuilder.append("Is Timeout: ").append(response.isTimeout()).append(newLine);
         stringBuilder.append("Trace URL: ").append(response.getTraceUrl()).append(newLine);
@@ -477,7 +477,7 @@ public class QueryService extends BasicService {
             QueryContext queryContext = QueryContext.current();
             sqlResponse.setTotalScanCount(queryContext.getScannedRows());
             sqlResponse.setTotalScanBytes(queryContext.getScannedBytes());
-            sqlResponse.setSparderEnabled(queryContext.isSparderUsed());
+            sqlResponse.setIsSparderUsed(queryContext.isSparderUsed());
             sqlResponse.setLateDecodeEnabled(queryContext.isLateDecodeEnabled());
             sqlResponse.setTimeout(queryContext.isTimeout());
             if (queryCacheEnabled && e.getCause() != null
@@ -853,7 +853,7 @@ public class QueryService extends BasicService {
         response.setTotalScanCount(QueryContext.current().getScannedRows());
         response.setTotalScanBytes(QueryContext.current().getScannedBytes());
         response.setLateDecodeEnabled(QueryContext.current().isLateDecodeEnabled());
-        response.setSparderEnabled(QueryContext.current().isSparderUsed());
+        response.setIsSparderUsed(QueryContext.current().isSparderUsed());
         return response;
     }
 

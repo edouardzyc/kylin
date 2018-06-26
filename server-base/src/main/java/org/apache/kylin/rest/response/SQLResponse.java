@@ -75,7 +75,7 @@ public class SQLResponse implements Serializable {
 
     protected String traceUrl = null;
 
-    protected boolean isSparderEnabled;
+    protected boolean isSparderUsed;
 
     protected boolean isLateDecodeEnabled;
 
@@ -109,12 +109,12 @@ public class SQLResponse implements Serializable {
         isTimeout = timeout;
     }
 
-    public boolean isSparderEnabled() {
-        return isSparderEnabled;
+    public boolean isSparderUsed() {
+        return isSparderUsed;
     }
 
-    public void setSparderEnabled(boolean sparderEnabled) {
-        isSparderEnabled = sparderEnabled;
+    public void setIsSparderUsed(boolean isSparderUsed) {
+        this.isSparderUsed = isSparderUsed;
     }
 
     public boolean isLateDecodeEnabled() {

@@ -33,6 +33,7 @@ public class Constant {
     public final static String ROLE_ADMIN = "ROLE_ADMIN";
     public final static String ROLE_MODELER = "ROLE_MODELER";
     public final static String ROLE_ANALYST = "ROLE_ANALYST";
+    public final static String ROLE_QUERY_VIP = "ROLE_QUERY_VIP";
 
     public final static String GROUP_ALL_USERS = "ALL_USERS";
 
