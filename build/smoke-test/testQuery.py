@@ -62,7 +62,7 @@ class testQuery(unittest.TestCase):
             del actual_result['storageCacheUsed']
             del actual_result['totalScanCount']
             del actual_result['totalScanBytes']
-            del actual_result['sparderEnabled']
+            del actual_result['sparderUsed']
             del actual_result['lateDecodeEnabled']
             del actual_result['timeout']
 
@@ -115,7 +115,7 @@ class testQuery(unittest.TestCase):
             del actual_result['totalScanCount']
             del actual_result['totalScanBytes']
             del actual_result['columnMetas']
-            del actual_result['sparderEnabled']
+            del actual_result['sparderUsed']
             del actual_result['lateDecodeEnabled']
             del actual_result['timeout']
 

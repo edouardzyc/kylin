@@ -70,7 +70,7 @@ public class QueryContext {
     private String sql;
     private Object calcitePlan;
     private boolean hasRuntimeAgg;
-    private boolean isSparderEnabled;
+    private boolean isSparderAppliable;
     // sparder may enabled but eventually go to calcite.
     private boolean isSparderUsed;
     private boolean isLateDecodeEnabled;
@@ -191,12 +191,12 @@ public class QueryContext {
         isTimeout = timeout;
     }
 
-    public boolean isSparderEnabled() {
-        return isSparderEnabled;
+    public boolean isSparderAppliable() {
+        return isSparderAppliable;
     }
 
-    public void setSparderAppliable(boolean sparderEnabled) {
-        isSparderEnabled = sparderEnabled;
+    public void setSparderAppliable(boolean isSparderAppliable) {
+        this.isSparderAppliable = isSparderAppliable;
     }
 
     public boolean isSparderUsed() {
