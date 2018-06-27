@@ -129,6 +129,11 @@ public class FixedLenDimEnc extends DimensionEncoding implements Serializable{
         return new FixedLenSerializer();
     }
 
+    @Override
+    public String returnType() {
+        return "varchar";
+    }
+
     public class FixedLenSerializer extends DataTypeSerializer<Object> {
 
         private byte[] currentBuf() {

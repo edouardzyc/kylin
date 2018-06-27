@@ -97,6 +97,7 @@ public class IntegerDimEnc extends DimensionEncoding implements Serializable {
             throw new IllegalArgumentException();
 
         this.fixedLen = len;
+        this.dataType = "varchar";
         this.valueConvert = new ValueConvert() {
             @Override
             public Object convert(long value) {
@@ -219,6 +220,11 @@ public class IntegerDimEnc extends DimensionEncoding implements Serializable {
     @Override
     public DataTypeSerializer<Object> asDataTypeSerializer() {
         return new IntegerSerializer();
+    }
+
+    @Override
+    public String returnType() {
+        return dataType;
     }
 
     public class IntegerSerializer extends DataTypeSerializer<Object> {

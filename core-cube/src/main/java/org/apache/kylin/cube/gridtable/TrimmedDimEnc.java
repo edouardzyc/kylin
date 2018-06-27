@@ -59,6 +59,11 @@ public class TrimmedDimEnc extends DimensionEncoding {
     }
 
     @Override
+    public String returnType() {
+        return null;
+    }
+
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeShort(fixedLen);
     }

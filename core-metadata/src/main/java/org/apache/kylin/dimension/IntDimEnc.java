@@ -83,6 +83,7 @@ public class IntDimEnc extends DimensionEncoding implements Serializable {
             throw new IllegalArgumentException("the length of IntDimEnc is " + len + ", which should be 1-8");
 
         this.fixedLen = len;
+        this.dataType = "varchar";
         this.valueConvert = new ValueConvert() {
             @Override
             public Object convert(long value) {
@@ -181,6 +182,11 @@ public class IntDimEnc extends DimensionEncoding implements Serializable {
     @Override
     public DataTypeSerializer<Object> asDataTypeSerializer() {
         return new IntegerSerializer();
+    }
+
+    @Override
+    public String returnType() {
+        return dataType;
     }
 
     public class IntegerSerializer extends DataTypeSerializer<Object> {

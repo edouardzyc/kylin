@@ -121,6 +121,11 @@ public class DictionaryDimEnc extends DimensionEncoding implements Serializable 
         return new DictionarySerializer();
     }
 
+    @Override
+    public String returnType() {
+        return "varchar";
+    }
+
     public class DictionarySerializer extends DataTypeSerializer<Object> {
         @Override
         public void serialize(Object value, ByteBuffer buf) {

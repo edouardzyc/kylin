@@ -123,6 +123,14 @@ public class BooleanDimEnc extends DimensionEncoding implements Serializable{
         return new BooleanSerializer();
     }
 
+    @Override
+    public String returnType() {
+        if(isBooleanType){
+            return "boolean";
+        }
+        return "varchar";
+    }
+
     public class BooleanSerializer extends DataTypeSerializer<Object> {
 
         private byte[] currentBuf() {

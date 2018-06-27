@@ -18,17 +18,17 @@
 
 package org.apache.kylin.dimension;
 
-import org.apache.kylin.common.util.BytesUtil;
-import org.apache.kylin.metadata.datatype.DataTypeSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+
+import org.apache.kylin.common.util.BytesUtil;
+import org.apache.kylin.metadata.datatype.DataTypeSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * not being used yet, prepared for future
@@ -116,6 +116,11 @@ public class OneMoreByteVLongDimEnc extends DimensionEncoding implements Seriali
     @Override
     public DataTypeSerializer<Object> asDataTypeSerializer() {
         return new VLongSerializer();
+    }
+
+    @Override
+    public String returnType() {
+        return "varchar";
     }
 
     public class VLongSerializer extends DataTypeSerializer<Object> {

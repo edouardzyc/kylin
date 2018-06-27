@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -78,6 +79,13 @@ public class JsonUtil {
             throws IOException, JsonParseException, JsonMappingException {
         return mapper.readValue(content, valueTypeRef);
     }
+
+    public static HashSet<String> readValueAsSet(String content) throws IOException {
+        TypeReference<HashSet<String>> typeRef = new TypeReference<HashSet<String>>() {
+        };
+        return mapper.readValue(content, typeRef);
+    }
+
 
     public static Map<String, String> readValueAsMap(String content) throws IOException {
         TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {

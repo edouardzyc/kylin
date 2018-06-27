@@ -126,6 +126,11 @@ public class AbstractDateDimEnc extends DimensionEncoding {
     }
 
     @Override
+    public String returnType() {
+        return "string";
+    }
+
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeInt(fixedLen);
         out.writeObject(codec);

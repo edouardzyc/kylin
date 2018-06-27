@@ -75,4 +75,6 @@ public abstract class DimensionEncoding implements Externalizable {
     /** return a DataTypeSerializer that does the same encoding/decoding on ByteBuffer */
     abstract public DataTypeSerializer<Object> asDataTypeSerializer();
 
+
+    abstract public String returnType();
 }
