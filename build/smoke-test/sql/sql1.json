@@ -33,5 +33,7 @@
       "isNullable": 0
     }
   ],
-  "traceUrl": null
+  "traceUrl": null,
+  "server": null,
+  "suiteId": null
 }
