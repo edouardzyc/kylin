@@ -21,7 +21,6 @@ package org.apache.kylin.engine.mr.steps;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
@@ -51,11 +50,8 @@ abstract public class FactDistinctColumnsMapperBase<KEYIN, VALUEIN> extends Kyli
     protected long baseCuboidId;
     protected IMRTableInputFormat flatTableInputFormat;
     protected List<TblColRef> allCols;
-    protected Set<String> allDicCols;
-    protected Set<String> allDimCols;
 
     protected Text outputKey = new Text();
-    //protected SelfDefineSortableKey sortableKey = new SelfDefineSortableKey();
     protected Text outputValue = new Text();
     protected int errorRecordCounter = 0;
 
@@ -77,8 +73,6 @@ abstract public class FactDistinctColumnsMapperBase<KEYIN, VALUEIN> extends Kyli
         baseCuboidId = Cuboid.getBaseCuboidId(cubeDesc);
         reducerMapping = new FactDistinctColumnsReducerMapping(cube);
         allCols = reducerMapping.getAllDimDictCols();
-        allDicCols = reducerMapping.getAllDicCols();
-        allDimCols = reducerMapping.getAllDimCols();
 
         flatTableInputFormat = MRUtil.getBatchCubingInputSide(cubeSeg).getFlatTableInputFormat();
 

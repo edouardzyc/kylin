@@ -56,8 +56,7 @@ abstract public class DataTypeOrder implements Comparator<String> {
     public String max(Collection<String> values) {
         String max = null;
         for (String v : values) {
-            if (max == null || compare(max, v) < 0)
-                max = v;
+            max = max(max, v);
         }
         return max;
     }
@@ -65,8 +64,7 @@ abstract public class DataTypeOrder implements Comparator<String> {
     public String min(Collection<String> values) {
         String min = null;
         for (String v : values) {
-            if (min == null || compare(min, v) > 0)
-                min = v;
+            min = min(min, v);
         }
         return min;
     }

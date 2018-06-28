@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -30,6 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.hadoop.io.Text;
 import org.apache.kylin.common.KylinVersion;
 import org.apache.kylin.common.util.Bytes;
+import org.apache.kylin.common.util.MemoryBudgetController;
 import org.apache.kylin.common.util.StringUtil;
 import org.apache.kylin.cube.DimensionRangeInfo;
 import org.apache.kylin.cube.cuboid.CuboidUtil;
@@ -39,6 +41,7 @@ import org.apache.kylin.measure.BufferedMeasureCodec;
 import org.apache.kylin.measure.hllc.HLLCounter;
 import org.apache.kylin.measure.hllc.RegisterType;
 import org.apache.kylin.metadata.datatype.DataType;
+import org.apache.kylin.metadata.model.TblColRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +68,8 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
     private int rowCount = 0;
     private int samplingPercentage;
     private ByteBuffer tmpbuf;
-    private Map<Integer, Set<String>> dicValueSetMap = Maps.newHashMap();
+    
+    private DictColDeduper dictColDeduper;
     private Map<Integer, DimensionRangeInfo> dimensionRangeInfoMap = Maps.newHashMap();
 
     private CuboidStatCalculator[] cuboidStatCalculators;
@@ -137,6 +141,14 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
             cuboidStatCalculators[i] = calculator;
             calculator.start();
         }
+        
+        // setup dict col deduper
+        dictColDeduper = new DictColDeduper();
+        Set<TblColRef> dictCols = cubeDesc.getAllColumnsNeedDictionaryBuilt();
+        for (int i = 0; i < allCols.size(); i++) {
+            if (dictCols.contains(allCols.get(i)))
+                dictColDeduper.setIsDictCol(i);
+        }
     }
 
     private int getStatsThreadNum(int cuboidNum) {
@@ -167,16 +179,10 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
                     continue;
 
                 final DataType type = allCols.get(i).getType();
-                final String colId = allCols.get(i).getIdentity();
 
                 //for dic column, de dup before write value; for dim not dic column, hold util doCleanup()
-                if (allDicCols.contains(colId)) {
-                    Set<String> dicValueSet = dicValueSetMap.get(i);
-                    if (dicValueSet == null) {
-                        dicValueSet = Sets.newHashSet();
-                        dicValueSetMap.put(i, dicValueSet);
-                    }
-                    if (dicValueSet.add(fieldValue)) {
+                if (dictColDeduper.isDictCol(i)) {
+                    if (dictColDeduper.add(i, fieldValue)) {
                         writeFieldValue(context, type, i, fieldValue);
                     }
                 } else {
@@ -185,11 +191,8 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
                         old = new DimensionRangeInfo(fieldValue, fieldValue);
                         dimensionRangeInfoMap.put(i, old);
                     } else {
-                        if (type.getOrder().compare(fieldValue, old.getMax()) > 0) {
-                            old.setMax(fieldValue);
-                        } else if (type.getOrder().compare(fieldValue, old.getMin()) < 0) {
-                            old.setMin(fieldValue);
-                        }
+                        old.setMax(type.getOrder().max(old.getMax(), fieldValue));
+                        old.setMin(type.getOrder().min(old.getMin(), fieldValue));
                     }
                 }
             }
@@ -197,11 +200,15 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
             if (rowCount % 100 < samplingPercentage) {
                 putRowKeyToHLL(row);
             }
+            
+            if (rowCount % 100 == 0) {
+                dictColDeduper.resetIfShortOfMem();
+            }
 
             rowCount++;
         }
     }
-
+    
     private void putRowKeyToHLL(String[] row) {
         for (CuboidStatCalculator cuboidStatCalculator : cuboidStatCalculators) {
             cuboidStatCalculator.putRow(row);
@@ -407,5 +414,46 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
                 }
             }
         }
+    }
+    
+    public static class DictColDeduper {
+
+        final boolean enabled;
+        final int resetThresholdMB;
+        final Map<Integer, Set<String>> colValueSets = Maps.newHashMap();
+        
+        public DictColDeduper() {
+            this(200, 100);
+        }
+        
+        public DictColDeduper(int enableThresholdMB, int resetThresholdMB) {
+            // only enable when there is sufficient memory
+            this.enabled = MemoryBudgetController.getSystemAvailMB() >= enableThresholdMB;
+            this.resetThresholdMB = resetThresholdMB;
+        }
+        
+        public void setIsDictCol(int i) {
+            colValueSets.put(i, new HashSet<String>());
+        }
+        
+        public boolean isDictCol(int i) {
+            return colValueSets.containsKey(i);
+        }
+
+        public boolean add(int i, String fieldValue) {
+            return colValueSets.get(i).add(fieldValue);
+        }
+        
+        public Set<String> getValueSet(int i) {
+            return colValueSets.get(i);
+        }
+
+        public void resetIfShortOfMem() {
+            if (MemoryBudgetController.getSystemAvailMB() < resetThresholdMB) {
+                for (Set<String> set : colValueSets.values())
+                    set.clear();
+            }
+        }
+        
     }
 }
