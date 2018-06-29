@@ -451,7 +451,17 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public double getJobCuboidSizeRatio() {
-        return Double.parseDouble(getOptional("kylin.cube.size-estimate-ratio", "0.25"));
+        return Double.parseDouble(getOptional("kylin.cube.size-estimate-ratio", rewriteWithParquetPageCompression("0.25")));
+    }
+
+    private String rewriteWithParquetPageCompression(String ratio) {
+        String compression = getParquetPageCompression();
+        if (StringUtils.isEmpty(compression) || compression.toUpperCase().equals("UNCOMPRESSED")) {
+            // magic num with no snappy
+            return String.valueOf(Double.parseDouble(ratio) * 1.27);
+        }
+        // magic num with snappy
+        return ratio;
     }
 
     @Deprecated
@@ -460,7 +470,7 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public double getJobCuboidSizeCountDistinctRatio() {
-        return Double.parseDouble(getOptional("kylin.cube.size-estimate-countdistinct-ratio", "0.5"));
+        return Double.parseDouble(getOptional("kylin.cube.size-estimate-countdistinct-ratio", rewriteWithParquetPageCompression("0.5")));
     }
 
     public String getCubeAlgorithm() {
@@ -1659,7 +1669,7 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public double getJobCuboidSizeTopNRatio() {
-        return Double.parseDouble(getOptional("kylin.cube.size-estimate-topn-ratio", "0.5"));
+        return Double.parseDouble(getOptional("kylin.cube.size-estimate-topn-ratio", rewriteWithParquetPageCompression("0.5")));
     }
 
     // ============================================================================
@@ -1667,5 +1677,11 @@ abstract public class KylinConfigBase implements Serializable {
     // ============================================================================
     public String getSuiteId() {
         return getOptional("kylin.suite.id");
+    }
+
+    // mv this config to kylinConfig from kapConfig, for cubeStatsReader need this config to estimate Cuboid StorageSize
+    // with different the parquet page compression, we use different magic num
+    public String getParquetPageCompression() {
+        return getOptional("kap.storage.columnar.page-compression", "");
     }
 }
