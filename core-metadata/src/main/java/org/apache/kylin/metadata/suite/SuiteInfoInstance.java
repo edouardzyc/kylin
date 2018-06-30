@@ -65,6 +65,10 @@ public class SuiteInfoInstance extends RootPersistentEntity {
         this.projects.add(project);
     }
 
+    public void removeProject(String project) {
+        this.projects.remove(project);
+    }
+
     @Override
     public String resourceName() {
         return suiteId;

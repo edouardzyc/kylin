@@ -75,6 +75,16 @@ public class SuiteInfoManagerTest extends LocalFileMetadataTestCase {
         }
 
         {
+            try {
+                mgr.removeSuiteInfo(suiteId);
+                throw new RuntimeException("I'm an unexpected exception");
+            } catch (Exception e) {
+                Assert.assertTrue(e instanceof IllegalArgumentException);
+                Assert.assertTrue(e.getMessage().startsWith("Can not remove suite with id"));
+            }
+            mgr.removeProject("default");
+            mgr.removeProject("default2");
+            mgr.removeProject("default3");
             mgr.removeSuiteInfo(suiteId);
             Assert.assertEquals(0, mgr.listAllSuiteInfos().size());
         }

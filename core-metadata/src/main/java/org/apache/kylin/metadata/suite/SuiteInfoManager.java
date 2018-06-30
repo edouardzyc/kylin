@@ -133,8 +133,26 @@ public class SuiteInfoManager {
         }
     }
 
+    public void removeProject(String projectName) {
+        try (AutoLock l = lock.lockForWrite()) {
+            for (SuiteInfoInstance suiteInfoInstance : listAllSuiteInfos()) {
+                if (suiteInfoInstance.getProjects().contains(projectName)) {
+                    suiteInfoInstance.removeProject(projectName);
+                    saveSuite(suiteInfoInstance, true);
+                    logger.info("Removed project \'" + projectName + "\' from suite " + suiteInfoInstance.getId());
+                    break;
+                }
+            }
+        }
+    }
+
     public void removeSuiteInfo(String suiteId) throws IOException {
         try (AutoLock l = lock.lockForWrite()) {
+            SuiteInfoInstance suiteInfoInstance = getSuiteInfo(suiteId);
+            if (suiteInfoInstance.getProjects().size() > 0) {
+                throw new IllegalArgumentException("Can not remove suite with id \'" + suiteId
+                        + "\', the following projects rely on it: " + suiteInfoInstance.getProjects());
+            }
             crud.delete(suiteId);
         }
     }
