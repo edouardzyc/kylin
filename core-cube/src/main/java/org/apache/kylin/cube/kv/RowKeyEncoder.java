@@ -53,12 +53,21 @@ public class RowKeyEncoder extends AbstractRowKeyEncoder implements java.io.Seri
             throw new IllegalStateException("Does not support multiple UHC now");
         }
         colIO = new RowKeyColumnIO(cubeSeg.getDimensionEncodingMap());
+        Map<String, Integer> columnLengthMap = cubeSeg.getColumnLengthMap();
         for (TblColRef column : cuboid.getColumns()) {
             if (shardByColumns.contains(column)) {
                 uhcOffset = bodyLength;
-                uhcLength = colIO.getColumnLength(column);
+                if (columnLengthMap == null || columnLengthMap.size() == 0) {
+                    uhcLength = colIO.getColumnLength(column);
+                } else {
+                    uhcLength = columnLengthMap.get(column.getIdentity());
+                }
             }
-            bodyLength += colIO.getColumnLength(column);
+            if (columnLengthMap == null || columnLengthMap.size() == 0) {
+                bodyLength += colIO.getColumnLength(column);
+            } else {
+                bodyLength += columnLengthMap.get(column.getIdentity());
+            }
         }
     }
 
@@ -88,7 +97,7 @@ public class RowKeyEncoder extends AbstractRowKeyEncoder implements java.io.Seri
         return getHeaderLength() + bodyLength;
     }
 
-    protected short calculateShard(byte[] key) {
+    public short calculateShard(byte[] key) {
         if (enableSharding) {
             int shardSeedOffset = uhcOffset == -1 ? 0 : uhcOffset;
             int shardSeedLength = uhcLength == -1 ? bodyLength : uhcLength;

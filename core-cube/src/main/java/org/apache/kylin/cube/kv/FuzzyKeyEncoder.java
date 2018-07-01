@@ -33,7 +33,7 @@ public class FuzzyKeyEncoder extends RowKeyEncoder {
     }
 
     @Override
-    protected short calculateShard(byte[] key) {
+    public short calculateShard(byte[] key) {
         if (enableSharding) {
             return 0;
         } else {

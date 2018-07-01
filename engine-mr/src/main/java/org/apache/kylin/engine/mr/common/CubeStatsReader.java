@@ -209,7 +209,12 @@ public class CubeStatsReader {
         final Long baseCuboidRowCount = rowCountMap.get(baseCuboid.getId());
 
         for (int i = 0; i < columnList.size(); i++) {
-            rowkeyColumnSize.add(dimEncMap.get(columnList.get(i)).getLengthOfEncoding());
+            Map<String, Integer> columnLengthMap = cubeSegment.getColumnLengthMap();
+            if (columnLengthMap == null || columnLengthMap.size() == 0) {
+                rowkeyColumnSize.add(dimEncMap.get(columnList.get(i)).getLengthOfEncoding());
+            } else {
+                rowkeyColumnSize.add(columnLengthMap.get(columnList.get(i).getIdentity()));
+            }
         }
 
         Map<Long, Double> sizeMap = Maps.newHashMap();

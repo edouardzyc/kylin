@@ -45,6 +45,8 @@ import org.apache.kylin.engine.mr.common.BatchConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.hadoop.mapreduce.lib.input.FileInputFormat.SPLIT_MINSIZE;
+
 /**
  */
 public class FactDistinctColumnsJob extends AbstractHadoopJob {
@@ -97,6 +99,20 @@ public class FactDistinctColumnsJob extends AbstractHadoopJob {
                 throw new IllegalStateException();
             }
 
+            // config the spill buffer in mapper
+            // when the mapper need little memory to process data, it can be larger if needed to reduce the data spill
+            long factDistinctMapSortSize = cube.getConfig().getFactDistinctMapreduceTaskIoSortSize();
+            if (factDistinctMapSortSize > 0) {
+                job.getConfiguration().setLong("mapreduce.task.io.sort.mb", factDistinctMapSortSize);
+            }
+            // config the SPLIT_MINSIZE to control the mapper num,
+            // in some case, input block size is 150M, but with the default split size, it will be divided into 2 splits,
+            // one is 128M and another is 22M, there could be a data skew in mapper side,
+            // then we can adjust config to avoid the data skew and reduce the mapper num
+            long factDistinctInputSplitMinSize = cube.getConfig().getFactDistinctInputSplitMinSize();
+            if (factDistinctInputSplitMinSize > 0) {
+                job.getConfiguration().setLong(SPLIT_MINSIZE, factDistinctInputSplitMinSize);
+            }
             setupMapper(segment);
             setupReducer(output, segment);
 

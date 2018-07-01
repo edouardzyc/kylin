@@ -30,7 +30,8 @@ import com.google.common.collect.Lists;
 
 /**
  * Reducers play different roles based on reducer-id:
- * - (start from 0) one reducer for each dimension column, dictionary column, UHC may have more than one reducer
+ * - (start from 0) one reducer for each dictionary column, UHC may have more than one reducer
+ * - one reducer to get min/max of date partition column
  * - (at the end) one or more reducers to collect row counts for cuboids using HLL
  */
 public class FactDistinctColumnsReducerMapping {
@@ -49,7 +50,7 @@ public class FactDistinctColumnsReducerMapping {
         this(cube, 0);
     }
 
-    private FactDistinctColumnsReducerMapping(CubeInstance cube, int cuboidRowCounterReducerNum) {
+    public FactDistinctColumnsReducerMapping(CubeInstance cube, int cuboidRowCounterReducerNum) {
         CubeDesc desc = cube.getDescriptor();
         Set<TblColRef> allCols = cube.getAllColumns();
         Set<TblColRef> dictCols = desc.getAllColumnsNeedDictionaryBuilt();
@@ -65,12 +66,17 @@ public class FactDistinctColumnsReducerMapping {
         colIdToReducerBeginId = new int[allDimDictCols.size() + 1];
 
         int uhcReducerCount = cube.getConfig().getUHCReducerCount();
+        // this config help to separate the column data to multiple reducers
+        // so that the ultra high cardinality columns will not be the bottleneck
+        // the dict will be built in next dict build step
+        int minReducerCount = cube.getConfig().getFactDistinctMinReducerCount();
+        uhcReducerCount = Math.max(uhcReducerCount, minReducerCount);
         List<TblColRef> uhcList = desc.getAllUHCColumns();
         int counter = 0;
         for (int i = 0; i < allDimDictCols.size(); i++) {
             colIdToReducerBeginId[i] = counter;
             boolean isUHC = uhcList.contains(allDimDictCols.get(i));
-            counter += (isUHC) ? uhcReducerCount : 1;
+            counter += (isUHC) ? uhcReducerCount : minReducerCount;
         }
         colIdToReducerBeginId[allDimDictCols.size()] = counter;
         nDimReducers = counter;

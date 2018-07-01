@@ -134,6 +134,10 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Map<String, SegProjectDict> projectDictionaries = Maps.newHashMap();
 
+    @JsonProperty("col_length_info")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Map<String, Integer> columnLengthMap = Maps.newHashMap();
+
     // lazy init
     transient volatile ISegmentAdvisor advisor = null;
 
@@ -614,8 +618,14 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
     public Map<String, DimensionRangeInfo> getDimensionRangeInfoMap() {
         return dimensionRangeInfoMap;
     }
+    public Map<String, Integer> getColumnLengthMap() {
+        return columnLengthMap;
+    }
 
     public void setDimensionRangeInfoMap(Map<String, DimensionRangeInfo> dimensionRangeInfoMap) {
         this.dimensionRangeInfoMap = dimensionRangeInfoMap;
+    }
+    public void setColumnLengthMap(Map<String, Integer> columnLengthMap) {
+        this.columnLengthMap = columnLengthMap;
     }
 }

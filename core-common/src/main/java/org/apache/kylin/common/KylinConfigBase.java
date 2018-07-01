@@ -1692,4 +1692,48 @@ abstract public class KylinConfigBase implements Serializable {
     public String getParquetPageCompression() {
         return getOptional("kap.storage.columnar.page-compression", "");
     }
+
+    public boolean getCuboidJobCombineEnabled() {
+        return Boolean.parseBoolean(getOptional("kap.cube.job.layer-map-combine-enable", "true"));
+    }
+
+    public long getFactDistinctInputSplitMinSize() {
+        return Long.parseLong(getOptional("kap.cube.job.fact-distinct-input-split-min-size", "0"));
+    }
+
+    public long getFactDistinctMapreduceTaskIoSortSize() {
+        return Long.parseLong(getOptional("kap.cube.job.fact-distinct-mapreduce-task-io-sort-mb", "0"));
+    }
+
+    public long getNdCuboidMapreduceTaskIoSortSize() {
+        return Long.parseLong(getOptional("kap.cube.job.nd-cuboid-mapreduce-task-io-sort-mb", "0"));
+    }
+
+    public boolean getCuboidBuildSimpleShardReduceMapping() {
+        return Boolean.parseBoolean(getOptional("kap.cube.job.cuboid-build-simple-shard-reduce-mapping", "false"));
+    }
+
+    public double getReducerOverloadRatio() {
+        return Double.parseDouble(getOptional("kap.cube.job.cuboid-build-reducer-overload-ratio", "1.5"));
+    }
+
+    public long getBaseCuboidInputSplitMinSize() {
+        return Long.parseLong(getOptional("kap.cube.job.base-cuboid-input-split-min-size", "0"));
+    }
+
+    public int getFactDistinctMinReducerCount() {
+        return Integer.parseInt(getOptional("kap.cube.job.fact-distinct-min-reducer-count", "1"));
+    }
+
+    public long getBaseCuboidMapreduceTaskIoSortSize() {
+        return Long.parseLong(getOptional("kap.cube.job.base-cuboid-mapreduce-task-io-sort-mb", "0"));
+    }
+
+    public double getTailShardNumRatio() {
+        return Double.parseDouble(getOptional("kap.cube.job.cuboid-build-tail-shard-num-ratio", "0.5"));
+    }
+
+    public boolean getCuboidBuildReducerNumCalibration() {
+        return Boolean.parseBoolean(getOptional("kap.cube.job.cuboid-build-reducer-num-calibration", "false"));
+    }
 }
