@@ -194,11 +194,13 @@ public class BuildCubeWithEngine {
 
     public void build() throws Exception {
         DeployUtil.prepareTestDataForNormalCubes("ci_left_join_model");
+        DeployUtil.prepareTestDataForNormalCubes("calcs_tdvt");
         System.setProperty("kylin.storage.hbase.hfile-size-gb", "1.0f");
         testCase("testInnerJoinCube");
         testCase("testLeftJoinCube");
         testCase("testTableExt");
         testCase("testModel");
+        testCase("testCALCTDVTCube");
         System.setProperty("kylin.storage.hbase.hfile-size-gb", "0.0f");
     }
 
@@ -326,6 +328,27 @@ public class BuildCubeWithEngine {
 
         // now have 2 normal segments [date1, date2) [date2, date5) and 1 empty segment [date5, date6)
         return true;
+    }
+
+
+    @SuppressWarnings("unused")
+    // called by reflection
+    private boolean testCALCTDVTCube() throws Exception {
+
+        String cubeName = "calcs_tdvt_cube";
+        clearSegment(cubeName);
+
+        return doBuildAndMergeOnCube(cubeName);
+    }
+
+    @SuppressWarnings("unused")
+    // called by reflection
+    private boolean testStapleTDVTCube() throws Exception {
+
+        String cubeName = "staples_tdvt";
+        clearSegment(cubeName);
+
+        return doBuildAndMergeOnCube(cubeName);
     }
 
     @SuppressWarnings("unused")

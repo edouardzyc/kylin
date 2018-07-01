@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <table name="query result of query05">
+    <column>TEMP_Test__3138008315__0_</column>
+    <row>
+      <value><![CDATA[2004-10-04 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[2004-10-05 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[2004-10-09 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[2004-10-12 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[2004-10-14 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[2004-10-17 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[2004-10-19 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[2004-10-22 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[2004-10-23 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[2004-10-25 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[2004-10-26 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[2004-10-28 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[2004-10-31 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[2004-11-02 00:00:00.0]]></value>
+    </row>
+  </table>
+</dataset>

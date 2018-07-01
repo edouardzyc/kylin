@@ -209,7 +209,7 @@ public class DeployUtil {
             }
         }
         TABLE_NAMES.add(TABLE_SELLER_TYPE_DIM_TABLE); // the wrapper view VIEW_SELLER_TYPE_DIM need this table
-        
+
         // scp data files, use the data from hbase, instead of local files
         File tempDir = Files.createTempDir();
         String tempDirAbsPath = tempDir.getAbsolutePath();
@@ -236,6 +236,7 @@ public class DeployUtil {
         
         // create hive tables
         sampleDataDeployer.createSampleDatabase("EDW");
+        sampleDataDeployer.createSampleDatabase("TDVT");
         for (String tablename : TABLE_NAMES) {
             logger.info(String.format("get table desc %s", tablename));
             sampleDataDeployer.createSampleTable(metaMgr.getTableDesc(tablename, model.getProject()));
@@ -247,7 +248,7 @@ public class DeployUtil {
             logger.info(String.format("load data into %s", tablename));
             sampleDataDeployer.loadSampleData(tablename, tempDirAbsPath);
         }
-        
+
         // create the view automatically here
         sampleDataDeployer.createWrapperView(TABLE_SELLER_TYPE_DIM_TABLE, VIEW_SELLER_TYPE_DIM);
     }

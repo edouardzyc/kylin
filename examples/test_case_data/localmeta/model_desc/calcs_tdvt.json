@@ -1,0 +1,29 @@
+{
+  "uuid" : "72cc6c3b-407c-4b6f-956c-853fa3d36cf7",
+  "last_modified" : 1525337001444,
+  "version" : "2.3.0.20500",
+  "name" : "calcs_tdvt",
+  "owner" : "ADMIN",
+  "is_draft" : false,
+  "description" : "",
+  "fact_table" : "TDVT.CALCS",
+  "lookups" : [ ],
+  "dimensions" : [ {
+    "table" : "CALCS",
+    "columns" : [ "KEY", "NUM4", "STR1", "STR2", "STR3", "INT0", "INT1", "INT2", "DATE0", "DATE1", "DATE2", "DATE3", "TIME0", "TIME1", "DATETIME0" ]
+  } ],
+  "metrics" : [ "CALCS.NUM1", "CALCS.NUM2" ],
+  "filter_condition" : "",
+  "partition_desc" : {
+    "partition_date_column" : null,
+    "partition_time_column" : null,
+    "partition_date_start" : 0,
+    "partition_date_format" : "yyyy-MM-dd",
+    "partition_time_format" : "HH:mm:ss",
+    "partition_type" : "APPEND",
+    "partition_condition_builder" : "org.apache.kylin.metadata.model.PartitionDesc$DefaultPartitionConditionBuilder"
+  },
+  "capacity" : "MEDIUM",
+  "multilevel_partition_cols" : [ ],
+  "computed_columns" : [ ]
+}

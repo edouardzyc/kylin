@@ -76,6 +76,18 @@
       "name": "ssb_cube_with_dimention_range",
       "type": "CUBE",
       "realization": "ssb_cube_with_dimention_range"
+    },
+    {
+      "name" : "staples_tdvt",
+      "type" : "CUBE",
+      "realization" : "staples_tdvt"
+    }, {
+      "name" : "calcs_tdvt_cube",
+      "type" : "CUBE",
+      "realization" : "calcs_tdvt_cube"
+    }, {
+      "type" : "INVERTED_INDEX",
+      "realization" : "calcs_tdvt_cube"
     }
   ],
   "tables": [
@@ -94,7 +106,9 @@
     "SSB.SUPPLIER",
     "SSB.V_LINEORDER",
     "DEFAULT.FIFTY_DIM",
-    "DEFAULT.WIDE_TABLE"
+    "DEFAULT.WIDE_TABLE",
+    "TDVT.CALCS",
+    "TDVT.STAPLES"
   ],
   "models": [
     "ssb",
@@ -105,7 +119,9 @@
     "test_streaming_table_model_desc",
     "fifty_dim",
     "twenty_dim",
-    "ut_large_dimension_number"
+    "ut_large_dimension_number",
+    "staples_tdvt_test",
+    "calcs_tdvt"
   ],
   "override_kylin_properties": {
     "kylin.storage.hbase.owner-tag": "kylin@kylin.apache.org"

@@ -1,0 +1,372 @@
+{
+  "uuid" : "33a36686-5c1d-4991-8323-979a2e40fe84",
+  "last_modified" : 1525426967979,
+  "version" : "2.3.0.20500",
+  "name" : "calcs_tdvt_cube",
+  "is_draft" : false,
+  "model_name" : "calcs_tdvt",
+  "description" : "",
+  "null_string" : null,
+  "dimensions" : [ {
+    "name" : "KEY",
+    "table" : "CALCS",
+    "column" : "KEY",
+    "derived" : null
+  }, {
+    "name" : "INT0",
+    "table" : "CALCS",
+    "column" : "INT0",
+    "derived" : null
+  }, {
+    "name" : "DATE1",
+    "table" : "CALCS",
+    "column" : "DATE1",
+    "derived" : null
+  }, {
+    "name" : "TIME1",
+    "table" : "CALCS",
+    "column" : "TIME1",
+    "derived" : null
+  }, {
+    "name" : "INT1",
+    "table" : "CALCS",
+    "column" : "INT1",
+    "derived" : null
+  }, {
+    "name" : "DATE0",
+    "table" : "CALCS",
+    "column" : "DATE0",
+    "derived" : null
+  }, {
+    "name" : "INT2",
+    "table" : "CALCS",
+    "column" : "INT2",
+    "derived" : null
+  }, {
+    "name" : "DATE3",
+    "table" : "CALCS",
+    "column" : "DATE3",
+    "derived" : null
+  }, {
+    "name" : "STR2",
+    "table" : "CALCS",
+    "column" : "STR2",
+    "derived" : null
+  }, {
+    "name" : "STR1",
+    "table" : "CALCS",
+    "column" : "STR1",
+    "derived" : null
+  }, {
+    "name" : "TIME0",
+    "table" : "CALCS",
+    "column" : "TIME0",
+    "derived" : null
+  }, {
+    "name" : "DATE2",
+    "table" : "CALCS",
+    "column" : "DATE2",
+    "derived" : null
+  }, {
+    "name" : "STR3",
+    "table" : "CALCS",
+    "column" : "STR3",
+    "derived" : null
+  }, {
+    "name" : "DATETIME0",
+    "table" : "CALCS",
+    "column" : "DATETIME0",
+    "derived" : null
+  }, {
+    "name" : "NUM4",
+    "table" : "CALCS",
+    "column" : "NUM4",
+    "derived" : null
+  } ],
+  "measures" : [ {
+    "name" : "_COUNT_",
+    "function" : {
+      "expression" : "COUNT",
+      "parameter" : {
+        "type" : "constant",
+        "value" : "1"
+      },
+      "returntype" : "bigint"
+    }
+  }, {
+    "name" : "CALCS.NUM1_SUM",
+    "function" : {
+      "expression" : "SUM",
+      "parameter" : {
+        "type" : "column",
+        "value" : "CALCS.NUM1"
+      },
+      "returntype" : "double"
+    }
+  }, {
+    "name" : "CALCS.NUM2_SUM",
+    "function" : {
+      "expression" : "SUM",
+      "parameter" : {
+        "type" : "column",
+        "value" : "CALCS.NUM2"
+      },
+      "returntype" : "double"
+    }
+  }, {
+    "name" : "CALCS.NUM4_SUM",
+    "function" : {
+      "expression" : "SUM",
+      "parameter" : {
+        "type" : "column",
+        "value" : "CALCS.NUM4"
+      },
+      "returntype" : "double"
+    }
+  } ],
+  "dictionaries" : [ ],
+  "rowkey" : {
+    "rowkey_columns" : [ {
+      "column" : "CALCS.TIME0",
+      "encoding" : "time",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.KEY",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.INT0",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.DATE1",
+      "encoding" : "date",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.TIME1",
+      "encoding" : "time",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.INT1",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.DATE0",
+      "encoding" : "date",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.INT2",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.DATE3",
+      "encoding" : "date",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.STR2",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.STR1",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.DATE2",
+      "encoding" : "date",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.STR3",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.DATETIME0",
+      "encoding" : "time",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "CALCS.NUM4",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    } ]
+  },
+  "hbase_mapping" : {
+    "column_family" : [ {
+      "name" : "F1",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "_COUNT_" ]
+      } ]
+    }, {
+      "name" : "F2",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "CALCS.NUM1_SUM" ]
+      } ]
+    }, {
+      "name" : "F3",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "CALCS.NUM2_SUM" ]
+      } ]
+    }, {
+      "name" : "F4",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "CALCS.NUM4_SUM" ]
+      } ]
+    } ]
+  },
+  "aggregation_groups" : [
+    {
+      "includes" : [ "CALCS.TIME0", "CALCS.KEY", "CALCS.INT0", "CALCS.DATE1", "CALCS.TIME1", "CALCS.INT1", "CALCS.DATE0", "CALCS.INT2", "CALCS.DATE3", "CALCS.DATE2", "CALCS.STR2", "CALCS.STR1", "CALCS.DATETIME0", "CALCS.STR3", "CALCS.NUM4" ],
+      "select_rule" : {
+        "hierarchy_dims" : [ ],
+        "mandatory_dims" : [ "CALCS.TIME0", "CALCS.KEY", "CALCS.INT0", "CALCS.DATE1", "CALCS.TIME1", "CALCS.DATE0", "CALCS.DATE3", "CALCS.DATE2", "CALCS.STR2", "CALCS.STR1", "CALCS.DATETIME0", "CALCS.STR3", "CALCS.NUM4" ],
+        "joint_dims" : [ ]
+      }
+    },{
+    "includes" : [ "CALCS.KEY" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.KEY" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.DATE1", "CALCS.DATE0", "CALCS.DATETIME0" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.DATE1", "CALCS.DATE0", "CALCS.DATETIME0" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.STR1", "CALCS.TIME0" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.STR1", "CALCS.TIME0" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.STR2", "CALCS.STR3" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.STR2", "CALCS.STR3" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.DATE3", "CALCS.DATE2" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.DATE3", "CALCS.DATE2" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.INT0" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.INT0" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.TIME1" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.TIME1" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.INT1" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.INT1" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.DATE0" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.DATE0" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.INT2" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.INT2" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.DATE3" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.DATE3" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.STR2" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.STR2" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.TIME0" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.TIME0" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.DATE2" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.DATE2" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.DATE2", "CALCS.DATETIME0" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.DATE2", "CALCS.DATETIME0" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.DATETIME0" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.DATETIME0" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "CALCS.NUM4" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "CALCS.NUM4" ],
+      "joint_dims" : [ ]
+    }
+  } ],
+  "signature" : "1uo1KC3Inx2U33wdffZNPQ==",
+  "notify_list": null,
+  "status_need_notify": [],
+  "auto_merge_time_ranges": null,
+  "retention_range": 0,
+  "engine_type": 4,
+  "storage_type": 2,
+  "override_kylin_properties": {
+    "kylin.cube.algorithm": "LAYER"
+  },
+  "partition_date_start": 0
+}

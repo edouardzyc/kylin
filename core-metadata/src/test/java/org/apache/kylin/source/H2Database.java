@@ -52,7 +52,10 @@ public class H2Database {
             "edw.test_sites", //
             "default.test_account", //
             "default.test_country", //
-            "default.streaming_table" };
+            "default.streaming_table",
+            "tdvt.calcs"
+    };
+
     private static final Map<String, String> javaToH2DataTypeMapping = new HashMap<String, String>();
 
     static {
@@ -111,7 +114,7 @@ public class H2Database {
 
         String cvsFilePath = tempFile.getPath();
         try (Statement stmt = h2Connection.createStatement()) {
-            String createDBSql = "CREATE SCHEMA IF NOT EXISTS DEFAULT;\nCREATE SCHEMA IF NOT EXISTS EDW;\nSET SCHEMA DEFAULT;\n";
+            String createDBSql = "CREATE SCHEMA IF NOT EXISTS TDVT;\nCREATE SCHEMA IF NOT EXISTS DEFAULT;\nCREATE SCHEMA IF NOT EXISTS EDW;\nSET SCHEMA DEFAULT;\n";
             stmt.executeUpdate(createDBSql);
 
             String sql = generateCreateH2TableSql(tableDesc, cvsFilePath);

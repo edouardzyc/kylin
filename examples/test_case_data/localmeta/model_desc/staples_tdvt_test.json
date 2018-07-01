@@ -1,0 +1,29 @@
+{
+  "uuid" : "d7a65025-f678-4116-a619-0407d4012d19",
+  "last_modified" : 1525336310885,
+  "version" : "2.3.0.20500",
+  "name" : "staples_tdvt_test",
+  "owner" : "ADMIN",
+  "is_draft" : false,
+  "description" : "",
+  "fact_table" : "TDVT.STAPLES",
+  "lookups" : [ ],
+  "dimensions" : [ {
+    "table" : "STAPLES",
+    "columns" : [ "ORDER_QUANTITY", "SALES_TOTAL", "DISCOUNT", "SHIP_MODE", "GROSS_PROFIT", "PRICE", "EMPLOYEE_NAME", "CUSTOMER_NAME", "CUSTOMER_STATE", "CALL_CENTER_REGION", "CUSTOMER_BALANCE", "PROD_TYPE1", "PROD_TYPE2", "PRODUCT_NAME", "ORDER_DATE", "RECEIVED_DATE", "SHIP_DATE", "PID", "MARKET_SEGMENT"]
+  } ],
+  "metrics" : [ "STAPLES.EMPLOYEE_SALARY", "STAPLES.PRODUCT_BASE_MARGIN" ],
+  "filter_condition" : "",
+  "partition_desc" : {
+    "partition_date_column" : null,
+    "partition_time_column" : null,
+    "partition_date_start" : 0,
+    "partition_date_format" : "yyyy-MM-dd",
+    "partition_time_format" : "HH:mm:ss",
+    "partition_type" : "APPEND",
+    "partition_condition_builder" : "org.apache.kylin.metadata.model.PartitionDesc$DefaultPartitionConditionBuilder"
+  },
+  "capacity" : "MEDIUM",
+  "multilevel_partition_cols" : [ ],
+  "computed_columns" : [ ]
+}

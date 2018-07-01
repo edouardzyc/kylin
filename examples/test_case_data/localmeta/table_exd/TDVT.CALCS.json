@@ -1,0 +1,24 @@
+{
+  "uuid" : "1a0e8e9e-5e67-4a8f-a40a-1829de136fa2",
+  "last_modified" : 1525332612899,
+  "version" : "2.3.0.20500",
+  "table_name" : "TDVT.CALCS",
+  "last_build_job_id" : null,
+  "frequency" : 0,
+  "columns_stats" : [ ],
+  "sample_rows" : [ ],
+  "last_modified_time" : 0,
+  "total_rows" : 0,
+  "mapper_rows" : [ ],
+  "data_source_properties" : {
+    "owner" : "root",
+    "skip_header_line_count" : "0",
+    "total_file_size" : "2739",
+    "hive_inputFormat" : "org.apache.hadoop.mapred.TextInputFormat",
+    "hive_outputFormat" : "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
+    "location" : "s3://simba-cert/simba/kylin/TDVT/calcs",
+    "partition_column" : "",
+    "total_file_number" : "1",
+    "last_access_time" : "0"
+  }
+}

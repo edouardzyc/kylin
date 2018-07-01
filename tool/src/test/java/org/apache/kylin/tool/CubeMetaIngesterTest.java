@@ -101,7 +101,7 @@ public class CubeMetaIngesterTest extends LocalFileMetadataTestCase {
             @Override
             public boolean matches(Object item) {
                 if (item instanceof IllegalStateException) {
-                    if (((IllegalStateException) item).getMessage().equals("Already exist a model called ci_inner_join_model")) {
+                    if (((IllegalStateException) item).getMessage().startsWith("Already exist a model called ")) {
                         return true;
                     }
                 }

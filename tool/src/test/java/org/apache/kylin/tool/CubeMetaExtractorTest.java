@@ -94,11 +94,15 @@ public class CubeMetaExtractorTest extends LocalFileMetadataTestCase {
                 "/table/SSB.DATES.json", //
                 "/table/SSB.PART.json", //
                 "/table/SSB.SUPPLIER.json", //
-                "/table/SSB.V_LINEORDER.json"
+                "/table/SSB.V_LINEORDER.json", //
+                "/table/TDVT.CALCS.json", //
+                "/table/TDVT.STAPLES.json"
         );
         Set<String> expectTblExd = Sets.newHashSet(
                 "/table_exd/DEFAULT.TEST_COUNTRY.json", //
-                "/table_exd/DEFAULT.TEST_KYLIN_FACT--default.json"); //
+                "/table_exd/DEFAULT.TEST_KYLIN_FACT--default.json", //
+                "/table_exd/TDVT.CALCS.json", //
+                "/table_exd/TDVT.STAPLES.json"); //
         Assert.assertEquals(expectTbl, tables);
         Assert.assertEquals(expectTblExd, tableExds);
     }

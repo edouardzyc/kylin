@@ -1,0 +1,509 @@
+{
+  "uuid" : "a9bfb153-b742-4a55-98bd-f614ce511231",
+  "last_modified" : 1525336705412,
+  "version" : "2.3.0.20500",
+  "name" : "staples_tdvt",
+  "is_draft" : false,
+  "model_name" : "staples_tdvt_test",
+  "description" : "",
+  "null_string" : null,
+  "dimensions" : [ {
+    "name" : "SHIP_MODE",
+    "table" : "STAPLES",
+    "column" : "SHIP_MODE",
+    "derived" : null
+  }, {
+    "name" : "GROSS_PROFIT",
+    "table" : "STAPLES",
+    "column" : "GROSS_PROFIT",
+    "derived" : null
+  }, {
+    "name" : "PRODUCT_NAME",
+    "table" : "STAPLES",
+    "column" : "PRODUCT_NAME",
+    "derived" : null
+  }, {
+    "name" : "EMPLOYEE_NAME",
+    "table" : "STAPLES",
+    "column" : "EMPLOYEE_NAME",
+    "derived" : null
+  }, {
+    "name" : "MARKET_SEGMENT",
+    "table" : "STAPLES",
+    "column" : "MARKET_SEGMENT",
+    "derived" : null
+  }, {
+    "name" : "CUSTOMER_NAME",
+    "table" : "STAPLES",
+    "column" : "CUSTOMER_NAME",
+    "derived" : null
+  }, {
+    "name" : "CUSTOMER_BALANCE",
+    "table" : "STAPLES",
+    "column" : "CUSTOMER_BALANCE",
+    "derived" : null
+  }, {
+    "name" : "ORDER_QUANTITY",
+    "table" : "STAPLES",
+    "column" : "ORDER_QUANTITY",
+    "derived" : null
+  }, {
+    "name" : "RECEIVED_DATE",
+    "table" : "STAPLES",
+    "column" : "RECEIVED_DATE",
+    "derived" : null
+  }, {
+    "name" : "CUSTOMER_STATE",
+    "table" : "STAPLES",
+    "column" : "CUSTOMER_STATE",
+    "derived" : null
+  }, {
+    "name" : "PROD_TYPE2",
+    "table" : "STAPLES",
+    "column" : "PROD_TYPE2",
+    "derived" : null
+  }, {
+    "name" : "DISCOUNT",
+    "table" : "STAPLES",
+    "column" : "DISCOUNT",
+    "derived" : null
+  }, {
+    "name" : "SHIP_DATE",
+    "table" : "STAPLES",
+    "column" : "SHIP_DATE",
+    "derived" : null
+  }, {
+    "name" : "PROD_TYPE1",
+    "table" : "STAPLES",
+    "column" : "PROD_TYPE1",
+    "derived" : null
+  }, {
+    "name" : "SALES_TOTAL",
+    "table" : "STAPLES",
+    "column" : "SALES_TOTAL",
+    "derived" : null
+  }, {
+    "name" : "CALL_CENTER_REGION",
+    "table" : "STAPLES",
+    "column" : "CALL_CENTER_REGION",
+    "derived" : null
+  }, {
+    "name" : "ORDER_DATE",
+    "table" : "STAPLES",
+    "column" : "ORDER_DATE",
+    "derived" : null
+  }, {
+    "name" : "PID",
+    "table" : "STAPLES",
+    "column" : "PID",
+    "derived" : null
+  } ],
+  "measures" : [ {
+    "name" : "STAPLES.DISCOUNT_SUM",
+    "function" : {
+      "expression" : "SUM",
+      "parameter" : {
+        "type" : "column",
+        "value" : "STAPLES.DISCOUNT"
+      },
+      "returntype" : "double"
+    }
+  }, {
+    "name" : "STAPLES.EMPLOYEE_SALARY_SUM",
+    "function" : {
+      "expression" : "SUM",
+      "parameter" : {
+        "type" : "column",
+        "value" : "STAPLES.EMPLOYEE_SALARY"
+      },
+      "returntype" : "decimal(19,4)"
+    }
+  }, {
+    "name" : "STAPLES.SALES_TOTAL_SUM",
+    "function" : {
+      "expression" : "SUM",
+      "parameter" : {
+        "type" : "column",
+        "value" : "STAPLES.SALES_TOTAL"
+      },
+      "returntype" : "double"
+    }
+  }, {
+    "name" : "STAPLES.PRICE_SUM",
+    "function" : {
+      "expression" : "SUM",
+      "parameter" : {
+        "type" : "column",
+        "value" : "STAPLES.PRICE"
+      },
+      "returntype" : "decimal(19,4)"
+    }
+  }, {
+    "name" : "STAPLES.ORDER_QUANTITY_SUM",
+    "function" : {
+      "expression" : "SUM",
+      "parameter" : {
+        "type" : "column",
+        "value" : "STAPLES.ORDER_QUANTITY"
+      },
+      "returntype" : "double"
+    }
+  }, {
+    "name" : "STAPLES.PRODUCT_BASE_MARGIN_SUM",
+    "function" : {
+      "expression" : "SUM",
+      "parameter" : {
+        "type" : "column",
+        "value" : "STAPLES.PRODUCT_BASE_MARGIN"
+      },
+      "returntype" : "double"
+    }
+  }, {
+    "name" : "_COUNT_",
+    "function" : {
+      "expression" : "COUNT",
+      "parameter" : {
+        "type" : "constant",
+        "value" : "1"
+      },
+      "returntype" : "bigint"
+    }
+  }, {
+    "name" : "STAPLES.CUSTOMER_BALANCE_SUM",
+    "function" : {
+      "expression" : "SUM",
+      "parameter" : {
+        "type" : "column",
+        "value" : "STAPLES.CUSTOMER_BALANCE"
+      },
+      "returntype" : "double"
+    }
+  }, {
+    "name" : "STAPLES.GROSS_PROFIT_SUM",
+    "function" : {
+      "expression" : "SUM",
+      "parameter" : {
+        "type" : "column",
+        "value" : "STAPLES.GROSS_PROFIT"
+      },
+      "returntype" : "double"
+    }
+  } ],
+  "dictionaries" : [ ],
+  "rowkey" : {
+    "rowkey_columns" : [ {
+      "column" : "STAPLES.SHIP_MODE",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.PRODUCT_NAME",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.RECEIVED_DATE",
+      "encoding" : "time",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.DISCOUNT",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.SHIP_DATE",
+      "encoding" : "time",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.SALES_TOTAL",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.CALL_CENTER_REGION",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.ORDER_DATE",
+      "encoding" : "time",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.PROD_TYPE1",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.PROD_TYPE2",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.CUSTOMER_NAME",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.GROSS_PROFIT",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.EMPLOYEE_NAME",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.MARKET_SEGMENT",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.CUSTOMER_BALANCE",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.ORDER_QUANTITY",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.CUSTOMER_STATE",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    }, {
+      "column" : "STAPLES.PID",
+      "encoding" : "dict",
+      "isShardBy" : false,
+      "index" : "eq"
+    } ]
+  },
+  "hbase_mapping" : {
+    "column_family" : [ {
+      "name" : "F1",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "STAPLES.DISCOUNT_SUM" ]
+      } ]
+    }, {
+      "name" : "F2",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "STAPLES.EMPLOYEE_SALARY_SUM" ]
+      } ]
+    }, {
+      "name" : "F4",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "STAPLES.SALES_TOTAL_SUM" ]
+      } ]
+    }, {
+      "name" : "F5",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "STAPLES.PRICE_SUM" ]
+      } ]
+    }, {
+      "name" : "F6",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "STAPLES.ORDER_QUANTITY_SUM" ]
+      } ]
+    }, {
+      "name" : "F7",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "STAPLES.PRODUCT_BASE_MARGIN_SUM" ]
+      } ]
+    }, {
+      "name" : "F8",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "_COUNT_" ]
+      } ]
+    }, {
+      "name" : "F10",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "STAPLES.CUSTOMER_BALANCE_SUM" ]
+      } ]
+    }, {
+      "name" : "F11",
+      "columns" : [ {
+        "qualifier" : "M",
+        "measure_refs" : [ "STAPLES.GROSS_PROFIT_SUM" ]
+      } ]
+    } ]
+  },
+  "aggregation_groups" : [ {
+    "includes" : [ "STAPLES.PRODUCT_NAME", "STAPLES.EMPLOYEE_NAME" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.MARKET_SEGMENT" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.MARKET_SEGMENT" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.CUSTOMER_NAME" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.CUSTOMER_NAME" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.PROD_TYPE2", "STAPLES.ORDER_DATE" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.PROD_TYPE2", "STAPLES.ORDER_DATE" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.DISCOUNT", "STAPLES.CUSTOMER_BALANCE", "STAPLES.ORDER_QUANTITY", "STAPLES.CALL_CENTER_REGION", "STAPLES.ORDER_DATE", "STAPLES.PID" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.DISCOUNT", "STAPLES.CUSTOMER_BALANCE", "STAPLES.ORDER_QUANTITY", "STAPLES.CALL_CENTER_REGION", "STAPLES.ORDER_DATE", "STAPLES.PID" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.PROD_TYPE2", "STAPLES.PROD_TYPE1" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.PROD_TYPE2", "STAPLES.PROD_TYPE1" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.CUSTOMER_STATE", "STAPLES.CALL_CENTER_REGION" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.CUSTOMER_STATE", "STAPLES.CALL_CENTER_REGION" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.PROD_TYPE2", "STAPLES.PROD_TYPE1", "STAPLES.CALL_CENTER_REGION" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.PROD_TYPE2", "STAPLES.PROD_TYPE1", "STAPLES.CALL_CENTER_REGION" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.EMPLOYEE_NAME", "STAPLES.CALL_CENTER_REGION" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.EMPLOYEE_NAME", "STAPLES.CALL_CENTER_REGION" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.CUSTOMER_NAME", "STAPLES.CALL_CENTER_REGION" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.CUSTOMER_NAME", "STAPLES.CALL_CENTER_REGION" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.PROD_TYPE2", "STAPLES.MARKET_SEGMENT" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.PROD_TYPE2", "STAPLES.MARKET_SEGMENT" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.GROSS_PROFIT", "STAPLES.SALES_TOTAL", "STAPLES.CALL_CENTER_REGION", "STAPLES.ORDER_DATE", "STAPLES.PID" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.GROSS_PROFIT", "STAPLES.SALES_TOTAL", "STAPLES.CALL_CENTER_REGION", "STAPLES.ORDER_DATE", "STAPLES.PID" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.CUSTOMER_NAME", "STAPLES.ORDER_DATE" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.CUSTOMER_NAME", "STAPLES.ORDER_DATE" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.PROD_TYPE2" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.PROD_TYPE2" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.SHIP_DATE" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.SHIP_DATE" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.PROD_TYPE1" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.PROD_TYPE1" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.SHIP_MODE", "STAPLES.CUSTOMER_NAME", "STAPLES.ORDER_DATE" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.SHIP_MODE", "STAPLES.CUSTOMER_NAME", "STAPLES.ORDER_DATE" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.CUSTOMER_STATE", "STAPLES.CALL_CENTER_REGION", "STAPLES.RECEIVED_DATE", "STAPLES.ORDER_DATE" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.CUSTOMER_STATE", "STAPLES.CALL_CENTER_REGION", "STAPLES.RECEIVED_DATE", "STAPLES.ORDER_DATE" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.DISCOUNT", "STAPLES.CUSTOMER_NAME", "STAPLES.CALL_CENTER_REGION", "STAPLES.ORDER_DATE" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.DISCOUNT", "STAPLES.CUSTOMER_NAME", "STAPLES.CALL_CENTER_REGION", "STAPLES.ORDER_DATE" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.ORDER_DATE" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.ORDER_DATE" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.PROD_TYPE1", "STAPLES.MARKET_SEGMENT" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.PROD_TYPE1", "STAPLES.MARKET_SEGMENT" ],
+      "joint_dims" : [ ]
+    }
+  }, {
+    "includes" : [ "STAPLES.SHIP_MODE", "STAPLES.RECEIVED_DATE", "STAPLES.PRODUCT_NAME", "STAPLES.DISCOUNT", "STAPLES.SALES_TOTAL", "STAPLES.CALL_CENTER_REGION", "STAPLES.SHIP_DATE", "STAPLES.ORDER_DATE", "STAPLES.PROD_TYPE1", "STAPLES.PROD_TYPE2", "STAPLES.CUSTOMER_NAME", "STAPLES.GROSS_PROFIT", "STAPLES.EMPLOYEE_NAME", "STAPLES.MARKET_SEGMENT", "STAPLES.CUSTOMER_BALANCE", "STAPLES.ORDER_QUANTITY", "STAPLES.CUSTOMER_STATE", "STAPLES.PID" ],
+    "select_rule" : {
+      "hierarchy_dims" : [ ],
+      "mandatory_dims" : [ "STAPLES.SHIP_MODE", "STAPLES.RECEIVED_DATE", "STAPLES.PRODUCT_NAME", "STAPLES.DISCOUNT", "STAPLES.SALES_TOTAL", "STAPLES.CALL_CENTER_REGION", "STAPLES.SHIP_DATE", "STAPLES.ORDER_DATE", "STAPLES.PROD_TYPE1", "STAPLES.PROD_TYPE2", "STAPLES.CUSTOMER_NAME", "STAPLES.GROSS_PROFIT", "STAPLES.EMPLOYEE_NAME", "STAPLES.MARKET_SEGMENT", "STAPLES.CUSTOMER_BALANCE", "STAPLES.ORDER_QUANTITY", "STAPLES.CUSTOMER_STATE", "STAPLES.PID" ],
+      "joint_dims" : [ ]
+    }
+  } ],
+  "signature" : "NHqSyjOMgAODldW4ZhZpnA==",
+  "notify_list": null,
+  "status_need_notify": [],
+  "auto_merge_time_ranges": null,
+  "retention_range": 0,
+  "engine_type": 4,
+  "storage_type": 2,
+  "override_kylin_properties": {
+    "kylin.cube.algorithm": "LAYER"
+  },
+  "partition_date_start": 0
+}

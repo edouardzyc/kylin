@@ -1,0 +1,12 @@
+{
+  "uuid" : "8bf18c15-f409-43fa-9a56-82f3a270ea30",
+  "last_modified" : 1525341413982,
+  "version" : "2.3.0.20500",
+  "name" : "staples_tdvt",
+  "owner" : "ADMIN",
+  "descriptor" : "staples_tdvt",
+  "display_name" : "staples_tdvt",
+  "cost" : 50,
+  "status" : "DISABLED",
+  "create_time_utc" : 1525336705425
+}
