@@ -73,6 +73,8 @@ public class QueryContext {
     private boolean isSparderAppliable;
     // sparder may enabled but eventually go to calcite.
     private boolean isSparderUsed;
+    private boolean hasLike;
+    private boolean hasAdvance;
     private boolean isLateDecodeEnabled;
     private boolean isTimeout;
     private Set<Future> allRunningTasks = new HashSet<>();
@@ -221,6 +223,22 @@ public class QueryContext {
 
     public void setHasRuntimeAgg(Boolean hasRuntimeAgg) {
         this.hasRuntimeAgg = hasRuntimeAgg;
+    }
+
+    public boolean isHasLike() {
+        return hasLike;
+    }
+
+    public void setHasLike(boolean hasLike) {
+        this.hasLike = hasLike;
+    }
+
+    public boolean isHasAdvance() {
+        return hasAdvance;
+    }
+
+    public void setHasAdvance(boolean hasAdvance) {
+        this.hasAdvance = hasAdvance;
     }
 
     public void addContext(int ctxId, String type, boolean ifCube) {
