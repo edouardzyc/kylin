@@ -606,7 +606,7 @@ public class ExecutableManager {
         }
     }
 
-    public String findRunningJobForTableSample(String project, String tableName) {
+    public String findRunningTableSampleJob(String project, String tableName) {
         KylinConfig config = KylinConfig.getInstanceFromEnv();
         TableMetadataManager metaMgr = TableMetadataManager.getInstance(config);
         TableExtDesc tableExtDesc = metaMgr.getTableExt(tableName, project);
