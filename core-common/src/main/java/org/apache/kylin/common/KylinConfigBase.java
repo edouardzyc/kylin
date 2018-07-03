@@ -1680,7 +1680,11 @@ abstract public class KylinConfigBase implements Serializable {
     // Suite
     // ============================================================================
     public String getSuiteId() {
-        return getOptional("kylin.suite.id");
+        return getOptional("kylin.suite.id", "");
+    }
+
+    public boolean isMultiTenancyMode() {
+        return StringUtils.isNotEmpty(getSuiteId()) || ServerMode.isMaster(getServerMode());
     }
 
     // mv this config to kylinConfig from kapConfig, for cubeStatsReader need this config to estimate Cuboid StorageSize

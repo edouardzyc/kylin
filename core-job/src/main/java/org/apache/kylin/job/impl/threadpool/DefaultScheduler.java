@@ -177,7 +177,7 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
 
                     AbstractExecutable executable = executableManager.getJob(id);
 
-                    if (jobEngineConfig.getConfig().getSuiteId() != null) {
+                    if (jobEngineConfig.getConfig().isMultiTenancyMode()) {
                         SuiteInfoManager suiteInfoManager = SuiteInfoManager.getInstance(jobEngineConfig.getConfig());
                         String projectName = executable.getParam(CheckpointExecutable.PROJECT_INSTANCE_NAME);
 
@@ -257,7 +257,7 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
                     }
                     final AbstractExecutable executable = executableManager.getJob(id);
 
-                    if (jobEngineConfig.getConfig().getSuiteId() != null) {
+                    if (jobEngineConfig.getConfig().isMultiTenancyMode()) {
                         SuiteInfoManager suiteInfoManager = SuiteInfoManager.getInstance(jobEngineConfig.getConfig());
                         String projectName = executable.getParam(CheckpointExecutable.PROJECT_INSTANCE_NAME);
 
