@@ -338,18 +338,16 @@ public class BuildCubeWithEngine {
         String cubeName = "calcs_tdvt_cube";
         clearSegment(cubeName);
 
-        return doBuildAndMergeOnCube(cubeName);
+        return buildSegment(cubeName, 0, 0);
     }
 
-    @SuppressWarnings("unused")
-    // called by reflection
-    private boolean testStapleTDVTCube() throws Exception {
-
-        String cubeName = "staples_tdvt";
-        clearSegment(cubeName);
-
-        return doBuildAndMergeOnCube(cubeName);
-    }
+//    private boolean testStapleTDVTCube() throws Exception {
+//
+//        String cubeName = "staples_tdvt";
+//        clearSegment(cubeName);
+//
+//        return doBuildAndMergeOnCube(cubeName);
+//    }
 
     @SuppressWarnings("unused")
     // called by reflection
