@@ -24,11 +24,18 @@ source ${dir}/load-hive-conf.sh
 
 echo Retrieving hive dependency...
 
-## FusionInsight platform.
+## FusionInsight platform C70.
 if [ -n "$BIGDATA_CLIENT_HOME" ]
 then
     export HIVE_CONF=$BIGDATA_CLIENT_HOME/Hive/config
     export HCAT_HOME=$BIGDATA_CLIENT_HOME/Hive/HCatalog
+fi
+
+## FusionInsight platform C60.
+if [ -n "$BIGDATA_HOME" ]
+then
+    export HIVE_CONF=$BIGDATA_HOME/Hive/config
+    export HCAT_HOME=$BIGDATA_HOME/Hive/HCatalog
 fi
 
 client_mode=`bash ${KYLIN_HOME}/bin/get-properties.sh kylin.source.hive.client`
