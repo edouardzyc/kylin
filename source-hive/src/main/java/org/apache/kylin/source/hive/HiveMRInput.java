@@ -136,7 +136,7 @@ public class HiveMRInput implements IMRInput {
             KylinConfig config = KylinConfig.getInstanceFromEnv();
             this.flatDesc = flatDesc;
             this.flatTableDatabase = config.getHiveDatabaseForIntermediateTable();
-            this.hdfsWorkingDir = config.getHdfsWorkingDirectory();
+            this.hdfsWorkingDir = config.getHdfsWorkingDirectoryWithoutScheme();
         }
 
         @Override

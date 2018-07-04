@@ -31,6 +31,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.engine.mr.common.AbstractHadoopJob;
@@ -75,9 +76,9 @@ public class RangeKeyDistributionJob extends AbstractHadoopJob {
 
             setJobClasspath(job, kylinConfig);
 
-            addInputDirs(getOptionValue(OPTION_INPUT_PATH), job);
+            addInputDirs(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH)), job);
 
-            Path output = new Path(getOptionValue(OPTION_OUTPUT_PATH));
+            Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
             FileOutputFormat.setOutputPath(job, output);
             // job.getConfiguration().set("dfs.block.size", "67108864");
 

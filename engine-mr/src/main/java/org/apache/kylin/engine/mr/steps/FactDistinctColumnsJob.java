@@ -35,6 +35,7 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.cube.CubeSegment;
@@ -70,10 +71,10 @@ public class FactDistinctColumnsJob extends AbstractHadoopJob {
             String job_id = getOptionValue(OPTION_CUBING_JOB_ID);
             job.getConfiguration().set(BatchConstants.ARG_CUBING_JOB_ID, job_id);
             String cubeName = getOptionValue(OPTION_CUBE_NAME);
-            Path output = new Path(getOptionValue(OPTION_OUTPUT_PATH));
+            Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
 
             String segmentID = getOptionValue(OPTION_SEGMENT_ID);
-            String statistics_output = getOptionValue(OPTION_STATISTICS_OUTPUT);
+            String statistics_output = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_STATISTICS_OUTPUT));
             String statistics_sampling_percent = getOptionValue(OPTION_STATISTICS_SAMPLING_PERCENT);
 
             // ----------------------------------------------------------------------------

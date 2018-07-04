@@ -32,6 +32,7 @@ import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.persistence.ResourceStoreTest;
 import org.apache.kylin.common.persistence.StringEntity;
 import org.apache.kylin.common.util.HBaseMetadataTestCase;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.job.dao.ExecutableOutoutPOSerializer;
 import org.apache.kylin.job.dao.ExecutableOutputPO;
 import org.junit.After;
@@ -86,7 +87,7 @@ public class ITHBaseResourceStoreTest extends HBaseMetadataTestCase {
             store.putResource(path, largeEntity, StringEntity.serializer);
 
             Path redirectPath = ((HBaseResourceStore) store).bigCellHDFSPath(path);
-            FileSystem fileSystem = FileSystem.get(hconf);
+            FileSystem fileSystem = HadoopUtil.getWorkingFileSystem();
             fileSystem.delete(redirectPath, true);
 
             try {
@@ -135,7 +136,7 @@ public class ITHBaseResourceStoreTest extends HBaseMetadataTestCase {
             store.putResource(path + "-01", smallEntity2, StringEntity.serializer);
 
             Path redirectPath = ((HBaseResourceStore) store).bigCellHDFSPath(path + "-00");
-            FileSystem fileSystem = FileSystem.get(hconf);
+            FileSystem fileSystem = HadoopUtil.getWorkingFileSystem();
             fileSystem.delete(redirectPath, true);
 
             try {
@@ -181,7 +182,7 @@ public class ITHBaseResourceStoreTest extends HBaseMetadataTestCase {
 
             Path redirectPath = ((HBaseResourceStore) store).bigCellHDFSPath(path);
 
-            FileSystem fileSystem = FileSystem.get(hconf);
+            FileSystem fileSystem = HadoopUtil.getWorkingFileSystem();
             assertTrue(fileSystem.exists(redirectPath));
 
             FSDataInputStream in = fileSystem.open(redirectPath);

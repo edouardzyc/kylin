@@ -58,7 +58,7 @@ public interface BatchConstants {
     String CFG_STATISTICS_ENABLED = "statistics.enabled";
     String CFG_STATISTICS_OUTPUT = "statistics.ouput";//spell error, for compatibility issue better not change it
     String CFG_STATISTICS_SAMPLING_PERCENT = "statistics.sampling.percent";
-    String CFG_STATISTICS_CUBOID_ESTIMATION_FILENAME = "cuboid_statistics.seq";
+    String CFG_STATISTICS_CUBOID_ESTIMATION_FILENAME = "cuboid-statistics.seq";//s3 donot support file path contains '_'
 
     String CFG_MAPRED_OUTPUT_COMPRESS = "mapred.output.compress";
 

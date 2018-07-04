@@ -30,6 +30,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.engine.mr.common.AbstractHadoopJob;
 
 /**
@@ -60,9 +61,9 @@ public class RowKeyDistributionCheckerJob extends AbstractHadoopJob {
 
         setJobClasspath(job, KylinConfig.getInstanceFromEnv());
 
-        addInputDirs(getOptionValue(OPTION_INPUT_PATH), job);
+        addInputDirs(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH)), job);
 
-        Path output = new Path(getOptionValue(OPTION_OUTPUT_PATH));
+        Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
         FileOutputFormat.setOutputPath(job, output);
 
         // Mapper

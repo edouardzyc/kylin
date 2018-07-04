@@ -19,14 +19,14 @@ package org.apache.kylin.source.hive;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.common.util.HiveCmdBuilder;
 import org.apache.kylin.common.util.Pair;
 import org.apache.kylin.job.common.PatternedLogger;
@@ -74,9 +74,8 @@ public class CreateFlatHiveTableStep extends AbstractExecutable {
     }
 
     private long getFileSize(String hdfsUrl) throws IOException {
-        Configuration configuration = new Configuration();
         Path path = new Path(hdfsUrl);
-        FileSystem fs = path.getFileSystem(configuration);
+        FileSystem fs = HadoopUtil.getWorkingFileSystem();
         ContentSummary contentSummary = fs.getContentSummary(path);
         long length = contentSummary.getLength();
         return length;

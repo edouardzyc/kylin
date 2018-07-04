@@ -25,6 +25,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.cube.CubeSegment;
@@ -95,7 +96,7 @@ public class CuboidJob extends AbstractHadoopJob {
             options.addOption(OPTION_CUBOID_MODE);
             parseOptions(options, args);
 
-            String output = getOptionValue(OPTION_OUTPUT_PATH);
+            String output = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH));
             String cubeName = getOptionValue(OPTION_CUBE_NAME).toUpperCase();
             int nCuboidLevel = Integer.parseInt(getOptionValue(OPTION_NCUBOID_LEVEL));
             String segmentID = getOptionValue(OPTION_SEGMENT_ID);
@@ -157,7 +158,7 @@ public class CuboidJob extends AbstractHadoopJob {
     }
 
     private void configureMapperInputFormat(CubeSegment cubeSeg) throws Exception {
-        String input = getOptionValue(OPTION_INPUT_PATH);
+        String input = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH));
 
         if ("FLAT_TABLE".equals(input)) {
             // base cuboid case

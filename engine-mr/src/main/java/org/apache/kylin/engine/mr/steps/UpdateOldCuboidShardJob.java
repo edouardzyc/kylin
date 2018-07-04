@@ -27,6 +27,7 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.cube.CubeSegment;
@@ -55,8 +56,8 @@ public class UpdateOldCuboidShardJob extends AbstractHadoopJob {
             job = Job.getInstance(getConf(), getOptionValue(OPTION_JOB_NAME));
             String cubeName = getOptionValue(OPTION_CUBE_NAME).toUpperCase();
             String segmentID = getOptionValue(OPTION_SEGMENT_ID);
-            Path input = new Path(getOptionValue(OPTION_INPUT_PATH));
-            Path output = new Path(getOptionValue(OPTION_OUTPUT_PATH));
+            Path input = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH)));
+            Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
 
             CubeManager cubeMgr = CubeManager.getInstance(KylinConfig.getInstanceFromEnv());
             CubeInstance cube = cubeMgr.getCube(cubeName);

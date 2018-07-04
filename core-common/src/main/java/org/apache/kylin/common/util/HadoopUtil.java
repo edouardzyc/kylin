@@ -26,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -37,6 +38,8 @@ import org.apache.hadoop.io.Writable;
 import org.apache.kylin.common.KylinConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 public class HadoopUtil {
     @SuppressWarnings("unused")
@@ -78,6 +81,16 @@ public class HadoopUtil {
     public static FileSystem getWorkingFileSystem(Configuration conf) throws IOException {
         Path workingPath = new Path(KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory());
         return getFileSystem(workingPath, conf);
+    }
+
+    public static FileSystem getReadFileSystem() throws IOException {
+        Configuration conf = getCurrentConfiguration();
+        return getReadFileSystem(conf);
+    }
+
+    public static FileSystem getReadFileSystem(Configuration conf) throws IOException {
+        Path parquetReadPath = new Path(KylinConfig.getInstanceFromEnv().getReadHdfsWorkingDirectory());
+        return getFileSystem(parquetReadPath, conf);
     }
 
     public static FileSystem getFileSystem(String path) throws IOException {
@@ -212,5 +225,46 @@ public class HadoopUtil {
             path = Path.getPathWithoutSchemeAndAuthority(new Path(path)).toString() + "/";
         }
         return path;
+    }
+
+    public static FileSystem getJdbcFileSystem() throws IOException {
+        Configuration conf = getCurrentConfiguration();
+        return getJdbcFileSystem(conf);
+    }
+
+    public static FileSystem getJdbcFileSystem(Configuration conf) throws IOException {
+        Path jdbcPath = new Path(KylinConfig.getInstanceFromEnv().getJdbcHdfsWorkingDirectory());
+        return getFileSystem(jdbcPath, conf);
+    }
+
+    public static String getPathWithReadScheme(String path) {
+        String scheme = KylinConfig.getInstanceFromEnv().getPrefixReadScheme();
+        if (isSpecialFs(scheme)) {
+            return path;
+        }
+        return scheme + Path.getPathWithoutSchemeAndAuthority(new Path(path));
+    }
+
+    public static String getPathWithReadScheme(String[] paths) {
+        List pathList = Lists.newArrayList();
+        for (String path : paths) {
+            pathList.add(getPathWithReadScheme(path));
+        }
+        return StringUtils.join(pathList, ",");
+    }
+
+    public static String getPathWithWorkingScheme(String path) {
+        String scheme = KylinConfig.getInstanceFromEnv().getPrefixWorkingScheme();
+        if (isSpecialFs(scheme)) {
+            return path;
+        }
+        return scheme + Path.getPathWithoutSchemeAndAuthority(new Path(path));
+    }
+
+    private static boolean isSpecialFs(String scheme) {
+        if (scheme.startsWith("file://") || scheme.startsWith("maprfs://"))
+            return true;
+
+        return false;
     }
 }

@@ -59,13 +59,15 @@ public class JobEngineConfig {
 
         File jobConfig = getJobConfig(hadoopJobConfFile);
         if (jobConfig == null || !jobConfig.exists()) {
-            logger.warn("fail to locate " + hadoopJobConfFile + ", trying to locate " + HADOOP_JOB_CONF_FILENAME + ".xml");
+            logger.warn(
+                    "fail to locate " + hadoopJobConfFile + ", trying to locate " + HADOOP_JOB_CONF_FILENAME + ".xml");
             jobConfig = getJobConfig(HADOOP_JOB_CONF_FILENAME + ".xml");
             if (jobConfig == null || !jobConfig.exists()) {
                 logger.error("fail to locate " + HADOOP_JOB_CONF_FILENAME + ".xml");
                 throw new RuntimeException("fail to locate " + HADOOP_JOB_CONF_FILENAME + ".xml");
             }
         }
+
         return OptionsHelper.convertToFileURL(jobConfig.getAbsolutePath());
     }
 
@@ -124,7 +126,7 @@ public class JobEngineConfig {
     }
 
     public String getHdfsWorkingDirectory(String project) {
-        if(config.isProjectIsolationEnabled()){
+        if (config.isProjectIsolationEnabled()) {
             return config.getHdfsWorkingDirectory() + project + "/";
         } else {
             return config.getHdfsWorkingDirectory();
@@ -158,7 +160,7 @@ public class JobEngineConfig {
     public int getAsyncJobCheckInterval() {
         return config.getYarnStatusCheckIntervalSeconds();
     }
-    
+
     public int getPollIntervalSecond() {
         return config.getSchedulerPollIntervalSecond();
     }

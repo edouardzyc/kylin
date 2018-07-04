@@ -21,6 +21,7 @@ package org.apache.kylin.common;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.kylin.common.lock.DistributedLockFactory;
+import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.util.ClassUtil;
 import org.apache.kylin.common.util.CliCommandExecutor;
 import org.apache.kylin.common.util.HadoopUtil;
@@ -266,6 +268,106 @@ abstract public class KylinConfigBase implements Serializable {
         return cachedHdfsWorkingDirectory;
     }
 
+    public String getPrefixWorkingScheme() {
+        return getPrefixScheme(getHdfsWorkingDirectory());
+    }
+
+    public String getPrefixReadScheme() {
+        return getPrefixScheme(getReadHdfsWorkingDirectory());
+    }
+
+    public String getPrefixScheme(String path) {
+        URI pathUri = new Path(path).toUri();
+        return org.apache.commons.lang3.StringUtils.remove(pathUri.toString(), pathUri.getPath());
+    }
+
+    public String getHdfsWorkingDirectory(String project) {
+        if (isProjectIsolationEnabled()) {
+            return getHdfsWorkingDirectory() + project + "/";
+        } else {
+            return getHdfsWorkingDirectory();
+        }
+    }
+
+    public String getReadHdfsWorkingDirectory() {
+        if (StringUtils.isNotEmpty(getParquetReadFileSystem())) {
+            Path workingDir = new Path(getHdfsWorkingDirectory());
+            return new Path(getParquetReadFileSystem(), Path.getPathWithoutSchemeAndAuthority(workingDir)).toString()
+                    + "/";
+        }
+
+        return getHdfsWorkingDirectory();
+    }
+
+    public String getReadHdfsWorkingDirectory(String project) {
+        if (StringUtils.isNotEmpty(getParquetReadFileSystem())) {
+            Path workingDir = new Path(getHdfsWorkingDirectory(project));
+            return new Path(getParquetReadFileSystem(), Path.getPathWithoutSchemeAndAuthority(workingDir)).toString()
+                    + "/";
+        }
+
+        return getHdfsWorkingDirectory(project);
+    }
+
+    public String getJdbcHdfsWorkingDirectory() {
+        if (StringUtils.isNotEmpty(getJdbcFileSystem())) {
+            Path workingDir = new Path(getReadHdfsWorkingDirectory());
+            return new Path(getJdbcFileSystem(), Path.getPathWithoutSchemeAndAuthority(workingDir)).toString() + "/";
+        }
+
+        return getReadHdfsWorkingDirectory();
+    }
+
+    public boolean isParquetSeparateFsEnabled() {
+        return Boolean.parseBoolean(getOptional("kylin.storage.columnar.separate-fs-enable", "false"));
+    }
+
+    public String getParquetReadFileSystem() {
+        return getOptional("kylin.storage.columnar.file-system", "");
+    }
+
+    public String getJdbcFileSystem() {
+        return getOptional("kylin.storage.columnar.jdbc.file-system", "");
+    }
+
+    /**
+     * where is parquet fles stored in hdfs , end with /
+     */
+    public String getWorkingParquetStoragePath() {
+        return getHdfsWorkingDirectory() + "parquet/";
+    }
+
+    public String getWorkingParquetStoragePath(String project) {
+        String defaultPath = getHdfsWorkingDirectory(project) + "parquet/";
+        return getOptional("kap.storage.columnar.hdfs-dir", defaultPath);
+    }
+
+    public String getReadParquetStoragePath() {
+        if (StringUtils.isNotEmpty(getParquetReadFileSystem())) {
+            Path parquetPath = new Path(getWorkingParquetStoragePath());
+            return new Path(getParquetReadFileSystem(), Path.getPathWithoutSchemeAndAuthority(parquetPath)).toString()
+                    + "/";
+        }
+        return getWorkingParquetStoragePath();
+    }
+
+    public String getReadParquetStoragePath(String project) {
+        if (StringUtils.isNotEmpty(getParquetReadFileSystem())) {
+            Path parquetPath = new Path(getWorkingParquetStoragePath(project));
+            return new Path(getParquetReadFileSystem(), Path.getPathWithoutSchemeAndAuthority(parquetPath)).toString()
+                    + "/";
+        }
+        return getWorkingParquetStoragePath(project);
+    }
+
+    public String getWorkingDictStoragePath(String project) {
+        return getHdfsWorkingDirectory(project) + ResourceStore.SPARDER_DICT_RESOURCE_ROOT;
+    }
+
+    public String getReadSDictStoragePath(String project) {
+        return getReadHdfsWorkingDirectory(project) + "/sparder/";
+    }
+
     public String getZookeeperBasePath() {
         return getOptional("kylin.env.zookeeper-base-path", "/kylin");
     }
@@ -451,7 +553,8 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public double getJobCuboidSizeRatio() {
-        return Double.parseDouble(getOptional("kylin.cube.size-estimate-ratio", rewriteWithParquetPageCompression("0.25")));
+        return Double
+                .parseDouble(getOptional("kylin.cube.size-estimate-ratio", rewriteWithParquetPageCompression("0.25")));
     }
 
     private String rewriteWithParquetPageCompression(String ratio) {
@@ -470,7 +573,8 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public double getJobCuboidSizeCountDistinctRatio() {
-        return Double.parseDouble(getOptional("kylin.cube.size-estimate-countdistinct-ratio", rewriteWithParquetPageCompression("0.5")));
+        return Double.parseDouble(
+                getOptional("kylin.cube.size-estimate-countdistinct-ratio", rewriteWithParquetPageCompression("0.5")));
     }
 
     public String getCubeAlgorithm() {
@@ -1673,7 +1777,8 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public double getJobCuboidSizeTopNRatio() {
-        return Double.parseDouble(getOptional("kylin.cube.size-estimate-topn-ratio", rewriteWithParquetPageCompression("0.5")));
+        return Double.parseDouble(
+                getOptional("kylin.cube.size-estimate-topn-ratio", rewriteWithParquetPageCompression("0.5")));
     }
 
     // ============================================================================

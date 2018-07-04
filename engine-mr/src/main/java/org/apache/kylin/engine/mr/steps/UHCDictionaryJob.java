@@ -64,8 +64,8 @@ public class UHCDictionaryJob extends AbstractHadoopJob {
             job = Job.getInstance(getConf(), getOptionValue(OPTION_JOB_NAME));
             String job_id = getOptionValue(OPTION_CUBING_JOB_ID);
             String cubeName = getOptionValue(OPTION_CUBE_NAME);
-            Path output = new Path(getOptionValue(OPTION_OUTPUT_PATH));
-            Path input = new Path(getOptionValue(OPTION_INPUT_PATH));
+            Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
+            Path input = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH)));
 
             //add metadata to distributed cache
             CubeManager cubeMgr = CubeManager.getInstance(KylinConfig.getInstanceFromEnv());

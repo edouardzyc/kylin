@@ -34,6 +34,7 @@ import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.ql.Driver;
 import org.apache.hadoop.hive.ql.session.SessionState;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.common.util.Pair;
 import org.apache.kylin.metrics.lib.ActiveReservoirReporter;
 import org.apache.kylin.metrics.lib.Record;
@@ -71,7 +72,7 @@ public class HiveProducer {
             hiveConf.set(e.getKey().toString(), e.getValue().toString());
         }
 
-        hdfs = FileSystem.get(hiveConf);
+        hdfs = HadoopUtil.getWorkingFileSystem(hiveConf);
 
         tableFieldSchemaCache = CacheBuilder.newBuilder().removalListener(new RemovalListener<Pair<String, String>, Pair<String, List<FieldSchema>>>() {
             @Override

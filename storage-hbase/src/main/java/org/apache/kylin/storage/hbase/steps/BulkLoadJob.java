@@ -25,6 +25,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FsShell;
 import org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.engine.mr.common.AbstractHadoopJob;
 import org.apache.kylin.storage.hbase.HBaseConnection;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public class BulkLoadJob extends AbstractHadoopJob {
         // e.g
         // /tmp/kylin-3f150b00-3332-41ca-9d3d-652f67f044d7/test_kylin_cube_with_slr_ready_2_segments/hfile/
         // end with "/"
-        String input = getOptionValue(OPTION_INPUT_PATH);
+        String input = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH));
 
         Configuration conf = HBaseConnection.getCurrentHBaseConfiguration();
         FsShell shell = new FsShell(conf);

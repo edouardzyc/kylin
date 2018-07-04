@@ -63,8 +63,8 @@ public class CreateDictionaryJob extends AbstractHadoopJob {
 
         final String cubeName = getOptionValue(OPTION_CUBE_NAME);
         final String segmentID = getOptionValue(OPTION_SEGMENT_ID);
-        final String factColumnsInputPath = getOptionValue(OPTION_INPUT_PATH);
-        final String dictPath = getOptionValue(OPTION_DICT_PATH);
+        final String factColumnsInputPath = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH));
+        final String dictPath = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_DICT_PATH));
 
         final KylinConfig config = KylinConfig.getInstanceFromEnv();
 

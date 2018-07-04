@@ -80,7 +80,7 @@ public class HiveColumnCardinalityUpdateJob extends AbstractHadoopJob {
             String jobName = JOB_TITLE + getOptionsAsString();
             logger.info("Starting: " + jobName);
             Configuration conf = getConf();
-            Path output = new Path(getOptionValue(OPTION_OUTPUT_PATH));
+            Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
 
             updateKylinTableExd(table.toUpperCase(), output.toString(), conf, project);
             return 0;

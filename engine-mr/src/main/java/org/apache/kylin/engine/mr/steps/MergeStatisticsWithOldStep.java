@@ -76,7 +76,7 @@ public class MergeStatisticsWithOldStep extends AbstractExecutable {
         try {
             //1. Add statistics from optimized segment
             Path statisticsDirPath = new Path(CubingExecutableUtil.getStatisticsPath(this.getParams()));
-            FileSystem hdfs = FileSystem.get(conf);
+            FileSystem hdfs = HadoopUtil.getWorkingFileSystem();
             if (!hdfs.exists(statisticsDirPath)) {
                 throw new IOException("StatisticsFilePath " + statisticsDirPath + " does not exists");
             }

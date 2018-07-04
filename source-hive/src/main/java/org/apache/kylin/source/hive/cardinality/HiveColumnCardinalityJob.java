@@ -30,6 +30,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.engine.mr.IMRInput.IMRTableInputFormat;
 import org.apache.kylin.engine.mr.MRUtil;
 import org.apache.kylin.engine.mr.common.AbstractHadoopJob;
@@ -84,7 +85,7 @@ public class HiveColumnCardinalityJob extends AbstractHadoopJob {
         job.getConfiguration().set(BatchConstants.CFG_PROJECT_NAME, project);
         job.getConfiguration().set(BatchConstants.CFG_TABLE_NAME, table);
 
-        Path output = new Path(getOptionValue(OPTION_OUTPUT_PATH));
+        Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
         FileOutputFormat.setOutputPath(job, output);
         job.getConfiguration().set("dfs.blocksize", "67108864");
         job.getConfiguration().set("mapreduce.output.fileoutputformat.compress", "false");

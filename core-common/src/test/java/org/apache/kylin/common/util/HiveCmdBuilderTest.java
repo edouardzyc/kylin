@@ -66,7 +66,7 @@ public class HiveCmdBuilderTest {
         hiveCmdBuilder.setHiveConfProps(hiveProps);
         hiveCmdBuilder.overwriteHiveProps(hivePropsOverwrite);
         assertEquals(
-                "hive -e \"USE default;\nDROP TABLE test;\nSHOW\n TABLES;\n\" --hiveconf hive.execution.engine=tez",
+                "hive -e \"USE default;\nDROP TABLE test;\nSHOW\n TABLES;\n\" --hiveconf fs.defaultFS=file:// --hiveconf hive.execution.engine=tez",
                 hiveCmdBuilder.build());
     }
 

@@ -18,15 +18,14 @@
 
 package org.apache.kylin.engine.mr.common;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
@@ -36,6 +35,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Cluster;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobID;
@@ -44,11 +44,9 @@ import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.ClassUtil;
 import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.cube.CubeManager;
-import org.apache.kylin.cube.CubeSegment;
 import org.apache.kylin.engine.mr.exception.MapReduceException;
 import org.apache.kylin.job.constant.ExecutableConstants;
 import org.apache.kylin.job.constant.JobStepStatusEnum;
-import org.apache.kylin.job.engine.JobEngineConfig;
 import org.apache.kylin.job.exception.ExecuteException;
 import org.apache.kylin.job.execution.AbstractExecutable;
 import org.apache.kylin.job.execution.ExecutableContext;
@@ -70,7 +68,6 @@ public class MapReduceExecutable extends AbstractExecutable {
     private static final String KEY_MR_JOB = "MR_JOB_CLASS";
     private static final String KEY_PARAMS = "MR_JOB_PARAMS";
     private static final String KEY_COUNTER_SAVEAS = "MR_COUNTER_SAVEAS";
-    private static final String KEY_PREFIX = "JOB_PARAM_";
 
     protected static final Logger logger = LoggerFactory.getLogger(MapReduceExecutable.class);
 
@@ -271,9 +268,12 @@ public class MapReduceExecutable extends AbstractExecutable {
 
         String confFile = commandLine.getOptionValue(BatchConstants.ARG_CONF);
         String cubeName = commandLine.getOptionValue(BatchConstants.ARG_CUBE_NAME);
+
         List<String> remainingArgs = Lists.newArrayList();
 
-        appendExtraJobParams(conf);
+        if (StringUtils.isNotBlank(confFile)) {
+            conf.addResource(new Path(getJobConfig(confFile).getPath()));
+        }
 
         if (StringUtils.isNotBlank(cubeName)) {
             for (Map.Entry<String, String> entry : CubeManager.getInstance(config).getCube(cubeName).getConfig()
@@ -319,35 +319,16 @@ public class MapReduceExecutable extends AbstractExecutable {
         }
     }
 
-    private void appendExtraJobParams(Configuration conf) {
-        Set<Map.Entry<String, String>> entrySet = getParams().entrySet();
-        for (Map.Entry<String, String> entry : entrySet) {
-            if (entry.getKey().startsWith(KEY_PREFIX)) {
-                conf.set(entry.getKey().replaceFirst(KEY_PREFIX, ""), entry.getValue());
-            }
+    private static File getJobConfig(String fileName) {
+        String path = System.getProperty(KylinConfig.KYLIN_CONF);
+        if (StringUtils.isNotEmpty(path)) {
+            return new File(path, fileName);
         }
-    }
 
-    public void setExtraJobParams(CubeSegment seg) {
-        setExtraJobParams(seg, JobEngineConfig.DEFAUL_JOB_CONF_SUFFIX);
-    }
-
-    public void setExtraJobParams(CubeSegment seg, String jobConf) {
-        JobEngineConfig config = new JobEngineConfig(seg.getConfig());
-        String confFile = null;
-        try {
-            confFile = config.getHadoopJobConfFilePath(jobConf);
-            Configuration configuration = HadoopUtil.loadConfig(confFile);
-            Iterator<Map.Entry<String, String>> confIter = configuration.iterator();
-
-            while (confIter.hasNext()) {
-                Map.Entry<String, String> entry = confIter.next();
-                String key = entry.getKey();
-                String value = entry.getValue();
-                setParam(KEY_PREFIX + key, value);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Job config file read error. file is " + confFile, e);
+        path = KylinConfig.getKylinHome();
+        if (StringUtils.isNotEmpty(path)) {
+            return new File(path + File.separator + "conf", fileName);
         }
+        return null;
     }
 }

@@ -37,12 +37,16 @@ public class HiveMRInputTest {
 
     @Test
     public void TestGetJobWorkingDir() throws IOException {
+        // after #5305, Hadoop Path should NOT carry FileSystem info in general.
+        // Instread, you should explictly define to use workingFileSystem or readFileSystem to avoid confusion.
+        //  The following use is a exception
         FileSystem fileSystem = FileSystem.get(new Configuration());
         Path jobWorkDirPath = null;
         KylinConfig kylinConfig = mock(KylinConfig.class);
         try (SetAndUnsetThreadLocalConfig autoUnset = KylinConfig.setAndUnsetThreadLocalConfig(kylinConfig)) {
             when(kylinConfig.getHiveTableDirCreateFirst()).thenReturn(true);
             when(kylinConfig.getHdfsWorkingDirectory()).thenReturn("/tmp/kylin/");
+            when(kylinConfig.getHdfsWorkingDirectoryWithoutScheme()).thenReturn("/tmp/kylin/");
             DefaultChainedExecutable defaultChainedExecutable = mock(DefaultChainedExecutable.class);
             defaultChainedExecutable.setId(UUID.randomUUID().toString());
 

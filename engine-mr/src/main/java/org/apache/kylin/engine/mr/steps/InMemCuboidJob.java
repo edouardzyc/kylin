@@ -23,6 +23,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.cube.CubeSegment;
@@ -74,7 +75,7 @@ public class InMemCuboidJob extends AbstractHadoopJob {
 
             String cubeName = getOptionValue(OPTION_CUBE_NAME).toUpperCase();
             String segmentID = getOptionValue(OPTION_SEGMENT_ID);
-            String output = getOptionValue(OPTION_OUTPUT_PATH);
+            String output = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH));
 
             CubeManager cubeMgr = CubeManager.getInstance(KylinConfig.getInstanceFromEnv());
             CubeInstance cube = cubeMgr.getCube(cubeName);

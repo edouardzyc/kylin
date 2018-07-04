@@ -106,6 +106,8 @@ public class HiveCmdBuilder {
     }
 
     private String parseProps() {
+        hiveConfProps.put("fs.defaultFS", kylinConfig.getPrefixWorkingScheme());
+
         StringBuilder s = new StringBuilder();
         for (Map.Entry<String, String> prop : hiveConfProps.entrySet()) {
             s.append(" --hiveconf ");
@@ -113,6 +115,7 @@ public class HiveCmdBuilder {
             s.append("=");
             s.append(prop.getValue());
         }
+
         return s.toString();
     }
 

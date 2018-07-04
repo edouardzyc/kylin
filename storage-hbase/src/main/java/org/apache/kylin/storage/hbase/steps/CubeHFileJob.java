@@ -38,6 +38,7 @@ import org.apache.hadoop.mapreduce.lib.partition.TotalOrderPartitioner;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.engine.mr.KylinReducer;
@@ -68,7 +69,7 @@ public class CubeHFileJob extends AbstractHadoopJob {
 
             Path partitionFilePath = new Path(getOptionValue(OPTION_PARTITION_FILE_PATH));
 
-            Path output = new Path(getOptionValue(OPTION_OUTPUT_PATH));
+            Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
             String cubeName = getOptionValue(OPTION_CUBE_NAME);
 
             CubeManager cubeMgr = CubeManager.getInstance(KylinConfig.getInstanceFromEnv());
@@ -80,7 +81,7 @@ public class CubeHFileJob extends AbstractHadoopJob {
             // For separate HBase cluster, note the output is a qualified HDFS path if "kylin.storage.hbase.cluster-fs" is configured, ref HBaseMRSteps.getHFilePath()
             HBaseConnection.addHBaseClusterNNHAConfiguration(job.getConfiguration());
 
-            addInputDirs(getOptionValue(OPTION_INPUT_PATH), job);
+            addInputDirs(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH)), job);
             FileOutputFormat.setOutputPath(job, output);
 
             // set job configuration
@@ -133,7 +134,7 @@ public class CubeHFileJob extends AbstractHadoopJob {
      */
     @SuppressWarnings("deprecation")
     private void reconfigurePartitions(Configuration conf, Path path) throws IOException {
-        FileSystem fs = path.getFileSystem(conf);
+        FileSystem fs = HadoopUtil.getWorkingFileSystem(conf);
         if (fs.exists(path)) {
             try (SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf)) {
                 int partitionCount = 0;

@@ -58,7 +58,7 @@ public class GlobalDictHDFSStore extends GlobalDictStore {
         super(baseDir);
         this.basePath = new Path(baseDir);
         this.conf = HadoopUtil.getCurrentConfiguration();
-        this.fileSystem = HadoopUtil.getFileSystem(baseDir);
+        this.fileSystem = HadoopUtil.getWorkingFileSystem();
     }
 
     // Previously we put slice files and index file directly in base directory,

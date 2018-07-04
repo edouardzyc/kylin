@@ -22,6 +22,7 @@ import org.apache.commons.cli.Options;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.cube.CubeSegment;
@@ -43,8 +44,8 @@ public class MergeCuboidJob extends CuboidJob {
             options.addOption(OPTION_OUTPUT_PATH);
             parseOptions(options, args);
 
-            String input = getOptionValue(OPTION_INPUT_PATH);
-            String output = getOptionValue(OPTION_OUTPUT_PATH);
+            String input = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH));
+            String output = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH));
             String cubeName = getOptionValue(OPTION_CUBE_NAME).toUpperCase();
             String segmentID = getOptionValue(OPTION_SEGMENT_ID);
 

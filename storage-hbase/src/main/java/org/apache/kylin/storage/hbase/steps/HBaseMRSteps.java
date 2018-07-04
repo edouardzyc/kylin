@@ -65,7 +65,7 @@ public class HBaseMRSteps extends JobBuilderSupport {
         rowkeyDistributionStep.setName(ExecutableConstants.STEP_NAME_GET_CUBOID_KEY_DISTRIBUTION);
         StringBuilder cmd = new StringBuilder();
 
-        rowkeyDistributionStep.setExtraJobParams(seg);
+        appendHadoopJobConf(cmd);
         appendExecCmdParameters(cmd, BatchConstants.ARG_INPUT, inputPath);
         appendExecCmdParameters(cmd, BatchConstants.ARG_OUTPUT, getRowkeyDistributionOutputPath(jobId));
         appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getRealization().getName());
@@ -108,7 +108,7 @@ public class HBaseMRSteps extends JobBuilderSupport {
         mergeCuboidDataStep.setName(ExecutableConstants.STEP_NAME_MERGE_CUBOID);
         StringBuilder cmd = new StringBuilder();
 
-        mergeCuboidDataStep.setExtraJobParams(seg);
+        appendHadoopJobConf(cmd);
         appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getCubeInstance().getName());
         appendExecCmdParameters(cmd, BatchConstants.ARG_SEGMENT_ID, seg.getUuid());
         appendExecCmdParameters(cmd, BatchConstants.ARG_INPUT, formattedPath);
@@ -128,7 +128,7 @@ public class HBaseMRSteps extends JobBuilderSupport {
         createHFilesStep.setName(ExecutableConstants.STEP_NAME_CONVERT_CUBOID_TO_HFILE);
         StringBuilder cmd = new StringBuilder();
 
-        createHFilesStep.setExtraJobParams(seg);
+        appendHadoopJobConf(cmd);
         appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getRealization().getName());
         appendExecCmdParameters(cmd, BatchConstants.ARG_PARTITION, getRowkeyDistributionOutputPath(jobId) + "/part-r-00000_hfile");
         appendExecCmdParameters(cmd, BatchConstants.ARG_INPUT, inputPath);

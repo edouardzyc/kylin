@@ -18,8 +18,11 @@
 
 package org.apache.kylin.engine.mr;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.cube.CubeSegment;
 import org.apache.kylin.cube.cuboid.CuboidModeEnum;
 import org.apache.kylin.engine.mr.common.BatchConstants;
@@ -65,7 +68,7 @@ public class JobBuilderSupport {
         result.setName(ExecutableConstants.STEP_NAME_FACT_DISTINCT_COLUMNS);
         result.setMapReduceJobClass(FactDistinctColumnsJob.class);
         StringBuilder cmd = new StringBuilder();
-        result.setExtraJobParams(seg);
+        appendHadoopJobConf(cmd);
         appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getRealization().getName());
         appendExecCmdParameters(cmd, BatchConstants.ARG_OUTPUT, getFactDistinctColumnsPath(jobId));
         appendExecCmdParameters(cmd, BatchConstants.ARG_SEGMENT_ID, seg.getUuid());
@@ -85,7 +88,7 @@ public class JobBuilderSupport {
         result.setName(ExecutableConstants.STEP_NAME_BUILD_UHC_DICTIONARY);
         result.setMapReduceJobClass(UHCDictionaryJob.class);
         StringBuilder cmd = new StringBuilder();
-        result.setExtraJobParams(seg);
+        appendHadoopJobConf(cmd);
         appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getRealization().getName());
         appendExecCmdParameters(cmd, BatchConstants.ARG_OUTPUT, getDictRootPath(jobId));
         appendExecCmdParameters(cmd, BatchConstants.ARG_INPUT, getFactDistinctColumnsPath(jobId));
@@ -107,7 +110,7 @@ public class JobBuilderSupport {
         result.setName(ExecutableConstants.STEP_NAME_CALCULATE_STATS_FROM_BASE_CUBOID);
         result.setMapReduceJobClass(CalculateStatsFromBaseCuboidJob.class);
         StringBuilder cmd = new StringBuilder();
-        result.setExtraJobParams(seg);
+        appendHadoopJobConf(cmd);
         appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getRealization().getName());
         appendExecCmdParameters(cmd, BatchConstants.ARG_SEGMENT_ID, seg.getUuid());
         appendExecCmdParameters(cmd, BatchConstants.ARG_INPUT, inputPath);
@@ -176,7 +179,7 @@ public class JobBuilderSupport {
     // ============================================================================
 
     public String getJobWorkingDir(String jobId) {
-        return getJobWorkingDirIn(config, jobId);
+        return HadoopUtil.getPathWithoutScheme(getJobWorkingDir(config, jobId));
     }
 
     public String getRealizationRootPath(String jobId) {
@@ -189,6 +192,21 @@ public class JobBuilderSupport {
 
     public String getCuboidRootPath(CubeSegment seg) {
         return getCuboidRootPath(seg.getLastBuildJobID());
+    }
+
+    public void appendHadoopJobConf(StringBuilder buf) {
+        appendHadoopJobConf(buf, JobEngineConfig.DEFAUL_JOB_CONF_SUFFIX);
+    }
+
+    public void appendHadoopJobConf(StringBuilder buf, String jobType) {
+        try {
+            String jobConf = new File(config.getHadoopJobConfFilePath(jobType)).getName();
+            if (jobConf != null && jobConf.length() > 0) {
+                buf.append(" -conf ").append(jobConf);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getFactDistinctColumnsPath(String jobId) {

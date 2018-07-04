@@ -31,6 +31,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.ByteArray;
+import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.common.util.SplittedBytes;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
@@ -125,7 +126,7 @@ public class UpdateOldCuboidShardMapper extends KylinMapper<Text, Text, Text, Te
         mos.close();
 
         Path outputDirBase = new Path(context.getConfiguration().get(FileOutputFormat.OUTDIR), PathNameCuboidBase);
-        FileSystem fs = FileSystem.get(context.getConfiguration());
+        FileSystem fs = HadoopUtil.getFileSystem(outputDirBase);
         if (!fs.exists(outputDirBase)) {
             fs.mkdirs(outputDirBase);
             SequenceFile
