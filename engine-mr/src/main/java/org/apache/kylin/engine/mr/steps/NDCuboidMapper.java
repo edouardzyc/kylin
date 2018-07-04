@@ -87,7 +87,7 @@ public class NDCuboidMapper extends KylinMapper<Text, Text, Text, Text> {
         cubeDesc = cube.getDescriptor();
         cubeSegment = cube.getSegmentById(segmentID);
 
-        if (cubeSegment.getStorageType() == 99) {
+        if (cubeSegment.getStorageType() != 100) {
             ndCuboidBuilder = new NDCuboidBuilder(cubeSegment);
             rowKeySplitter = new RowKeySplitter(cubeSegment);
         } else {
@@ -107,7 +107,7 @@ public class NDCuboidMapper extends KylinMapper<Text, Text, Text, Text> {
 
     @Override
     public void doMap(Text key, Text value, Context context) throws IOException, InterruptedException {
-        if (cubeSegment.getStorageType() == 99) {
+        if (cubeSegment.getStorageType() != 100) {
             cuboidId = rowKeySplitter.split(key.getBytes());
         }
 
@@ -133,7 +133,7 @@ public class NDCuboidMapper extends KylinMapper<Text, Text, Text, Text> {
 
         for (Long child : myChildren) {
             Cuboid childCuboid = Cuboid.findForMandatory(cubeDesc, child);
-            if (cubeSegment.getStorageType() == 99) {
+            if (cubeSegment.getStorageType() != 100) {
                 Pair<Integer, ByteArray> result = ndCuboidBuilder.buildKey(parentCuboid, childCuboid, rowKeySplitter.getSplitBuffers());
                 outputKey.set(result.getSecond().array(), 0, result.getFirst());
             } else {
