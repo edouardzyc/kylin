@@ -113,7 +113,8 @@ public class CuboidJob extends AbstractHadoopJob {
             cuboidScheduler = CuboidSchedulerUtil.getCuboidSchedulerByMode(segment, cuboidModeName);
 
             if (checkSkip(cubingJobId, nCuboidLevel)) {
-                logger.info("Skip job " + getOptionValue(OPTION_JOB_NAME) + " for " + segmentID + "[" + segmentID + "]");
+                logger.info(
+                        "Skip job " + getOptionValue(OPTION_JOB_NAME) + " for " + segmentID + "[" + segmentID + "]");
                 return 0;
             }
 
@@ -158,15 +159,17 @@ public class CuboidJob extends AbstractHadoopJob {
     }
 
     private void configureMapperInputFormat(CubeSegment cubeSeg) throws Exception {
-        String input = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH));
+        String input = getOptionValue(OPTION_INPUT_PATH);
 
         if ("FLAT_TABLE".equals(input)) {
             // base cuboid case
-            IMRTableInputFormat flatTableInputFormat = MRUtil.getBatchCubingInputSide(cubeSeg).getFlatTableInputFormat();
+            IMRTableInputFormat flatTableInputFormat = MRUtil.getBatchCubingInputSide(cubeSeg)
+                    .getFlatTableInputFormat();
             flatTableInputFormat.configureJob(job);
         } else {
             // n-dimension cuboid case
             IMROutput2.IMROutputFormat outputFormat = MRUtil.getBatchCubingOutputSide2(cubeSeg).getOuputFormat();
+            input = HadoopUtil.getPathWithWorkingScheme(input);
             outputFormat.configureJobInput(job, input);
             FileInputFormat.setInputPaths(job, new Path(input));
         }
