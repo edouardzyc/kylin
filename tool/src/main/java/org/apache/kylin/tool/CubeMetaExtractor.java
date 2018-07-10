@@ -50,7 +50,6 @@ import org.apache.kylin.metadata.project.ProjectManager;
 import org.apache.kylin.metadata.project.RealizationEntry;
 import org.apache.kylin.metadata.realization.IRealization;
 import org.apache.kylin.metadata.realization.RealizationRegistry;
-import org.apache.kylin.metadata.realization.RealizationStatusEnum;
 import org.apache.kylin.metadata.realization.RealizationType;
 import org.apache.kylin.metadata.streaming.StreamingConfig;
 import org.apache.kylin.metadata.streaming.StreamingManager;
@@ -428,7 +427,6 @@ public class CubeMetaExtractor extends AbstractInfoExtractor {
             if (includeJobs) {
                 logger.warn("It's useless to set includeJobs to true when includeSegments is set to false");
             }
-            cube.setStatus(RealizationStatusEnum.DISABLED);
             cubesToTrimAndSave.add(cube);
         }
     }
