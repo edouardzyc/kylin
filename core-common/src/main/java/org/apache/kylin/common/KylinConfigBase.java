@@ -1841,4 +1841,8 @@ abstract public class KylinConfigBase implements Serializable {
     public boolean getCuboidBuildReducerNumCalibration() {
         return Boolean.parseBoolean(getOptional("kap.cube.job.cuboid-build-reducer-num-calibration", "false"));
     }
+
+    public String getQueryVIPRole() {
+        return String.valueOf(getOptional("kap.query.vip-role", ""));
+    }
 }

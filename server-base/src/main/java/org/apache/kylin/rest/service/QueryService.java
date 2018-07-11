@@ -177,13 +177,7 @@ public class QueryService extends BasicService {
             final String user = SecurityContextHolder.getContext().getAuthentication().getName();
             badQueryDetector.queryStart(Thread.currentThread(), sqlRequest, user);
             QueryContext.current().setSql(sqlRequest.getSql());
-            if (SecurityContextHolder.getContext() //
-                    .getAuthentication() //
-                    .getAuthorities() //
-                    .contains(new SimpleGrantedAuthority(Constant.ROLE_QUERY_VIP))) { //
-                QueryContext.current().markHighPriorityQuery();
-            }
-
+            markHighPriorityQueryIfNeeded();
             ret = queryWithSqlMassage(sqlRequest);
             return ret;
 
@@ -191,6 +185,16 @@ public class QueryService extends BasicService {
             String badReason = (ret != null && ret.isPushDown()) ? BadQueryEntry.ADJ_PUSHDOWN : null;
             badQueryDetector.queryEnd(Thread.currentThread(), badReason);
             Thread.interrupted(); //reset if interrupted
+        }
+    }
+
+    private void markHighPriorityQueryIfNeeded() {
+        String vipRoleName = KylinConfig.getInstanceFromEnv().getQueryVIPRole();
+        if (!StringUtils.isBlank(vipRoleName) && SecurityContextHolder.getContext() //
+                .getAuthentication() //
+                .getAuthorities() //
+                .contains(new SimpleGrantedAuthority(vipRoleName))) { //
+            QueryContext.current().markHighPriorityQuery();
         }
     }
 
