@@ -29,7 +29,7 @@ public class DictPatch extends RootPersistentEntity {
     private int[] offset;
     private int[] compressed;
 
-    DictPatch(int[] offset) {
+    public DictPatch(int[] offset) {
         this.offset = offset;
         this.compressed = IntegratedUtils.compress(offset);
     }

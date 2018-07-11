@@ -117,15 +117,35 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
         }
     }
 
-    private int transformReverseId(int id) {
-        if (reverseOffset != null) {
-            try {
-                return reverseOffset[id];
-            } catch (Exception e) {
 
-                //  user to debug
-                throw e;
+    /**
+    * <p>
+    * - if roundingFlag=0, throw IllegalArgumentException; <br>
+    * - if roundingFlag<0, the closest smaller ID integer if exist; <br>
+    * - if roundingFlag>0, the closest bigger ID integer if exist. <br>
+    * <p>
+    * Reference org.apache.kylin.common.util.Dictionary#getIdFromValue(java.lang.Object, int)
+    * if rounding cannot find a smaller or bigger ID, we need throw an IllegalArgumentException.
+    */
+    private int transformReverseId(int oriId, int roundingFlag) {
+        int id = oriId;
+        if (reverseOffset != null) {
+            if (roundingFlag < 0) {
+                while (id >= 0 && reverseOffset[id] == NULL_ID[idLength]) {
+                    if (id == 0) {
+                        throw new IllegalArgumentException("Id: " + oriId + " smaller than the smallest value in segment dictionary.");
+                    }
+                    id--;
+                }
+            } else if (roundingFlag > 0) {
+                while (id < reverseOffset.length && reverseOffset[id] == NULL_ID[idLength]) {
+                    if (id == reverseOffset.length - 1) {
+                        throw new IllegalArgumentException("Id: " + oriId + " bigger than the biggest value in segment dictionary.");
+                    }
+                    id++;
+                }
             }
+            return reverseOffset[id];
         } else {
             return id;
         }
@@ -146,8 +166,9 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
         if (!reverse) {
             initReverse();
         }
-        int id = transformReverseId(dictionary.getIdFromValue(value, roundingFlag));
-        return id;
+        // for project dictionary.
+        int oriId = dictionary.getIdFromValue(value, roundingFlag);
+        return transformReverseId(oriId, roundingFlag);
     }
 
     @Override
