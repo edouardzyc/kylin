@@ -1,7 +1,7 @@
 {
   "realizations" : [ {
     "query_type" : "OLAP",
-    "realization" : "calcs_tdvt_clone",
+    "realization" : "calcs_tdvt_cube",
     "realization_type" : "CUBE",
     "source_cuboid_cols" : [ "CALCS.DATETIME0" ],
     "target_cuboid_cols" : [ "CALCS.DATETIME0" ]
