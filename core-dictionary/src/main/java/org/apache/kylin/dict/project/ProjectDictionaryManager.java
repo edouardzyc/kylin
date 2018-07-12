@@ -24,10 +24,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +41,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.persistence.WriteConflictException;
+import org.apache.kylin.common.util.Dictionary;
 import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.dict.DictionaryInfo;
 import org.apache.kylin.dict.DictionaryManager;
@@ -68,6 +71,7 @@ public class ProjectDictionaryManager {
     private static ConcurrentMap<String, Long> dictCacheSwapCount = Maps.newConcurrentMap();
     private static final ProjectDictionaryInfo NONE_INDICATOR = new ProjectDictionaryInfo();
     private static AtomicLong usedMem = new AtomicLong(0);
+    private final static Map<String, WeakReference<Object>> weakDictCache = new ConcurrentHashMap<>();
     private final static LoadingCache<String, ProjectDictionaryInfo> dictionaryInfoCache = CacheBuilder.newBuilder()
             .maximumWeight(KylinConfig.getInstanceFromEnv().getCachedPrjDictMaxMemory()).softValues()
             .weigher(new Weigher<String, ProjectDictionaryInfo>() {
@@ -103,14 +107,46 @@ public class ProjectDictionaryManager {
                 @Override
                 public ProjectDictionaryInfo load(String sourceIdentity) throws Exception {
                     logger.info("Loading project dictionary :" + sourceIdentity);
-                    ProjectDictionaryInfo projectDictionaryInfo = doLoad(sourceIdentity, true);
+                    ProjectDictionaryInfo projectDictionaryInfo = null;
+                    Dictionary dictObj = null;
+                    WeakReference reference = weakDictCache.get(sourceIdentity);
+                    if (reference != null) {
+                        projectDictionaryInfo = (ProjectDictionaryInfo) reference.get();
+                    }
+                    if (null != projectDictionaryInfo) {
+                        logger.info("get dictInfo from weakDictCache success");
+                        return projectDictionaryInfo;
+                    } else {
+                        // if the dictInfo's reference has cleaned, but the dictObj reference is handled by others,
+                        // just load the dictInfo without dictObj, and fill it with the existing dictObj
+                        reference = weakDictCache.get(dictObjKey(sourceIdentity));
+                        if (reference != null) {
+                            dictObj = (Dictionary) reference.get();
+                        }
+                        if (dictObj != null) {
+                            logger.info("get dictObj from weakDictCache success");
+                            projectDictionaryInfo = doLoad(sourceIdentity, false);
+                            if (projectDictionaryInfo != null) {
+                                projectDictionaryInfo.setDictionaryObject(dictObj);
+                            }
+                        } else {
+                            projectDictionaryInfo = doLoad(sourceIdentity, true);
+                        }
+                    }
                     if (projectDictionaryInfo == null) {
                         return NONE_INDICATOR;
                     } else {
+                        weakDictCache.put(sourceIdentity, new WeakReference<>(projectDictionaryInfo));
+                        weakDictCache.put(dictObjKey(sourceIdentity), new WeakReference<>(projectDictionaryInfo.getDictionaryObject()));
+                        logger.info("weakDictCache size : " + weakDictCache.size());
                         return projectDictionaryInfo;
                     }
                 }
             });
+
+    public static String dictObjKey(String sourceIdentity) {
+        return sourceIdentity + "_obj";
+    }
 
     private final static Cache<String, DictPatch> patchCache = CacheBuilder.newBuilder().softValues()
             .maximumSize(KylinConfig.getInstanceFromEnv().getCachedPrjDictPatchMaxEntrySize())
@@ -462,6 +498,8 @@ public class ProjectDictionaryManager {
         }
         String newKey = PathBuilder.dataPath(sourceIdentify, dictionaryInfo.getDictionaryVersion());
         dictionaryInfoCache.put(newKey, dictionaryInfo);
+        weakDictCache.put(newKey, new WeakReference<>(dictionaryInfo));
+        weakDictCache.put(dictObjKey(newKey), new WeakReference<>(dictionaryInfo.getDictionaryObject()));
     }
 
     private String eatAndUpgradeDictionary(String project, DictionaryInfo originDict, String sourceIdentify,
@@ -571,6 +609,7 @@ public class ProjectDictionaryManager {
             crud.reloadAll();
             dictionaryInfoCache.invalidateAll();
             patchCache.invalidateAll();
+            weakDictCache.clear();
         } catch (IOException e) {
             e.printStackTrace();
         }

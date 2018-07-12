@@ -22,10 +22,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -73,6 +76,7 @@ public class DictionaryManager {
 
     private KylinConfig config;
     private LoadingCache<String, DictionaryInfo> dictCache; // resource
+    private static Map<String, WeakReference<Object>> weakDictCache = new ConcurrentHashMap<>();
     private static ConcurrentMap<String, Long> dictCacheSwapCount = Maps.newConcurrentMap();
     private static AtomicLong usedMem = new AtomicLong(0);
 
@@ -110,15 +114,47 @@ public class DictionaryManager {
                 }).expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, DictionaryInfo>() {
                     @Override
                     public DictionaryInfo load(String key) throws Exception {
-                        DictionaryInfo dictInfo = DictionaryManager.this.load(key, true);
+                        DictionaryInfo dictInfo = null;
+                        Dictionary<String> dictObj = null;
+                        WeakReference dictReference = weakDictCache.get(key);
+                        if (dictReference != null) {
+                            dictInfo = (DictionaryInfo) dictReference.get();
+                        }
+                        if (null != dictInfo) {
+                            logger.info("get dictInfo from weakDictCache success");
+                            return dictInfo;
+                        } else {
+                            // if the dictInfo's reference has cleaned, but the dictObj reference is handled by others,
+                            // just load the dictInfo without dictObj, and fill it with the existing dictObj
+                            dictReference = weakDictCache.get(dictObjKey(key));
+                            if (dictReference != null) {
+                                dictObj = (Dictionary<String>) dictReference.get();
+                            }
+                            if (dictObj != null) {
+                                logger.info("get dictObj from weakDictCache success");
+                                dictInfo = DictionaryManager.this.load(key, false);
+                                if (dictInfo != null) {
+                                    dictInfo.setDictionaryObject(dictObj);
+                                }
+                            } else {
+                                dictInfo = DictionaryManager.this.load(key, true);
+                            }
+                        }
                         if (dictInfo == null) {
                             return NONE_INDICATOR;
                         } else {
+                            weakDictCache.put(key, new WeakReference<>(dictInfo));
+                            weakDictCache.put(dictObjKey(key), new WeakReference<>(dictInfo.getDictionaryObject()));
+                            logger.info("weakDictCache size : " + weakDictCache.size());
                             return dictInfo;
                         }
                     }
                 });
 
+    }
+
+    public String dictObjKey(String key) {
+        return key + "_obj";
     }
 
     public Dictionary<String> getDictionary(String resourcePath) throws IOException {
@@ -226,6 +262,8 @@ public class DictionaryManager {
 
         save(newDictInfo);
         dictCache.put(newDictInfo.getResourcePath(), newDictInfo);
+        weakDictCache.put(newDictInfo.getResourcePath(), new WeakReference<>(newDictInfo));
+        weakDictCache.put(dictObjKey(newDictInfo.getResourcePath()), new WeakReference<>(newDictInfo.getDictionaryObject()));
 
         return newDictInfo;
     }
@@ -435,6 +473,8 @@ public class DictionaryManager {
         ResourceStore store = getStore();
         store.deleteResource(resourcePath);
         dictCache.invalidate(resourcePath);
+        weakDictCache.remove(resourcePath);
+        weakDictCache.remove(dictObjKey(resourcePath));
     }
 
     public void removeDictionaries(String srcTable, String srcCol) throws IOException {

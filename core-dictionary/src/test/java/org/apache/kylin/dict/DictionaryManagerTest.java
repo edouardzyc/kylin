@@ -19,10 +19,16 @@
 package org.apache.kylin.dict;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.util.Map;
 
+import com.google.common.cache.LoadingCache;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.Dictionary;
 import org.apache.kylin.common.util.LocalFileMetadataTestCase;
@@ -45,7 +51,6 @@ public class DictionaryManagerTest extends LocalFileMetadataTestCase {
         cleanupTestMetadata();
     }
 
-    
     @Test
     public void testBuildSaveDictionary() throws IOException {
         KylinConfig config = KylinConfig.getInstanceFromEnv();
@@ -77,5 +82,105 @@ public class DictionaryManagerTest extends LocalFileMetadataTestCase {
         Dictionary<String> dict2 = DictionaryGenerator.buildDictionary(col.getType(), new IterableDictionaryValueEnumerator("1", "2", "3", "4"));
         DictionaryInfo info5 = dictMgr.saveDictionary(col, MockupReadableTable.newNonExistTable("/a/path"), dict2);
         assertTrue(info1 != info5);
+    }
+
+    @Test
+    public void testDictionaryCache() throws Exception {
+        KylinConfig config = KylinConfig.getInstanceFromEnv();
+        DictionaryManager dictMgr = DictionaryManager.getInstance(config);
+        DataModelManager metaMgr = DataModelManager.getInstance(config);
+        DataModelDesc model = metaMgr.getDataModelDesc("test_kylin_inner_join_model_desc");
+        TblColRef col = model.findColumn("lstg_format_name");
+
+        DictionaryInfo dictionaryInfo = dictMgr.buildDictionary(col, MockupReadableTable.newSingleColumnTable("/a/path", "1", "2", "3"));
+
+        String sourcePath = dictionaryInfo.getResourcePath();
+        dictionaryInfo = null;
+
+        Dictionary dictionary = dictMgr.getDictionary(sourcePath);
+        assertNotNull(dictionary);
+
+        // 1. clean cache
+        releaseDictionary(dictMgr, sourcePath);
+
+        Dictionary dictionary2 = getDictObjByWeakCache(sourcePath, dictMgr);
+        assertNotNull(dictionary2);
+        assertEquals(dictionary, dictionary2);
+
+        DictionaryInfo dictionaryInfo2 = getDictInfoByWeakCache(sourcePath, dictMgr);
+        assertNotNull(dictionaryInfo2);
+        dictionaryInfo2 = null;
+
+        // 2. gc
+        System.gc();
+
+        Dictionary dictionary3 = getDictObjByWeakCache(sourcePath, dictMgr);
+        assertNotNull(dictionary3);
+        assertEquals(dictionary, dictionary3);
+
+        DictionaryInfo dictionaryInfo3 = getDictInfoByWeakCache(sourcePath, dictMgr);
+        assertNull(dictionaryInfo3);
+
+        Dictionary dictionary4 = dictMgr.getDictionary(sourcePath);
+        assertNotNull(dictionary4);
+        assertEquals(dictionary, dictionary4);
+
+        // 3. clean cache && clean handle && gc
+        releaseDictionary(dictMgr, sourcePath);
+        dictionary = null;
+        dictionary2 = null;
+        dictionary3 = null;
+        dictionary4 = null;
+
+        System.gc();
+
+        Dictionary dictionary5 = getDictObjByWeakCache(sourcePath, dictMgr);
+        assertNull(dictionary5);
+
+        DictionaryInfo dictionaryInfo5 = getDictInfoByWeakCache(sourcePath, dictMgr);
+        assertNull(dictionaryInfo5);
+
+        Dictionary dictionary6 = dictMgr.getDictionary(sourcePath);
+        assertNotNull(dictionary6);
+
+    }
+
+    private void releaseDictionary(DictionaryManager dictMgr, String sourcePath) throws NoSuchFieldException, IllegalAccessException {
+        getDictCache(dictMgr).invalidate(sourcePath);
+    }
+
+    private LoadingCache<String, DictionaryInfo> getDictCache(DictionaryManager dictMgr) throws NoSuchFieldException, IllegalAccessException {
+        Class<?> clazz = dictMgr.getClass();
+        Field field = clazz.getDeclaredField("dictCache");
+        field.setAccessible(true);
+        return (LoadingCache<String, DictionaryInfo>) field.get(dictMgr);
+    }
+
+    private DictionaryInfo getDictInfoByWeakCache(String resourcePath, DictionaryManager dictMgr) throws Exception {
+        Map<String, WeakReference<Object>> weakCache = getWeakCache(dictMgr);
+
+        WeakReference reference = weakCache.get(resourcePath);
+        if (reference == null) {
+            return null;
+        }
+        return (DictionaryInfo) reference.get();
+    }
+
+    private Map<String, WeakReference<Object>> getWeakCache(DictionaryManager dictMgr) throws NoSuchFieldException, IllegalAccessException {
+        Class<?> clazz = dictMgr.getClass();
+        Field field = clazz.getDeclaredField("weakDictCache");
+        field.setAccessible(true);
+        return (Map<String, WeakReference<Object>>) field.get(dictMgr);
+    }
+
+    private Dictionary getDictObjByWeakCache(String resourcePath, DictionaryManager dictMgr) throws Exception {
+        Map<String, WeakReference<Object>> weakCache = getWeakCache(dictMgr);
+
+        WeakReference reference = weakCache.get(dictMgr.dictObjKey(resourcePath));
+        if (reference == null) {
+            return null;
+        }
+
+        return (Dictionary) reference.get();
     }
 }
