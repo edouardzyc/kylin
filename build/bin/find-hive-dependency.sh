@@ -38,21 +38,6 @@ then
     export HCAT_HOME=$BIGDATA_HOME/Hive/HCatalog
 fi
 
-client_mode=`bash ${KYLIN_HOME}/bin/get-properties.sh kylin.source.hive.client`
-hive_env=
-
-if [ "${client_mode}" == "beeline" ]
-then
-    beeline_shell=`$KYLIN_HOME/bin/get-properties.sh kylin.source.hive.beeline-shell`
-    beeline_params=`bash ${KYLIN_HOME}/bin/get-properties.sh kylin.source.hive.beeline-params`
-    hive_env=`${beeline_shell} ${hive_conf_properties} ${beeline_params} --outputformat=dsv -e set 2>&1 | grep 'env:CLASSPATH' `
-else
-    source ${dir}/hive-usability-check.sh
-    hive_env=`hive ${hive_conf_properties} -e set 2>&1 | grep 'env:CLASSPATH'`
-fi
-
-hive_classpath=`echo $hive_env | grep 'env:CLASSPATH' | awk -F '=' '{print $2}'`
-arr=(`echo $hive_classpath | cut -d ":" -f 1- | sed 's/:/ /g'`)
 hive_conf_path=
 hive_exec_path=
 
@@ -60,27 +45,42 @@ if [ -n "$HIVE_CONF" ]
 then
     verbose "HIVE_CONF is set to: $HIVE_CONF, use it to locate hive configurations."
     hive_conf_path=$HIVE_CONF
-fi
-
-for data in ${arr[@]}
-do
-    result=`echo $data | grep -e 'hive-exec[a-z0-9A-Z\.-]*.jar'`
-    # In some cases there are more than one lib dirs, only the first one will be applied.
-    if [ $result ] && [ -z "$hive_exec_path" ]
-    then
-        hive_exec_path=$data
-    fi
-
-    # in some versions of hive config is not in hive's classpath, find it separately
-    if [ -z "$hive_conf_path" ]
-    then
-        result=`echo $data | grep -e 'hive[^/]*/conf'`
-        if [ $result ]
+else
+    client_mode=`bash ${KYLIN_HOME}/bin/get-properties.sh kylin.source.hive.client`
+    if [ "${client_mode}" == "beeline" ]
         then
-            hive_conf_path=$data
-        fi
+            beeline_shell=`$KYLIN_HOME/bin/get-properties.sh kylin.source.hive.beeline-shell`
+            beeline_params=`bash ${KYLIN_HOME}/bin/get-properties.sh kylin.source.hive.beeline-params`
+        else
+            source ${dir}/hive-usability-check.sh
     fi
-done
+    ## In CDH, both beeline and cli need to use the hive command to get env.
+    ## Because beeline can't get hive conf dir in the environment.
+    hive_env=`hive ${hive_conf_properties} -e set 2>&1 | grep 'env:CLASSPATH'`
+
+    hive_classpath=`echo $hive_env | grep 'env:CLASSPATH' | awk -F '=' '{print $2}'`
+    arr=(`echo $hive_classpath | cut -d ":" -f 1- | sed 's/:/ /g'`)
+
+    for data in ${arr[@]}
+    do
+        result=`echo $data | grep -e 'hive-exec[a-z0-9A-Z\.-]*.jar'`
+        # In some cases there are more than one lib dirs, only the first one will be applied.
+        if [ $result ] && [ -z "$hive_exec_path" ]
+        then
+            hive_exec_path=$data
+        fi
+
+        # in some versions of hive config is not in hive's classpath, find it separately
+        if [ -z "$hive_conf_path" ]
+        then
+            result=`echo $data | grep -e 'hive[^/]*/conf'`
+            if [ $result ]
+            then
+                hive_conf_path=$data
+            fi
+        fi
+    done
+fi
 
 if [ -z "$hive_conf_path" ]
 then
