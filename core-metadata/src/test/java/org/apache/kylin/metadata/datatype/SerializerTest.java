@@ -85,6 +85,7 @@ public class SerializerTest extends LocalFileMetadataTestCase {
         buffer.mark();
         bigDecimalSerializer.serialize(null, buffer);
         buffer.reset();
+        assertEquals(2, bigDecimalSerializer.peekLength(buffer));
         assertEquals(null, bigDecimalSerializer.deserialize(buffer));
 
         //Long NULL

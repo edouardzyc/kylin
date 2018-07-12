@@ -47,6 +47,7 @@ public class BigDecimalSerializer extends DataTypeSerializer<BigDecimal> {
     @Override
     public void serialize(BigDecimal value, ByteBuffer out) {
         if (value == null) {
+            //write scale
             BytesUtil.writeVLongObject(null, out);
             return;
         }
@@ -89,11 +90,13 @@ public class BigDecimalSerializer extends DataTypeSerializer<BigDecimal> {
     public int peekLength(ByteBuffer in) {
         int mark = in.position();
 
-        @SuppressWarnings("unused")
-        int scale = BytesUtil.readVInt(in);
-        int n = BytesUtil.readVInt(in);
+        Long scale = BytesUtil.readVLongObject(in);
+        int n = 0;
+        // if scale is null, no need to read value length
+        if (scale != null) {
+            n = BytesUtil.readVInt(in);
+        }
         int len = in.position() - mark + n;
-
         in.position(mark);
         return len;
     }
