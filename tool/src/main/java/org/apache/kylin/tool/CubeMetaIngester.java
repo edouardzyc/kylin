@@ -167,6 +167,11 @@ public class CubeMetaIngester extends AbstractApplication {
                     targetProjectName);
         }
 
+        for (DataModelDesc model : srcModelManager.listDataModels()) {
+            logger.info("add " + model + " to " + targetProjectName);
+            projectManager.addModelToProject(model.getName(), targetProjectName);
+        }
+
         for (CubeInstance cube : srcCubeManager.listAllCubes()) {
             logger.info("add " + cube + " to " + targetProjectName);
             //Since there are no projects in sourceConfig, cube.getModel().getName() causes NPE.
