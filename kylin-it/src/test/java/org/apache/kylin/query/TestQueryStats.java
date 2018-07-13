@@ -40,6 +40,10 @@ public class TestQueryStats {
 
     @JsonProperty("realizations")
     private List<RealizationStats> realizationStatsList;
+    
+    public List<RealizationStats> getRealizationStatsList() {
+        return realizationStatsList;
+    }
 
     public TestQueryStats() {
     }
@@ -104,9 +108,33 @@ public class TestQueryStats {
         @JsonProperty("realization_type")
         private String realizationType;
         @JsonProperty("source_cuboid_cols")
-        private List<String> sourceCuboidCols = Lists.newArrayList();;
+        private List<String> sourceCuboidCols = Lists.newArrayList();
         @JsonProperty("target_cuboid_cols")
-        private List<String> targetCuboidCols = Lists.newArrayList();;
+        private List<String> targetCuboidCols = Lists.newArrayList();
+        
+        public static long getSerialversionuid() {
+            return serialVersionUID;
+        }
+
+        public String getQueryType() {
+            return queryType;
+        }
+
+        public String getRealization() {
+            return realization;
+        }
+
+        public String getRealizationType() {
+            return realizationType;
+        }
+
+        public List<String> getSourceCuboidCols() {
+            return sourceCuboidCols;
+        }
+
+        public List<String> getTargetCuboidCols() {
+            return targetCuboidCols;
+        }
 
         @Override
         public boolean equals(Object obj) {
@@ -135,11 +163,11 @@ public class TestQueryStats {
         @Override
         public int hashCode() {
             int result = 0;
-            result = 31 * result + queryType.hashCode();
-            result = 31 * result + realization.hashCode();
-            result = 31 * result + realizationType.hashCode();
-            result = 31 * result + sourceCuboidCols.hashCode();
-            result = 31 * result + targetCuboidCols.hashCode();
+            result = 31 * result + (queryType == null ? 0 : queryType.hashCode());
+            result = 31 * result + (realization == null ? 0 : realization.hashCode());
+            result = 31 * result + (realizationType == null ? 0 : realizationType.hashCode());
+            result = 31 * result + (sourceCuboidCols == null ? 0 : sourceCuboidCols.hashCode());
+            result = 31 * result + (targetCuboidCols == null ? 0 : targetCuboidCols.hashCode());
             return result;
         }
     }

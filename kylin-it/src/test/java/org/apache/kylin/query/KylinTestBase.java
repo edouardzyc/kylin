@@ -60,6 +60,7 @@ import org.apache.kylin.common.util.Pair;
 import org.apache.kylin.metadata.project.ProjectInstance;
 import org.apache.kylin.metadata.querymeta.SelectedColumnMeta;
 import org.apache.kylin.metadata.realization.NoRealizationFoundException;
+import org.apache.kylin.query.TestQueryStats.RealizationStats;
 import org.apache.kylin.query.relnode.OLAPContext;
 import org.apache.kylin.query.routing.rules.RemoveBlackoutRealizationsRule;
 import org.apache.kylin.query.util.PushDownUtil;
@@ -925,6 +926,18 @@ public class KylinTestBase {
             File queryStatsFile = new File(sqlFile.getPath() + getTestQueryStatsFilePostfix());
             String json = FileUtils.readFileToString(queryStatsFile);
             TestQueryStats expected = JsonUtil.readValue(json, TestQueryStats.class);
+            List<RealizationStats> expectedStatsList = expected.getRealizationStatsList();
+            List<RealizationStats> actualStatsList = actual.getRealizationStatsList();
+            Assert.assertEquals(expectedStatsList.size(), actualStatsList.size());
+            for (int i = 0; i < expectedStatsList.size(); i++) {
+                RealizationStats eStats = expectedStatsList.get(i);
+                RealizationStats aStats = actualStatsList.get(i);
+                Assert.assertEquals(eStats.getQueryType(), aStats.getQueryType());
+                Assert.assertEquals(eStats.getRealization(), aStats.getRealization());
+                Assert.assertEquals(eStats.getRealizationType(), aStats.getRealizationType());
+                Assert.assertArrayEquals(eStats.getTargetCuboidCols().toArray(), aStats.getTargetCuboidCols().toArray());
+                Assert.assertArrayEquals(eStats.getSourceCuboidCols().toArray(), aStats.getSourceCuboidCols().toArray());
+            }
             Assert.assertEquals(expected, actual);
         } catch (IOException e) {
             logger.error("Fail to compare query stats of {}", sqlFile.getPath(), e);
