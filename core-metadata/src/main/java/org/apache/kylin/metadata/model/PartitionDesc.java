@@ -218,7 +218,7 @@ public class PartitionDesc implements Serializable {
 
         private static void buildSingleColumnRangeCondAsTimeMillis(StringBuilder builder, TblColRef partitionColumn,
                 long startInclusive, long endExclusive) {
-            String partitionColumnName = partitionColumn.getIdentity();
+            String partitionColumnName = partitionColumn.getExpressionInSourceDB();
             builder.append(partitionColumnName + " >= " + startInclusive);
             builder.append(" AND ");
             builder.append(partitionColumnName + " < " + endExclusive);
@@ -226,7 +226,7 @@ public class PartitionDesc implements Serializable {
 
         private static void buildSingleColumnRangeCondAsYmdInt(StringBuilder builder, TblColRef partitionColumn,
                 long startInclusive, long endExclusive) {
-            String partitionColumnName = partitionColumn.getIdentity();
+            String partitionColumnName = partitionColumn.getExpressionInSourceDB();
             builder.append(partitionColumnName + " >= "
                     + DateFormat.formatToDateStr(startInclusive, DateFormat.COMPACT_DATE_PATTERN));
             builder.append(" AND ");
@@ -236,7 +236,7 @@ public class PartitionDesc implements Serializable {
 
         private static void buildSingleColumnRangeCondition(StringBuilder builder, TblColRef partitionColumn,
                 long startInclusive, long endExclusive, String partitionColumnDateFormat) {
-            String partitionColumnName = partitionColumn.getIdentity();
+            String partitionColumnName = partitionColumn.getExpressionInSourceDB();
 
             if (endExclusive <= startInclusive) {
                 builder.append("1=1");
@@ -261,8 +261,8 @@ public class PartitionDesc implements Serializable {
         private static void buildMultipleColumnRangeCondition(StringBuilder builder, TblColRef partitionDateColumn,
                 TblColRef partitionTimeColumn, long startInclusive, long endExclusive, String partitionColumnDateFormat,
                 String partitionColumnTimeFormat) {
-            String partitionDateColumnName = partitionDateColumn.getIdentity();
-            String partitionTimeColumnName = partitionTimeColumn.getIdentity();
+            String partitionDateColumnName = partitionDateColumn.getExpressionInSourceDB();
+            String partitionTimeColumnName = partitionTimeColumn.getExpressionInSourceDB();
             builder.append("(");
             builder.append("(");
             builder.append(partitionDateColumnName + " = '"
