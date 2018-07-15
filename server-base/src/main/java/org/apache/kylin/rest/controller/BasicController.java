@@ -18,6 +18,8 @@
 
 package org.apache.kylin.rest.controller;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,7 +29,6 @@ import java.io.OutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kylin.rest.constant.Constant;
 import org.apache.kylin.rest.exception.BadRequestException;
@@ -64,7 +65,8 @@ public class BasicController {
         Throwable cause = ex;
         while (cause != null) {
             if (cause.getClass().getPackage().getName().startsWith("org.apache.hadoop.hbase")) {
-                return new ErrorResponse(req.getRequestURL().toString(), new InternalErrorException(String.format(msg.getHBASE_FAIL(), ex.getMessage()), ex));
+                return new ErrorResponse(req.getRequestURL().toString(),
+                        new InternalErrorException(String.format(msg.getHBASE_FAIL(), ex.getMessage()), ex));
             }
             cause = cause.getCause();
         }
@@ -109,13 +111,24 @@ public class BasicController {
 
     protected void setDownloadResponse(String downloadFile, final HttpServletResponse response) {
         File file = new File(downloadFile);
-        try (InputStream fileInputStream = new FileInputStream(file); OutputStream output = response.getOutputStream()) {
+        try {
+            InputStream fileInputStream = new FileInputStream(file);
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+            OutputStream output = response.getOutputStream();
+
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(output);
             response.reset();
-            response.setContentType("application/octet-stream");
+            response.setContentType("application/x-download");
             response.setContentLength((int) (file.length()));
             response.setHeader("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
-            IOUtils.copyLarge(fileInputStream, output);
-            output.flush();
+
+            int bytesRead;
+            byte[] buffer = new byte[1024];
+
+            while ((bytesRead = bufferedInputStream.read(buffer)) != -1) {
+                bufferedOutputStream.write(buffer, 0, bytesRead);
+            }
+            bufferedOutputStream.flush();
         } catch (IOException e) {
             throw new InternalErrorException("Failed to download file: " + e.getMessage(), e);
         }

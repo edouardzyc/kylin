@@ -20,7 +20,10 @@ package org.apache.kylin.tool;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.cli.Option;
@@ -39,8 +42,8 @@ import org.apache.kylin.metadata.TableMetadataManager;
 import org.apache.kylin.metadata.cachesync.Broadcaster;
 import org.apache.kylin.metadata.model.DataModelDesc;
 import org.apache.kylin.metadata.model.DataModelManager;
-import org.apache.kylin.metadata.model.TableDesc;
 import org.apache.kylin.metadata.model.Segments;
+import org.apache.kylin.metadata.model.TableDesc;
 import org.apache.kylin.metadata.project.ProjectInstance;
 import org.apache.kylin.metadata.project.ProjectManager;
 import org.apache.kylin.metadata.realization.RealizationType;
@@ -92,9 +95,10 @@ public class CubeMetaIngester extends AbstractApplication {
     protected KylinConfig kylinConfig;
 
     protected Set<String> requiredResources = Sets.newLinkedHashSet();
-    private String targetProjectName;
+    protected String targetProjectName;
     private boolean overwriteTables = false;
     protected boolean forceIngest = false;
+    private Map<String, List<String>> conflictedResources = new HashMap<>();
     private String restoreType;
     private static String[] defaultProsKeys = new String[] { "kylin.query.force-limit", "kylin.source.default" };
 
@@ -139,11 +143,17 @@ public class CubeMetaIngester extends AbstractApplication {
         tempFolder.delete();
         tempFolder.mkdir();
         ZipFileUtils.decompressZipfileToDirectory(srcPath, tempFolder);
-        if (tempFolder.list().length != 1) {
-            throw new IllegalStateException(Arrays.toString(tempFolder.list()));
+
+        File[] subFolders = tempFolder.listFiles();
+        if (subFolders == null) {
+            throw new IllegalStateException("Invalid source package.");
         }
 
-        injest(tempFolder.listFiles()[0].getAbsoluteFile());
+        if (subFolders.length == 1) {
+            injest(subFolders[0].getAbsoluteFile());
+        } else {
+            injest(tempFolder.getAbsoluteFile());
+        }
     }
 
     private void injest(File metaRoot) throws IOException {
@@ -216,20 +226,29 @@ public class CubeMetaIngester extends AbstractApplication {
         }
 
         TableMetadataManager metadataManager = TableMetadataManager.getInstance(kylinConfig);
+        List<String> conflictedTables = new ArrayList<>();
+        List<String> conflictedModels = new ArrayList<>();
+        List<String> conflictedCubes = new ArrayList<>();
+
         for (TableDesc tableDesc : srcMetadataManager.listAllTables(null)) {
             TableDesc existing = metadataManager.getTableDesc(tableDesc.getIdentity(), targetProjectName);
-            if (existing != null && !existing.equals(tableDesc)) {
-                logger.info("Table {} already has a different version in target metadata store",
-                        tableDesc.getIdentity());
-                logger.info("Existing version: " + existing);
-                logger.info("New version: " + tableDesc);
 
-                if (!forceIngest && !overwriteTables) {
-                    throw new IllegalStateException(
-                            "Table already exists with a different version: " + tableDesc.getIdentity()
-                                    + ". Consider adding -overwriteTables option to force overwriting (with caution)");
-                } else {
-                    logger.warn("Overwriting the old table desc: " + tableDesc.getIdentity());
+            if (existing != null) {
+                conflictedTables.add(tableDesc.getName());
+
+                if (!existing.equals(tableDesc)) {
+                    logger.info("Table {} already has a different version in target metadata store",
+                            tableDesc.getIdentity());
+                    logger.info("Existing version: " + existing);
+                    logger.info("New version: " + tableDesc);
+
+                    if (!forceIngest && !overwriteTables) {
+                        throw new IllegalStateException("Table already exists with a different version: "
+                                + tableDesc.getIdentity()
+                                + ". Consider adding -overwriteTables option to force overwriting (with caution)");
+                    } else {
+                        logger.warn("Overwriting the old table desc: " + tableDesc.getIdentity());
+                    }
                 }
             }
             requiredResources.add(tableDesc.getResourcePath());
@@ -239,6 +258,7 @@ public class CubeMetaIngester extends AbstractApplication {
         for (DataModelDesc dataModelDesc : srcModelManager.listDataModels()) {
             DataModelDesc existing = modelManager.getDataModelDesc(dataModelDesc.getName());
             if (existing != null) {
+                conflictedModels.add(dataModelDesc.getName());
                 if (!forceIngest || !dataModelDesc.getProject().equals(existing.getProject())) {
                     throw new IllegalStateException("The model " + dataModelDesc.getName()
                             + " cannot exist in multiple projects, please resolve the conflicts. ");
@@ -253,6 +273,7 @@ public class CubeMetaIngester extends AbstractApplication {
         for (CubeInstance cube : srcCubeManager.listAllCubes()) {
             CubeInstance existing = cubeManager.getCube(cube.getName());
             if (existing != null) {
+                conflictedCubes.add(cube.getDisplayName());
                 Segments segments = existing.getSegments();
                 if (segments.size() != 0) {
                     throw new IllegalStateException(
@@ -290,6 +311,13 @@ public class CubeMetaIngester extends AbstractApplication {
             requiredResources.add(CubeDesc.concatResourcePath(cubeDesc.getName()));
         }
 
+        conflictedResources.put("table", conflictedTables);
+        conflictedResources.put("model", conflictedModels);
+        conflictedResources.put("cube", conflictedCubes);
+    }
+
+    public Map<String, List<String>> getConflictedResources() {
+        return conflictedResources;
     }
 
     public static void main(String[] args) {

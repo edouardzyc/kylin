@@ -58,6 +58,10 @@ public abstract class AbstractInfoExtractor extends AbstractApplication {
     private static final Option OPTION_PACKAGETYPE = OptionBuilder.withArgName("packagetype").hasArg().isRequired(false)
             .withDescription("specify the package type").create("packagetype");
 
+    @SuppressWarnings("static-access")
+    private static final Option OPTION_ENTITYNAME = OptionBuilder.withArgName("entityName").hasArg().isRequired(false)
+            .withDescription("specify the entity name").create("entityName");
+
     private static final String DEFAULT_PACKAGE_TYPE = "base";
     private static final String[] COMMIT_SHA1_FILES = { "commit_SHA1", "commit.sha1" };
 
@@ -72,6 +76,7 @@ public abstract class AbstractInfoExtractor extends AbstractApplication {
         options.addOption(OPTION_COMPRESS);
         options.addOption(OPTION_SUBMODULE);
         options.addOption(OPTION_PACKAGETYPE);
+        options.addOption(OPTION_ENTITYNAME);
         packageType = DEFAULT_PACKAGE_TYPE;
     }
 
@@ -84,15 +89,16 @@ public abstract class AbstractInfoExtractor extends AbstractApplication {
     protected void execute(OptionsHelper optionsHelper) throws Exception {
         String exportDest = optionsHelper.getOptionValue(options.getOption("destDir"));
         boolean shouldCompress = optionsHelper.hasOption(OPTION_COMPRESS)
-                ? Boolean.valueOf(optionsHelper.getOptionValue(OPTION_COMPRESS))
-                : true;
+                ? Boolean.valueOf(optionsHelper.getOptionValue(OPTION_COMPRESS)) : true;
         boolean isSubmodule = optionsHelper.hasOption(OPTION_SUBMODULE)
-                ? Boolean.valueOf(optionsHelper.getOptionValue(OPTION_SUBMODULE))
-                : false;
+                ? Boolean.valueOf(optionsHelper.getOptionValue(OPTION_SUBMODULE)) : false;
         packageType = optionsHelper.getOptionValue(OPTION_PACKAGETYPE);
+        String entityName = optionsHelper.getOptionValue(OPTION_ENTITYNAME);
 
         if (packageType == null)
             packageType = DEFAULT_PACKAGE_TYPE;
+
+        String baseName = entityName == null ? packageType.toLowerCase() : packageType.toLowerCase() + "_" + entityName;
 
         if (StringUtils.isEmpty(exportDest)) {
             throw new RuntimeException("destDir is not set, exit directly without extracting");
@@ -102,8 +108,7 @@ public abstract class AbstractInfoExtractor extends AbstractApplication {
         }
 
         // create new folder to contain the output
-        String packageName = packageType.toLowerCase() + "_"
-                + new SimpleDateFormat("YYYY_MM_dd_HH_mm_ss").format(new Date());
+        String packageName = baseName + "_" + new SimpleDateFormat("YYYY_MM_dd_HH_mm_ss").format(new Date());
         if (!isSubmodule && new File(exportDest).exists()) {
             exportDest = exportDest + packageName + "/";
         }

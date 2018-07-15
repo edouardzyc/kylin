@@ -356,7 +356,7 @@ public class CubeMetaExtractor extends AbstractInfoExtractor {
             addRequired(CubeDesc.concatResourcePath(cubeDesc.getName()));
             //add Segments and Jobs
             addSegAndJob(cube);
-
+            addRequired(ProjectInstance.concatResourcePath(cube.getProject()));
         } else if (realization instanceof HybridInstance) {
             HybridInstance hybridInstance = (HybridInstance) realization;
             addRequired(HybridInstance.concatResourcePath(hybridInstance.getName()));
