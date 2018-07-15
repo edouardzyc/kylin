@@ -30,6 +30,8 @@ import org.apache.kylin.common.util.CliCommandExecutor;
 import org.apache.kylin.common.util.LocalFileMetadataTestCase;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
+import org.apache.kylin.metadata.model.DataModelDesc;
+import org.apache.kylin.metadata.model.DataModelManager;
 import org.apache.kylin.metadata.project.ProjectInstance;
 import org.apache.kylin.metadata.project.ProjectManager;
 import org.apache.kylin.metadata.project.RealizationEntry;
@@ -64,13 +66,15 @@ public class CubeMetaIngesterTest extends LocalFileMetadataTestCase {
 
     @Test
     public void testHappyIngest() {
-        String srcPath = Thread.currentThread().getContextClassLoader().getResource("cloned_cube_and_model.zip").getPath();
+        String srcPath = Thread.currentThread().getContextClassLoader().getResource("cloned_cube_and_model.zip")
+                .getPath();
         CubeMetaIngester.main(new String[] { "-project", "default", "-srcPath", srcPath, "-overwriteTables", "true",
                 "-forceIngest", "true", "-restoreType", "cube" });
         ProjectInstance project = ProjectManager.getInstance(KylinConfig.getInstanceFromEnv()).getProject("default");
         Assert.assertEquals(1, Collections.frequency(project.getTables(), "DEFAULT.TEST_KYLIN_FACT"));
         Assert.assertTrue(project.getModels().contains("cloned_model"));
-        Assert.assertTrue(project.getRealizationEntries().contains(RealizationEntry.create(RealizationType.CUBE, "cloned_cube")));
+        Assert.assertTrue(
+                project.getRealizationEntries().contains(RealizationEntry.create(RealizationType.CUBE, "cloned_cube")));
 
         getTestConfig().clearManagers();
         CubeInstance instance = CubeManager.getInstance(KylinConfig.getInstanceFromEnv()).getCube("cloned_cube");
@@ -81,11 +85,12 @@ public class CubeMetaIngesterTest extends LocalFileMetadataTestCase {
     public void testHappyIngest2() {
         String srcPath = Thread.currentThread().getContextClassLoader().getResource("benchmark_meta.zip").getPath();
         CubeMetaIngester.main(new String[] { "-project", "default", "-srcPath", srcPath, "-overwriteTables", "true",
-                "-forceIngest", "true", "-restoreType", "cube"  });
+                "-forceIngest", "true", "-restoreType", "cube" });
         ProjectInstance project = ProjectManager.getInstance(KylinConfig.getInstanceFromEnv()).getProject("default");
         Assert.assertEquals(1, Collections.frequency(project.getTables(), "SSB.CUSTOMER"));
         Assert.assertTrue(project.getModels().contains("benchmark_model"));
-        Assert.assertTrue(project.getRealizationEntries().contains(RealizationEntry.create(RealizationType.CUBE, "benchmark_cube")));
+        Assert.assertTrue(project.getRealizationEntries()
+                .contains(RealizationEntry.create(RealizationType.CUBE, "benchmark_cube")));
 
         getTestConfig().clearManagers();
         CubeInstance instance = CubeManager.getInstance(KylinConfig.getInstanceFromEnv()).getCube("benchmark_cube");
@@ -101,7 +106,8 @@ public class CubeMetaIngesterTest extends LocalFileMetadataTestCase {
             @Override
             public boolean matches(Object item) {
                 if (item instanceof IllegalStateException) {
-                    if (((IllegalStateException) item).getMessage().startsWith("Already exist a model called ")) {
+                    if (((IllegalStateException) item).getMessage().startsWith(
+                            "The model calcs_tdvt cannot exist in multiple projects, please resolve the conflicts. ")) {
                         return true;
                     }
                 }
@@ -115,7 +121,7 @@ public class CubeMetaIngesterTest extends LocalFileMetadataTestCase {
 
         String srcPath = doExtractorProject();
         CubeMetaIngester.main(new String[] { "-project", "default", "-srcPath", srcPath, "-overwriteTables", "true",
-                "-forceIngest", "false", "-restoreType", "project"  });
+                "-forceIngest", "false", "-restoreType", "project" });
 
     }
 
@@ -136,7 +142,22 @@ public class CubeMetaIngesterTest extends LocalFileMetadataTestCase {
         // delete the project
         ProjectManager projectManager = ProjectManager.getInstance(KylinConfig.getInstanceFromEnv());
         ProjectInstance project = projectManager.getProject("default");
-        project.getRealizationEntries().clear();
+
+        DataModelManager modelManager = DataModelManager.getInstance(KylinConfig.getInstanceFromEnv());
+        for (DataModelDesc modelDesc : modelManager.getModels("default")) {
+            modelManager.dropModel(modelDesc);
+        }
+
+        CubeManager cubeManager = CubeManager.getInstance(KylinConfig.getInstanceFromEnv());
+        for (RealizationEntry realization : project.getRealizationEntries()) {
+            if (realization.getType() == RealizationType.CUBE) {
+                cubeManager.dropCube(realization.getRealization(), true);
+            }
+
+        }
+
+        ProjectInstance projectInstance = projectManager.getProject("default");
+        projectInstance.getRealizationEntries().clear();
 
         projectManager.dropProject("default");
 
@@ -151,6 +172,71 @@ public class CubeMetaIngesterTest extends LocalFileMetadataTestCase {
 
         Assert.assertNotNull(project);
 
+    }
+
+    @Test
+    public void testBadProjectIngest() throws IOException {
+        thrown.expect(RuntimeException.class);
+
+        //should not break at table duplicate check, should fail at model duplicate check
+        thrown.expectCause(new BaseMatcher<Throwable>() {
+            @Override
+            public boolean matches(Object item) {
+                if (item instanceof IllegalStateException) {
+                    if (((IllegalStateException) item).getMessage().startsWith(
+                            "The model calcs_tdvt cannot exist in multiple projects, please resolve the conflicts. ")) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+            }
+        });
+
+        String srcPath = doExtractorProject();
+
+        ProjectManager projectManager = ProjectManager.getInstance(KylinConfig.getInstanceFromEnv());
+        ProjectInstance project = projectManager.getProject("default");
+        project.removeModel("calcs_tdvt");
+        projectManager.createProject("default1", "ADMIN", "", null);
+        projectManager.addModelToProject("calcs_tdvt", "default1");
+
+        CubeMetaIngester.main(new String[] { "-project", "default", "-srcPath", srcPath, "-overwriteTables", "true",
+                "-forceIngest", "true", "-restoreType", "project" });
+
+    }
+
+    @Test
+    public void testBadCubeIngest() throws IOException {
+        thrown.expect(RuntimeException.class);
+
+        //should not break at table duplicate check, should fail at model duplicate check
+        thrown.expectCause(new BaseMatcher<Throwable>() {
+            @Override
+            public boolean matches(Object item) {
+                if (item instanceof IllegalStateException) {
+                    if (((IllegalStateException) item).getMessage()
+                            .startsWith("The cube ssb cannot exist in multiple models, please resolve the conflicts. ")) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+            }
+        });
+
+        String srcPath = doExtractorProject();
+        CubeManager cubeManager = CubeManager.getInstance(KylinConfig.getInstanceFromEnv());
+        CubeInstance cube = cubeManager.getCube("ssb");
+        cube.getDescriptor().setModelName("ci_inner_join_model");
+        CubeMetaIngester.main(new String[] { "-project", "default", "-srcPath", srcPath, "-overwriteTables", "true",
+                "-forceIngest", "true", "-restoreType", "project" });
     }
 
     private String doExtractorProject() throws IOException {
@@ -183,7 +269,7 @@ public class CubeMetaIngesterTest extends LocalFileMetadataTestCase {
         String cmd = "cd " + files[0].getParent() + " && zip -r " + testDir + " " + files[0].getName();
         cli.execute(cmd);
 
-        return files[0].getParent() + "/" +testDir;
+        return files[0].getParent() + "/" + testDir;
     }
 
 }

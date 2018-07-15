@@ -40,6 +40,7 @@ import org.apache.kylin.metadata.cachesync.Broadcaster;
 import org.apache.kylin.metadata.model.DataModelDesc;
 import org.apache.kylin.metadata.model.DataModelManager;
 import org.apache.kylin.metadata.model.TableDesc;
+import org.apache.kylin.metadata.model.Segments;
 import org.apache.kylin.metadata.project.ProjectInstance;
 import org.apache.kylin.metadata.project.ProjectManager;
 import org.apache.kylin.metadata.realization.RealizationType;
@@ -225,7 +226,7 @@ public class CubeMetaIngester extends AbstractApplication {
 
                 if (!forceIngest && !overwriteTables) {
                     throw new IllegalStateException(
-                            "table already exists with a different version: " + tableDesc.getIdentity()
+                            "Table already exists with a different version: " + tableDesc.getIdentity()
                                     + ". Consider adding -overwriteTables option to force overwriting (with caution)");
                 } else {
                     logger.warn("Overwriting the old table desc: " + tableDesc.getIdentity());
@@ -238,8 +239,9 @@ public class CubeMetaIngester extends AbstractApplication {
         for (DataModelDesc dataModelDesc : srcModelManager.listDataModels()) {
             DataModelDesc existing = modelManager.getDataModelDesc(dataModelDesc.getName());
             if (existing != null) {
-                if (!forceIngest) {
-                    throw new IllegalStateException("Already exist a model called " + dataModelDesc.getName());
+                if (!forceIngest || !dataModelDesc.getProject().equals(existing.getProject())) {
+                    throw new IllegalStateException("The model " + dataModelDesc.getName()
+                            + " cannot exist in multiple projects, please resolve the conflicts. ");
                 } else {
                     logger.warn("Overwriting the old model desc: " + dataModelDesc.getName());
                 }
@@ -247,30 +249,45 @@ public class CubeMetaIngester extends AbstractApplication {
             requiredResources.add(DataModelDesc.concatResourcePath(dataModelDesc.getName()));
         }
 
-        CubeDescManager cubeDescManager = CubeDescManager.getInstance(kylinConfig);
-        for (CubeDesc cubeDesc : srcCubeDescManager.listAllDesc()) {
-            CubeDesc existing = cubeDescManager.getCubeDesc(cubeDesc.getName());
-            if (existing != null) {
-                if (!forceIngest) {
-                    throw new IllegalStateException("Already exist a cube desc called " + cubeDesc.getName());
-                } else {
-                    logger.warn("Overwriting the old cube desc: " + cubeDesc.getName());
-                }
-            }
-            requiredResources.add(CubeDesc.concatResourcePath(cubeDesc.getName()));
-        }
-
         CubeManager cubeManager = CubeManager.getInstance(kylinConfig);
         for (CubeInstance cube : srcCubeManager.listAllCubes()) {
             CubeInstance existing = cubeManager.getCube(cube.getName());
             if (existing != null) {
-                if (!forceIngest) {
-                    throw new IllegalStateException("Already exist a cube called " + cube.getName());
+                Segments segments = existing.getSegments();
+                if (segments.size() != 0) {
+                    throw new IllegalStateException(
+                            "Please purge segments of " + cube.getName() + " before restoring metadata.");
+                }
+                // check they are in same model.
+                if (!forceIngest
+                        || !cube.getDescriptor().getModelName().equals(existing.getDescriptor().getModelName())) {
+                    throw new IllegalStateException("The cube " + cube.getName()
+                            + " cannot exist in multiple models, please resolve the conflicts. ");
                 } else {
                     logger.warn("Overwriting the old cube: " + cube.getName());
                 }
             }
             requiredResources.add(CubeInstance.concatResourcePath(cube.getName()));
+        }
+
+        CubeDescManager cubeDescManager = CubeDescManager.getInstance(kylinConfig);
+        for (CubeDesc cubeDesc : srcCubeDescManager.listAllDesc()) {
+            CubeDesc existing = cubeDescManager.getCubeDesc(cubeDesc.getName());
+            if (existing != null) {
+                Segments segments = cubeManager.getCube(cubeDesc.getName()).getSegments();
+                if (segments.size() != 0) {
+                    throw new IllegalStateException(
+                            "Please purge segments of " + cubeDesc.getName() + " before restoring metadata.");
+                }
+                // check they are in same model.
+                if (!forceIngest || !cubeDesc.getModelName().equals(existing.getModelName())) {
+                    throw new IllegalStateException("The cube" + cubeDesc.getName()
+                            + " cannot exist in multiple models, please resolve the conflicts. ");
+                } else {
+                    logger.warn("Overwriting the old cube desc: " + cubeDesc.getName());
+                }
+            }
+            requiredResources.add(CubeDesc.concatResourcePath(cubeDesc.getName()));
         }
 
     }
