@@ -162,6 +162,7 @@ public class HiveMRInput implements IMRInput {
 
         @Override
         public void addStepPhase1_DoCreateFlatTable(DefaultChainedExecutable jobFlow) {
+            logger.info("addStepPhase1_DoCreateFlatTable");
             String cubeName = CubingExecutableUtil.getCubeName(jobFlow.getParams());
             String modelName = jobFlow.getParam("model_name");
 
@@ -191,26 +192,7 @@ public class HiveMRInput implements IMRInput {
             } else {
                 jobWorkingDir = JobBuilderSupport.getJobWorkingDir(hdfsWorkingDir, jobFlow.getId());
             }
-
-            if (KylinConfig.getInstanceFromEnv().getHiveTableDirCreateFirst()) {
-                // Create work dir to avoid hive create it,
-                // the difference is that the owners are different.
-                checkAndCreateWorkDir(jobWorkingDir);
-            }
             return jobWorkingDir;
-        }
-
-        private void checkAndCreateWorkDir(String jobWorkingDir) {
-            try {
-                Path path = new Path(jobWorkingDir);
-                FileSystem fileSystem = HadoopUtil.getFileSystem(path);
-                if (!fileSystem.exists(path)) {
-                    logger.info("Create jobWorkDir : " + jobWorkingDir);
-                    fileSystem.mkdirs(path);
-                }
-            } catch (IOException e) {
-                logger.error("Could not create lookUp table dir : " + jobWorkingDir);
-            }
         }
 
         private AbstractExecutable createRedistributeFlatHiveTableStep(String hiveInitStatements, String cubeName) {
@@ -292,6 +274,7 @@ public class HiveMRInput implements IMRInput {
             step.setInitStatement(hiveInitStatements);
             step.setCreateTableStatement(dropTableHql + createTableHql + insertDataHqls);
             step.setName(ExecutableConstants.STEP_NAME_CREATE_FLAT_HIVE_TABLE);
+            step.setWorkingDir(jobWorkingDir);
 
             if (cubeName != null) {
                 CubingExecutableUtil.setCubeName(cubeName, step.getParams());
