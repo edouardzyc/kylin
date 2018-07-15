@@ -483,11 +483,12 @@ public class ProjectDictionaryManager {
         KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
         Path sDictDir = null;
         if (kylinConfig.isProjectIsolationEnabled()) {
-            sDictDir = new Path(kylinConfig.getHdfsWorkingDirectory() + project + "/" + PathBuilder.SPARDER_DICT_ROOT);
+            sDictDir = new Path(
+                    kylinConfig.getReadHdfsWorkingDirectory() + project + "/" + PathBuilder.SPARDER_DICT_ROOT);
         } else {
-            sDictDir = new Path(kylinConfig.getHdfsWorkingDirectory() + PathBuilder.SPARDER_DICT_ROOT);
+            sDictDir = new Path(kylinConfig.getReadHdfsWorkingDirectory() + PathBuilder.SPARDER_DICT_ROOT);
         }
-        FileSystem workingFileSystem = HadoopUtil.getWorkingFileSystem();
+        FileSystem workingFileSystem = HadoopUtil.getReadFileSystem();
         if (!workingFileSystem.exists(sDictDir)) {
             workingFileSystem.mkdirs(sDictDir);
         }
