@@ -57,6 +57,7 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
         }
 
     }
+
     @Override
     public int getMinId() {
         return this.min;
@@ -117,7 +118,6 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
         }
     }
 
-
     /**
     * <p>
     * - if roundingFlag=0, throw IllegalArgumentException; <br>
@@ -127,23 +127,28 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
     * Reference org.apache.kylin.common.util.Dictionary#getIdFromValue(java.lang.Object, int)
     * if rounding cannot find a smaller or bigger ID, we need throw an IllegalArgumentException.
     */
-    private int transformReverseId(int oriId, int roundingFlag) {
+    private int transformReverseId(int oriId, T value, int roundingFlag) {
         int id = oriId;
         if (reverseOffset != null) {
             if (roundingFlag < 0) {
-                while (id >= 0 && reverseOffset[id] == NULL_ID[idLength]) {
-                    if (id == 0) {
-                        throw new IllegalArgumentException("Id: " + oriId + " smaller than the smallest value in segment dictionary.");
+
+                for (int i = id; i >= 0; i--) {
+                    id = i;
+                    if (reverseOffset[id] != NULL_ID[idLength]) {
+                        break;
                     }
-                    id--;
                 }
             } else if (roundingFlag > 0) {
-                while (id < reverseOffset.length && reverseOffset[id] == NULL_ID[idLength]) {
-                    if (id == reverseOffset.length - 1) {
-                        throw new IllegalArgumentException("Id: " + oriId + " bigger than the biggest value in segment dictionary.");
+
+                for (int i = id; i < reverseOffset.length; i++) {
+                    id = i;
+                    if (reverseOffset[id] != NULL_ID[idLength]) {
+                        break;
                     }
-                    id++;
                 }
+            }
+            if (reverseOffset[id] == NULL_ID[idLength]) {
+                throw new IllegalArgumentException("Value : " + value + " not exists");
             }
             return reverseOffset[id];
         } else {
@@ -168,7 +173,7 @@ public class DisguiseTrieDictionary<T> extends Dictionary<T> {
         }
         // for project dictionary.
         int oriId = dictionary.getIdFromValue(value, roundingFlag);
-        return transformReverseId(oriId, roundingFlag);
+        return transformReverseId(oriId, value, roundingFlag);
     }
 
     @Override
