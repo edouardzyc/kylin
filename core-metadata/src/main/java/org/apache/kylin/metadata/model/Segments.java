@@ -179,7 +179,7 @@ public class Segments<T extends ISegment> extends ArrayList<T> implements Serial
         Segments volatileSegs = new Segments();
         for(T seg: segs) {
             if(seg.getTSRange().end.v + volatileRange >= latestSegEndTs) {
-                logger.warn("segment in volatile range: seg:" + seg.toString() +
+                logger.debug("segment in volatile range: seg:" + seg.toString() +
                         "rangeStart:" + seg.getTSRange().start.v + ", rangeEnd" + seg.getTSRange().end.v);
                 volatileSegs.add(seg);
             }
@@ -217,6 +217,11 @@ public class Segments<T extends ISegment> extends ArrayList<T> implements Serial
 
         removeLatestSegmentByVolatileRange(readySegs, volatileRange);
 
+        if (readySegs.size() < 2) {
+            return null;
+        }
+
+        boolean isAutoMergeSegmentGapAllowed = readySegs.get(0).getConfig().isAutoMergeGapAllowed();
         // exclude those already under merging segments
         readySegs.removeAll(mergingSegs);
 
@@ -229,7 +234,7 @@ public class Segments<T extends ISegment> extends ArrayList<T> implements Serial
                 ISegment seg = readySegs.get(s);
                 TSRange tsRange = new TSRange(seg.getTSRange().start.v, seg.getTSRange().start.v + toMergeRange);
                 Pair<T, T> p = readySegs.getSubList(s, readySegs.size()) //
-                        .findMergeOffsetsByDateRange(tsRange, toMergeRange);
+                        .findMergeOffsetsByDateRange(tsRange, toMergeRange, isAutoMergeSegmentGapAllowed);
                 if (p != null && p.getSecond().getTSRange().end.v - p.getFirst().getTSRange().start.v >= toMergeRange)
                     return new SegmentRange(p.getFirst().getSegRange().start.v, p.getSecond().getSegRange().end.v);
             }
@@ -238,7 +243,12 @@ public class Segments<T extends ISegment> extends ArrayList<T> implements Serial
         return null;
     }
 
+
     public Pair<T, T> findMergeOffsetsByDateRange(TSRange tsRange, long skipSegDateRangeCap) {
+        return findMergeOffsetsByDateRange(tsRange, skipSegDateRangeCap, false);
+    }
+
+    public Pair<T, T> findMergeOffsetsByDateRange(TSRange tsRange, long skipSegDateRangeCap, boolean gapAllowed) {
         // must be offset cube
         Segments result = new Segments();
         for (ISegment seg : this) {
@@ -251,7 +261,8 @@ public class Segments<T extends ISegment> extends ArrayList<T> implements Serial
                     break;
 
                 // reject holes
-                if (result.size() > 0 && !result.getLast().getSegRange().connects(seg.getSegRange()))
+                if (gapAllowed == false && (result.size() > 0
+                        && !result.getLast().getSegRange().connects(seg.getSegRange())))
                     break;
 
                 result.add(seg);
@@ -441,9 +452,9 @@ public class Segments<T extends ISegment> extends ArrayList<T> implements Serial
             boolean endFit = pair.getSecond();
 
             if (!startFit)
-                logger.warn("NEW segment start does not fit/connect with other segments: " + seg);
+                logger.debug("NEW segment start does not fit/connect with other segments: " + seg);
             if (!endFit)
-                logger.warn("NEW segment end does not fit/connect with other segments: " + seg);
+                logger.debug("NEW segment end does not fit/connect with other segments: " + seg);
         }
     }
 
@@ -485,4 +496,62 @@ public class Segments<T extends ISegment> extends ArrayList<T> implements Serial
         }
         return true;
     }
+
+
+    public List<SegmentRange> mergeConsecutiveSegmentsByFiles() {
+        return mergeConsecutiveSegmentsByFiles(1000L);
+    }
+
+    public List<SegmentRange> mergeConsecutiveSegmentsByFiles(long maxOffset) {
+        Segments<T> readySegs = getSegments(SegmentStatusEnum.READY);
+
+        Segments mergingSegs = new Segments();
+
+        for (ISegment building : getBuildingSegments()) {
+            // exclude those under-merging segs
+            for (ISegment ready : readySegs) {
+                if (building.getSegRange().contains(ready.getSegRange())) {
+                    mergingSegs.add(ready);
+                }
+            }
+        }
+
+        readySegs.removeAll(mergingSegs);
+
+        Collections.sort(readySegs);
+        List<SegmentRange> result = new ArrayList<>();
+        ISegment start = null, end = null;
+        for (ISegment segment : readySegs) {
+            if (start == null) {
+                start = segment;
+                end = segment;
+                continue;
+            }
+
+            SegmentRange<Long> sg0 = start.getSegRange();
+            SegmentRange<Long> sg1 = end.getSegRange();
+            SegmentRange<Long> sg2 = segment.getSegRange();
+
+            if (sg1.connects(sg2) && (sg1.end.v - sg0.start.v) <= maxOffset) {
+                // connect, then move to next
+                end = segment;
+                continue;
+            } else {
+                // disconnect, merge start and end if they're not the same
+                if (start != end) {
+                    // merge start to end
+                    result.add(new SegmentRange(start.getSegRange().start, end.getSegRange().end));
+                }
+                start = segment;
+                end = segment;
+            }
+        }
+
+        if (end != null && start != end) {
+            result.add(new SegmentRange(start.getSegRange().start, end.getSegRange().end));
+        }
+
+        return result;
+    }
+
 }

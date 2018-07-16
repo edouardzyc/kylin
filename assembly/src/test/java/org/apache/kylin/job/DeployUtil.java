@@ -26,6 +26,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,6 +61,8 @@ import com.google.common.io.Files;
 
 public class DeployUtil {
     private static final Logger logger = LoggerFactory.getLogger(DeployUtil.class);
+
+    private static int rowCount = 10000;
 
     public static void initCliWorkDir() throws IOException {
         execCliCommand("rm -rf " + getHadoopCliWorkingDir());
@@ -121,6 +124,44 @@ public class DeployUtil {
 
     // ============================================================================
 
+    public static List<String> prepareTestDataForIncFileCubes(String modelName, int fileNum) throws Exception {
+        List<String> fileList = new ArrayList<>();
+        DataModelManager modelMgr = DataModelManager.getInstance(config());
+        DataModelDesc model = modelMgr.getDataModelDesc(modelName);
+        TableRef tableRef = model.getRootFactTable();
+
+        String tableName = tableRef.getTableIdentity();
+        String path = getHadoopCliWorkingDir() + "/" + tableName;
+
+        String loadToFileHql = generateLoadToFileHql(path, tableName, fileNum);
+        String hiveCmd = "hive -e " + "\"" + loadToFileHql + "\"";
+        execCliCommand(hiveCmd);
+        String filePreFix = "00000";
+        String fileSuffix = "_0";
+        for (int i = 0; i < fileNum; i++) {
+            fileList.add(path + "/" + filePreFix + i + fileSuffix);
+        }
+        // an empty file
+        String emptyFileName = path + "/" + filePreFix + fileNum +  fileSuffix;
+        execCliCommand("hadoop fs -touchz " + emptyFileName);
+        fileList.add(emptyFileName);
+
+
+        return fileList;
+    }
+
+    private static String generateLoadToFileHql(String path, String tableName, int fileNum) {
+        StringBuilder hql = new StringBuilder();
+        hql.append("set mapreduce.job.reduces=" + fileNum + ";\n");
+        hql.append("set hive.merge.mapredfiles=false;\n");
+        hql.append("INSERT OVERWRITE DIRECTORY ");
+        hql.append("'" + path + "'");
+        hql.append(" ROW FORMAT DELIMITED FIELDS TERMINATED BY ','  select * from ");
+        hql.append(tableName);
+        hql.append(" DISTRIBUTE BY RAND();");
+        return hql.toString();
+    }
+
     public static void prepareTestDataForNormalCubes(String modelName) throws Exception {
 
         boolean buildCubeUsingProvidedData = Boolean.parseBoolean(System.getProperty("buildCubeUsingProvidedData"));
@@ -129,7 +170,7 @@ public class DeployUtil {
 
             // data is generated according to cube descriptor and saved in resource store
             DataModelManager mgr = DataModelManager.getInstance(KylinConfig.getInstanceFromEnv());
-            ModelDataGenerator gen = new ModelDataGenerator(mgr.getDataModelDesc(modelName), 10000);
+            ModelDataGenerator gen = new ModelDataGenerator(mgr.getDataModelDesc(modelName), rowCount);
             gen.generate();
         } else {
             System.out.println("build normal cubes with provided dataset");

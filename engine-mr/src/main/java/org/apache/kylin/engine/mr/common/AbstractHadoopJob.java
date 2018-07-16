@@ -203,10 +203,10 @@ public abstract class AbstractHadoopJob extends Configured implements Tool {
         Configuration jobConf = job.getConfiguration();
         String classpath = jobConf.get(MAP_REDUCE_CLASSPATH);
         if (classpath == null || classpath.length() == 0) {
-            logger.info("Didn't find " + MAP_REDUCE_CLASSPATH
+            logger.debug("Didn't find " + MAP_REDUCE_CLASSPATH
                     + " in job configuration, will run 'mapred classpath' to get the default value.");
             classpath = getDefaultMapRedClasspath();
-            logger.info("The default mapred classpath is: " + classpath);
+            logger.debug("The default mapred classpath is: " + classpath);
         }
 
         jobConf.set(MAP_REDUCE_CLASSPATH, classpath);

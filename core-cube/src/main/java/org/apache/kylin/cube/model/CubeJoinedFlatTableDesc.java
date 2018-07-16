@@ -66,12 +66,12 @@ public class CubeJoinedFlatTableDesc implements IJoinedFlatTableDesc, Serializab
         this.cubeDesc = cubeDesc;
         this.cubeSegment = cubeSegment;
 
-        this.tableName = makeTableName(cubeDesc, cubeSegment);
+        this.tableName = makeIntermediateTableName(cubeDesc, cubeSegment);
         this.includingDerived = includingDerived;
         initParseCubeDesc();
     }
 
-    protected String makeTableName(CubeDesc cubeDesc, CubeSegment cubeSegment) {
+    static String makeIntermediateTableName(CubeDesc cubeDesc, CubeSegment cubeSegment) {
         if (cubeSegment == null) {
             return "kylin_intermediate_" + cubeDesc.getName().toLowerCase();
         } else {

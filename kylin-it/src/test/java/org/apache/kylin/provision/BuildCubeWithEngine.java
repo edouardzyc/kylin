@@ -72,11 +72,11 @@ import com.google.common.collect.Lists;
 
 public class BuildCubeWithEngine {
 
-    private CubeManager cubeManager;
+    protected CubeManager cubeManager;
     private CubeDescManager cubeDescManager;
     private DefaultScheduler scheduler;
     protected ExecutableManager jobService;
-    private static boolean fastBuildMode = false;
+    protected static boolean fastBuildMode = false;
     private static int engineType;
 
     private static final Logger logger = LoggerFactory.getLogger(BuildCubeWithEngine.class);
@@ -330,7 +330,6 @@ public class BuildCubeWithEngine {
         return true;
     }
 
-
     @SuppressWarnings("unused")
     // called by reflection
     private boolean testCALCTDVTCube() throws Exception {
@@ -351,7 +350,7 @@ public class BuildCubeWithEngine {
 
     @SuppressWarnings("unused")
     // called by reflection
-    private boolean testInnerJoinCube() throws Exception {
+    protected boolean testInnerJoinCube() throws Exception {
 
         String cubeName = "ci_inner_join_cube";
         clearSegment(cubeName);
@@ -368,7 +367,7 @@ public class BuildCubeWithEngine {
         }
     }
 
-    private void clearSegment(String cubeName) throws Exception {
+    protected void clearSegment(String cubeName) throws Exception {
         CubeInstance cube = cubeManager.getCube(cubeName);
         cubeManager.updateCubeDropSegments(cube, cube.getSegments());
     }
@@ -431,7 +430,7 @@ public class BuildCubeWithEngine {
         }
     }
 
-    private void checkEmptySegRangeInfo(CubeInstance cube) {
+    protected void checkEmptySegRangeInfo(CubeInstance cube) {
         CubeSegment segment = getLastModifiedSegment(cube);
         for (String colId : segment.getDimensionRangeInfoMap().keySet()) {
             DimensionRangeInfo range = segment.getDimensionRangeInfoMap().get(colId);
@@ -441,7 +440,7 @@ public class BuildCubeWithEngine {
         }
     }
 
-    private void checkNormalSegRangeInfo(CubeInstance cube) {
+    protected void checkNormalSegRangeInfo(CubeInstance cube) {
         CubeSegment segment = getLastModifiedSegment(cube);
         if (segment.getModel().getPartitionDesc().isPartitioned()) {
             TblColRef colRef = segment.getModel().getPartitionDesc().getPartitionDateColumnRef();

@@ -17,11 +17,7 @@
 */
 package org.apache.kylin.source.hive;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,6 +25,11 @@ import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.common.util.HiveCmdBuilder;
 import org.apache.kylin.common.util.Pair;
+import org.apache.kylin.cube.CubeInstance;
+import org.apache.kylin.cube.CubeManager;
+import org.apache.kylin.cube.CubeSegment;
+import org.apache.kylin.cube.model.FactInputSubstitute;
+import org.apache.kylin.engine.mr.steps.CubingExecutableUtil;
 import org.apache.kylin.job.common.PatternedLogger;
 import org.apache.kylin.job.constant.ExecutableConstants;
 import org.apache.kylin.job.exception.ExecuteException;
@@ -37,6 +38,11 @@ import org.apache.kylin.job.execution.ExecutableContext;
 import org.apache.kylin.job.execution.ExecuteResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  */
@@ -88,15 +94,44 @@ public class CreateFlatHiveTableStep extends AbstractExecutable {
         return length;
     }
 
+    private CubeInstance getCube(ExecutableContext context) {
+        String cubeName = CubingExecutableUtil.getCubeName(getParams());
+        if (StringUtils.isEmpty(cubeName)) {
+            return null;
+        }
+        CubeManager manager = CubeManager.getInstance(context.getConfig());
+        return manager.getCube(cubeName);
+    }
+
     @Override
     protected ExecuteResult doWork(ExecutableContext context) throws ExecuteException {
-        KylinConfig config = getConfig();
+        KylinConfig config = context.getConfig();
+        CubeInstance cube = getCube(context);
+        if (cube != null) {
+            config = cube.getConfig();
+        }
+
         try {
+            setupFactInputSubstituteIfNeeded(context);
             createFlatHiveTable(config);
             return new ExecuteResult(ExecuteResult.State.SUCCEED, stepLogger.getBufferedLog());
         } catch (Exception e) {
             logger.error("job:" + getId() + " execute finished with exception", e);
             return new ExecuteResult(ExecuteResult.State.ERROR, stepLogger.getBufferedLog(), e);
+        }
+    }
+
+    private void setupFactInputSubstituteIfNeeded(ExecutableContext context) throws IOException {
+        CubeInstance cube = getCube(context);
+        if (cube == null) {
+            return;
+        }
+        String segId = CubingExecutableUtil.getSegmentId(getParams());
+        CubeSegment seg = cube.getSegmentById(segId);
+        FactInputSubstitute sub = FactInputSubstitute.getInstance(seg);
+        if (sub != null) {
+            logger.debug("Calling FactInputSubstitute.setupFactTableBeforeBuild() on " + sub);
+            sub.setupFactTableBeforeBuild();
         }
     }
 

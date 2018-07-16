@@ -28,12 +28,14 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.cube.CubeSegment;
+import org.apache.kylin.cube.model.FactInputSubstitute;
 import org.apache.kylin.job.engine.JobEngineConfig;
 import org.apache.kylin.metadata.model.DataModelDesc;
 import org.apache.kylin.metadata.model.IJoinedFlatTableDesc;
 import org.apache.kylin.metadata.model.JoinDesc;
 import org.apache.kylin.metadata.model.JoinTableDesc;
 import org.apache.kylin.metadata.model.PartitionDesc;
+import org.apache.kylin.metadata.model.PartitionDesc.IPartitionConditionBuilder;
 import org.apache.kylin.metadata.model.SegmentRange;
 import org.apache.kylin.metadata.model.TableRef;
 import org.apache.kylin.metadata.model.TblColRef;
@@ -154,23 +156,13 @@ public class JoinedFlatTable {
         return sql.toString();
     }
 
-    public static String generateCountDataStatement(IJoinedFlatTableDesc flatDesc, final String outputDir) {
-        final StringBuilder sql = new StringBuilder();
-        final TableRef rootTbl = flatDesc.getDataModel().getRootFactTable();
-        sql.append("dfs -mkdir -p " + outputDir + ";\n");
-        sql.append("INSERT OVERWRITE DIRECTORY '" + outputDir + "' SELECT count(*) FROM " + rootTbl.getTableIdentity()
-                + " " + rootTbl.getAlias() + "\n");
-        appendWhereStatement(flatDesc, sql);
-        return sql.toString();
-    }
-
     public static void appendJoinStatement(IJoinedFlatTableDesc flatDesc, StringBuilder sql, boolean singleLine) {
         final String sep = singleLine ? " " : "\n";
         Set<TableRef> dimTableCache = new HashSet<>();
 
         DataModelDesc model = flatDesc.getDataModel();
         TableRef rootTable = model.getRootFactTable();
-        sql.append("FROM " + rootTable.getTableIdentity() + " as " + rootTable.getAlias() + " " + sep);
+        sql.append("FROM " + getRootFactTableNameConcerningSubstitute(flatDesc) + " as " + rootTable.getAlias() + " " + sep);
 
         for (JoinTableDesc lookupDesc : model.getJoinTables()) {
             JoinDesc join = lookupDesc.getJoin();
@@ -199,16 +191,20 @@ public class JoinedFlatTable {
         }
     }
 
+    private static String getRootFactTableNameConcerningSubstitute(IJoinedFlatTableDesc flatDesc) {
+        FactInputSubstitute sub = FactInputSubstitute.getInstance(flatDesc.getSegment());
+        if (sub == null)
+            return flatDesc.getDataModel().getRootFactTable().getTableIdentity();
+        else
+            return sub.getFactTableSubstitute();
+    }
+
     private static void appendDistributeStatement(StringBuilder sql, TblColRef redistCol) {
         sql.append(" DISTRIBUTE BY ").append(colName(redistCol)).append(";\n");
     }
 
     private static void appendClusterStatement(StringBuilder sql, TblColRef clusterCol) {
         sql.append(" CLUSTER BY ").append(colName(clusterCol)).append(";\n");
-    }
-
-    private static void appendWhereStatement(IJoinedFlatTableDesc flatDesc, StringBuilder sql) {
-        appendWhereStatement(flatDesc, sql, false);
     }
 
     private static void appendWhereStatement(IJoinedFlatTableDesc flatDesc, StringBuilder sql, boolean singleLine) {
@@ -222,21 +218,31 @@ public class JoinedFlatTable {
             whereBuilder.append(" AND (").append(model.getFilterCondition()).append(") ");
         }
 
-        if (flatDesc.getSegment() != null) {
-            PartitionDesc partDesc = model.getPartitionDesc();
-            if (partDesc != null && partDesc.getPartitionDateColumn() != null) {
-                SegmentRange segRange = flatDesc.getSegRange();
-
-                if (segRange != null && !segRange.isInfinite()) {
-                    whereBuilder.append(" AND (");
-                    whereBuilder.append(partDesc.getPartitionConditionBuilder().buildDateRangeCondition(partDesc,
-                            flatDesc.getSegment(), segRange));
-                    whereBuilder.append(")" + sep);
-                }
+        PartitionDesc partDesc = model.getPartitionDesc();
+        SegmentRange segRange = flatDesc.getSegRange();
+        if (flatDesc.getSegment() != null //
+                && partDesc != null && partDesc.getPartitionDateColumn() != null //
+                && segRange != null && !segRange.isInfinite()) {
+            
+            IPartitionConditionBuilder builder = getPartitionConditionBuilderConcerningSubstitute(flatDesc);
+            if (builder != null) {
+                whereBuilder.append(" AND (");
+                whereBuilder.append(builder.buildDateRangeCondition(partDesc, flatDesc.getSegment(), segRange));
+                whereBuilder.append(")" + sep);
             }
         }
 
         sql.append(whereBuilder.toString());
+    }
+
+    private static IPartitionConditionBuilder getPartitionConditionBuilderConcerningSubstitute(
+            IJoinedFlatTableDesc flatDesc) {
+        
+        FactInputSubstitute sub = FactInputSubstitute.getInstance(flatDesc.getSegment());
+        if (sub == null)
+            return flatDesc.getDataModel().getPartitionDesc().getPartitionConditionBuilder();
+        else
+            return sub.getPartitionConditionBuilder();
     }
 
     private static String colName(TblColRef col) {

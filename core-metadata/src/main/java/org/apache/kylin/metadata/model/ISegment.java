@@ -24,6 +24,8 @@ import org.apache.kylin.metadata.model.SegmentRange.TSRange;
 public interface ISegment extends Comparable<ISegment> {
 
     public KylinConfig getConfig();
+
+    public String getUuid();
     
     public String getName();
 

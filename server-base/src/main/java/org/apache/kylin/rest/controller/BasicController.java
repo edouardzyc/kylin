@@ -35,6 +35,7 @@ import org.apache.kylin.rest.exception.BadRequestException;
 import org.apache.kylin.rest.exception.ForbiddenException;
 import org.apache.kylin.rest.exception.InternalErrorException;
 import org.apache.kylin.rest.exception.NotFoundException;
+import org.apache.kylin.rest.exception.TooManyRequestException;
 import org.apache.kylin.rest.exception.UnauthorizedException;
 import org.apache.kylin.rest.msg.Message;
 import org.apache.kylin.rest.msg.MsgPicker;
@@ -89,7 +90,7 @@ public class BasicController {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(BadRequestException.class)
+    @ExceptionHandler({BadRequestException.class, IllegalArgumentException.class})
     @ResponseBody
     ErrorResponse handleBadRequest(HttpServletRequest req, Exception ex) {
         logger.error("", ex);
@@ -100,6 +101,13 @@ public class BasicController {
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseBody
     ErrorResponse handleUnauthorized(HttpServletRequest req, Exception ex) {
+        return new ErrorResponse(req.getRequestURL().toString(), ex);
+    }
+
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    @ExceptionHandler(TooManyRequestException.class)
+    @ResponseBody
+    ErrorResponse handleTooManyRequest(HttpServletRequest req, Exception ex) {
         return new ErrorResponse(req.getRequestURL().toString(), ex);
     }
 

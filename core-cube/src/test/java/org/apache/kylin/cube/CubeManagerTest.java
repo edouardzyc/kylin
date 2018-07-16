@@ -431,6 +431,68 @@ public class CubeManagerTest extends LocalFileMetadataTestCase {
     }
 
 
+    @Test
+    public void testMergeInnerSegmentsByFiles() throws Exception {
+        CubeManager mgr = CubeManager.getInstance(getTestConfig());
+        CubeInstance cube = mgr.getCube("test_kylin_cube_with_slr_empty");
+
+        cube = mgr.getCube(cube.getName());
+
+        // no segment at first
+        assertEquals(0, cube.getSegments().size());
+
+        // append first
+        CubeSegment seg1 = mgr.appendSegment(cube, null, new SegmentRange(1000L, 1001L), null, null);
+        mgr.updateCubeSegStatus(seg1, SegmentStatusEnum.READY);
+
+        List<SegmentRange> canMergedSegs = cube.getSegments().mergeConsecutiveSegmentsByFiles();
+        assertTrue(canMergedSegs.size() == 0);
+
+        CubeSegment seg2 = mgr.appendSegment(cube, null, new SegmentRange(1001L, 1002L), null, null);
+        mgr.updateCubeSegStatus(seg2, SegmentStatusEnum.READY);
+
+        cube = mgr.getCube(cube.getName());
+        canMergedSegs = cube.getSegments().mergeConsecutiveSegmentsByFiles();
+        assertTrue(canMergedSegs.size() == 1);
+        assertEquals(new SegmentRange(1000L, 1002L), canMergedSegs.get(0));
+
+
+        CubeSegment seg3 = mgr.appendSegment(cube, null, new SegmentRange(2000L, 2001L), null, null);
+        mgr.updateCubeSegStatus(seg3, SegmentStatusEnum.READY);
+
+        cube = mgr.getCube(cube.getName());
+        canMergedSegs = cube.getSegments().mergeConsecutiveSegmentsByFiles();
+        assertTrue(canMergedSegs.size() == 1);
+        assertEquals(new SegmentRange(1000L, 1002L), canMergedSegs.get(0));
+
+
+        CubeSegment seg4 = mgr.appendSegment(cube, null, new SegmentRange(2001L, 2002L), null, null);
+        mgr.updateCubeSegStatus(seg4, SegmentStatusEnum.READY);
+
+        cube = mgr.getCube(cube.getName());
+        canMergedSegs = cube.getSegments().mergeConsecutiveSegmentsByFiles();
+        assertTrue(canMergedSegs.size() == 2);
+        assertEquals(new SegmentRange(2000L, 2002L), canMergedSegs.get(1));
+
+
+        CubeSegment seg5 = mgr.appendSegment(cube, null, new SegmentRange(2002L, 3000L), null, null);
+        mgr.updateCubeSegStatus(seg5, SegmentStatusEnum.READY);
+
+        cube = mgr.getCube(cube.getName());
+        canMergedSegs = cube.getSegments().mergeConsecutiveSegmentsByFiles();
+        assertTrue(canMergedSegs.size() == 2);
+        assertEquals(new SegmentRange(2000L, 3000L), canMergedSegs.get(1));
+
+        CubeSegment seg6 = mgr.appendSegment(cube, null, new SegmentRange(3000L, 3001L), null, null);
+        mgr.updateCubeSegStatus(seg5, SegmentStatusEnum.READY);
+
+        cube = mgr.getCube(cube.getName());
+        canMergedSegs = cube.getSegments().mergeConsecutiveSegmentsByFiles();
+        assertTrue(canMergedSegs.size() == 2);
+        assertEquals(new SegmentRange(2000L, 3000L), canMergedSegs.get(1));
+
+    }
+
     public CubeDescManager getCubeDescManager() {
         return CubeDescManager.getInstance(getTestConfig());
     }

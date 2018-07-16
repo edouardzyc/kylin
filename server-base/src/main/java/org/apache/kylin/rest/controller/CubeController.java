@@ -61,6 +61,9 @@ import org.apache.kylin.rest.exception.BadRequestException;
 import org.apache.kylin.rest.exception.ForbiddenException;
 import org.apache.kylin.rest.exception.InternalErrorException;
 import org.apache.kylin.rest.exception.NotFoundException;
+import org.apache.kylin.rest.exception.TooManyRequestException;
+import org.apache.kylin.rest.msg.Message;
+import org.apache.kylin.rest.msg.MsgPicker;
 import org.apache.kylin.rest.request.CubeRequest;
 import org.apache.kylin.rest.request.JobBuildRequest;
 import org.apache.kylin.rest.request.JobBuildRequest2;
@@ -377,13 +380,12 @@ public class CubeController extends BasicController {
             String buildType, boolean force) {
         try {
             String submitter = SecurityContextHolder.getContext().getAuthentication().getName();
+            checkCubeExists(cubeName);
             CubeInstance cube = jobService.getCubeManager().getCube(cubeName);
 
-            if (cube == null) {
-                throw new InternalErrorException("Cannot find cube " + cubeName);
-            }
+            checkBuildingSegment(cube);
             return jobService.submitJob(cube, tsRange, segRange, sourcePartitionOffsetStart, sourcePartitionOffsetEnd,
-                    CubeBuildTypeEnum.valueOf(buildType), force, submitter);
+                    null, CubeBuildTypeEnum.valueOf(buildType), force, submitter);
         } catch (Throwable e) {
             logger.error(e.getLocalizedMessage(), e);
             throw new InternalErrorException(e.getLocalizedMessage(), e);
@@ -401,11 +403,9 @@ public class CubeController extends BasicController {
     public JobInstance optimize(@PathVariable String cubeName, @RequestBody JobOptimizeRequest jobOptimizeRequest) {
         try {
             String submitter = SecurityContextHolder.getContext().getAuthentication().getName();
+            checkCubeExists(cubeName);
             CubeInstance cube = jobService.getCubeManager().getCube(cubeName);
 
-            if (cube == null) {
-                throw new InternalErrorException("Cannot find cube " + cubeName);
-            }
             logger.info("cuboid recommend:" + jobOptimizeRequest.getCuboidsRecommend());
             return jobService.submitOptimizeJob(cube, jobOptimizeRequest.getCuboidsRecommend(), submitter).getFirst();
         } catch (BadRequestException e) {
@@ -431,14 +431,12 @@ public class CubeController extends BasicController {
     public JobInstance recoverSegmentOptimize(@PathVariable String cubeName, @PathVariable String segmentID) {
         try {
             String submitter = SecurityContextHolder.getContext().getAuthentication().getName();
+            checkCubeExists(cubeName);
             CubeInstance cube = jobService.getCubeManager().getCube(cubeName);
-            if (cube == null) {
-                throw new InternalErrorException("Cannot find cube " + cubeName);
-            }
 
             CubeSegment segment = cube.getSegmentById(segmentID);
             if (segment == null) {
-                throw new InternalErrorException("Cannot find segment '" + segmentID + "'");
+                throw new NotFoundException("Cannot find segment '" + segmentID + "'");
             }
 
             return jobService.submitRecoverSegmentOptimizeJob(segment, submitter);
@@ -455,11 +453,8 @@ public class CubeController extends BasicController {
     @ResponseBody
     public CubeInstance disableCube(@PathVariable String cubeName) {
         try {
+            checkCubeExists(cubeName);
             CubeInstance cube = cubeService.getCubeManager().getCube(cubeName);
-
-            if (cube == null) {
-                throw new InternalErrorException("Cannot find cube " + cubeName);
-            }
 
             return cubeService.disableCube(cube);
         } catch (Exception e) {
@@ -473,11 +468,8 @@ public class CubeController extends BasicController {
     @ResponseBody
     public CubeInstance purgeCube(@PathVariable String cubeName) {
         try {
+            checkCubeExists(cubeName);
             CubeInstance cube = cubeService.getCubeManager().getCube(cubeName);
-
-            if (cube == null) {
-                throw new InternalErrorException("Cannot find cube '" + cubeName + "'");
-            }
 
             //            if (cube.getSegments() != null && cube.getBuildingSegments().size() > 0) {
             //                int num = cube.getBuildingSegments().size();
@@ -498,10 +490,9 @@ public class CubeController extends BasicController {
         String newCubeName = cubeRequest.getCubeName();
         String projectName = cubeRequest.getProject();
 
+        checkCubeExists(cubeName);
         CubeInstance cube = cubeService.getCubeManager().getCube(cubeName);
-        if (cube == null) {
-            throw new BadRequestException("Cannot find cube " + cubeName);
-        }
+
         if (cube.getStatus() == RealizationStatusEnum.DESCBROKEN) {
             throw new BadRequestException("Broken cube can't be cloned");
         }
@@ -512,7 +503,7 @@ public class CubeController extends BasicController {
 
         ProjectInstance project = cubeService.getProjectManager().getProject(projectName);
         if (project == null) {
-            throw new BadRequestException("Project " + projectName + " doesn't exist");
+            throw new NotFoundException("Project " + projectName + " doesn't exist");
         }
 
         CubeDesc cubeDesc = cube.getDescriptor();
@@ -538,10 +529,8 @@ public class CubeController extends BasicController {
     @ResponseBody
     public CubeInstance enableCube(@PathVariable String cubeName) {
         try {
+            checkCubeExists(cubeName);
             CubeInstance cube = cubeService.getCubeManager().getCube(cubeName);
-            if (null == cube) {
-                throw new InternalErrorException("Cannot find cube " + cubeName);
-            }
 
             cubeService.checkEnableCubeCondition(cube);
 
@@ -556,10 +545,8 @@ public class CubeController extends BasicController {
     @RequestMapping(value = "/{cubeName}", method = { RequestMethod.DELETE }, produces = { "application/json" })
     @ResponseBody
     public void deleteCube(@PathVariable String cubeName) {
+        checkCubeExists(cubeName);
         CubeInstance cube = cubeService.getCubeManager().getCube(cubeName);
-        if (null == cube) {
-            throw new NotFoundException("Cube with name " + cubeName + " not found..");
-        }
 
         //drop Cube
         try {
@@ -603,7 +590,7 @@ public class CubeController extends BasicController {
                     : cubeRequest.getProject();
             ProjectInstance project = cubeService.getProjectManager().getProject(projectName);
             if (project == null) {
-                throw new BadRequestException("Project " + projectName + " doesn't exist");
+                throw new NotFoundException("Project " + projectName + " doesn't exist");
             }
             cubeService.createCubeAndDesc(project, desc);
         } catch (Exception e) {
@@ -737,7 +724,7 @@ public class CubeController extends BasicController {
     @RequestMapping(value = "/{cubeName}/holes", method = { RequestMethod.GET }, produces = { "application/json" })
     @ResponseBody
     public List<CubeSegment> getHoles(@PathVariable String cubeName) {
-        checkCubeName(cubeName);
+        checkCubeExists(cubeName);
         return cubeService.getCubeManager().calculateHoles(cubeName);
     }
 
@@ -750,7 +737,7 @@ public class CubeController extends BasicController {
     @RequestMapping(value = "/{cubeName}/holes", method = { RequestMethod.PUT }, produces = { "application/json" })
     @ResponseBody
     public List<JobInstance> fillHoles(@PathVariable String cubeName) {
-        checkCubeName(cubeName);
+        checkCubeExists(cubeName);
         List<JobInstance> jobs = Lists.newArrayList();
         List<CubeSegment> holes = cubeService.getCubeManager().calculateHoles(cubeName);
 
@@ -971,7 +958,7 @@ public class CubeController extends BasicController {
             "application/json" })
     @ResponseBody
     public GeneralResponse initStartOffsets(@PathVariable String cubeName) {
-        checkCubeName(cubeName);
+        checkCubeExists(cubeName);
         CubeInstance cubeInstance = cubeService.getCubeManager().getCube(cubeName);
         if (cubeInstance.getSourceType() != ISourceAware.ID_STREAMING) {
             String msg = "Cube '" + cubeName + "' is not a Streaming Cube.";
@@ -1017,13 +1004,26 @@ public class CubeController extends BasicController {
         request.setMessage(message);
     }
 
-    private void checkCubeName(String cubeName) {
+
+    private void checkCubeExists(String cubeName) {
+
         CubeInstance cubeInstance = cubeService.getCubeManager().getCube(cubeName);
 
-        String msg = "";
         if (cubeInstance == null) {
-            msg = "Cube '" + cubeName + "' not found.";
-            throw new IllegalArgumentException(msg);
+            Message msg = MsgPicker.getMsg();
+            throw new NotFoundException(String.format(msg.getCUBE_NOT_FOUND(), cubeName));
+        }
+    }
+
+    private void checkBuildingSegment(CubeInstance cube) {
+
+        checkBuildingSegment(cube, cube.getConfig().getMaxBuildingSegments());
+    }
+
+    private void checkBuildingSegment(CubeInstance cube, int maxBuildingSeg) {
+        if (cube.getBuildingSegments().size() >= maxBuildingSeg) {
+            throw new TooManyRequestException(
+                    "There is already " + cube.getBuildingSegments().size() + " building segment; ");
         }
     }
 

@@ -67,6 +67,7 @@ import org.apache.kylin.metadata.model.SegmentStatusEnum;
 import org.apache.kylin.metadata.model.Segments;
 import org.apache.kylin.metadata.realization.RealizationStatusEnum;
 import org.apache.kylin.rest.exception.BadRequestException;
+import org.apache.kylin.rest.exception.TooManyRequestException;
 import org.apache.kylin.rest.msg.Message;
 import org.apache.kylin.rest.msg.MsgPicker;
 import org.apache.kylin.rest.util.AclEvaluate;
@@ -109,7 +110,6 @@ public class JobService extends BasicService implements InitializingBean {
     * @see
     * org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
     */
-    @SuppressWarnings("unchecked")
     @Override
     public void afterPropertiesSet() throws Exception {
 
@@ -210,17 +210,19 @@ public class JobService extends BasicService implements InitializingBean {
 
     public JobInstance submitJob(CubeInstance cube, TSRange tsRange, SegmentRange segRange, //
             Map<Integer, Long> sourcePartitionOffsetStart, Map<Integer, Long> sourcePartitionOffsetEnd,
-            CubeBuildTypeEnum buildType, boolean force, String submitter) throws IOException {
+            Map<String, String> segAddInfo, CubeBuildTypeEnum buildType, boolean force, String submitter)
+            throws IOException {
         aclEvaluate.checkProjectOperationPermission(cube);
         JobInstance jobInstance = submitJobInternal(cube, tsRange, segRange, sourcePartitionOffsetStart,
-                sourcePartitionOffsetEnd, buildType, force, submitter);
+                sourcePartitionOffsetEnd, segAddInfo, buildType, force, submitter);
 
         return jobInstance;
     }
 
     public JobInstance submitJobInternal(CubeInstance cube, TSRange tsRange, SegmentRange segRange, //
             Map<Integer, Long> sourcePartitionOffsetStart, Map<Integer, Long> sourcePartitionOffsetEnd, //
-            CubeBuildTypeEnum buildType, boolean force, String submitter) throws IOException {
+            Map<String, String> segAddInfo, CubeBuildTypeEnum buildType, boolean force, String submitter)
+            throws IOException {
         Message msg = MsgPicker.getMsg();
 
         if (cube.getStatus() == RealizationStatusEnum.DESCBROKEN) {
@@ -254,6 +256,10 @@ public class JobService extends BasicService implements InitializingBean {
             } else {
                 throw new BadRequestException(String.format(msg.getINVALID_BUILD_TYPE(), buildType));
             }
+            
+            if (segAddInfo != null && segAddInfo.size() > 0) {
+                newSeg = updateSegAddInfo(newSeg, segAddInfo);
+            }
 
             getExecutableManager().addJob(job);
 
@@ -266,7 +272,7 @@ public class JobService extends BasicService implements InitializingBean {
                     getCubeManager().updateCubeDropSegments(cube, newSeg);
                 } catch (Exception ee) {
                     // swallow the exception
-                    logger.error("Clean New segment failed, ignoring it", e);
+                    logger.error("Clean new segment failed, ignoring it", ee);
                 }
             }
             throw e;
@@ -275,6 +281,16 @@ public class JobService extends BasicService implements InitializingBean {
         JobInstance jobInstance = getSingleJobInstance(job);
 
         return jobInstance;
+    }
+
+    private CubeSegment updateSegAddInfo(CubeSegment newSeg, Map<String, String> segAddInfo) throws IOException {
+        CubeInstance copy = newSeg.getCubeInstance().latestCopyForWrite();
+        CubeSegment segCopy = copy.getSegmentById(newSeg.getUuid());
+        segCopy.getAdditionalInfo().putAll(segAddInfo);
+        CubeUpdate update = new CubeUpdate(copy);
+        update.setToUpdateSegs(segCopy);
+        CubeInstance cube = getCubeManager().updateCube(update);
+        return cube.getSegmentById(newSeg.getUuid());
     }
 
     public Pair<JobInstance, List<JobInstance>> submitOptimizeJob(CubeInstance cube, Set<Long> cuboidsRecommend,
@@ -406,7 +422,7 @@ public class JobService extends BasicService implements InitializingBean {
         if (cube.getConfig().isCubePlannerEnabled()) {
             Segments<CubeSegment> readyPendingSegments = cube.getSegments(SegmentStatusEnum.READY_PENDING);
             if (readyPendingSegments.size() > 0) {
-                throw new BadRequestException("The cube " + cube.getName() + " has READY_PENDING segments "
+                throw new TooManyRequestException("The cube " + cube.getName() + " has READY_PENDING segments "
                         + readyPendingSegments + ". It's not allowed for building");
             }
         }
@@ -454,7 +470,7 @@ public class JobService extends BasicService implements InitializingBean {
         return getExecutableManager().getOutput(id);
     }
 
-    protected JobInstance getSingleJobInstance(AbstractExecutable job) {
+    public JobInstance getSingleJobInstance(AbstractExecutable job) {
         Message msg = MsgPicker.getMsg();
 
         if (job == null) {

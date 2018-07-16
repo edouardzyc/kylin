@@ -18,10 +18,8 @@
 
 package org.apache.kylin.rest.controller;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.List;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeSegment;
 import org.apache.kylin.cube.model.CubeDesc;
@@ -41,8 +39,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.List;
 
 /**
  * @author xduo
@@ -131,7 +130,7 @@ public class CubeControllerTest extends ServiceTestBase {
         cubeController.deleteCube(newCubeName);
     }
 
-    @Test(expected = InternalErrorException.class)
+    @Test
     public void testDeleteSegmentNew() throws IOException {
         String cubeName = "test_kylin_cube_with_slr_ready_3_segments";
         CubeDesc[] cubes = cubeDescController.getCube(cubeName);

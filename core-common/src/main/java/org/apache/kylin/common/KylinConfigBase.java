@@ -624,10 +624,19 @@ abstract public class KylinConfigBase implements Serializable {
     public int getGTScanRequestSerializationLevel() {
         return Integer.parseInt(getOptional("kylin.cube.gtscanrequest-serialization-level", "1"));
     }
+    
+    public String getFactInputSubstitute() {
+        return getOptional("kylin.cube.fact-input-substitute");
+    }
 
     public boolean isAutoMergeEnabled() {
         return Boolean.parseBoolean(getOptional("kylin.cube.is-automerge-enabled", "true"));
     }
+
+    public boolean isAutoMergeGapAllowed() {
+        return Boolean.parseBoolean(getOptional("kylin.cube.is-automerge-gap-allowed", "false"));
+    }
+
 
     // ============================================================================
     // Cube Planner

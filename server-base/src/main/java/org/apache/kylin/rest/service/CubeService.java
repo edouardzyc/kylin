@@ -18,15 +18,11 @@
 
 package org.apache.kylin.rest.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.ServerMode;
@@ -80,11 +76,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Stateless & lightweight service facade of cube management functions.
@@ -477,7 +476,7 @@ public class CubeService extends BasicService implements InitializingBean {
         }
 
         if (toDelete.getStatus() != SegmentStatusEnum.READY) {
-            throw new BadRequestException(String.format(msg.getDELETE_NOT_READY_SEG(), segmentName));
+            logger.warn(String.format(msg.getDELETE_NOT_READY_SEG(), segmentName));
         }
 
         if (!segmentName.equals(cube.getSegments().get(0).getName())

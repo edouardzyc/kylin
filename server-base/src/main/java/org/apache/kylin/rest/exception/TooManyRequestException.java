@@ -23,12 +23,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * @author xduo
  *
  */
-@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-public class BadRequestException extends RuntimeException {
-    
+@ResponseStatus(value = HttpStatus.TOO_MANY_REQUESTS)
+public class TooManyRequestException extends RuntimeException {
+
     private static final long serialVersionUID = -6798154278095441848L;
 
     private String code;
@@ -36,28 +35,21 @@ public class BadRequestException extends RuntimeException {
     /**
      * legacy support, new APIs should not call this. Instead, new APIs should provide return code
      */
-    public BadRequestException(String msg) {
+    public TooManyRequestException(String msg) {
         super(msg);
         this.code = ResponseCode.CODE_UNDEFINED;
     }
 
-    /**
-     * legacy support, new APIs should not call this. Instead, new APIs should provide return code
-     */
-    public BadRequestException(String msg, Throwable cause) {
-        super(msg, cause);
-        this.code = ResponseCode.CODE_UNDEFINED;
-    }
-    
-    public BadRequestException(String msg, String code) {
+    public TooManyRequestException(String msg, String code) {
         super(msg);
         this.code = code;
     }
 
-    public BadRequestException(String msg, String code, Throwable cause) {
+    public TooManyRequestException(String msg, String code, Throwable cause) {
         super(msg, cause);
         this.code = code;
     }
+
 
     public String getCode() {
         return code;

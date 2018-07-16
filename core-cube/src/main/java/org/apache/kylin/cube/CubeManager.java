@@ -390,8 +390,7 @@ public class CubeManager implements IRealizationProvider {
         return cube;
     }
 
-    // for test
-    CubeInstance reloadCube(String cubeName) {
+    public CubeInstance reloadCube(String cubeName) {
         try (AutoLock lock = cubeMapLock.lockForWrite()) {
             return crud.reload(cubeName);
         }
@@ -575,7 +574,6 @@ public class CubeManager implements IRealizationProvider {
             CubeInstance cubeCopy = cube.latestCopyForWrite(); // get a latest copy
 
             checkInputRanges(tsRange, segRange);
-            checkBuildingSegment(cubeCopy);
 
             // fix start/end a bit
             if (cubeCopy.getModel().getPartitionDesc().isPartitioned()) {
@@ -611,7 +609,6 @@ public class CubeManager implements IRealizationProvider {
             CubeInstance cubeCopy = cube.latestCopyForWrite(); // get a latest copy
 
             checkInputRanges(tsRange, segRange);
-            checkBuildingSegment(cubeCopy);
 
             if (cubeCopy.getModel().getPartitionDesc().isPartitioned() == false) {
                 // full build
@@ -653,7 +650,6 @@ public class CubeManager implements IRealizationProvider {
         }
 
         public CubeSegment[] optimizeSegments(CubeInstance cube, Set<Long> cuboidsRecommend) throws IOException {
-            checkReadyForOptimize(cube);
 
             List<CubeSegment> readySegments = cube.getSegments(SegmentStatusEnum.READY);
             CubeSegment[] optimizeSegments = new CubeSegment[readySegments.size()];
@@ -682,7 +678,6 @@ public class CubeManager implements IRealizationProvider {
             }
 
             checkInputRanges(tsRange, segRange);
-            checkBuildingSegment(cubeCopy);
             checkCubeIsPartitioned(cubeCopy);
 
             if (cubeCopy.getSegments().getFirstSegment().isOffsetCube()) {
@@ -771,20 +766,11 @@ public class CubeManager implements IRealizationProvider {
             }
         }
 
-        private void checkBuildingSegment(CubeInstance cube) {
-            checkBuildingSegment(cube, cube.getConfig().getMaxBuildingSegments());
-        }
 
-        private void checkReadyForOptimize(CubeInstance cube) {
-            checkBuildingSegment(cube, 1);
-        }
+//        private void checkReadyForOptimize(CubeInstance cube) {
+//            checkBuildingSegment(cube, 1);
+//        }
 
-        private void checkBuildingSegment(CubeInstance cube, int maxBuildingSeg) {
-            if (cube.getBuildingSegments().size() >= maxBuildingSeg) {
-                throw new IllegalStateException(
-                        "There is already " + cube.getBuildingSegments().size() + " building segment; ");
-            }
-        }
 
         private void checkCubeIsPartitioned(CubeInstance cube) {
             if (cube.getDescriptor().getModel().getPartitionDesc().isPartitioned() == false) {

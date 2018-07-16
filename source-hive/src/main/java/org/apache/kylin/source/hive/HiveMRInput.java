@@ -36,6 +36,7 @@ import org.apache.kylin.common.util.Pair;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
 import org.apache.kylin.cube.CubeSegment;
+import org.apache.kylin.cube.model.FactInputSubstitute;
 import org.apache.kylin.engine.mr.IMRInput;
 import org.apache.kylin.engine.mr.JobBuilderSupport;
 import org.apache.kylin.engine.mr.steps.CubingExecutableUtil;
@@ -273,6 +274,8 @@ public class HiveMRInput implements IMRInput {
             CreateFlatHiveTableStep step = new CreateFlatHiveTableStep();
             step.setInitStatement(hiveInitStatements);
             step.setCreateTableStatement(dropTableHql + createTableHql + insertDataHqls);
+            CubingExecutableUtil.setCubeName(cubeName, step.getParams());
+            CubingExecutableUtil.setSegmentId(flatDesc.getSegment().getUuid(), step.getParams());
             step.setName(ExecutableConstants.STEP_NAME_CREATE_FLAT_HIVE_TABLE);
             step.setWorkingDir(jobWorkingDir);
 
@@ -289,6 +292,7 @@ public class HiveMRInput implements IMRInput {
 
         @Override
         public void addStepPhase4_Cleanup(DefaultChainedExecutable jobFlow) {
+            final String cubeName = CubingExecutableUtil.getCubeName(jobFlow.getParams());
             final String jobWorkingDir = getJobWorkingDir(jobFlow);
 
             GarbageCollectionStep step = new GarbageCollectionStep();
@@ -296,6 +300,8 @@ public class HiveMRInput implements IMRInput {
             step.setIntermediateTableIdentity(getIntermediateTableIdentity());
             step.setExternalDataPath(JoinedFlatTable.getTableDir(flatDesc, jobWorkingDir));
             step.setHiveViewIntermediateTableIdentities(hiveViewIntermediateTables);
+            CubingExecutableUtil.setCubeName(cubeName, step.getParams());
+            CubingExecutableUtil.setSegmentId(flatDesc.getSegment().getUuid(), step.getParams());
             jobFlow.addTask(step);
         }
 
@@ -434,12 +440,25 @@ public class HiveMRInput implements IMRInput {
                 output.append(cleanUpIntermediateFlatTable(config));
                 // don't drop view to avoid concurrent issue
                 //output.append(cleanUpHiveViewIntermediateTable(config));
+                tearDownFactInputSubstituteIfNeeded(context);
             } catch (IOException e) {
                 logger.error("job:" + getId() + " execute finished with exception", e);
                 return ExecuteResult.createError(e);
             }
 
             return new ExecuteResult(ExecuteResult.State.SUCCEED, output.toString());
+        }
+
+        private void tearDownFactInputSubstituteIfNeeded(ExecutableContext context) throws IOException {
+            String cubeName = CubingExecutableUtil.getCubeName(getParams());
+            CubeInstance cube = CubeManager.getInstance(context.getConfig()).getCube(cubeName);
+            String segId = CubingExecutableUtil.getSegmentId(getParams());
+            CubeSegment seg = cube.getSegmentById(segId);
+            FactInputSubstitute sub = FactInputSubstitute.getInstance(seg);
+            if (sub != null) {
+                logger.debug("Calling FactInputSubstitute.tearDownFactTableAfterBuild() on " + sub);
+                sub.tearDownFactTableAfterBuild();
+            }
         }
 
         private String cleanUpIntermediateFlatTable(KylinConfig config) throws IOException {
