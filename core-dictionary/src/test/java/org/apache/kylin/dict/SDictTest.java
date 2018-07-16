@@ -23,7 +23,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -64,9 +66,17 @@ public class SDictTest {
     @Test
     public void testWrap() throws IOException {
         TrieDictionaryBuilder<String> b = new TrieDictionaryBuilder<String>(new StringBytesConverter());
-        for (int i = 0; i < 100; i++) {
-            b.addValue(gen());
+        int capacity = 100;
+        Set<String> uniqueValue = new HashSet<>(capacity);
+        while (uniqueValue.size() < capacity) {
+            uniqueValue.add(gen());
         }
+
+        Assert.assertEquals(100, uniqueValue.size());
+        for (String v : uniqueValue) {
+            b.addValue(v);
+        }
+
         TrieDictionary<String> d = b.build(0);
         SDict dict = SDict.wrap(d);
 
