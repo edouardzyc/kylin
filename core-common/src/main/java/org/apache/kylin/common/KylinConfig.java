@@ -6,17 +6,26 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 package org.apache.kylin.common;
+
+import com.google.common.base.Preconditions;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.kylin.common.restclient.RestClient;
+import org.apache.kylin.common.util.ClassUtil;
+import org.apache.kylin.common.util.OrderedProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,16 +43,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.kylin.common.restclient.RestClient;
-import org.apache.kylin.common.util.ClassUtil;
-import org.apache.kylin.common.util.OrderedProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
 
 /**
  */
@@ -67,14 +66,14 @@ public class KylinConfig extends KylinConfigBase {
     static {
         /*
          * Make Calcite to work with Unicode.
-         * 
+         *
          * Sets default char set for string literals in SQL and row types of
          * RelNode. This is more a label used to compare row type equality. For
          * both SQL string and row record, they are passed to Calcite in String
          * object and does not require additional codec.
-         * 
+         *
          * Ref SaffronProperties.defaultCharset
-         * Ref SqlUtil.translateCharacterSetName() 
+         * Ref SqlUtil.translateCharacterSetName()
          * Ref NlsString constructor()
          */
         // copied from org.apache.calcite.util.ConversionUtil.NATIVE_UTF16_CHARSET_NAME
@@ -243,7 +242,7 @@ public class KylinConfig extends KylinConfigBase {
     public static SetAndUnsetThreadLocalConfig setAndUnsetThreadLocalConfig(KylinConfig config) {
         return new SetAndUnsetThreadLocalConfig(config);
     }
-    
+
     public static class SetAndUnsetThreadLocalConfig implements AutoCloseable {
 
         public SetAndUnsetThreadLocalConfig(KylinConfig config) {
@@ -399,7 +398,7 @@ public class KylinConfig extends KylinConfigBase {
     }
 
     // ============================================================================
-    
+
     Map<Class, Object> managersCache = new ConcurrentHashMap<>();
 
     private KylinConfig() {
@@ -414,19 +413,19 @@ public class KylinConfig extends KylinConfigBase {
         KylinConfig base = base();
         if (base != this)
             return base.getManager(clz);
-        
+
         Object mgr = managersCache.get(clz);
         if (mgr != null)
             return (T) mgr;
-        
+
         synchronized (clz) {
             mgr = managersCache.get(clz);
             if (mgr != null)
                 return (T) mgr;
-            
+
             try {
                 logger.info("Creating new manager instance of " + clz);
-                
+
                 // new manager via static Manager.newInstance()
                 Method method = clz.getDeclaredMethod("newInstance", KylinConfig.class);
                 method.setAccessible(true); // override accessibility
@@ -438,14 +437,14 @@ public class KylinConfig extends KylinConfigBase {
         }
         return (T) mgr;
     }
-    
+
     public void clearManagers() {
         KylinConfig base = base();
         if (base != this) {
             base.clearManagers();
             return;
         }
-        
+
         managersCache.clear();
     }
 
@@ -456,35 +455,24 @@ public class KylinConfig extends KylinConfigBase {
         return copy;
     }
 
-    public String exportAllToString() throws IOException {
+    public String exportAllToString() {
         final Properties allProps = getProperties(null);
-        final OrderedProperties orderedProperties = KylinConfig.buildSiteOrderedProps();
-
-        for (Map.Entry<Object, Object> entry : allProps.entrySet()) {
-            String key = entry.getKey().toString();
-            String value = entry.getValue().toString();
-            if (!orderedProperties.containsProperty(key)) {
-                orderedProperties.setProperty(key, value);
-            } else if (!orderedProperties.getProperty(key).equalsIgnoreCase(value)) {
-                orderedProperties.setProperty(key, value);
-            }
-        }
 
         final StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> entry : orderedProperties.entrySet()) {
-            sb.append(entry.getKey() + "=" + entry.getValue()).append('\n');
+        for (Map.Entry<Object, Object> entry : allProps.entrySet()) {
+            sb.append(entry.getKey()).append("=").append(entry.getValue()).append('\n');
         }
         return sb.toString();
 
     }
 
     public String exportToString(Collection<String> propertyKeys) throws IOException {
-        Properties filteredProps = getProperties(propertyKeys);
-        OrderedProperties orderedProperties = KylinConfig.buildSiteOrderedProps();
+        final Properties filteredProps = getProperties(propertyKeys);
+        final Properties allProps = getProperties(null);
 
         for (String key : propertyKeys) {
             if (!filteredProps.containsKey(key)) {
-                filteredProps.put(key, orderedProperties.getProperty(key, ""));
+                filteredProps.put(key, allProps.getProperty(key, ""));
             }
         }
 
@@ -508,7 +496,7 @@ public class KylinConfig extends KylinConfigBase {
     public synchronized void reloadFromSiteProperties() {
         reloadKylinConfig(buildSiteProperties());
     }
-    
+
     public KylinConfig base() {
         return this;
     }

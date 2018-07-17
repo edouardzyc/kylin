@@ -45,6 +45,11 @@ public class HadoopUtil {
     @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(HadoopUtil.class);
     private static final transient ThreadLocal<Configuration> hadoopConfig = new ThreadLocal<>();
+    private static final Configuration confBase = new Configuration();
+
+    static{
+        confBase.get(""); //trigger init of Configuration
+    }
 
     public static void setCurrentConfiguration(Configuration conf) {
         hadoopConfig.set(conf);
@@ -52,7 +57,7 @@ public class HadoopUtil {
 
     public static Configuration getCurrentConfiguration() {
         if (hadoopConfig.get() == null) {
-            Configuration conf = healSickConfig(new Configuration());
+            Configuration conf = healSickConfig(new Configuration(confBase));// use copy constructor to speed up (parsing xml is slow)
             // do not cache this conf, or will affect following mr jobs
             return conf;
         }
