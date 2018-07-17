@@ -53,13 +53,7 @@ public class CreateFlatHiveTableStep extends AbstractExecutable {
     private static final Pattern HDFS_LOCATION = Pattern.compile("LOCATION \'(.*)\';");
 
     protected void createFlatHiveTable(KylinConfig config) throws IOException {
-        if (config.getHiveTableDirCreateFirst()) {
-            // Create work dir to avoid hive create it,
-            // the difference is that the owners are different.
-            checkAndCreateWorkDir(getWorkingDir());
-        } else {
-            logger.info("Skip crate hive dir first.");
-        }
+        createHiveTableDirIfNeed(config);
         final HiveCmdBuilder hiveCmdBuilder = new HiveCmdBuilder();
         hiveCmdBuilder.overwriteHiveProps(config.getHiveConfigOverride());
         hiveCmdBuilder.addStatement(getInitStatement());
@@ -156,20 +150,27 @@ public class CreateFlatHiveTableStep extends AbstractExecutable {
     }
 
     public String getWorkingDir() {
-        return getParam("WorkingDIr");
+        return getParam("WorkingDir");
     }
 
-    private void checkAndCreateWorkDir(String jobWorkingDir) {
-        try {
-            Path path = new Path(jobWorkingDir);
-            FileSystem fileSystem = HadoopUtil.getFileSystem(path);
-            if (!fileSystem.exists(path)) {
-                logger.info("Create jobWorkDir : " + jobWorkingDir);
-                fileSystem.mkdirs(path);
+    private void createHiveTableDirIfNeed(KylinConfig config) {
+        if (config.getHiveTableDirCreateFirst()) {
+            // Create work dir to avoid hive create it,
+            // the difference is that the owners are different.
+            String jobWorkingDir = getWorkingDir();
+            try {
+                Path path = new Path(jobWorkingDir);
+                FileSystem fileSystem = HadoopUtil.getFileSystem(path);
+                if (!fileSystem.exists(path)) {
+                    logger.info("Create jobWorkDir : " + jobWorkingDir);
+                    fileSystem.mkdirs(path);
+                }
+                logger.info("File exists :" + jobWorkingDir);
+            } catch (IOException e) {
+                logger.error("Could not create lookUp table dir : " + jobWorkingDir);
             }
-            logger.info("File exists :" + jobWorkingDir);
-        } catch (IOException e) {
-            logger.error("Could not create lookUp table dir : " + jobWorkingDir);
+        } else {
+            logger.info("Skip crate hive dir first.");
         }
     }
 }

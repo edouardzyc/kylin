@@ -18,48 +18,10 @@
 
 package org.apache.kylin.source.hive;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.UUID;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.kylin.common.KylinConfig;
-import org.apache.kylin.common.KylinConfig.SetAndUnsetThreadLocalConfig;
-import org.apache.kylin.job.execution.DefaultChainedExecutable;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class HiveMRInputTest {
-
-    @Ignore("move create dir to step")
-    public void TestGetJobWorkingDir() throws IOException {
-        // after #5305, Hadoop Path should NOT carry FileSystem info in general.
-        // Instread, you should explictly define to use workingFileSystem or readFileSystem to avoid confusion.
-        //  The following use is a exception
-        FileSystem fileSystem = FileSystem.get(new Configuration());
-        Path jobWorkDirPath = null;
-        KylinConfig kylinConfig = mock(KylinConfig.class);
-        try (SetAndUnsetThreadLocalConfig autoUnset = KylinConfig.setAndUnsetThreadLocalConfig(kylinConfig)) {
-            when(kylinConfig.getHiveTableDirCreateFirst()).thenReturn(true);
-            when(kylinConfig.getHdfsWorkingDirectory()).thenReturn("/tmp/kylin/");
-            when(kylinConfig.getHdfsWorkingDirectoryWithoutScheme()).thenReturn("/tmp/kylin/");
-            DefaultChainedExecutable defaultChainedExecutable = mock(DefaultChainedExecutable.class);
-            defaultChainedExecutable.setId(UUID.randomUUID().toString());
-
-            HiveMRInput.BatchCubingInputSide batchCubingInputSide = new HiveMRInput.BatchCubingInputSide(null);
-            String jobWorkingDir = batchCubingInputSide.getJobWorkingDir(defaultChainedExecutable);
-            jobWorkDirPath = new Path(jobWorkingDir);
-            Assert.assertTrue(fileSystem.exists(jobWorkDirPath));
-        } finally {
-            if (jobWorkDirPath != null)
-                fileSystem.deleteOnExit(jobWorkDirPath);
-        }
-    }
 
     @Test
     public void testMaterializeViewHql() {
