@@ -127,7 +127,7 @@ public class AbstractDateDimEnc extends DimensionEncoding {
 
     @Override
     public String returnType() {
-        return "string";
+        return "varchar";
     }
 
     @Override
