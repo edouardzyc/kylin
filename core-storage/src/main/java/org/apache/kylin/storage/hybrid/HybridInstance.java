@@ -215,7 +215,7 @@ public class HybridInstance extends RootPersistentEntity implements IRealization
         for (IRealization realization : getRealizations()) {
             c = Math.min(realization.getCost(), c);
         }
-        return c;
+        return c - 10;
     }
 
     @Override

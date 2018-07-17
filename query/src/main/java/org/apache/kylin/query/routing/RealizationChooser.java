@@ -41,7 +41,6 @@ import org.apache.kylin.metadata.model.TblColRef;
 import org.apache.kylin.metadata.project.ProjectManager;
 import org.apache.kylin.metadata.realization.IRealization;
 import org.apache.kylin.metadata.realization.NoRealizationFoundException;
-import org.apache.kylin.metadata.realization.RealizationType;
 import org.apache.kylin.query.relnode.OLAPContext;
 import org.apache.kylin.query.routing.rules.RemoveBlackoutRealizationsRule;
 import org.apache.kylin.util.JoinsGraph;
@@ -268,19 +267,12 @@ public class RealizationChooser {
 
     private static Set<IRealization> sortRealizationByCostAndType(final OLAPContext context,
             Collection<? extends IRealization> realizations) {
-        final Map<RealizationType, Integer> weightOfRealization = Maps.newHashMap(Candidate.PRIORITIES);
-        if (context.hasAgg) {
-            weightOfRealization.put(RealizationType.INVERTED_INDEX,
-                    weightOfRealization.get(RealizationType.INVERTED_INDEX) + 1);
-        } else {
-            weightOfRealization.put(RealizationType.CUBE, weightOfRealization.get(RealizationType.CUBE) + 1);
-        }
         Set<IRealization> orderedRealizations = Sets.newTreeSet(new Comparator<IRealization>() {
             @Override
             public int compare(IRealization o1, IRealization o2) {
-                int res = weightOfRealization.get(o1.getType()) - weightOfRealization.get(o2.getType()) == 0
+                int res = Candidate.PRIORITIES.get(o1.getType()) - Candidate.PRIORITIES.get(o2.getType()) == 0
                         ? o1.getCost(context.getSQLDigest()) - o2.getCost(context.getSQLDigest())
-                        : weightOfRealization.get(o1.getType()) - weightOfRealization.get(o2.getType());
+                        : Candidate.PRIORITIES.get(o1.getType()) - Candidate.PRIORITIES.get(o2.getType());
                 return res == 0 ? o1.getName().compareTo(o2.getName()) : res;
             }
         });

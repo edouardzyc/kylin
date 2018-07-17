@@ -533,20 +533,7 @@ public class CubeInstance extends RootPersistentEntity implements IRealization, 
     }
 
     public int getCost(SQLDigest digest) {
-        int calculatedCost = cost;
-
-        //the number of dimensions is not as accurate as number of row key cols
-        calculatedCost += getRowKeyColumnCount() * COST_WEIGHT_DIMENSION + getMeasures().size() * COST_WEIGHT_MEASURE;
-
-        for (JoinTableDesc joinTable : this.getModel().getJoinTables()) {
-            // more tables, more cost
-            if (joinTable.getJoin().isInnerJoin()) {
-                // inner join cost is bigger than left join, as it will filter some records
-                calculatedCost += COST_WEIGHT_INNER_JOIN;
-            }
-        }
-
-        return calculatedCost;
+        return getCost();
     }
 
     @Override
