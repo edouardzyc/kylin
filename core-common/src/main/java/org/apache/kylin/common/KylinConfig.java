@@ -519,7 +519,7 @@ public class KylinConfig extends KylinConfigBase {
     }
 
     public String getServerRestAddress() {
-        return System.getProperty("KYLIN_REST_ADDRESS");
+        return System.getProperty("kap.server.host-address");
     }
 
 }
