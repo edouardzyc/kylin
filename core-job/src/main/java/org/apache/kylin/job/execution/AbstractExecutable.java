@@ -66,16 +66,16 @@ public abstract class AbstractExecutable implements Executable, Idempotent {
     public AbstractExecutable() {
         setId(UUID.randomUUID().toString());
     }
-    
+
     protected void initConfig(KylinConfig config) {
         Preconditions.checkState(this.config == null || this.config == config);
         this.config = config;
     }
-    
+
     protected KylinConfig getConfig() {
         return config;
     }
-    
+
     protected ExecutableManager getManager() {
         return ExecutableManager.getInstance(config);
     }
@@ -120,27 +120,31 @@ public abstract class AbstractExecutable implements Executable, Idempotent {
 
         try {
             onExecuteStart(executableContext);
-            Throwable exception;
+            Throwable catchedException;
+            Throwable realException;
             do {
                 if (retry > 0) {
                     logger.info("Retry " + retry);
                 }
-                exception = null;
+                catchedException = null;
                 result = null;
                 try {
                     result = doWork(executableContext);
 
                 } catch (Throwable e) {
                     logger.error("error running Executable: " + this.toString());
-                    exception = e;
+                    catchedException = e;
                 }
                 retry++;
-            } while (needRetry(this.retry, exception)); //exception in ExecuteResult should handle by user itself.
+                realException = catchedException != null ? catchedException
+                        : (result.getThrowable() != null ? result.getThrowable() : null);
+                //don't invoke retry on ChainedExecutable
+            } while (needRetry(this.retry, realException)); //exception in ExecuteResult should handle by user itself.
 
             //check exception in result to avoid retry on ChainedExecutable(only need retry on subtask actually)
-            if (exception != null || result.getThrowable() != null) {
-                onExecuteError(exception, executableContext);
-                throw new ExecuteException(exception);
+            if (realException != null) {
+                onExecuteError(realException, executableContext);
+                throw new ExecuteException(realException);
             }
 
             onExecuteFinished(result, executableContext);
@@ -331,7 +335,7 @@ public abstract class AbstractExecutable implements Executable, Idempotent {
     public static long getEndTime(Output output) {
         return getExtraInfoAsLong(output, END_TIME, 0L);
     }
-    
+
     public static long getInterruptTime(Output output) {
         return getExtraInfoAsLong(output, INTERRUPT_TIME, 0L);
     }
@@ -429,8 +433,9 @@ public abstract class AbstractExecutable implements Executable, Idempotent {
     // Retry will happen in below cases:
     // 1) if property "kylin.job.retry-exception-classes" is not set or is null, all jobs with exceptions will retry according to the retry times.
     // 2) if property "kylin.job.retry-exception-classes" is set and is not null, only jobs with the specified exceptions will retry according to the retry times.
-    public static boolean needRetry(int retry, Throwable t) {
-        if (retry > KylinConfig.getInstanceFromEnv().getJobRetry() || t == null) {
+    public boolean needRetry(int retry, Throwable t) {
+        if (retry > KylinConfig.getInstanceFromEnv().getJobRetry() || t == null
+                || (this instanceof DefaultChainedExecutable)) {
             return false;
         } else {
             return isRetryableException(t.getClass().getName());
@@ -447,8 +452,10 @@ public abstract class AbstractExecutable implements Executable, Idempotent {
             conf.set(entry.getKey(), entry.getValue());
         }
     }
+
     @Override
     public String toString() {
-        return Objects.toStringHelper(this).add("id", getId()).add("name", getName()).add("state", getStatus()).toString();
+        return Objects.toStringHelper(this).add("id", getId()).add("name", getName()).add("state", getStatus())
+                .toString();
     }
 }

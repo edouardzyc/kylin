@@ -38,7 +38,6 @@ import org.apache.kylin.job.NoErrorStatusExecutable;
 import org.apache.kylin.job.RunningTestExecutable;
 import org.apache.kylin.job.SelfStopExecutable;
 import org.apache.kylin.job.SucceedTestExecutable;
-import org.apache.kylin.job.execution.AbstractExecutable;
 import org.apache.kylin.job.execution.CheckpointExecutable;
 import org.apache.kylin.job.execution.DefaultChainedExecutable;
 import org.apache.kylin.job.execution.ExecutableManager;
@@ -243,14 +242,22 @@ public class DefaultSchedulerTest extends BaseSchedulerTest {
 
     @Test
     public void testRetryableException() throws Exception {
+        DefaultChainedExecutable job = new DefaultChainedExecutable();
+        BaseTestExecutable task = new ErrorTestExecutable();
+        job.addTask(task);
+
         System.setProperty("kylin.job.retry", "3");
-        Assert.assertTrue(AbstractExecutable.needRetry(1, new Exception("")));
-        Assert.assertFalse(AbstractExecutable.needRetry(1, null));
-        Assert.assertFalse(AbstractExecutable.needRetry(4, new Exception("")));
+
+        //don't retry on DefaultChainedExecutable, only retry on subtasks
+        Assert.assertFalse(job.needRetry(1, new Exception("")));
+        Assert.assertTrue(task.needRetry(1, new Exception("")));
+        Assert.assertFalse(task.needRetry(1, null));
+        Assert.assertFalse(task.needRetry(4, new Exception("")));
 
         System.setProperty("kylin.job.retry-exception-classes", "java.io.FileNotFoundException");
-        Assert.assertTrue(AbstractExecutable.needRetry(1, new FileNotFoundException()));
-        Assert.assertFalse(AbstractExecutable.needRetry(1, new Exception("")));
+
+        Assert.assertTrue(task.needRetry(1, new FileNotFoundException()));
+        Assert.assertFalse(task.needRetry(1, new Exception("")));
     }
 
     @Test
@@ -259,7 +266,7 @@ public class DefaultSchedulerTest extends BaseSchedulerTest {
         System.setProperty("kylin.suite.id", suiteId);
         SuiteInfoManager mgr = SuiteInfoManager.getInstance(getTestConfig());
 
-        String[] projects = {"default"};
+        String[] projects = { "default" };
         SuiteInfoInstance suiteInfo = new SuiteInfoInstance(suiteId, Lists.newArrayList(projects));
         mgr.saveSuite(suiteInfo, true);
 
