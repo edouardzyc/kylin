@@ -64,7 +64,7 @@ public class HDFSResourceStore extends ResourceStore {
         String path = metadataUrl.getParameter("path");
         if (path == null) {
             // missing path is not expected, but don't fail it
-            path = kylinConfig.getHdfsWorkingDirectory() + "tmp_metadata";
+            path = kylinConfig.getHdfsWorkingDirectory(null) + "tmp_metadata";
             logger.warn("Missing path, fall back to " + path);
         }
         

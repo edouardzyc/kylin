@@ -45,7 +45,7 @@ public class SegmentAppendTrieDictBuilder implements IDictionaryBuilder {
         int maxEntriesPerSlice = config.getAppendDictEntrySize();
         if (hdfsDir == null) {
             //build in Kylin job server
-            hdfsDir = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory();
+            hdfsDir = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(null);
         }
 
         //use UUID to make each segment dict in different HDFS dir and support concurrent build

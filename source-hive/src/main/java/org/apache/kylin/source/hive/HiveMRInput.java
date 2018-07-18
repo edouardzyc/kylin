@@ -137,7 +137,7 @@ public class HiveMRInput implements IMRInput {
             KylinConfig config = KylinConfig.getInstanceFromEnv();
             this.flatDesc = flatDesc;
             this.flatTableDatabase = config.getHiveDatabaseForIntermediateTable();
-            this.hdfsWorkingDir = config.getHdfsWorkingDirectoryWithoutScheme();
+            this.hdfsWorkingDir = config.getHdfsWorkingDirectoryWithoutScheme(null);
         }
 
         @Override
@@ -186,14 +186,8 @@ public class HiveMRInput implements IMRInput {
         protected String getJobWorkingDir(DefaultChainedExecutable jobFlow) {
             final KylinConfig cubeConfig = KylinConfig.getInstanceFromEnv();
 
-            String jobWorkingDir = null;
-            if (cubeConfig.isProjectIsolationEnabled()) {
-                final String projectName = jobFlow.getParam(PROJECT_INSTANCE_NAME);
-                jobWorkingDir = JobBuilderSupport.getJobWorkingDir(hdfsWorkingDir, projectName, jobFlow.getId());
-            } else {
-                jobWorkingDir = JobBuilderSupport.getJobWorkingDir(hdfsWorkingDir, jobFlow.getId());
-            }
-            return jobWorkingDir;
+            final String projectName = jobFlow.getParam(PROJECT_INSTANCE_NAME);
+            return JobBuilderSupport.getJobWorkingDir(cubeConfig.getHdfsWorkingDirectoryWithoutScheme(projectName), jobFlow.getId());
         }
 
         private AbstractExecutable createRedistributeFlatHiveTableStep(String hiveInitStatements, String cubeName) {

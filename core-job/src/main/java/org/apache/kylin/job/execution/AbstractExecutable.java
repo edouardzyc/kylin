@@ -61,6 +61,7 @@ public abstract class AbstractExecutable implements Executable, Idempotent {
     private String name;
     private String id;
     private Map<String, String> params = Maps.newHashMap();
+    private AbstractExecutable parentExecutable = null;
 
     public AbstractExecutable() {
         setId(UUID.randomUUID().toString());
@@ -389,6 +390,14 @@ public abstract class AbstractExecutable implements Executable, Idempotent {
 
     public final long getDuration() {
         return getDuration(getStartTime(), getEndTime(), getInterruptTime());
+    }
+
+    public AbstractExecutable getParentExecutable() {
+        return parentExecutable;
+    }
+
+    public void setParentExecutable(AbstractExecutable parentExecutable) {
+        this.parentExecutable = parentExecutable;
     }
 
     public boolean isReady() {

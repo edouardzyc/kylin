@@ -368,7 +368,7 @@ public class TableService extends BasicService {
         job.setName("Hive Column Cardinality calculation for table '" + tableName + "'");
         job.setSubmitter(submitter);
 
-        String outPath = getConfig().getHdfsWorkingDirectory() + "cardinality/" + job.getId() + "/" + tableName;
+        String outPath = getConfig().getHdfsWorkingDirectory(table.getProject()) + "cardinality/" + job.getId() + "/" + tableName;
         String param = "-table " + tableName + " -output " + outPath + " -project " + prj;
 
         MapReduceExecutable step1 = new MapReduceExecutable();

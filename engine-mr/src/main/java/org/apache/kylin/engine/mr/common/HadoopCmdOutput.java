@@ -43,11 +43,13 @@ public class HadoopCmdOutput {
 
     private final StringBuilder output;
     private final Job job;
+    private final String project;
 
-    public HadoopCmdOutput(Job job, StringBuilder output) {
+    public HadoopCmdOutput(Job job, StringBuilder output, String project) {
         super();
         this.job = job;
         this.output = output;
+        this.project = project;
     }
 
     public String getMrJobId() {
@@ -100,7 +102,8 @@ public class HadoopCmdOutput {
             mapInputRecords = String.valueOf(counters.findCounter(TaskCounter.MAP_INPUT_RECORDS).getValue());
             rawInputBytesRead = String.valueOf(counters.findCounter(RawDataCounter.BYTES).getValue());
 
-            String outputFolder = job.getConfiguration().get("mapreduce.output.fileoutputformat.outputdir", KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory());
+            String outputFolder = job.getConfiguration().get("mapreduce.output.fileoutputformat.outputdir",
+                    KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(project));
             logger.debug("outputFolder is " + outputFolder);
             Path outputPath = new Path(outputFolder);
             String fsScheme = outputPath.getFileSystem(job.getConfiguration()).getScheme();

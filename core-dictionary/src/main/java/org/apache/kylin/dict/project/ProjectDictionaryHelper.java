@@ -135,8 +135,8 @@ final public class ProjectDictionaryHelper {
             return PROJECT_DICT_DIR + "/" + sourceIdentify + "/" + toVersion + "/" + currentVersion + "-" + toVersion;
         }
 
-        public static String sDictPath(String sourceIdentify, long currentVersion) {
-            String hdfsWorkingDirectory = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory();
+        public static String sDictPath(String project, String sourceIdentify, long currentVersion) {
+            String hdfsWorkingDirectory = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(project);
             return hdfsWorkingDirectory + SPARDER_SDICT_BASE_DIR + "/" + sourceIdentify + "/" + currentVersion
                     + SDICT_DATA;
         }

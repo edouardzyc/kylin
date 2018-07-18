@@ -261,9 +261,9 @@ public class GlobalDictHDFSStore extends GlobalDictStore {
             return baseDir;
         }
 
-        checkArgument(baseDir.startsWith(srcConfig.getHdfsWorkingDirectory()), "Please check why current directory {} doesn't belong to source working directory {}", baseDir, srcConfig.getHdfsWorkingDirectory());
+        checkArgument(baseDir.startsWith(srcConfig.getHdfsWorkingDirectory(null)), "Please check why current directory {} doesn't belong to source working directory {}", baseDir, srcConfig.getHdfsWorkingDirectory(null));
 
-        final String dstBaseDir = baseDir.replaceFirst(srcConfig.getHdfsWorkingDirectory(), dstConfig.getHdfsWorkingDirectory());
+        final String dstBaseDir = baseDir.replaceFirst(srcConfig.getHdfsWorkingDirectory(null), dstConfig.getHdfsWorkingDirectory(null));
 
         Long[] versions = listAllVersions();
         if (versions.length == 0) { // empty dict, nothing to copy
@@ -271,7 +271,7 @@ public class GlobalDictHDFSStore extends GlobalDictStore {
         }
 
         Path srcVersionDir = getVersionDir(versions[versions.length - 1]);
-        Path dstVersionDir = new Path(srcVersionDir.toString().replaceFirst(srcConfig.getHdfsWorkingDirectory(), dstConfig.getHdfsWorkingDirectory()));
+        Path dstVersionDir = new Path(srcVersionDir.toString().replaceFirst(srcConfig.getHdfsWorkingDirectory(null), dstConfig.getHdfsWorkingDirectory(null)));
         FileSystem dstFS = dstVersionDir.getFileSystem(conf);
         if (dstFS.exists(dstVersionDir)) {
             dstFS.delete(dstVersionDir, true);

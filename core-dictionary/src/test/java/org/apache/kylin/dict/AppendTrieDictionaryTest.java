@@ -69,7 +69,7 @@ public class AppendTrieDictionaryTest extends LocalFileMetadataTestCase {
     public void beforeTest() {
         staticCreateTestMetadata();
         KylinConfig.getInstanceFromEnv().setProperty("kylin.dictionary.append-entry-size", "50000");
-        BASE_DIR = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory() + "/resources/GlobalDict" + RESOURCE_DIR + "/";
+        BASE_DIR = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(null) + "/resources/GlobalDict" + RESOURCE_DIR + "/";
         LOCAL_BASE_DIR = getLocalWorkingDirectory() + "/resources/GlobalDict" + RESOURCE_DIR + "/";
     }
 

@@ -49,7 +49,7 @@ public class ITGlobalDictionaryBuilderTest extends HBaseMetadataTestCase {
     }
 
     private void cleanup() {
-        String BASE_DIR = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory() + "/resources/GlobalDict" + dictionaryInfo.getResourceDir() + "/";
+        String BASE_DIR = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(null) + "/resources/GlobalDict" + dictionaryInfo.getResourceDir() + "/";
         Path basePath = new Path(BASE_DIR);
         try {
             HadoopUtil.getFileSystem(basePath).delete(basePath, true);
@@ -72,7 +72,7 @@ public class ITGlobalDictionaryBuilderTest extends HBaseMetadataTestCase {
         finishLatch.await();
 
         GlobalDictionaryBuilder builder = new GlobalDictionaryBuilder();
-        builder.init(dictionaryInfo, 0, KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory());
+        builder.init(dictionaryInfo, 0, KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(null));
         builder.addValue("success");
         Dictionary<String> dict = builder.build();
 
@@ -108,7 +108,7 @@ public class ITGlobalDictionaryBuilderTest extends HBaseMetadataTestCase {
                 GlobalDictionaryBuilder builder = new GlobalDictionaryBuilder();
                 startLatch.countDown();
 
-                builder.init(dictionaryInfo, 0, KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory());
+                builder.init(dictionaryInfo, 0, KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(null));
                 for (int i = 0; i < count; i++) {
                     builder.addValue(prefix + i);
                 }

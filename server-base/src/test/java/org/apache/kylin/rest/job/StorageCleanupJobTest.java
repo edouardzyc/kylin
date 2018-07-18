@@ -72,13 +72,13 @@ public class StorageCleanupJobTest {
                 new Path("file:///tmp/examples/test_metadata/kylin-f8edd777-8756-40d5-be19-3159120e4f7b/kylin_intermediate_2838c7fc-722a-48fa-9d1a-8ab37837a952"),
 
                 // verifyCleanUnusedHdfsFiles
-                new Path("file:///tmp/examples/test_metadata/kylin-to-be-delete")
+                new Path("file:///tmp/examples/test_metadata/default/kylin-to-be-delete")
         );
         assertEquals(expected, pathCaptor.getAllValues());
     }
 
     private void prepareUnusedHDFSFiles(FileSystem mockFs) throws IOException {
-        Path p1 = new Path("file:///tmp/examples/test_metadata/");
+        Path p1 = new Path("file:///tmp/examples/test_metadata/default/");
         FileStatus[] statuses = new FileStatus[3];
         FileStatus f1 = mock(FileStatus.class);
         FileStatus f2 = mock(FileStatus.class);
@@ -93,7 +93,7 @@ public class StorageCleanupJobTest {
         statuses[2] = f3;
 
         when(mockFs.listStatus(p1)).thenReturn(statuses);
-        Path p2 = new Path("file:///tmp/examples/test_metadata/kylin-to-be-delete");
+        Path p2 = new Path("file:///tmp/examples/test_metadata/default/kylin-to-be-delete");
         when(mockFs.exists(p2)).thenReturn(true);
     }
 

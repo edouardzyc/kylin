@@ -198,8 +198,8 @@ public class CubeMigrationCLI extends AbstractApplication {
         for (CubeSegment segment : cube.getSegments()) {
 
             String jobUuid = segment.getLastBuildJobID();
-            String src = JobBuilderSupport.getJobWorkingDir(srcConfig.getHdfsWorkingDirectory(), jobUuid);
-            String tgt = JobBuilderSupport.getJobWorkingDir(dstConfig.getHdfsWorkingDirectory(), jobUuid);
+            String src = JobBuilderSupport.getJobWorkingDir(srcConfig.getHdfsWorkingDirectory(cube.getProject()), jobUuid);
+            String tgt = JobBuilderSupport.getJobWorkingDir(dstConfig.getHdfsWorkingDirectory(cube.getProject()), jobUuid);
 
             operations.add(new Opt(OptType.RENAME_FOLDER_IN_HDFS, new Object[] { src, tgt }));
         }

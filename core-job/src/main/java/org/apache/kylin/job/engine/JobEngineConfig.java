@@ -122,15 +122,11 @@ public class JobEngineConfig {
     }
 
     public String getHdfsWorkingDirectory() {
-        return config.getHdfsWorkingDirectory();
+        return config.getHdfsWorkingDirectory(null);
     }
 
     public String getHdfsWorkingDirectory(String project) {
-        if (config.isProjectIsolationEnabled()) {
-            return config.getHdfsWorkingDirectory() + project + "/";
-        } else {
-            return config.getHdfsWorkingDirectory();
-        }
+        return config.getHdfsWorkingDirectory(project);
     }
 
     /**

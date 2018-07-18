@@ -168,6 +168,7 @@ public class DefaultChainedExecutable extends AbstractExecutable implements Chai
     @Override
     public void addTask(AbstractExecutable executable) {
         executable.setId(getId() + "-" + String.format("%02d", subTasks.size()));
+        executable.setParentExecutable(this);
         this.subTasks.add(executable);
     }
 

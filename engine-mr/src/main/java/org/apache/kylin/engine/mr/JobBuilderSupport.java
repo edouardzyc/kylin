@@ -179,7 +179,7 @@ public class JobBuilderSupport {
     // ============================================================================
 
     public String getJobWorkingDir(String jobId) {
-        return HadoopUtil.getPathWithoutScheme(getJobWorkingDir(config, jobId));
+        return HadoopUtil.getPathWithoutScheme(getJobWorkingDirIn(config, jobId));
     }
 
     public String getRealizationRootPath(String jobId) {
@@ -242,7 +242,7 @@ public class JobBuilderSupport {
     }
 
     public String getJobWorkingDirIn(JobEngineConfig conf, String jobId) {
-        return getJobWorkingDir(conf.getHdfsWorkingDirectory(seg.getCubeInstance().getProject()), jobId);
+        return getJobWorkingDir(conf.getHdfsWorkingDirectory(seg.getProject()), jobId);
     }
 
     public static String getJobWorkingDir(String hdfsDir, String jobId) {
@@ -250,13 +250,6 @@ public class JobBuilderSupport {
             hdfsDir = hdfsDir + "/";
         }
         return hdfsDir + "kylin-" + jobId;
-    }
-
-    public static String getJobWorkingDir(String hdfsDir, String project, String jobId) {
-        if (!hdfsDir.endsWith("/")) {
-            hdfsDir = hdfsDir + "/";
-        }
-        return hdfsDir + project + "/" + "kylin-" + jobId;
     }
 
     public static StringBuilder appendExecCmdParameters(StringBuilder buf, String paraName, String paraValue) {

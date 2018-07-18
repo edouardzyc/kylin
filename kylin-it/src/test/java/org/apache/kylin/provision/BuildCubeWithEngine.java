@@ -139,14 +139,14 @@ public class BuildCubeWithEngine {
         try {
             //check hdfs permission
             FileSystem fileSystem = HadoopUtil.getWorkingFileSystem();
-            String hdfsWorkingDirectory = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory();
+            String hdfsWorkingDirectory = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(null);
             Path coprocessorDir = new Path(hdfsWorkingDirectory);
             boolean success = fileSystem.mkdirs(coprocessorDir);
             if (!success) {
                 throw new IOException("mkdir fails");
             }
         } catch (IOException e) {
-            throw new RuntimeException("failed to create kylin.env.hdfs-working-dir, Please make sure the user has right to access " + KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(), e);
+            throw new RuntimeException("failed to create kylin.env.hdfs-working-dir, Please make sure the user has right to access " + KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(null), e);
         }
     }
 

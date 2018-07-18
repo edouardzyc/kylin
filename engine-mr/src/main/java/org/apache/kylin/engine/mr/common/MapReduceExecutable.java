@@ -146,7 +146,9 @@ public class MapReduceExecutable extends AbstractExecutable {
                 job = hadoopJob.getJob();
             }
             final StringBuilder output = new StringBuilder();
-            final HadoopCmdOutput hadoopCmdOutput = new HadoopCmdOutput(job, output);
+            final String projectName = this.getParentExecutable() == null ? null
+                    : this.getParentExecutable().getParam("projectName");
+            final HadoopCmdOutput hadoopCmdOutput = new HadoopCmdOutput(job, output, projectName);
 
             JobStepStatusEnum status = JobStepStatusEnum.NEW;
             while (!isDiscarded() && !isPaused()) {

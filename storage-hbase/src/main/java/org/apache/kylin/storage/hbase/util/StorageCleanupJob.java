@@ -192,7 +192,7 @@ public class StorageCleanupJob extends AbstractApplication {
         // GlobFilter(KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory()
         // + "/kylin-.*");
         // TODO: when first use, /kylin/kylin_metadata does not exist.
-        FileStatus[] fStatus = fs.listStatus(new Path(KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectoryWithoutScheme()));
+        FileStatus[] fStatus = fs.listStatus(new Path(KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectoryWithoutScheme(null)));
         for (FileStatus status : fStatus) {
             String path = status.getPath().getName();
             // System.out.println(path);

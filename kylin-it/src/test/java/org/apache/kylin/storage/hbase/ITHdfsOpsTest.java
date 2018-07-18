@@ -46,7 +46,7 @@ public class ITHdfsOpsTest extends HBaseMetadataTestCase {
 
     @Test
     public void TestPath() throws IOException {
-        String hdfsWorkingDirectory = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory();
+        String hdfsWorkingDirectory = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(null);
         Path coprocessorDir = new Path(hdfsWorkingDirectory, "test");
         fileSystem.mkdirs(coprocessorDir);
 

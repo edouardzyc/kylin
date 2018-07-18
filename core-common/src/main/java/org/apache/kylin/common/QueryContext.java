@@ -78,6 +78,7 @@ public class QueryContext {
     private boolean isLateDecodeEnabled;
     private boolean isTimeout;
     private Set<Future> allRunningTasks = new HashSet<>();
+    private String project;
 
     public boolean switchToSparder = false;
     private boolean isHighPriorityQuery = false;
@@ -127,6 +128,14 @@ public class QueryContext {
 
     public void setQueryId(String queryId) {
         this.queryId = queryId;
+    }
+
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
     }
 
     public String getUsername() {

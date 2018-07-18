@@ -229,13 +229,11 @@ abstract public class KylinConfigBase implements Serializable {
 
     private String cachedHdfsWorkingDirectory;
 
-    public String getHdfsWorkingDirectoryWithoutScheme() {
-        String path = getHdfsWorkingDirectory();
-
-        return HadoopUtil.getPathWithoutScheme(path);
+    public String getHdfsWorkingDirectoryWithoutScheme(String project) {
+        return HadoopUtil.getPathWithoutScheme(getHdfsWorkingDirectory(project));
     }
 
-    public String getHdfsWorkingDirectory() {
+    private String getHdfsWorkingDirectory() {
         if (cachedHdfsWorkingDirectory != null)
             return cachedHdfsWorkingDirectory;
 
@@ -269,7 +267,7 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public String getPrefixWorkingScheme() {
-        return getPrefixScheme(getHdfsWorkingDirectory());
+        return getPrefixScheme(getHdfsWorkingDirectory(null));
     }
 
     public String getPrefixReadScheme() {
@@ -282,14 +280,14 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public String getHdfsWorkingDirectory(String project) {
-        if (isProjectIsolationEnabled()) {
-            return getHdfsWorkingDirectory() + project + "/";
+        if (isProjectIsolationEnabled() && project != null) {
+            return new Path(getHdfsWorkingDirectory(), project).toString() + "/";
         } else {
             return getHdfsWorkingDirectory();
         }
     }
 
-    public String getReadHdfsWorkingDirectory() {
+    private String getReadHdfsWorkingDirectory() {
         if (StringUtils.isNotEmpty(getParquetReadFileSystem())) {
             Path workingDir = new Path(getHdfsWorkingDirectory());
             return new Path(getParquetReadFileSystem(), Path.getPathWithoutSchemeAndAuthority(workingDir)).toString()
@@ -333,22 +331,10 @@ abstract public class KylinConfigBase implements Serializable {
     /**
      * where is parquet fles stored in hdfs , end with /
      */
-    public String getWorkingParquetStoragePath() {
-        return getHdfsWorkingDirectory() + "parquet/";
-    }
 
     public String getWorkingParquetStoragePath(String project) {
         String defaultPath = getHdfsWorkingDirectory(project) + "parquet/";
         return getOptional("kap.storage.columnar.hdfs-dir", defaultPath);
-    }
-
-    public String getReadParquetStoragePath() {
-        if (StringUtils.isNotEmpty(getParquetReadFileSystem())) {
-            Path parquetPath = new Path(getWorkingParquetStoragePath());
-            return new Path(getParquetReadFileSystem(), Path.getPathWithoutSchemeAndAuthority(parquetPath)).toString()
-                    + "/";
-        }
-        return getWorkingParquetStoragePath();
     }
 
     public String getReadParquetStoragePath(String project) {
@@ -1396,7 +1382,7 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public boolean isProjectIsolationEnabled() {
-        return Boolean.parseBoolean(getOptional("kylin.metadata.project-isolation-enable", "false"));
+        return Boolean.parseBoolean(getOptional("kylin.metadata.project-isolation-enable", "true"));
     }
 
     @Deprecated //Limit is good even it's large. This config is meaning less since we already have scan threshold
