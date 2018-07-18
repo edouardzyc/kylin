@@ -199,7 +199,7 @@ abstract public class KylinConfigBase implements Serializable {
         properties.setProperty(BCC.check(key), value);
     }
 
-    final protected void reloadKylinConfig(Properties properties) {
+    final protected void handleBCC(Properties properties) {
         this.properties = BCC.check(properties);
     }
 

@@ -93,7 +93,7 @@ public class KylinConfig extends KylinConfigBase {
             if (SYS_ENV_INSTANCE == null) {
                 try {
                     config = new KylinConfig();
-                    config.reloadKylinConfig(buildSiteProperties());
+                    config.handleBCC(buildSiteProperties());
 
                     logger.info("Initialized a new KylinConfig from getInstanceFromEnv : "
                             + System.identityHashCode(config));
@@ -190,7 +190,7 @@ public class KylinConfig extends KylinConfigBase {
                 config = new KylinConfig();
                 InputStream is = new FileInputStream(uri);
                 Properties prop = streamToProps(is);
-                config.reloadKylinConfig(prop);
+                config.handleBCC(prop);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -202,7 +202,7 @@ public class KylinConfig extends KylinConfigBase {
                 String propertyText = client.getKylinProperties();
                 InputStream is = IOUtils.toInputStream(propertyText, Charset.defaultCharset());
                 Properties prop = streamToProps(is);
-                config.reloadKylinConfig(prop);
+                config.handleBCC(prop);
                 return config;
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -222,7 +222,7 @@ public class KylinConfig extends KylinConfigBase {
             if (SYS_ENV_INSTANCE == null) {
                 try {
                     KylinConfig config = new KylinConfig();
-                    config.reloadKylinConfig(prop);
+                    config.handleBCC(prop);
                     logger.info("Resetting SYS_ENV_INSTANCE by a input stream: " + System.identityHashCode(config));
                     SYS_ENV_INSTANCE = config;
                 } catch (IllegalArgumentException e) {
@@ -271,7 +271,7 @@ public class KylinConfig extends KylinConfigBase {
 
     public static KylinConfig createKylinConfig(Properties prop) {
         KylinConfig kylinConfig = new KylinConfig();
-        kylinConfig.reloadKylinConfig(prop);
+        kylinConfig.handleBCC(prop);
         return kylinConfig;
     }
 
@@ -454,7 +454,6 @@ public class KylinConfig extends KylinConfigBase {
         copy.putAll(all);
         return copy;
     }
-
     public String exportAllToString() {
         final Properties allProps = getProperties(null);
 
@@ -468,11 +467,10 @@ public class KylinConfig extends KylinConfigBase {
 
     public String exportToString(Collection<String> propertyKeys) throws IOException {
         final Properties filteredProps = getProperties(propertyKeys);
-        final Properties allProps = getProperties(null);
 
         for (String key : propertyKeys) {
             if (!filteredProps.containsKey(key)) {
-                filteredProps.put(key, allProps.getProperty(key, ""));
+                filteredProps.put(key, ""); //use blank to answer
             }
         }
 
@@ -494,7 +492,7 @@ public class KylinConfig extends KylinConfigBase {
     }
 
     public synchronized void reloadFromSiteProperties() {
-        reloadKylinConfig(buildSiteProperties());
+        handleBCC(buildSiteProperties());
     }
 
     public KylinConfig base() {
