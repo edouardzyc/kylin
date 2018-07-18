@@ -22,7 +22,6 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -49,8 +48,7 @@ public class SDictTest {
             w.write(out);
         }
 
-        RandomAccessFile in = new RandomAccessFile(f, "r");
-        SDict  d1 = new SDict(in);
+        SDict  d1 = new SDict(f.getAbsolutePath());
         d1.init();
 
         Assert.assertArrayEquals(dict[99].getBytes(), d1.getValueBytesFromIdImpl(99));
@@ -87,8 +85,7 @@ public class SDictTest {
             dict.write(out);
         }
 
-        RandomAccessFile in = new RandomAccessFile(f, "r");
-        SDict r = new SDict(in);
+        SDict r = new SDict(f.getAbsolutePath());
         r.init();
 
         Assert.assertArrayEquals(d.getValueByteFromId(99), r.getValueBytesFromIdImpl(99));
@@ -113,8 +110,7 @@ public class SDictTest {
         }
         System.out.println("write down.");
 
-        RandomAccessFile in = new RandomAccessFile(f, "r");
-        SDict r = new SDict(in);
+        SDict r = new SDict(f.getAbsolutePath());
         r.init();
 
         int nThreads = 10;
@@ -158,8 +154,7 @@ public class SDictTest {
             w.write(out);
         }
 
-        RandomAccessFile in = new RandomAccessFile(f, "r");
-        SDict r = new SDict(in);
+        SDict r = new SDict(f.getAbsolutePath());
         r.init();
 
         long t1 = System.currentTimeMillis();

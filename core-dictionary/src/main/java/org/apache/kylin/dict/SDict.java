@@ -64,10 +64,6 @@ public class SDict extends Dictionary<String> implements DictFileResource {
         raf = new RandomAccessFile(path, "r");
     }
 
-    public SDict(RandomAccessFile in) {
-        raf = in;
-    }
-
     public static SDict wrap(Dictionary dict) {
         String[] values = new String[dict.getSize()];
         for (int i = 0; i < values.length; i++) {
@@ -76,7 +72,7 @@ public class SDict extends Dictionary<String> implements DictFileResource {
         return new SDict(values);
     }
 
-    SDict(String[] values) {
+    public SDict(String[] values) {
         int total = 0;
         this.values = values;
         this.pos = new int[this.values.length];
