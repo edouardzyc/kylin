@@ -259,6 +259,8 @@ public class JobService extends BasicService implements InitializingBean {
             
             if (segAddInfo != null && segAddInfo.size() > 0) {
                 newSeg = updateSegAddInfo(newSeg, segAddInfo);
+                // in case updateSegAddInfo has something error, do double check
+                checkCubeSegmentAddInfo(segAddInfo, newSeg);
             }
 
             getExecutableManager().addJob(job);
@@ -281,6 +283,14 @@ public class JobService extends BasicService implements InitializingBean {
         JobInstance jobInstance = getSingleJobInstance(job);
 
         return jobInstance;
+    }
+
+    private void checkCubeSegmentAddInfo(Map<String, String> segAddInfo, CubeSegment newSeg) {
+        if (newSeg == null || newSeg.getAdditionalInfo() == null || newSeg.getAdditionalInfo().size() == 0
+                || segAddInfo.size() != newSeg.getAdditionalInfo().size()) {
+            logger.error("CheckCubeSegmentAddInfo failed, addInfo of this newSeg {} is incomplete", newSeg == null ? "NULL" : newSeg.getName());
+            throw new RuntimeException("CheckCubeSegmentAddInfo failed, addInfo of this newSeg is incomplete");
+        }
     }
 
     private CubeSegment updateSegAddInfo(CubeSegment newSeg, Map<String, String> segAddInfo) throws IOException {
