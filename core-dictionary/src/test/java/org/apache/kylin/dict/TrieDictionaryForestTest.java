@@ -870,7 +870,7 @@ public class TrieDictionaryForestTest {
 
     private static void testStringDictionary(ArrayList<String> str, ArrayList<String> notFound) {
         int baseId = new Random().nextInt(100);
-        TrieDictionaryForestBuilder<String> b = newDictBuilder(str, baseId, 2);
+        TrieDictionaryForestBuilder<String> b = newDictBuilder(str, baseId, 50);
         TrieDictionaryForest<String> dict = b.build();
         TreeSet<String> set = new TreeSet<String>();
         for (String s : str) {
