@@ -62,6 +62,7 @@ public class EncodingController extends BasicController {
         allDatatypes.addAll(DataType.INTEGER_FAMILY);
         allDatatypes.addAll(DataType.NUMBER_FAMILY);
         allDatatypes.addAll(DataType.STRING_FAMILY);
+        allDatatypes.add("boolean");
 
         Map<String, List<String>> datatypeValidEncodings = Maps.newHashMap();
         for (String dataTypeStr : allDatatypes) {
