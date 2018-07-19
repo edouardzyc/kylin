@@ -451,13 +451,16 @@ public class HiveMRInput implements IMRInput {
 
         private void tearDownFactInputSubstituteIfNeeded(ExecutableContext context) throws IOException {
             String cubeName = CubingExecutableUtil.getCubeName(getParams());
-            CubeInstance cube = CubeManager.getInstance(context.getConfig()).getCube(cubeName);
-            String segId = CubingExecutableUtil.getSegmentId(getParams());
-            CubeSegment seg = cube.getSegmentById(segId);
-            FactInputSubstitute sub = FactInputSubstitute.getInstance(seg);
-            if (sub != null) {
-                logger.debug("Calling FactInputSubstitute.tearDownFactTableAfterBuild() on " + sub);
-                sub.tearDownFactTableAfterBuild();
+            // param cubeName is added, do a check for compatibility with the job/executable created by older KE
+            if (StringUtils.isNotBlank(cubeName)) {
+                CubeInstance cube = CubeManager.getInstance(context.getConfig()).getCube(cubeName);
+                String segId = CubingExecutableUtil.getSegmentId(getParams());
+                CubeSegment seg = cube.getSegmentById(segId);
+                FactInputSubstitute sub = FactInputSubstitute.getInstance(seg);
+                if (sub != null) {
+                    logger.debug("Calling FactInputSubstitute.tearDownFactTableAfterBuild() on " + sub);
+                    sub.tearDownFactTableAfterBuild();
+                }
             }
         }
 
