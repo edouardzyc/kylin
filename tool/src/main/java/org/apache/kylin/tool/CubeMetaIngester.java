@@ -260,9 +260,12 @@ public class CubeMetaIngester extends AbstractApplication {
             if (existing != null) {
                 conflictedModels.add(dataModelDesc.getName());
                 if (!forceIngest || !dataModelDesc.getProject().equals(existing.getProject())) {
+                    System.out.println("The model " + dataModelDesc.getName()
+                            + " cannot exist in multiple projects, please resolve the conflicts. ");
                     throw new IllegalStateException("The model " + dataModelDesc.getName()
                             + " cannot exist in multiple projects, please resolve the conflicts. ");
                 } else {
+                    System.out.println("Overwriting the old model desc: \" + dataModelDesc.getName()");
                     logger.warn("Overwriting the old model desc: " + dataModelDesc.getName());
                 }
             }
@@ -276,15 +279,18 @@ public class CubeMetaIngester extends AbstractApplication {
                 conflictedCubes.add(cube.getDisplayName());
                 Segments segments = existing.getSegments();
                 if (segments.size() != 0) {
-                    throw new IllegalStateException(
-                            "Please purge segments of " + cube.getName() + " before restoring metadata.");
+                    System.out.println("Please purge data of " + cube.getName() + " at first.");
+                    throw new IllegalStateException("Please purge data of \" + cube.getName() + \" at first.");
                 }
                 // check they are in same model.
                 if (!forceIngest
                         || !cube.getDescriptor().getModelName().equals(existing.getDescriptor().getModelName())) {
+                    System.out.println("The cube " + cube.getName()
+                            + " cannot exist in multiple models, please resolve the conflicts. ");
                     throw new IllegalStateException("The cube " + cube.getName()
                             + " cannot exist in multiple models, please resolve the conflicts. ");
                 } else {
+                    System.out.println("Overwriting the old cube desc: " + cube.getName());
                     logger.warn("Overwriting the old cube: " + cube.getName());
                 }
             }
@@ -297,14 +303,17 @@ public class CubeMetaIngester extends AbstractApplication {
             if (existing != null) {
                 Segments segments = cubeManager.getCube(cubeDesc.getName()).getSegments();
                 if (segments.size() != 0) {
-                    throw new IllegalStateException(
-                            "Please purge segments of " + cubeDesc.getName() + " before restoring metadata.");
+                    System.out.println("Please purge data of " + cubeDesc.getName() + " at first.");
+                    throw new IllegalStateException("Please purge data of " + cubeDesc.getName() + " at first.");
                 }
                 // check they are in same model.
                 if (!forceIngest || !cubeDesc.getModelName().equals(existing.getModelName())) {
+                    System.out.println("The cube" + cubeDesc.getName()
+                            + "cannot exist in multiple models, please resolve the conflicts. ");
                     throw new IllegalStateException("The cube" + cubeDesc.getName()
                             + " cannot exist in multiple models, please resolve the conflicts. ");
                 } else {
+                    System.out.println("Overwriting the old cube desc: " + cubeDesc.getName());
                     logger.warn("Overwriting the old cube desc: " + cubeDesc.getName());
                 }
             }
