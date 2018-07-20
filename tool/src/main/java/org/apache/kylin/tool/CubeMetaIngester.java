@@ -265,7 +265,7 @@ public class CubeMetaIngester extends AbstractApplication {
                     throw new IllegalStateException("The model " + dataModelDesc.getName()
                             + " cannot exist in multiple projects, please resolve the conflicts. ");
                 } else {
-                    System.out.println("Overwriting the old model desc: \" + dataModelDesc.getName()");
+                    System.out.println("Overwriting the old model desc: " + dataModelDesc.getName());
                     logger.warn("Overwriting the old model desc: " + dataModelDesc.getName());
                 }
             }
@@ -280,7 +280,7 @@ public class CubeMetaIngester extends AbstractApplication {
                 Segments segments = existing.getSegments();
                 if (segments.size() != 0) {
                     System.out.println("Please purge data of " + cube.getName() + " at first.");
-                    throw new IllegalStateException("Please purge data of \" + cube.getName() + \" at first.");
+                    throw new IllegalStateException("Please purge data of " + cube.getName() + " at first.");
                 }
                 // check they are in same model.
                 if (!forceIngest
@@ -290,8 +290,8 @@ public class CubeMetaIngester extends AbstractApplication {
                     throw new IllegalStateException("The cube " + cube.getName()
                             + " cannot exist in multiple models, please resolve the conflicts. ");
                 } else {
-                    System.out.println("Overwriting the old cube desc: " + cube.getName());
-                    logger.warn("Overwriting the old cube: " + cube.getName());
+                    System.out.println("Overwriting the old cube : " + cube.getName());
+                    logger.warn("Overwriting the old cube : " + cube.getName());
                 }
             }
             requiredResources.add(CubeInstance.concatResourcePath(cube.getName()));
