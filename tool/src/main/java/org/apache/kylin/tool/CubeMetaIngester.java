@@ -259,7 +259,7 @@ public class CubeMetaIngester extends AbstractApplication {
             DataModelDesc existing = modelManager.getDataModelDesc(dataModelDesc.getName());
             if (existing != null) {
                 conflictedModels.add(dataModelDesc.getName());
-                if (!forceIngest || !dataModelDesc.getProject().equals(existing.getProject())) {
+                if (!forceIngest || !existing.getProject().equals(targetProject.getName())) {
                     System.out.println("The model " + dataModelDesc.getName()
                             + " cannot exist in multiple projects, please resolve the conflicts. ");
                     throw new IllegalStateException("The model " + dataModelDesc.getName()

@@ -239,6 +239,35 @@ public class CubeMetaIngesterTest extends LocalFileMetadataTestCase {
                 "-forceIngest", "true", "-restoreType", "project" });
     }
 
+    @Test
+    public void testBadModelIngest() throws IOException {
+        thrown.expect(RuntimeException.class);
+
+        //should not break at table duplicate check, should fail at model duplicate check
+        thrown.expectCause(new BaseMatcher<Throwable>() {
+            @Override
+            public boolean matches(Object item) {
+                if (item instanceof IllegalStateException) {
+                    if (((IllegalStateException) item).getMessage()
+                            .startsWith("The model calcs_tdvt cannot exist in multiple projects, please resolve the conflicts. ")) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+            }
+        });
+
+        String srcPath = doExtractorProject();
+        ProjectManager projectManager = ProjectManager.getInstance(KylinConfig.getInstanceFromEnv());
+        projectManager.createProject("default1", "ADMIN", "", null);
+        CubeMetaIngester.main(new String[] { "-project", "default1", "-srcPath", srcPath, "-overwriteTables", "true",
+                "-forceIngest", "true", "-restoreType", "project" });
+    }
+
     private String doExtractorProject() throws IOException {
         // Does not support ingest hybrid yet so removeProject before extractorProject
         ProjectManager projectManager = ProjectManager.getInstance(KylinConfig.getInstanceFromEnv());
