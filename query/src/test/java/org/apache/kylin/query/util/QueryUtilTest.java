@@ -167,6 +167,19 @@ public class QueryUtilTest extends LocalFileMetadataTestCase {
             String sqlWithComment = "/* comment1 * comment2 */ -- comment 5\n" + originSql + "/* comment3 / comment4 */";
             Assert.assertEquals(originSql, QueryUtil.removeCommentInSql(sqlWithComment));
         }
+
+        String content ="        --  One-line comment and /**range\n" +
+                "/*\n" +
+                "Multi-line comment\r\n" +
+                "--  Multi-line comment*/\n" +
+                "select price as "+
+                "/*\n" +
+                "Multi-line comment\r\n" +
+                "--  Multi-line comment*/\n"+
+                "revenue from /*One-line comment-- One-line comment*/ v_lineitem;";
+        String expectedContent = "select price as revenue from  v_lineitem;";
+        String trimmedContent = QueryUtil.removeCommentInSql(content).replaceAll("\n", "").trim();
+        Assert.assertEquals(trimmedContent, expectedContent);
     }
 
     @Test
