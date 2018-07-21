@@ -27,8 +27,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
@@ -36,6 +38,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.persistence.ResourceTool;
+import org.apache.kylin.common.util.HiveCmdBuilder;
 import org.apache.kylin.common.util.LocalFileMetadataTestCase;
 import org.apache.kylin.cube.CubeDescManager;
 import org.apache.kylin.cube.CubeInstance;
@@ -133,9 +136,17 @@ public class DeployUtil {
         String tableName = tableRef.getTableIdentity();
         String path = getHadoopCliWorkingDir() + "/" + tableName;
 
-        String loadToFileHql = generateLoadToFileHql(path, tableName, fileNum);
-        String hiveCmd = "hive -e " + "\"" + loadToFileHql + "\"";
-        execCliCommand(hiveCmd);
+        String distributeColumn = model.getPartitionDesc().getPartitionDateColumnRef().getIdentity();
+        String loadToFileHql = generateLoadToFileHql(path, tableName, fileNum, distributeColumn);
+        logger.info("prepareTestDataForIncFileCubes hql : " + loadToFileHql);
+        final HiveCmdBuilder hiveCmdBuilder = new HiveCmdBuilder();
+        hiveCmdBuilder.overwriteHiveProps(model.getConfig().getHiveConfigOverride());
+        Map<String, String> overwrites = new HashMap<>();
+        overwrites.put("hive.exec.compress.output", "false");
+        hiveCmdBuilder.overwriteHiveProps(overwrites);
+        hiveCmdBuilder.addStatement(loadToFileHql);
+        final String cmd = hiveCmdBuilder.toString();
+        execCliCommand(cmd);
         String filePreFix = "00000";
         String fileSuffix = "_0";
         for (int i = 0; i < fileNum; i++) {
@@ -146,11 +157,15 @@ public class DeployUtil {
         execCliCommand("hadoop fs -touchz " + emptyFileName);
         fileList.add(emptyFileName);
 
+        fileNum ++;
+        String anotherEmptyFileName = path + "/" + filePreFix + fileNum +  fileSuffix;
+        execCliCommand("hadoop fs -touchz " + anotherEmptyFileName);
+        fileList.add(anotherEmptyFileName);
 
         return fileList;
     }
 
-    private static String generateLoadToFileHql(String path, String tableName, int fileNum) {
+    private static String generateLoadToFileHql(String path, String tableName, int fileNum, String distributeColumn) {
         StringBuilder hql = new StringBuilder();
         hql.append("set mapreduce.job.reduces=" + fileNum + ";\n");
         hql.append("set hive.merge.mapredfiles=false;\n");
@@ -158,7 +173,11 @@ public class DeployUtil {
         hql.append("'" + path + "'");
         hql.append(" ROW FORMAT DELIMITED FIELDS TERMINATED BY ','  select * from ");
         hql.append(tableName);
-        hql.append(" DISTRIBUTE BY RAND();");
+        String distributeBy = "RAND()";
+        if (StringUtils.isNotBlank(distributeColumn)) {
+            distributeBy = distributeColumn;
+        }
+        hql.append(" DISTRIBUTE BY " + distributeBy + ";");
         return hql.toString();
     }
 
