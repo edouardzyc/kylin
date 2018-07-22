@@ -58,7 +58,7 @@ public class GlobalDictHDFSStore extends GlobalDictStore {
         super(baseDir);
         this.basePath = new Path(baseDir);
         this.conf = HadoopUtil.getCurrentConfiguration();
-        this.fileSystem = HadoopUtil.getWorkingFileSystem();
+        this.fileSystem = HadoopUtil.getReadFileSystem();
     }
 
     // Previously we put slice files and index file directly in base directory,
@@ -261,9 +261,9 @@ public class GlobalDictHDFSStore extends GlobalDictStore {
             return baseDir;
         }
 
-        checkArgument(baseDir.startsWith(srcConfig.getHdfsWorkingDirectory(null)), "Please check why current directory {} doesn't belong to source working directory {}", baseDir, srcConfig.getHdfsWorkingDirectory(null));
+        checkArgument(baseDir.startsWith(srcConfig.getReadHdfsWorkingDirectory(null)), "Please check why current directory {} doesn't belong to source working directory {}", baseDir, srcConfig.getReadHdfsWorkingDirectory(null));
 
-        final String dstBaseDir = baseDir.replaceFirst(srcConfig.getHdfsWorkingDirectory(null), dstConfig.getHdfsWorkingDirectory(null));
+        final String dstBaseDir = baseDir.replaceFirst(srcConfig.getReadHdfsWorkingDirectory(null), dstConfig.getReadHdfsWorkingDirectory(null));
 
         Long[] versions = listAllVersions();
         if (versions.length == 0) { // empty dict, nothing to copy
@@ -271,7 +271,7 @@ public class GlobalDictHDFSStore extends GlobalDictStore {
         }
 
         Path srcVersionDir = getVersionDir(versions[versions.length - 1]);
-        Path dstVersionDir = new Path(srcVersionDir.toString().replaceFirst(srcConfig.getHdfsWorkingDirectory(null), dstConfig.getHdfsWorkingDirectory(null)));
+        Path dstVersionDir = new Path(srcVersionDir.toString().replaceFirst(srcConfig.getReadHdfsWorkingDirectory(null), dstConfig.getReadHdfsWorkingDirectory(null)));
         FileSystem dstFS = dstVersionDir.getFileSystem(conf);
         if (dstFS.exists(dstVersionDir)) {
             dstFS.delete(dstVersionDir, true);

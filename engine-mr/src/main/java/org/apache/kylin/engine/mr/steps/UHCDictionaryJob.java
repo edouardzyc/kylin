@@ -96,7 +96,7 @@ public class UHCDictionaryJob extends AbstractHadoopJob {
 
             job.getConfiguration().set(BatchConstants.CFG_CUBE_NAME, cubeName);
             job.getConfiguration().set(BatchConstants.ARG_CUBING_JOB_ID, job_id);
-            job.getConfiguration().set(BatchConstants.CFG_GLOBAL_DICT_BASE_DIR, KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(null));
+            job.getConfiguration().set(BatchConstants.CFG_GLOBAL_DICT_BASE_DIR, KylinConfig.getInstanceFromEnv().getReadHdfsWorkingDirectory(null));
             job.getConfiguration().set(BatchConstants.CFG_MAPRED_OUTPUT_COMPRESS, "false");
 
             //8G memory is enough for all global dict, because the input is sequential and we handle global dict slice by slice

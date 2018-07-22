@@ -200,7 +200,7 @@ public class AppendTrieDictionary<T> extends CacheDictionary<T> {
      */
     private String convertToRelativePath(String path) {
         KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
-        String hdfsWorkingDir = kylinConfig.getHdfsWorkingDirectory(null);
+        String hdfsWorkingDir = kylinConfig.getReadHdfsWorkingDirectory(null);
         if (!isSaveAbsolutePath && path.startsWith(hdfsWorkingDir)) {
             return path.substring(hdfsWorkingDir.length());
         }
@@ -211,15 +211,15 @@ public class AppendTrieDictionary<T> extends CacheDictionary<T> {
         KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
         Path basicPath = new Path(path);
         if (basicPath.toUri().getScheme() == null)
-            return kylinConfig.getHdfsWorkingDirectory(null) + path;
+            return kylinConfig.getReadHdfsWorkingDirectory(null) + path;
 
         String[] paths = path.split("/resources/GlobalDict/");
         if (paths.length == 2)
-            return kylinConfig.getHdfsWorkingDirectory(null) + "/resources/GlobalDict/" + paths[1];
+            return kylinConfig.getReadHdfsWorkingDirectory(null) + "/resources/GlobalDict/" + paths[1];
 
         paths = path.split("/resources/SegmentDict/");
         if (paths.length == 2) {
-            return kylinConfig.getHdfsWorkingDirectory(null) + "/resources/SegmentDict/" + paths[1];
+            return kylinConfig.getReadHdfsWorkingDirectory(null) + "/resources/SegmentDict/" + paths[1];
         } else {
             throw new RuntimeException("the basic directory of global dictionary only support the format which contains '/resources/GlobalDict/' or '/resources/SegmentDict/'");
         }

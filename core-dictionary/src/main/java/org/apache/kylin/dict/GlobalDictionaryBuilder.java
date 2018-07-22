@@ -51,7 +51,7 @@ public class GlobalDictionaryBuilder implements IDictionaryBuilder {
         int maxEntriesPerSlice = KylinConfig.getInstanceFromEnv().getAppendDictEntrySize();
         if (hdfsDir == null) {
             //build in Kylin job server
-            hdfsDir = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(null);
+            hdfsDir = KylinConfig.getInstanceFromEnv().getReadHdfsWorkingDirectory(null);
         }
         String baseDir = hdfsDir + "resources/GlobalDict" + dictInfo.getResourceDir() + "/";
 

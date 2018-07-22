@@ -481,8 +481,8 @@ public class ProjectDictionaryManager {
         // if a failed segment is followed by another segment, project dict may need overwrite
         getStore().putResource(path, inputStream, System.currentTimeMillis());
         KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
-        Path sDictDir = new Path(kylinConfig.getHdfsWorkingDirectory(project) + PathBuilder.SPARDER_DICT_ROOT);
-        FileSystem workingFileSystem = HadoopUtil.getWorkingFileSystem();
+        Path sDictDir = new Path(kylinConfig.getReadHdfsWorkingDirectory(project) + PathBuilder.SPARDER_DICT_ROOT);
+        FileSystem workingFileSystem = HadoopUtil.getReadFileSystem();
         if (!workingFileSystem.exists(sDictDir)) {
             workingFileSystem.mkdirs(sDictDir);
         }

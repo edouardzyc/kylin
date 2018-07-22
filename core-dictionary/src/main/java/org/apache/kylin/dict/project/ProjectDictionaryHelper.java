@@ -136,7 +136,7 @@ final public class ProjectDictionaryHelper {
         }
 
         public static String sDictPath(String project, String sourceIdentify, long currentVersion) {
-            String hdfsWorkingDirectory = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(project);
+            String hdfsWorkingDirectory = KylinConfig.getInstanceFromEnv().getReadHdfsWorkingDirectory(project);
             return hdfsWorkingDirectory + SPARDER_SDICT_BASE_DIR + "/" + sourceIdentify + "/" + currentVersion
                     + SDICT_DATA;
         }

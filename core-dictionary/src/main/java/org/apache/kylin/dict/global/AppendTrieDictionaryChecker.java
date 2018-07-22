@@ -87,7 +87,7 @@ public class AppendTrieDictionaryChecker {
     }
 
     public static void main(String[] args) throws IOException {
-        String path = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory(null) + "resources/GlobalDict/";
+        String path = KylinConfig.getInstanceFromEnv().getReadParquetStoragePath(null) + "resources/GlobalDict/";
         if (args.length > 0) {
             path = args[0];
         }
