@@ -18,6 +18,14 @@
 
 package org.apache.kylin.rest.service;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.kylin.engine.mr.CubingJob;
 import org.apache.kylin.job.constant.JobTimeFilterEnum;
 import org.apache.kylin.job.exception.ExecuteException;
@@ -34,11 +42,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author xduo
@@ -60,7 +63,8 @@ public class JobServiceTest extends ServiceTestBase {
         Assert.assertNotNull(jobService.getDataModelManager());
         Assert.assertNotNull(QueryConnection.getConnection(ProjectInstance.DEFAULT_PROJECT_NAME));
         Assert.assertNull(jobService.getJobInstance("job_not_exist"));
-        Assert.assertNotNull(jobService.searchJobs(null, null, null, 0, 0, JobTimeFilterEnum.ALL, JobService.JobSearchMode.ALL));
+        Assert.assertNotNull(
+                jobService.searchJobs(null, null, null, 0, 0, JobTimeFilterEnum.ALL, JobService.JobSearchMode.ALL));
     }
 
     @Test
@@ -74,6 +78,27 @@ public class JobServiceTest extends ServiceTestBase {
         Assert.assertEquals(0, jobs.size());
     }
 
+    @Test
+    public void testSearchCubingJobs() {
+        ExecutableManager manager = ExecutableManager.getInstance(jobService.getConfig());
+        AbstractExecutable errorCubingJob = new ErrorCubingJob();
+        AbstractExecutable notRealCubingJob = new ErrorCubingJob();
+        errorCubingJob.setParam("cubeName", "cube");
+        errorCubingJob.setName("job1");
+        notRealCubingJob.setName("job2");
+        Output output1 = new TestOutput();
+        Output output2 = new TestOutput();
+
+        Map<String, Output> allOutputs = new HashMap<>();
+        allOutputs.put(errorCubingJob.getId(), output1);
+        allOutputs.put(notRealCubingJob.getId(), output2);
+        manager.addJob(errorCubingJob);
+        List<CubingJob> jobs = jobService.innerSearchCubingJobs("cube", null,
+                EnumSet.of(ExecutableState.RUNNING, ExecutableState.ERROR, ExecutableState.STOPPED), 0, Long.MAX_VALUE,
+                allOutputs, true, "project");
+        Assert.assertEquals(1, jobs.size());
+    }
+
     public static class TestJob extends CubingJob {
 
         public TestJob() {
@@ -85,4 +110,40 @@ public class JobServiceTest extends ServiceTestBase {
             return new ExecuteResult(ExecuteResult.State.SUCCEED, "");
         }
     }
+
+    public static class ErrorCubingJob extends CubingJob {
+
+        public ErrorCubingJob() {
+            super();
+        }
+
+        @Override
+        protected ExecuteResult doWork(ExecutableContext context) throws ExecuteException {
+            return new ExecuteResult(ExecuteResult.State.ERROR, "");
+        }
+    }
+
+    public static class TestOutput implements Output {
+
+        @Override
+        public Map<String, String> getExtra() {
+            return null;
+        }
+
+        @Override
+        public String getVerboseMsg() {
+            return null;
+        }
+
+        @Override
+        public ExecutableState getState() {
+            return ExecutableState.ERROR;
+        }
+
+        @Override
+        public long getLastModified() {
+            return 0;
+        }
+    }
+
 }

@@ -256,7 +256,7 @@ public class JobService extends BasicService implements InitializingBean {
             } else {
                 throw new BadRequestException(String.format(msg.getINVALID_BUILD_TYPE(), buildType));
             }
-            
+
             if (segAddInfo != null && segAddInfo.size() > 0) {
                 newSeg = updateSegAddInfo(newSeg, segAddInfo);
                 // in case updateSegAddInfo has something error, do double check
@@ -779,7 +779,7 @@ public class JobService extends BasicService implements InitializingBean {
                                     String executableCubeName = CubingExecutableUtil
                                             .getCubeName(executable.getParams());
                                     if (executableCubeName == null)
-                                        return true;
+                                        return false;
                                     if (nameExactMatch)
                                         return executableCubeName.equalsIgnoreCase(cubeName);
                                     else
@@ -877,7 +877,7 @@ public class JobService extends BasicService implements InitializingBean {
                                     String executableCubeName = CubingExecutableUtil
                                             .getCubeName(executable.getParams());
                                     if (executableCubeName == null)
-                                        return true;
+                                        return false;
                                     if (nameExactMatch)
                                         return executableCubeName.equalsIgnoreCase(cubeName);
                                     else
