@@ -27,7 +27,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.KylinVersion;
@@ -53,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
+import com.google.common.io.Files;
 
 @Ignore("KylinQueryTest is contained by ITCombinationTest")
 public class ITKylinQueryTest extends KylinTestBase {
@@ -361,6 +361,14 @@ public class ITKylinQueryTest extends KylinTestBase {
     @Test
     public void testDynamicQuery() throws Exception {
         execAndCompDynamicQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_dynamic", null, true);
+    }
+
+    @Test
+    // see https://github.com/Kyligence/KAP/issues/6042, for commit sparder's fix first.
+    public void testDynamicQueryInSparder() throws Exception {
+        if ("true".equalsIgnoreCase(System.getProperty("sparder.enabled"))) {
+            execAndCompDynamicQuery(getQueryFolderPrefix() + "src/test/resources/query/sql_dynamic_sparder", null, true);
+        }
     }
 
     @Test
