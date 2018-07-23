@@ -46,7 +46,7 @@ public class BadQueryDetectorTest extends LocalFileMetadataTestCase {
     @Test
     public void test() throws InterruptedException {
         int alertMB = BadQueryDetector.getSystemAvailMB() * 2;
-        int alertRunningSec = 5;
+        int alertRunningSec = 2;
         String mockSql = "select * from just_a_test";
         final ArrayList<String[]> alerts = new ArrayList<>();
 
