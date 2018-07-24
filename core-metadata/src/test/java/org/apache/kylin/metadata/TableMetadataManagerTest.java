@@ -33,10 +33,13 @@ import org.apache.kylin.common.util.JsonUtil;
 import org.apache.kylin.common.util.LocalFileMetadataTestCase;
 import org.apache.kylin.metadata.model.TableDesc;
 import org.apache.kylin.metadata.model.TableExtDesc;
+import org.apache.kylin.metadata.project.ProjectManager;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.Lists;
 
 /**
  */
@@ -103,6 +106,22 @@ public class TableMetadataManagerTest extends LocalFileMetadataTestCase {
         TableExtDesc tableExtDesc = getInstance(getTestConfig()).getTableExt(tableName, "default");
         Assert.assertEquals("1,2,3,4,", tableExtDesc.getCardinality());
         getInstance(getTestConfig()).removeTableExt(tableName, "default");
+    }
+
+    @Test
+    public void testlistTablesWithInconsistentState() throws IOException {
+        TableMetadataManager tableMetadataManager = getInstance(getTestConfig());
+        ProjectManager projectManager = ProjectManager.getInstance(getTestConfig());
+        TableDesc tableDesc = TableDesc.mockup("DEFAULT.test");
+        tableMetadataManager.saveSourceTable(tableDesc, "default");
+        projectManager.addTableDescToProject(Lists.newArrayList(tableDesc.getIdentity()).toArray(new String[0]),
+                "default");
+        List<TableDesc> tables = tableMetadataManager.listAllTables("default");
+        int numberBeforeDelete = tables.size();
+        tableMetadataManager.removeSourceTable("DEFAULT.test", "default");
+        tables = tableMetadataManager.listAllTables("default");
+        int numberAfterDelete = tables.size();
+        Assert.assertEquals(1, numberBeforeDelete - numberAfterDelete);
     }
 
     private void mockUpOldTableExtJson(String tableId, Map<String, String> tableExdProperties) throws IOException {

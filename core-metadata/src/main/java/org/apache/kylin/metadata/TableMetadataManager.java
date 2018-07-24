@@ -59,7 +59,7 @@ public class TableMetadataManager {
     private static final Logger logger = LoggerFactory.getLogger(TableMetadataManager.class);
 
     public static final Serializer<TableDesc> TABLE_SERIALIZER = new JsonSerializer<TableDesc>(TableDesc.class);
-    
+
     private static final Serializer<TableExtDesc> TABLE_EXT_SERIALIZER = new JsonSerializer<TableExtDesc>(
             TableExtDesc.class);
 
@@ -160,7 +160,7 @@ public class TableMetadataManager {
     public Map<String, TableDesc> getAllTablesMap(String prj) {
         // avoid cyclic locks
         ProjectInstance project = (prj == null) ? null : ProjectManager.getInstance(config).getProject(prj);
-        
+
         try (AutoLock lock = srcTableMapLock.lockForWrite()) {
             //TODO prj == null case is now only used by test case and CubeMetaIngester
             //should refactor these test case and tool ASAP and stop supporting null case
@@ -178,7 +178,10 @@ public class TableMetadataManager {
             Map<String, TableDesc> ret = new LinkedHashMap<>();
             for (String tableName : prjTableNames) {
                 String tableIdentity = getTableIdentity(tableName);
-                ret.put(tableIdentity, getProjectSpecificTableDesc(tableIdentity, prj));
+                TableDesc tableDesc = getProjectSpecificTableDesc(tableIdentity, prj);
+                if (tableDesc != null) {
+                    ret.put(tableIdentity, tableDesc);
+                }
             }
             return ret;
         }
@@ -254,7 +257,7 @@ public class TableMetadataManager {
     public void resetProjectSpecificTableDesc(String prj) throws IOException {
         // avoid cyclic locks
         ProjectInstance project = ProjectManager.getInstance(config).getProject(prj);
-        
+
         try (AutoLock lock = srcTableMapLock.lockForWrite()) {
             for (String tableName : project.getTables()) {
                 String tableIdentity = getTableIdentity(tableName);

@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.common.util.JsonUtil;
 import org.apache.kylin.metadata.model.TableDesc;
@@ -112,8 +114,9 @@ public class StreamingController extends BasicController {
      */
     @RequestMapping(value = "", method = { RequestMethod.POST }, produces = { "application/json" })
     @ResponseBody
-    public StreamingRequest saveStreamingConfig(@RequestBody StreamingRequest streamingRequest) {
-
+    public StreamingRequest saveStreamingConfig(@RequestBody StreamingRequest streamingRequest) throws IOException {
+        ResourceStore store = ResourceStore.getStore(KylinConfig.getInstanceFromEnv());
+        ResourceStore.Checkpoint cp = store.checkpoint();
         String project = streamingRequest.getProject();
         TableDesc tableDesc = deserializeTableDesc(streamingRequest);
         if (null == tableDesc) {
@@ -132,8 +135,11 @@ public class StreamingController extends BasicController {
 
         try {
             tableService.loadTableToProject(tableDesc, null, project);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            cp.rollback();
             throw new BadRequestException("Failed to add streaming table.");
+        } finally {
+            cp.close();
         }
 
         streamingConfig.setName(tableDesc.getIdentity());
