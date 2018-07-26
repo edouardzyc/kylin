@@ -62,6 +62,11 @@
     "name" : "TEST_COUNT_DISTINCT_BITMAP",
     "datatype" : "string",
     "data_gen" : "RAND"
+  }, {
+    "id" : "12",
+    "name" : "IS_EFFECTUAL",
+    "datatype" : "boolean",
+    "data_gen" : "true|false|TRUE|FALSE|True|False"
   } ],
   "database" : "DEFAULT",
   "last_modified" : 0
