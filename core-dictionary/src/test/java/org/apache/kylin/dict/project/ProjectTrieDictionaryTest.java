@@ -206,7 +206,7 @@ public class ProjectTrieDictionaryTest extends LocalFileMetadataTestCase {
     }
 
     @Test
-    public void testAdd() throws IOException, ExecutionException {
+    public void testAdd() throws IOException, ExecutionException, InterruptedException {
         String project = "test";
         DictionaryInfo num1 = createNumberDictionary(1000000);
         DictionaryInfo num2 = createNumberDictionary(1000000);

@@ -47,7 +47,6 @@ import org.apache.kylin.dict.DictionaryInfo;
 import org.apache.kylin.dict.DictionaryManager;
 import org.apache.kylin.dict.SDict;
 import org.apache.kylin.dict.project.ProjectDictionaryHelper.PathBuilder;
-import org.apache.kylin.dict.utils.SizeOfUtil;
 import org.apache.kylin.metadata.MetadataConstants;
 import org.apache.kylin.metadata.cachesync.Broadcaster;
 import org.apache.kylin.metadata.cachesync.CachedCrudAssist;
@@ -73,12 +72,12 @@ public class ProjectDictionaryManager {
     private static AtomicLong usedMem = new AtomicLong(0);
     private final static Map<String, WeakReference<Object>> weakDictCache = new ConcurrentHashMap<>();
     private final static LoadingCache<String, ProjectDictionaryInfo> dictionaryInfoCache = CacheBuilder.newBuilder()
-            .maximumWeight(KylinConfig.getInstanceFromEnv().getCachedPrjDictMaxMemory()).softValues()
+            .maximumWeight(KylinConfig.getInstanceFromEnv().getCachedPrjDictMaxMemory())
             .weigher(new Weigher<String, ProjectDictionaryInfo>() {
                 @Override
                 public int weigh(String sourceIdentity, ProjectDictionaryInfo dict) {
-                    long estimateBytes = SizeOfUtil.deepSizeOf(dict);
-                    long estimateMB = estimateBytes / (1024 * 1024);
+                    double estimateBytes = dict.getByteSize() * 1.5;
+                    long estimateMB = (long) (estimateBytes / (1024 * 1024));
                     logger.info("Add project dictionary to cache, size : " + estimateMB + " M. Current used memory: "
                             + usedMem + " M");
                     if (dictCacheSwapCount.containsKey(sourceIdentity)) {
@@ -95,12 +94,17 @@ public class ProjectDictionaryManager {
                     new RemovalListener<String, ProjectDictionaryInfo>() {
                         @Override
                         public void onRemoval(RemovalNotification<String, ProjectDictionaryInfo> notification) {
-                            long estimateBytes = SizeOfUtil.deepSizeOf(notification.getValue());
-                            long estimateMB = estimateBytes / (1024 * 1024);
-                            usedMem.addAndGet(-estimateMB);
-                            logger.info("DictionaryInfoCache entry with key {} is removed due to {} ",
-                                    notification.getKey(), notification.getCause() + ", release size : " + estimateMB
-                                            + " M," + " Current use memory: " + usedMem);
+                            if (notification.getValue() != null) {
+                                long estimateBytes = notification.getValue().getByteSize();
+                                long estimateMB = estimateBytes / (1024 * 1024);
+                                usedMem.addAndGet(-estimateMB);
+                                logger.info("DictionaryInfoCache entry with key {} is removed due to {} ",
+                                        notification.getKey(), notification.getCause() + ", release size : "
+                                                + estimateMB + " M," + " Current use memory: " + usedMem);
+                            } else {
+                                logger.info("DictionaryInfoCache with resource path " + notification.getKey()
+                                        + " is removed due to " + notification.getCause());
+                            }
                         }
                     })
             .build(new CacheLoader<String, ProjectDictionaryInfo>() {
@@ -137,7 +141,8 @@ public class ProjectDictionaryManager {
                         return NONE_INDICATOR;
                     } else {
                         weakDictCache.put(sourceIdentity, new WeakReference<>(projectDictionaryInfo));
-                        weakDictCache.put(dictObjKey(sourceIdentity), new WeakReference<>(projectDictionaryInfo.getDictionaryObject()));
+                        weakDictCache.put(dictObjKey(sourceIdentity),
+                                new WeakReference<>(projectDictionaryInfo.getDictionaryObject()));
                         logger.info("weakDictCache size : " + weakDictCache.size());
                         return projectDictionaryInfo;
                     }
@@ -398,7 +403,8 @@ public class ProjectDictionaryManager {
         return ResourceStore.getStore(KylinConfig.getInstanceFromEnv());
     }
 
-    public SegProjectDict append(String project, DictionaryInfo dictionaryInfo) throws ExecutionException, IOException {
+    public SegProjectDict append(String project, DictionaryInfo dictionaryInfo)
+            throws ExecutionException, IOException, InterruptedException {
         String sourceIdentify = PathBuilder.sourceIdentifier(project, dictionaryInfo);
         logger.info("Begin append dict : " + sourceIdentify);
         VersionControl mvc;
@@ -406,7 +412,7 @@ public class ProjectDictionaryManager {
             mvc = mvcMap.get(sourceIdentify);
         }
         long currentVersion = mvc.getCurrentVersion();
-        logger.info("Current version  is : " + currentVersion);
+        logger.info("Current version is : " + currentVersion);
         // check contains
         if (currentVersion > -1) {
             // fetch current dict
@@ -421,17 +427,41 @@ public class ProjectDictionaryManager {
             }
         }
         long version = mvc.acquireMyVersion();
-        if (version == 0) {
-            logger.info("Create project dictionary : " + sourceIdentify);
-            return createDictionary(project, sourceIdentify, dictionaryInfo, mvc, version);
-        } else {
-            logger.info("Append a new project dictionary with version : " + version);
-            return appendDictionary(project, sourceIdentify, dictionaryInfo, mvc, version);
+        int retry = KylinConfig.getInstanceFromEnv().getProjectDictionaryAppendRetryTimes();
+        Throwable throwable = null;
+        while (retry > 0) {
+            try {
+                if (version == 0) {
+                    logger.info("Create project dictionary : " + sourceIdentify);
+                    return createDictionary(project, sourceIdentify, dictionaryInfo, mvc, version);
+                } else {
+                    logger.info("Append a new project dictionary with version : " + version);
+                    return appendDictionary(project, sourceIdentify, dictionaryInfo, mvc, version);
+                }
+            } catch (Throwable th) {
+                if (th instanceof InterruptedException) {
+                    mvc.commit(false);
+                    throw th;
+                }
+                throwable = th;
+                retry--;
+                logger.error("Error for append project dictionary : " + sourceIdentify + ", retry after 10000ms.", th);
+                try {
+                    Thread.sleep(10000L);
+                } catch (InterruptedException e) {
+                    logger.error("Retry sleep interrupted.", e);
+                    mvc.commit(false);
+                    throw new RuntimeException("Error for retry sleep", e);
+                }
+            }
         }
+        mvc.commit(false);
+        logger.error("Error for append project dictionary : " + sourceIdentify, throwable);
+        throw new RuntimeException(throwable);
     }
 
     private SegProjectDict appendDictionary(String project, String sourceIdentify, DictionaryInfo dictionaryInfo,
-            VersionControl mvc, long versionEntry) throws IOException {
+            VersionControl mvc, long versionEntry) throws IOException, InterruptedException {
         checkInterrupted(sourceIdentify);
 
         logger.info("Append project dictionary with column: " + sourceIdentify);
@@ -441,7 +471,8 @@ public class ProjectDictionaryManager {
     }
 
     private synchronized void versionCheckPoint(String sourceIdentify, long version,
-            ProjectDictionaryVersionInfo projectDictionaryVersion, int sizeOfId) throws IOException {
+            ProjectDictionaryVersionInfo projectDictionaryVersion, int sizeOfId)
+            throws IOException, InterruptedException {
         checkInterrupted(sourceIdentify);
         if (projectDictionaryVersion != null) {
             ProjectDictionaryVersionInfo copy = projectDictionaryVersion.copy();
@@ -453,7 +484,7 @@ public class ProjectDictionaryManager {
     }
 
     private SegProjectDict createDictionary(String project, String sourceIdentify, DictionaryInfo dictionaryInfo,
-            VersionControl mvc, long version) throws IOException {
+            VersionControl mvc, long version) throws IOException, InterruptedException {
         checkInterrupted(sourceIdentify);
         logger.info("create project dictionary : " + sourceIdentify);
         ProjectDictionaryInfo warp = ProjectDictionaryInfo.wrap(dictionaryInfo, version);
@@ -465,7 +496,7 @@ public class ProjectDictionaryManager {
     }
 
     protected void saveDictionary(String project, String sourceIdentify, ProjectDictionaryInfo dictionaryInfo)
-            throws IOException {
+            throws IOException, InterruptedException {
         checkInterrupted(sourceIdentify);
         String path = PathBuilder.dataPath(sourceIdentify, dictionaryInfo.getDictionaryVersion());
         logger.info("Saving dictionary at " + path + "version is :" + dictionaryInfo.getDictionaryObject());
@@ -480,25 +511,53 @@ public class ProjectDictionaryManager {
         }
         // if a failed segment is followed by another segment, project dict may need overwrite
         getStore().putResource(path, inputStream, System.currentTimeMillis());
-        KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
-        Path sDictDir = new Path(kylinConfig.getReadHdfsWorkingDirectory(project) + PathBuilder.SPARDER_DICT_ROOT);
-        FileSystem workingFileSystem = HadoopUtil.getReadFileSystem();
-        if (!workingFileSystem.exists(sDictDir)) {
-            workingFileSystem.mkdirs(sDictDir);
-        }
-        Path f = new Path(sDictDir,
-                new Path(sourceIdentify + "/" + dictionaryInfo.getDictionaryVersion() + PathBuilder.SDICT_DATA));
-        try (FSDataOutputStream out1 = workingFileSystem.create(f)) {
-            SDict.wrap(dictionaryInfo.getDictionaryObject()).write(out1);
-        }
+        saveSdict(project, sourceIdentify, dictionaryInfo);
         String newKey = PathBuilder.dataPath(sourceIdentify, dictionaryInfo.getDictionaryVersion());
         dictionaryInfoCache.put(newKey, dictionaryInfo);
         weakDictCache.put(newKey, new WeakReference<>(dictionaryInfo));
         weakDictCache.put(dictObjKey(newKey), new WeakReference<>(dictionaryInfo.getDictionaryObject()));
     }
 
+    private void saveSdict(String project, String sourceIdentify, ProjectDictionaryInfo dictionaryInfo)
+            throws InterruptedException {
+        int retry = KylinConfig.getInstanceFromEnv().getProjectDictionaryAppendRetryTimes();
+        Throwable throwable = null;
+        while (retry > 0) {
+            try {
+                KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
+                Path sDictDir = new Path(
+                        kylinConfig.getReadHdfsWorkingDirectory(project) + PathBuilder.SPARDER_DICT_ROOT);
+                FileSystem workingFileSystem = HadoopUtil.getReadFileSystem();
+                if (!workingFileSystem.exists(sDictDir)) {
+                    workingFileSystem.mkdirs(sDictDir);
+                }
+                Path f = new Path(sDictDir, new Path(
+                        sourceIdentify + "/" + dictionaryInfo.getDictionaryVersion() + PathBuilder.SDICT_DATA));
+                try (FSDataOutputStream out1 = workingFileSystem.create(f)) {
+                    SDict.wrap(dictionaryInfo.getDictionaryObject()).write(out1);
+                }
+                return;
+            } catch (Throwable th) {
+                try {
+                    throwable = th;
+                    logger.error("Error for save sdict : " + sourceIdentify + ", version :"
+                            + dictionaryInfo.getDictionaryVersion() + ", retry after 10000ms.", th);
+                    retry--;
+                    Thread.sleep(10000L);
+                } catch (InterruptedException e) {
+                    logger.error("Retry sleep interrupted.", e);
+                    throw e;
+                }
+
+            }
+        }
+        throw new RuntimeException(
+                "Error for save sdict : " + sourceIdentify + ", version :" + dictionaryInfo.getDictionaryVersion(),
+                throwable);
+    }
+
     private String eatAndUpgradeDictionary(String project, DictionaryInfo originDict, String sourceIdentify,
-            long toVersion) throws IOException {
+            long toVersion) throws IOException, InterruptedException {
         ProjectDictionaryInfo previousDictionary = loadDictByVersion(sourceIdentify, toVersion - 1);
         DictionaryInfo mergedDictionary = dictionaryManager
                 .mergeDictionary(Lists.newArrayList(previousDictionary, originDict));
@@ -531,7 +590,7 @@ public class ProjectDictionaryManager {
     }
 
     private String genSegmentDictionaryToProjectDictionaryPatch(DictionaryInfo originDict, String sourceIdentify,
-            DictionaryInfo mergedDictionary, long version) throws IOException {
+            DictionaryInfo mergedDictionary, long version) throws IOException, InterruptedException {
         int[] offset = ProjectDictionaryHelper.genOffset(originDict, mergedDictionary);
         // different version has different patch
         String path = PathBuilder.segmentPatchPath(sourceIdentify, originDict.getUuid(), version);
@@ -539,7 +598,8 @@ public class ProjectDictionaryManager {
         return path;
     }
 
-    private void savePatch(String sourceIdentify, long currentVersion, long toVersion, int[] value) throws IOException {
+    private void savePatch(String sourceIdentify, long currentVersion, long toVersion, int[] value)
+            throws IOException, InterruptedException {
         checkInterrupted(sourceIdentify);
         String path = PathBuilder.patchPath(sourceIdentify, currentVersion, toVersion);
         ResourceStore store = getStore();
@@ -553,7 +613,7 @@ public class ProjectDictionaryManager {
         }
     }
 
-    private void savePatchToPath(int[] value, String path) throws IOException {
+    private void savePatchToPath(int[] value, String path) throws IOException, InterruptedException {
         ResourceStore store = getStore();
         if (store.listResources(path) == null) {
             logger.info("Saving patch at " + path);
@@ -564,28 +624,25 @@ public class ProjectDictionaryManager {
         }
     }
 
-    private void savePatch(int[] value, String path, ResourceStore store) throws IOException {
+    private void savePatch(int[] value, String path, ResourceStore store) throws IOException, InterruptedException {
         long retry = 100;
+        Throwable th = null;
         while (retry > 0) {
             try {
                 store.putResource(path, new DictPatch(value), DICT_PATCH_SERIALIZER);
-                break;
+                return;
             } catch (WriteConflictException e) {
-
-                try {
-                    logger.info("Find WriteConflictException, Sleep 100 ms");
-                    Thread.sleep(100L);
-                } catch (InterruptedException ignore) {
-                }
+                th = e;
+                logger.info("Find WriteConflictException, Sleep 100 ms.", e);
+                Thread.sleep(100L);
                 retry--;
                 if (store.getResource(path, DictPatch.class, DICT_PATCH_SERIALIZER) != null) {
                     logger.info("Patch is exist, skip save patch : " + path);
-                    break;
-                } else {
-                    throw new RuntimeException("Error for save patch: " + path);
+                    return;
                 }
             }
         }
+        throw new RuntimeException("Error for save patch: " + path, th);
     }
 
     //  remove mvc, to be init again
@@ -617,15 +674,9 @@ public class ProjectDictionaryManager {
         mvcMap.asMap().clear();
     }
 
-    protected void checkInterrupted(String sourceIdentify) {
+    protected void checkInterrupted(String sourceIdentify) throws InterruptedException {
         if (Thread.interrupted()) {
-            try {
-                VersionControl versionControl = mvcMap.get(sourceIdentify);
-                versionControl.commit(false);
-            } catch (ExecutionException e) {
-                logger.info("Failed to find mvc  with column :" + sourceIdentify);
-            }
-            throw new RuntimeException(new InterruptedException("Interrupted build dictionary : " + sourceIdentify));
+            throw new InterruptedException("Interrupted build dictionary : " + sourceIdentify);
         }
     }
 

@@ -533,6 +533,10 @@ abstract public class KylinConfigBase implements Serializable {
         return Integer.parseInt(getOptional("kylin.dictionary.project-dictionary-patch-max-cache-entry", "200"));
     }
 
+    public int getProjectDictionaryAppendRetryTimes(){
+        return Integer.parseInt(getOptional("kylin.dictionary.project-dictionary-retry-times", "3"));
+    }
+
     public int getAppendDictEntrySize() {
         return Integer.parseInt(getOptional("kylin.dictionary.append-entry-size", "10000000"));
     }

@@ -22,6 +22,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.google.common.io.CountingInputStream;
 import org.apache.kylin.common.persistence.Serializer;
 import org.apache.kylin.common.util.ClassUtil;
 import org.apache.kylin.common.util.Dictionary;
@@ -54,7 +55,9 @@ public class ProjectDictionaryInfoSerializer implements Serializer<ProjectDictio
 
     @Override
     public ProjectDictionaryInfo deserialize(DataInputStream in) throws IOException {
-        String json = in.readUTF();
+        CountingInputStream countStream = new CountingInputStream(in);
+        DataInputStream dataInputStream = new DataInputStream(countStream);
+        String json = dataInputStream.readUTF();
         ProjectDictionaryInfo obj = JsonUtil.readValue(json, ProjectDictionaryInfo.class);
 
         if (!infoOnly) {
@@ -64,8 +67,9 @@ public class ProjectDictionaryInfoSerializer implements Serializer<ProjectDictio
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
-            dict.readFields(in);
+            dict.readFields(dataInputStream);
             obj.setDictionaryObject(dict);
+            obj.setByteSize(countStream.getCount());
         }
         return obj;
     }

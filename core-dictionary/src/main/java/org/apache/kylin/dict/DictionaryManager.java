@@ -40,7 +40,6 @@ import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.util.ClassUtil;
 import org.apache.kylin.common.util.Dictionary;
 import org.apache.kylin.common.util.JsonUtil;
-import org.apache.kylin.dict.utils.SizeOfUtil;
 import org.apache.kylin.metadata.datatype.DataType;
 import org.apache.kylin.metadata.model.TblColRef;
 import org.apache.kylin.source.IReadableTable;
@@ -86,21 +85,26 @@ public class DictionaryManager {
                 .removalListener(new RemovalListener<String, DictionaryInfo>() {
                     @Override
                     public void onRemoval(RemovalNotification<String, DictionaryInfo> notification) {
-                        long estimateBytes = SizeOfUtil.deepSizeOf(notification.getValue());
-                        long estimateMB = estimateBytes / (1024 * 1024);
-                        usedMem.addAndGet(-estimateMB);
-                        DictionaryManager.logger.info("Dict with resource path " + notification.getKey()
-                                + " is removed due to " + notification.getCause() + ", release size : " + estimateMB
-                                + " M" + " Current used memory: " + usedMem + " M");
+                        if (notification.getValue() != null) {
+                            double estimateBytes = notification.getValue().getByteSize() * 1.5;
+                            long estimateMB = (long) (estimateBytes / (1024 * 1024));
+                            usedMem.addAndGet(-estimateMB);
+                            DictionaryManager.logger.info("Dict with resource path " + notification.getKey()
+                                    + " is removed due to " + notification.getCause() + ", release size : " + estimateMB
+                                    + " M" + " Current used memory: " + usedMem + " M");
+                        } else {
+                            DictionaryManager.logger.info("Dict with resource path " + notification.getKey()
+                                    + " is removed due to " + notification.getCause());
+                        }
                     }
-                }).maximumWeight(KylinConfig.getInstanceFromEnv().getCachedDictMaxMemory()).softValues()
+                }).maximumWeight(KylinConfig.getInstanceFromEnv().getCachedDictMaxMemory())
                 .weigher(new Weigher<String, DictionaryInfo>() {
                     @Override
                     public int weigh(String resPath, DictionaryInfo dict) {
-                        long estimateBytes = SizeOfUtil.deepSizeOf(dict);
-                        long estimateMB = estimateBytes / (1024 * 1024);
-                        logger.info("Add dictionary to cache, size : " + estimateMB + " M."
-                                + " Current used memory: " + usedMem + " M");
+                        double estimateBytes = dict.getByteSize() * 1.5;
+                        long estimateMB = (long) (estimateBytes / (1024 * 1024));
+                        logger.info("Add dictionary to cache, size : " + estimateMB + " M." + " Current used memory: "
+                                + usedMem + " M");
                         if (dictCacheSwapCount.containsKey(resPath)) {
                             dictCacheSwapCount.put(resPath, dictCacheSwapCount.get(resPath) + 1);
                         } else {
@@ -263,7 +267,8 @@ public class DictionaryManager {
         save(newDictInfo);
         dictCache.put(newDictInfo.getResourcePath(), newDictInfo);
         weakDictCache.put(newDictInfo.getResourcePath(), new WeakReference<>(newDictInfo));
-        weakDictCache.put(dictObjKey(newDictInfo.getResourcePath()), new WeakReference<>(newDictInfo.getDictionaryObject()));
+        weakDictCache.put(dictObjKey(newDictInfo.getResourcePath()),
+                new WeakReference<>(newDictInfo.getDictionaryObject()));
 
         return newDictInfo;
     }

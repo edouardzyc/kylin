@@ -973,7 +973,7 @@ public class CubeManager implements IRealizationProvider {
     }
 
     public void updateSegmentProjectDictionary(CubeSegment cubeSegment,
-            ProjectDictionaryManager projectDictionaryManager) throws IOException, ExecutionException {
+            ProjectDictionaryManager projectDictionaryManager) throws IOException, ExecutionException, InterruptedException {
         if (!cubeSegment.getProjectDictionaries().isEmpty()) {
             return;
         }
@@ -1032,7 +1032,7 @@ public class CubeManager implements IRealizationProvider {
         updateCube(update);
     }
 
-    public void updateSegmentProjectDictionary(CubeSegment cubeSegment) throws IOException, ExecutionException {
+    public void updateSegmentProjectDictionary(CubeSegment cubeSegment) throws IOException, ExecutionException, InterruptedException {
         updateSegmentProjectDictionary(cubeSegment, ProjectDictionaryManager.getInstance());
     }
 
