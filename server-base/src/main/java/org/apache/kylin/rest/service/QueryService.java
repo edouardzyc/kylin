@@ -6,15 +6,15 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 package org.apache.kylin.rest.service;
 
@@ -47,6 +47,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.google.common.base.Throwables;
 import org.apache.calcite.avatica.ColumnMetaData.Rep;
 import org.apache.calcite.config.CalciteConnectionConfig;
 import org.apache.calcite.jdbc.CalcitePrepare;
@@ -62,6 +63,7 @@ import org.apache.kylin.common.ServerMode;
 import org.apache.kylin.common.debug.BackdoorToggles;
 import org.apache.kylin.common.exceptions.BigQueryException;
 import org.apache.kylin.common.exceptions.ResourceLimitExceededException;
+import org.apache.kylin.common.exceptions.UnsupportedFunctionException;
 import org.apache.kylin.common.htrace.HtraceInit;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.persistence.RootPersistentEntity;
@@ -746,7 +748,11 @@ public class QueryService extends BasicService {
             }
 
         } catch (SQLException sqlException) {
-            if (sqlException.getCause().getCause() instanceof BigQueryException) {
+            if (hasCause(sqlException, UnsupportedFunctionException.class)) {
+                QueryContext.current().switchToSparder = false;
+                QueryContext.current().switchToCalcite = true;
+                return execute(correctedSql, sqlRequest, conn);
+            } else if (hasCause(sqlException, BigQueryException.class)) {
                 QueryContext.current().switchToSparder = true;
                 return execute(correctedSql, sqlRequest, conn);
             } else {
@@ -988,6 +994,15 @@ public class QueryService extends BasicService {
             String jsonStr = sb.toString();
             return JsonUtil.readValue(jsonStr, QueryRecord.class);
         }
+    }
+
+    private boolean hasCause(Throwable throwable, Class<? extends Throwable> c) {
+        for (; throwable != null; throwable = throwable.getCause()) {
+            if (c.isInstance(throwable)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

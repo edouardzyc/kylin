@@ -81,6 +81,7 @@ public class QueryContext {
     private String project;
 
     public boolean switchToSparder = false;
+    public boolean switchToCalcite = false;
     private boolean isHighPriorityQuery = false;
 
     private List<RPCStatistics> rpcStatisticsList = Lists.newCopyOnWriteArrayList();
