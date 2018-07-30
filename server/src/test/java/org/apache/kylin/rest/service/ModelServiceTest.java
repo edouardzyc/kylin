@@ -30,6 +30,7 @@ import org.apache.kylin.job.exception.JobException;
 import org.apache.kylin.metadata.draft.Draft;
 import org.apache.kylin.metadata.draft.DraftManager;
 import org.apache.kylin.metadata.model.DataModelDesc;
+import org.apache.kylin.metadata.model.JoinTableDesc;
 import org.apache.kylin.metadata.model.ModelDimensionDesc;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -50,7 +51,7 @@ public class ModelServiceTest extends ServiceTestBase {
     @Test
     public void testSuccessModelUpdate() throws IOException, JobException {
         Serializer<DataModelDesc> serializer = modelService.getDataModelManager().getDataModelSerializer();
-        
+
         List<DataModelDesc> dataModelDescs = modelService.listAllModels("ci_inner_join_model", "default", true);
         Assert.assertTrue(dataModelDescs.size() == 1);
 
@@ -150,6 +151,26 @@ public class ModelServiceTest extends ServiceTestBase {
         Assert.assertEquals(draftList.size(), 1);
     }
 
+    @Test
+    public void testModifyLookupTableKind() throws IOException {
+        Serializer<DataModelDesc> serializer = modelService.getDataModelManager().getDataModelSerializer();
+        List<DataModelDesc> dataModelDescs = modelService.listAllModels("ci_inner_join_model", "default", true);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.serialize(dataModelDescs.get(0), new DataOutputStream(baos));
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        DataModelDesc deserialize = serializer.deserialize(new DataInputStream(bais));
+        JoinTableDesc[] joinTableDescs = deserialize.getJoinTables();
+        Assert.assertTrue(joinTableDescs.length > 0);
+        if (joinTableDescs[0].getKind().equals(DataModelDesc.TableKind.FACT)) {
+            joinTableDescs[0].setKind(DataModelDesc.TableKind.LOOKUP);
+        } else {
+            joinTableDescs[0].setKind(DataModelDesc.TableKind.FACT);
+        }
+
+        expectedEx.expect(org.apache.kylin.rest.exception.BadRequestException.class);
+        expectedEx.expectMessage("The table kind shouldn't be modified.");
+        modelService.updateModelToResourceStore(deserialize, "default");
+    }
 
     private String[] cutItems(String[] origin, int count) {
         if (origin == null)

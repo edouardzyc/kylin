@@ -33,6 +33,7 @@ import org.apache.kylin.cube.model.CubeDesc;
 import org.apache.kylin.metadata.ModifiedOrder;
 import org.apache.kylin.metadata.draft.Draft;
 import org.apache.kylin.metadata.model.DataModelDesc;
+import org.apache.kylin.metadata.model.JoinTableDesc;
 import org.apache.kylin.metadata.model.JoinsTree;
 import org.apache.kylin.metadata.model.ModelDimensionDesc;
 import org.apache.kylin.metadata.model.TableDesc;
@@ -319,9 +320,30 @@ public class ModelService extends BasicService {
 
             JoinsTree joinsTree = dataModelDesc.getJoinsTree(), originJoinsTree = originDataModelDesc.getJoinsTree();
             if (joinsTree.matchNum(originJoinsTree) != originDataModelDesc.getJoinTables().length + 1)
-                checkRet.append("The join shouldn't be modified in this model.");
+                checkRet.append("The join shouldn't be modified in this model. \r\n");
+
+            if (hasChangedTableKind(originDataModelDesc.getJoinTables(), dataModelDesc.getJoinTables()))
+                checkRet.append("The table kind shouldn't be modified. \r\n");
         }
         return checkRet.toString();
+    }
+
+    private boolean hasChangedTableKind(JoinTableDesc[] originJoinTables, JoinTableDesc[] joinTables) {
+        Map<String, JoinTableDesc> originJoinTableMap = new HashMap<>();
+        for (JoinTableDesc originJoinTable : originJoinTables) {
+            originJoinTableMap.put(originJoinTable.getTable(), originJoinTable);
+        }
+
+        for (JoinTableDesc joinTableDesc : joinTables) {
+            if (originJoinTableMap.containsKey(joinTableDesc.getTable())) {
+                JoinTableDesc originJoinTable = originJoinTableMap.get(joinTableDesc.getTable());
+                if (!(joinTableDesc.getKind().equals(originJoinTable.getKind()))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public void primaryCheck(DataModelDesc modelDesc) {
