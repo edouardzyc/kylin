@@ -412,7 +412,7 @@ public class QueryService extends BasicService {
                 throw new InternalErrorException(sqlResponse.getExceptionMessage());
 
             String suiteId = kylinConfig.getSuiteId();
-            if (suiteId != null && !suiteId.equals("")){
+            if (suiteId != null && !suiteId.equals("")) {
                 sqlResponse.setSuiteId(suiteId);
             }
             sqlResponse.setServer(restAddress);
@@ -949,6 +949,7 @@ public class QueryService extends BasicService {
     }
 
     private static class QueryRecordSerializer implements Serializer<QueryRecord> {
+        private static final int MAX_WRITE_BYTE = (int) Math.pow(2, 14) - 1;
 
         private static final QueryRecordSerializer serializer = new QueryRecordSerializer();
 
@@ -963,12 +964,25 @@ public class QueryService extends BasicService {
         @Override
         public void serialize(QueryRecord record, DataOutputStream out) throws IOException {
             String jsonStr = JsonUtil.writeValueAsString(record);
-            out.writeUTF(jsonStr);
+            StringBuilder sb = new StringBuilder(jsonStr);
+            int count = sb.length() % MAX_WRITE_BYTE == 0 ? sb.length() / MAX_WRITE_BYTE
+                    : sb.length() / MAX_WRITE_BYTE + 1;
+            for (int i = 0; i < count; i++) {
+                if (i == count - 1) {
+                    out.writeUTF(sb.substring(i * MAX_WRITE_BYTE));
+                } else {
+                    out.writeUTF(sb.substring(i * MAX_WRITE_BYTE, (i + 1) * MAX_WRITE_BYTE));
+                }
+            }
         }
 
         @Override
         public QueryRecord deserialize(DataInputStream in) throws IOException {
-            String jsonStr = in.readUTF();
+            StringBuilder sb = new StringBuilder();
+            while (in.available() > 0) {
+                sb.append(in.readUTF());
+            }
+            String jsonStr = sb.toString();
             return JsonUtil.readValue(jsonStr, QueryRecord.class);
         }
     }
