@@ -266,6 +266,33 @@ abstract public class KylinConfigBase implements Serializable {
         return cachedHdfsWorkingDirectory;
     }
 
+    public String getMetastoreBigCellHdfsDirectory() {
+        String root = getOptional("kylin.env.hdfs-metastore-bigcell-dir");
+
+        if (root == null) {
+            root = getOptional("kylin.env.hdfs-working-dir", "/kylin");
+        }
+
+        Path path = new Path(root);
+        if (!path.isAbsolute())
+            throw new IllegalArgumentException("kylin.env.hdfs-metastore-bigcell-dir must be absolute, but got " + root);
+
+        // make sure path is qualified
+        try {
+            FileSystem fs = HadoopUtil.getReadFileSystem();
+            path = fs.makeQualified(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        root = path.toString();
+
+        if (!root.endsWith("/"))
+            root += "/";
+
+        return root;
+    }
+
     public String getPrefixWorkingScheme() {
         return getPrefixScheme(getHdfsWorkingDirectory(null));
     }
@@ -1382,7 +1409,7 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public boolean isProjectIsolationEnabled() {
-        return Boolean.parseBoolean(getOptional("kylin.metadata.project-isolation-enable", "true"));
+        return Boolean.parseBoolean(getOptional("kylin.storage.project-isolation-enable", "true"));
     }
 
     @Deprecated //Limit is good even it's large. This config is meaning less since we already have scan threshold
