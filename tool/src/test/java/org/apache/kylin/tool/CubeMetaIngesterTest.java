@@ -30,6 +30,8 @@ import org.apache.kylin.common.util.CliCommandExecutor;
 import org.apache.kylin.common.util.LocalFileMetadataTestCase;
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
+import org.apache.kylin.metadata.TableMetadataManager;
+import org.apache.kylin.metadata.model.TableDesc;
 import org.apache.kylin.metadata.model.DataModelDesc;
 import org.apache.kylin.metadata.model.DataModelManager;
 import org.apache.kylin.metadata.project.ProjectInstance;
@@ -172,6 +174,22 @@ public class CubeMetaIngesterTest extends LocalFileMetadataTestCase {
 
         Assert.assertNotNull(project);
 
+    }
+
+    @Test
+    public void testNotTableIngest() throws IOException {
+
+        String srcPath = Thread.currentThread().getContextClassLoader().getResource("cloned_cube_and_model.zip")
+                .getPath();
+
+        ProjectManager projectManager = ProjectManager.getInstance(KylinConfig.getInstanceFromEnv());
+        ProjectInstance project = projectManager.getProject("default");
+        TableMetadataManager metaMgr = TableMetadataManager.getInstance(KylinConfig.getInstanceFromEnv());
+        TableDesc table = metaMgr.getTableDesc("DEFAULT.TEST_KYLIN_FACT", "default");
+        projectManager.removeTableDescFromProject(table.getIdentity(), "default");
+        metaMgr.removeSourceTable(table.getIdentity(), "default");
+        CubeMetaIngester.main(new String[] { "-project", "default", "-srcPath", srcPath, "-overwriteTables", "true",
+                "-forceIngest", "true", "-restoreType", "project" });
     }
 
     @Test

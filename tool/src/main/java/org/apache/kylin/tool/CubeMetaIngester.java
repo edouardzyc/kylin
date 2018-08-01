@@ -149,15 +149,17 @@ public class CubeMetaIngester extends AbstractApplication {
             throw new IllegalStateException("Invalid source package.");
         }
 
+        KylinConfig srcConfig;
         if (subFolders.length == 1) {
-            injest(subFolders[0].getAbsoluteFile());
+            srcConfig = KylinConfig.createInstanceFromUri(subFolders[0].getAbsoluteFile().getAbsolutePath());
+
         } else {
-            injest(tempFolder.getAbsoluteFile());
+            srcConfig = KylinConfig.createInstanceFromUri(tempFolder.getAbsoluteFile().getAbsolutePath());
         }
+        injest(srcConfig);
     }
 
-    private void injest(File metaRoot) throws IOException {
-        KylinConfig srcConfig = KylinConfig.createInstanceFromUri(metaRoot.getAbsolutePath());
+    protected void injest(KylinConfig srcConfig) throws IOException {
         TableMetadataManager srcMetadataManager = TableMetadataManager.getInstance(srcConfig);
         DataModelManager srcModelManager = DataModelManager.getInstance(srcConfig);
         HybridManager srcHybridManager = HybridManager.getInstance(srcConfig);
@@ -172,8 +174,17 @@ public class CubeMetaIngester extends AbstractApplication {
         Broadcaster.getInstance(kylinConfig).notifyClearAll();
 
         ProjectManager projectManager = ProjectManager.getInstance(kylinConfig);
+        TableMetadataManager metaMgr = TableMetadataManager.getInstance(kylinConfig);
+
         for (TableDesc tableDesc : srcMetadataManager.listAllTables(null)) {
             logger.info("add " + tableDesc + " to " + targetProjectName);
+            TableDesc table = metaMgr.getTableDesc(tableDesc.getIdentity(), targetProjectName);
+            if (table == null) {
+                tableDesc.setLastModified(0);
+            } else {
+                tableDesc.setLastModified(table.getLastModified());
+            }
+            metaMgr.saveSourceTable(tableDesc, targetProjectName);
             projectManager.addTableDescToProject(Lists.newArrayList(tableDesc.getIdentity()).toArray(new String[0]),
                     targetProjectName);
         }
