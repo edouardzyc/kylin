@@ -270,7 +270,7 @@ abstract public class KylinConfigBase implements Serializable {
         String root = getOptional("kylin.env.hdfs-metastore-bigcell-dir");
 
         if (root == null) {
-            root = getOptional("kylin.env.hdfs-working-dir", "/kylin");
+            return getReadHdfsWorkingDirectory(null);
         }
 
         Path path = new Path(root);
@@ -285,7 +285,7 @@ abstract public class KylinConfigBase implements Serializable {
             throw new RuntimeException(e);
         }
 
-        root = path.toString();
+        root = new Path(path, StringUtils.replaceChars(getMetadataUrlPrefix(), ':', '-')).toString();
 
         if (!root.endsWith("/"))
             root += "/";
