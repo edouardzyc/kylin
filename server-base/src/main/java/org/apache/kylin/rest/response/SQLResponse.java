@@ -57,6 +57,8 @@ public class SQLResponse implements Serializable {
     // if isException, the related Exception
     protected Throwable throwable;
 
+    protected String queryId;
+
     protected long duration;
 
     protected boolean isPartial = false;
@@ -155,6 +157,14 @@ public class SQLResponse implements Serializable {
 
     public List<List<String>> getResults() {
         return results;
+    }
+
+    public String getQueryId() {
+        return queryId;
+    }
+
+    public void setQueryId(String queryId) {
+        this.queryId = queryId;
     }
 
     public void setResults(List<List<String>> results) {
@@ -266,8 +276,7 @@ public class SQLResponse implements Serializable {
         }
     }
 
-    public void setCubeSegmentStatisticsList(
-            List<QueryContext.CubeSegmentStatisticsResult> cubeSegmentStatisticsList) {
+    public void setCubeSegmentStatisticsList(List<QueryContext.CubeSegmentStatisticsResult> cubeSegmentStatisticsList) {
         try {
             this.queryStatistics = cubeSegmentStatisticsList == null ? null
                     : SerializationUtils.serialize((Serializable) cubeSegmentStatisticsList);

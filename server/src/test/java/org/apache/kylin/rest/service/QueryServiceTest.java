@@ -23,6 +23,7 @@ import java.sql.SQLException;
 
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.KylinConfig.SetAndUnsetThreadLocalConfig;
+import org.apache.kylin.common.QueryContext;
 import org.apache.kylin.job.exception.JobException;
 import org.apache.kylin.metadata.project.ProjectInstance;
 import org.apache.kylin.query.QueryConnection;
@@ -88,11 +89,33 @@ public class QueryServiceTest extends ServiceTestBase {
             queryService.doQueryWithCache(request);
 
             request.setSql(select_table);
+            String expectedRightQueryId = QueryContext.current().getQueryId();
             SQLResponse response = queryService.doQueryWithCache(request, true);
 
             Assert.assertEquals(
                     "WITH tableId as (select * from some_table1) , tableId2 AS (select * FROM some_table2) select * from tableId join tableId2 on tableId.a = tableId2.b;",
                     response.getExceptionMessage());
+
+            Assert.assertEquals(expectedRightQueryId, response.getQueryId());
         }
     }
+
+    @Test
+    public void testErrorQueryFromTable() {
+        String query_sql = "select * from no_exit_table";
+
+        KylinConfig config = KylinConfig.getInstanceFromEnv();
+        config.setProperty("kylin.query.convert-create-table-to-with", "true");
+        try (SetAndUnsetThreadLocalConfig autoUnset = KylinConfig.setAndUnsetThreadLocalConfig(config)) {
+
+            SQLRequest request = new SQLRequest();
+            request.setProject("default");
+            request.setSql(query_sql);
+            String expectedQueryId = QueryContext.current().getQueryId();
+            SQLResponse response1 = queryService.doQueryWithCache(request);
+            Assert.assertEquals(true, response1.getIsException());
+            Assert.assertEquals(expectedQueryId, response1.getQueryId());
+        }
+    }
+
 }

@@ -327,6 +327,8 @@ public class QueryService extends BasicService {
         stringBuilder.append("==========================[QUERY]===============================").append(newLine);
 
         logger.info(stringBuilder.toString());
+        if (response.getIsException())
+            logger.error(response.getExceptionMessage());
     }
 
     public SQLResponse doQueryWithCache(SQLRequest sqlRequest) {
@@ -400,6 +402,7 @@ public class QueryService extends BasicService {
             } else {
                 Trace.addTimelineAnnotation("response without real execution");
             }
+            sqlResponse.setQueryId(QueryContext.current().getQueryId());
             sqlResponse.setDuration(System.currentTimeMillis() - startTime);
             sqlResponse.setTraceUrl(traceUrl);
             logQuery(sqlRequest, sqlResponse);
@@ -408,8 +411,6 @@ public class QueryService extends BasicService {
             } catch (Throwable th) {
                 logger.warn("Write metric error.", th);
             }
-            if (sqlResponse.getIsException())
-                throw new InternalErrorException(sqlResponse.getExceptionMessage());
 
             String suiteId = kylinConfig.getSuiteId();
             if (suiteId != null && !suiteId.equals("")) {
@@ -479,6 +480,7 @@ public class QueryService extends BasicService {
 
             sqlResponse = new SQLResponse(null, null, null, 0, true, errMsg, false, false);
             QueryContext queryContext = QueryContext.current();
+            sqlResponse.setQueryId(queryContext.getQueryId());
             sqlResponse.setTotalScanCount(queryContext.getScannedRows());
             sqlResponse.setTotalScanBytes(queryContext.getScannedBytes());
             sqlResponse.setIsSparderUsed(queryContext.isSparderUsed());
@@ -854,6 +856,7 @@ public class QueryService extends BasicService {
 
         SQLResponse response = new SQLResponse(columnMetas, results, cubeSb.toString(), 0, false, null, isPartialResult,
                 isPushDown);
+        response.setQueryId(QueryContext.current().getQueryId());
         response.setTotalScanCount(QueryContext.current().getScannedRows());
         response.setTotalScanBytes(QueryContext.current().getScannedBytes());
         response.setLateDecodeEnabled(QueryContext.current().isLateDecodeEnabled());
