@@ -245,7 +245,7 @@ public class HiveMRInput implements IMRInput {
         public static String materializeViewHql(String viewName, String tableName, String jobWorkingDir) {
             StringBuilder createIntermediateTableHql = new StringBuilder();
             createIntermediateTableHql.append("DROP TABLE IF EXISTS " + viewName + ";\n");
-            createIntermediateTableHql.append("CREATE EXTERNAL TABLE IF NOT EXISTS " + viewName + " LIKE " + tableName
+            createIntermediateTableHql.append("CREATE TABLE IF NOT EXISTS " + viewName + " LIKE " + tableName
                     + " LOCATION '" + jobWorkingDir + "/" + viewName + "';\n");
             createIntermediateTableHql.append("ALTER TABLE " + viewName + " SET TBLPROPERTIES('auto.purge'='true');\n");
             createIntermediateTableHql

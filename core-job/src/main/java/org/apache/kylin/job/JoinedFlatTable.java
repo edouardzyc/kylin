@@ -72,7 +72,7 @@ public class JoinedFlatTable {
             String storageFormat, String fieldDelimiter) {
         StringBuilder ddl = new StringBuilder();
 
-        ddl.append("CREATE EXTERNAL TABLE IF NOT EXISTS " + flatDesc.getTableName() + "\n");
+        ddl.append("CREATE TABLE IF NOT EXISTS " + flatDesc.getTableName() + "\n");
 
         ddl.append("(" + "\n");
         for (int i = 0; i < flatDesc.getAllColumns().size(); i++) {
