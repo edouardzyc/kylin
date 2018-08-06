@@ -68,6 +68,8 @@ public class CubeScanRangePlanner extends ScanRangePlannerBase {
     protected CubeSegment cubeSegment;
     protected CubeDesc cubeDesc;
     protected Cuboid cuboid;
+    // fix double type dict
+    protected boolean hasDoubleTypeDict;
 
     public CubeScanRangePlanner(CubeSegment cubeSegment, Cuboid cuboid, TupleFilter filter, Set<TblColRef> dimensions, Set<TblColRef> groupByDims, //
                                 Collection<FunctionDesc> metrics, TupleFilter havingFilter, StorageContext context) {
@@ -104,6 +106,7 @@ public class CubeScanRangePlanner extends ScanRangePlannerBase {
         this.gtAggrGroups = mapping.makeGridTableColumns(replaceDerivedColumns(groupByPushDown, cubeSegment.getCubeDesc()));
         this.gtAggrMetrics = mapping.makeGridTableColumns(metrics);
         this.gtAggrFuncs = mapping.makeAggrFuncs(metrics);
+        this.hasDoubleTypeDict = checkHasDoubleTypeDict(filter);
     }
 
     protected StorageContext context;
@@ -133,11 +136,11 @@ public class CubeScanRangePlanner extends ScanRangePlannerBase {
     public GTScanRequest planScanRequest() {
         GTScanRequest scanRequest;
         List<GTScanRange> scanRanges = this.planScanRanges();
-        if (scanRanges != null && scanRanges.size() != 0) {
+        if ((scanRanges != null && scanRanges.size() != 0) || hasDoubleTypeDict) {
             scanRequest = new GTScanRequestBuilder().setInfo(gtInfo).setRanges(scanRanges).setDimensions(gtDimensions).//
                     setAggrGroupBy(gtAggrGroups).setAggrMetrics(gtAggrMetrics).setAggrMetricsFuncs(gtAggrFuncs).setFilterPushDown(gtFilter).//
                     setAllowStorageAggregation(context.isNeedStorageAggregation()).setAggCacheMemThreshold(cubeSegment.getConfig().getQueryCoprocessorMemGB()).//
-                    setStoragePushDownLimit(context.getFinalPushDownLimit()).setStorageLimitLevel(context.getStorageLimitLevel()).setHavingFilterPushDown(havingFilter).createGTScanRequest();
+                    setStoragePushDownLimit(context.getFinalPushDownLimit()).setStorageLimitLevel(context.getStorageLimitLevel()).setHavingFilterPushDown(havingFilter).setHasDoubleTypeDict(hasDoubleTypeDict).createGTScanRequest();
         } else {
             scanRequest = null;
         }
@@ -350,4 +353,16 @@ public class CubeScanRangePlanner extends ScanRangePlannerBase {
         this.maxScanRanges = maxScanRanges;
     }
 
+
+    private boolean checkHasDoubleTypeDict(TupleFilter filter){
+        Set<TblColRef> tblColRefSet = Sets.newHashSet();
+        TupleFilter.collectColumns(filter, tblColRefSet);
+        Set<TblColRef> allColumnsHaveDictionary = cubeDesc.getAllColumnsHaveDictionary();
+        for(TblColRef tblColRef: tblColRefSet){
+            if(tblColRef.getType().isDouble() && allColumnsHaveDictionary.contains(tblColRef)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

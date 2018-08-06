@@ -79,6 +79,7 @@ public class GTScanRequest {
     //valid value iff GTCubeStorageQueryBase.enableStorageLimitIfPossible is true
     private int storagePushDownLimit;
     private StorageLimitLevel storageLimitLevel;
+    private boolean hasDoubleTypeDict;
 
     // runtime computed fields
     private transient boolean doingStorageAggregation = false;
@@ -88,7 +89,7 @@ public class GTScanRequest {
             TupleFilter havingFilterPushDown, int onlyShardId, // 
             boolean allowStorageAggregation, double aggCacheMemThreshold, int storageScanRowNumThreshold, //
             int storagePushDownLimit, StorageLimitLevel storageLimitLevel, String storageBehavior, long startTime,
-            long timeout) {
+            long timeout, boolean hasDoubleTypeDict) {
         this.info = info;
         if (ranges == null) {
             this.ranges = Lists.newArrayList(new GTScanRange(new GTRecord(info), new GTRecord(info)));
@@ -113,7 +114,7 @@ public class GTScanRequest {
         this.storageScanRowNumThreshold = storageScanRowNumThreshold;
         this.storagePushDownLimit = storagePushDownLimit;
         this.storageLimitLevel = storageLimitLevel;
-
+        this.hasDoubleTypeDict = hasDoubleTypeDict;
         validate(info);
     }
 
@@ -355,6 +356,10 @@ public class GTScanRequest {
         return timeout;
     }
 
+    public boolean hasDoubleTypeDict() {
+        return hasDoubleTypeDict;
+    }
+
     @Override
     public String toString() {
         return "GTScanRequest [range=" + ranges + ", columns=" + columns + ", filterPushDown=" + filterPushDown
@@ -413,6 +418,7 @@ public class GTScanRequest {
             BytesUtil.writeVLong(value.startTime, out);
             BytesUtil.writeVLong(value.timeout, out);
             BytesUtil.writeUTFString(value.storageBehavior, out);
+            BytesUtil.writeVInt(value.hasDoubleTypeDict ? 1 : 0, out);
         }
 
         @Override
@@ -456,6 +462,7 @@ public class GTScanRequest {
             long startTime = BytesUtil.readVLong(in);
             long timeout = BytesUtil.readVLong(in);
             String storageBehavior = BytesUtil.readUTFString(in);
+            boolean hasBooleanTypeDict = (BytesUtil.readVInt(in) == 1);
 
             return new GTScanRequestBuilder().setInfo(sInfo).setRanges(sRanges).setDimensions(sColumns)
                     .setAggrGroupBy(sAggGroupBy).setAggrMetrics(sAggrMetrics).setAggrMetricsFuncs(sAggrMetricFuncs)
@@ -464,6 +471,7 @@ public class GTScanRequest {
                     .setStorageScanRowNumThreshold(storageScanRowNumThreshold)
                     .setStoragePushDownLimit(storagePushDownLimit).setStorageLimitLevel(storageLimitLevel)
                     .setStartTime(startTime).setTimeout(timeout).setStorageBehavior(storageBehavior)
+                    .setHasDoubleTypeDict(hasBooleanTypeDict)
                     .createGTScanRequest();
         }
 

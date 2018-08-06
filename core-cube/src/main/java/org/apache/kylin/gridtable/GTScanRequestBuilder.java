@@ -43,6 +43,7 @@ public class GTScanRequestBuilder {
     private long startTime = -1;
     private long timeout = -1;
     private String storageBehavior = null;
+    private boolean hasDoubleTypeDict;
 
     public GTScanRequestBuilder setInfo(GTInfo info) {
         this.info = info;
@@ -83,7 +84,7 @@ public class GTScanRequestBuilder {
         this.aggrMetricsFuncs = aggrMetricsFuncs;
         return this;
     }
-    
+
     public GTScanRequestBuilder setOnlyShardId(int onlyShardId) {
         this.onlyShardId = onlyShardId;
         return this;
@@ -129,6 +130,11 @@ public class GTScanRequestBuilder {
         return this;
     }
 
+    public GTScanRequestBuilder setHasDoubleTypeDict(boolean hasDoubleTypeDict) {
+        this.hasDoubleTypeDict = hasDoubleTypeDict;
+        return this;
+    }
+
     public GTScanRequest createGTScanRequest() {
         if (aggrGroupBy == null) {
             aggrGroupBy = new ImmutableBitSet(new BitSet());
@@ -154,6 +160,6 @@ public class GTScanRequestBuilder {
         return new GTScanRequest(info, ranges, dimensions, aggrGroupBy, aggrMetrics, aggrMetricsFuncs, filterPushDown,
                 havingFilterPushDown, onlyShardId, allowStorageAggregation, aggCacheMemThreshold,
                 storageScanRowNumThreshold, storagePushDownLimit, storageLimitLevel, storageBehavior, startTime,
-                timeout);
+                timeout, hasDoubleTypeDict);
     }
 }
