@@ -19,9 +19,7 @@
 package org.apache.kylin.query.relnode;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.calcite.adapter.enumerable.EnumerableConvention;
 import org.apache.calcite.adapter.enumerable.EnumerableRel;
@@ -44,7 +42,7 @@ import com.google.common.base.Preconditions;
  */
 public class OLAPUnionRel extends Union implements OLAPRel {
 
-    final boolean localAll ; // avoid same name in parent class
+    final boolean localAll; // avoid same name in parent class
     protected ColumnRowType columnRowType;
     protected OLAPContext context;
 
@@ -75,6 +73,7 @@ public class OLAPUnionRel extends Union implements OLAPRel {
                 .item("ctx", context == null ? "" : String.valueOf(context.id) + "@" + context.realization)
                 .itemIf("all", all, true);
     }
+
     @Override
     public void implementOLAP(OLAPImplementor implementor) {
         // Always create new OlapContext to combine columns from all children contexts.
@@ -97,19 +96,11 @@ public class OLAPUnionRel extends Union implements OLAPRel {
     protected ColumnRowType buildColumnRowType() {
         ColumnRowType inputColumnRowType = ((OLAPRel) getInput(0)).getColumnRowType();
         List<TblColRef> columns = new ArrayList<>();
-        List<Set<TblColRef>> sourceColumns = new ArrayList<>();
-
         for (TblColRef tblColRef : inputColumnRowType.getAllColumns()) {
             columns.add(TblColRef.newInnerColumn(tblColRef.getName(), TblColRef.InnerDataTypeEnum.LITERAL));
         }
 
-        for (RelNode child : getInputs()) {
-            OLAPRel olapChild = (OLAPRel) child;
-            sourceColumns.add(new HashSet<>(olapChild.getColumnRowType().getAllColumns()));
-        }
-
-        ColumnRowType fackColumnRowType = new ColumnRowType(columns, sourceColumns);
-        return fackColumnRowType;
+        return new ColumnRowType(columns, inputColumnRowType.getSourceColumns());
     }
 
     @Override

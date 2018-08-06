@@ -1,0 +1,7 @@
+-- #6244
+select TRANS_ID , ORDER_ID, SELLER_ID from (
+  select TRANS_ID, ORDER_ID, SELLER_ID from TEST_KYLIN_FACT group by TRANS_ID, ORDER_ID, SELLER_ID
+   union all
+  select TRANS_ID, ORDER_ID, SELLER_ID from TEST_KYLIN_FACT group by TRANS_ID, ORDER_ID, SELLER_ID
+  )
+ group by TRANS_ID, ORDER_ID, SELLER_ID
