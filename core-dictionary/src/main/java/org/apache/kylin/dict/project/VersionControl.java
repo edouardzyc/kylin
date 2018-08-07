@@ -72,9 +72,12 @@ public class VersionControl {
     void commit(boolean isSuccess) {
         // First add  then release
         if (isSuccess) {
+            logger.info("Append project dictionary success.");
             id.incrementAndGet();
+        } else {
+            logger.info("Append project dictionary failed.");
         }
-        logger.info("release the lock : " + key + "  version: " + (id.get() + 1));
+        logger.info("release the lock : " + key + "  version: " + (isSuccess ? id.get() - 1 : id.get()));
         semaphore.release();
     }
 

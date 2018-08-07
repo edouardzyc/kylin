@@ -205,7 +205,7 @@ public class ProjectDictionaryManager {
 
         // touch lower level metadata before registering my listener
         crud.reloadAll();
-        Broadcaster.getInstance(kylinConfig).registerListener(new ProjectDictionarySyncListener(),
+        Broadcaster.getInstance(kylinConfig).registerStaticListener(new ProjectDictionarySyncListener(),
                 "project_dictionary_version");
     }
 
@@ -356,7 +356,7 @@ public class ProjectDictionaryManager {
     public ProjectDictionaryInfo getSpecificDictWithOutPatch(SegProjectDict desc, long SpecificVersion) {
         ProjectDictionaryInfo projectDictionaryInfo = loadDictByVersion(desc.getSourceIdentifier(), SpecificVersion);
         if (projectDictionaryInfo == null) {
-            throw new RuntimeException(" error dictionary");
+            throw new RuntimeException("Error for load dictionary: " + desc.getSourceIdentifier());
         }
         logger.info("get dictionary: " + desc.getSourceIdentifier());
         return ProjectDictionaryInfo.copy(projectDictionaryInfo,
@@ -371,11 +371,12 @@ public class ProjectDictionaryManager {
     public ProjectDictionaryInfo getCombinationDictionary(SegProjectDict desc) throws IOException {
         ProjectDictionaryVersionInfo versionInfo = getMaxVersion(desc);
         if (versionInfo == null) {
-            logger.info("Max info is null");
+            logger.info("Max project dictionary info is null, key is : " + desc.getSourceIdentifier() + ", version is :"
+                    + desc.getCurrentVersion());
             // build step the version is null.
             return null;
         }
-        logger.info("Get max version info : " + versionInfo.getVersion());
+        logger.info("Get max project dictionary info, version :" + versionInfo.getProjectDictionaryVersion());
 
         long maxVersion = versionInfo.getProjectDictionaryVersion();
         return getSpecificDictionary(desc, maxVersion);
@@ -489,9 +490,9 @@ public class ProjectDictionaryManager {
         logger.info("create project dictionary : " + sourceIdentify);
         ProjectDictionaryInfo warp = ProjectDictionaryInfo.wrap(dictionaryInfo, version);
         saveDictionary(project, sourceIdentify, warp);
-        mvc.commit(true);
         ProjectDictionaryVersionInfo versionInfo = versionCache.get(PathBuilder.versionKey(sourceIdentify));
         versionCheckPoint(sourceIdentify, version, versionInfo, dictionaryInfo.getDictionaryObject().getSizeOfId());
+        mvc.commit(true);
         return new SegProjectDict(sourceIdentify, version, dictionaryInfo.getDictionaryObject().getSizeOfId());
     }
 
@@ -499,7 +500,7 @@ public class ProjectDictionaryManager {
             throws IOException, InterruptedException {
         checkInterrupted(sourceIdentify);
         String path = PathBuilder.dataPath(sourceIdentify, dictionaryInfo.getDictionaryVersion());
-        logger.info("Saving dictionary at " + path + "version is :" + dictionaryInfo.getDictionaryObject());
+        logger.info("Saving dictionary at " + path + "version is :" + dictionaryInfo.getDictionaryVersion());
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(buf);
         ProjectDictionaryInfoSerializer.FULL_SERIALIZER.serialize(dictionaryInfo, out);
@@ -520,6 +521,7 @@ public class ProjectDictionaryManager {
 
     private void saveSdict(String project, String sourceIdentify, ProjectDictionaryInfo dictionaryInfo)
             throws InterruptedException {
+        logger.info("Begin save sdict: " + sourceIdentify);
         int retry = KylinConfig.getInstanceFromEnv().getProjectDictionaryAppendRetryTimes();
         Throwable throwable = null;
         while (retry > 0) {

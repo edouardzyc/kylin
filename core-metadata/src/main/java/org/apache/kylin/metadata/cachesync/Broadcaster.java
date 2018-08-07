@@ -179,6 +179,7 @@ public class Broadcaster {
     }
 
     private static void doRegisterListener(Map<String, List<Listener>> lmap, Listener listener, String... entities) {
+        logger.info("Register listener : " + listener.getClass());
         synchronized (lmap) {
             // ignore re-registration
             List<Listener> all = lmap.get(SYNC_ALL);
@@ -287,6 +288,7 @@ public class Broadcaster {
      * Announce an event out to peer kylin servers
      */
     public void announce(String entity, String event, String key) {
+        logger.info("Annouce : "+ event + ", " + entity + ", " + key);
         announce(new BroadcastEvent(entity, event, key));
     }
 

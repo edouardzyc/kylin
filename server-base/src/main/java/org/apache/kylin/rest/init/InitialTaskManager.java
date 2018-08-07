@@ -20,6 +20,7 @@ package org.apache.kylin.rest.init;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.dict.project.ProjectDictionaryManager;
 import org.apache.kylin.rest.metrics.QueryMetrics2Facade;
 import org.apache.kylin.rest.metrics.QueryMetricsFacade;
 import org.slf4j.Logger;
@@ -47,6 +48,8 @@ public class InitialTaskManager implements InitializingBean {
         QueryMetrics2Facade.init();
 
         KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
+        // init project
+        ProjectDictionaryManager.getInstance();
         String initTasks = kylinConfig.getInitTasks();
         if (!StringUtils.isEmpty(initTasks)) {
             String[] taskClasses = initTasks.split(",");
