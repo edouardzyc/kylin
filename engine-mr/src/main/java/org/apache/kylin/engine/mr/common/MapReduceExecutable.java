@@ -152,8 +152,8 @@ public class MapReduceExecutable extends AbstractExecutable {
 
             JobStepStatusEnum status = JobStepStatusEnum.NEW;
             while (!isDiscarded() && !isPaused()) {
-
-                JobStepStatusEnum newStatus = HadoopJobStatusChecker.checkStatus(job, output);
+                boolean useREST = KylinConfig.getInstanceFromEnv().isYarnRestApiUsed();
+                JobStepStatusEnum newStatus = HadoopJobStatusChecker.checkStatus(job, output, useREST);
                 if (status == JobStepStatusEnum.KILLED) {
                     mgr.updateJobOutput(getId(), ExecutableState.ERROR, hadoopCmdOutput.getInfo(), "killed by admin");
                     return new ExecuteResult(ExecuteResult.State.FAILED, "killed by admin");

@@ -654,7 +654,6 @@ abstract public class KylinConfigBase implements Serializable {
         return Boolean.parseBoolean(getOptional("kylin.cube.is-automerge-gap-allowed", "false"));
     }
 
-
     // ============================================================================
     // Cube Planner
     // ============================================================================
@@ -835,6 +834,10 @@ abstract public class KylinConfigBase implements Serializable {
 
     public String getJobTrackingURLPattern() {
         return getOptional("kylin.job.tracking-url-pattern", "");
+    }
+
+    public boolean isYarnRestApiUsed() {
+        return Boolean.parseBoolean(getOptional("kylin.job.use-yarn-rest-api", "false"));
     }
 
     // ============================================================================

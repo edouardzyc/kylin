@@ -18,8 +18,11 @@
 
 package org.apache.kylin.engine.mr.common;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -39,10 +42,8 @@ import org.apache.kylin.job.constant.JobStepStatusEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class HadoopJobStatusChecker {
     protected static final Logger logger = LoggerFactory.getLogger(HadoopJobStatusChecker.class);
@@ -61,10 +62,11 @@ public class HadoopJobStatusChecker {
             String applicationId = mrJobId.replace("job", "application");
             String url = yarnUrl.replace("${job_id}", applicationId);
             String response = getHttpResponse(url);
-//            logger.debug("Hadoop job " + mrJobId + " status : " + response);
+            //            logger.debug("Hadoop job " + mrJobId + " status : " + response);
             JsonNode root = new ObjectMapper().readTree(response);
             RMAppState state = RMAppState.valueOf(root.findValue("state").textValue());
-            FinalApplicationStatus finalStatus = FinalApplicationStatus.valueOf(root.findValue("finalStatus").textValue());
+            FinalApplicationStatus finalStatus = FinalApplicationStatus
+                    .valueOf(root.findValue("finalStatus").textValue());
             return Pair.of(state, finalStatus);
         }
 
@@ -115,10 +117,10 @@ public class HadoopJobStatusChecker {
 
                     if (redirect == null) {
                         response = get.getResponseBodyAsString();
-//                        logger.debug("Job " + mrJobId + " get status check result.\n");
+                        //                        logger.debug("Job " + mrJobId + " get status check result.\n");
                     } else {
                         url = redirect;
-//                        logger.debug("Job " + mrJobId + " check redirect url " + url + ".\n");
+                        //                        logger.debug("Job " + mrJobId + " check redirect url " + url + ".\n");
                     }
                 } catch (InterruptedException e) {
                     logger.error(e.getMessage());
@@ -161,13 +163,15 @@ public class HadoopJobStatusChecker {
         if (yarnStatusCheckUrl != null) {
             return yarnStatusCheckUrl;
         } else {
-//            logger.info("kylin.job.yarn.app.rest.check.status.url" + " is not set, read from job configuration");
+            //            logger.info("kylin.job.yarn.app.rest.check.status.url" + " is not set, read from job configuration");
         }
-        String rmWebHost = HAUtil.getConfValueForRMInstance(YarnConfiguration.RM_WEBAPP_ADDRESS, YarnConfiguration.DEFAULT_RM_WEBAPP_ADDRESS, job.getConfiguration());
+        String rmWebHost = HAUtil.getConfValueForRMInstance(YarnConfiguration.RM_WEBAPP_ADDRESS,
+                YarnConfiguration.DEFAULT_RM_WEBAPP_ADDRESS, job.getConfiguration());
         if (HAUtil.isHAEnabled(job.getConfiguration())) {
             YarnConfiguration conf = new YarnConfiguration(job.getConfiguration());
             String active = RMHAUtils.findActiveRMHAId(conf);
-            rmWebHost = HAUtil.getConfValueForRMInstance(HAUtil.addSuffix(YarnConfiguration.RM_WEBAPP_ADDRESS, active), YarnConfiguration.DEFAULT_RM_WEBAPP_ADDRESS, conf);
+            rmWebHost = HAUtil.getConfValueForRMInstance(HAUtil.addSuffix(YarnConfiguration.RM_WEBAPP_ADDRESS, active),
+                    YarnConfiguration.DEFAULT_RM_WEBAPP_ADDRESS, conf);
         }
         if (StringUtils.isEmpty(rmWebHost)) {
             return null;
@@ -177,24 +181,28 @@ public class HadoopJobStatusChecker {
         } else {
             rmWebHost = "http://" + rmWebHost;
         }
-//        logger.info("yarn.resourcemanager.webapp.address:" + rmWebHost);
+        //        logger.info("yarn.resourcemanager.webapp.address:" + rmWebHost);
         return rmWebHost + "/ws/v1/cluster/apps/${job_id}?anonymous=true";
     }
 
-    public static JobStepStatusEnum checkStatus(Job job, StringBuilder output) {
-        if (null == job.getJobID()) {
-            logger.debug("Skip status check with empty job id..");
-            return JobStepStatusEnum.WAITING;
-        }
-        JobStepStatusEnum status = null;
-        String mrJobID = job.getJobID().toString();
+    public static JobStepStatusEnum checkStatus(Job job, StringBuilder output, boolean useREST) {
+        if (useREST) {
+            if (null == job.getJobID()) {
+                logger.debug("Skip status check with empty job id..");
+                return JobStepStatusEnum.WAITING;
+            }
+            JobStepStatusEnum status = null;
+            String mrJobID = job.getJobID().toString();
 
-        try {
-            final Pair<RMAppState, FinalApplicationStatus> result = new HadoopStatusGetter(getRestStatusCheckUrl(job, KylinConfig.getInstanceFromEnv()), mrJobID).get();
-            logger.debug("State of Hadoop job: " + mrJobID + ":" + result.getLeft() + "-" + result.getRight());
-            output.append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(new Date()) + " - State of Hadoop job: " + mrJobID + ":" + result.getLeft() + " - " + result.getRight() + "\n");
+            try {
+                final Pair<RMAppState, FinalApplicationStatus> result = new HadoopStatusGetter(
+                        getRestStatusCheckUrl(job, KylinConfig.getInstanceFromEnv()), mrJobID).get();
+                logger.debug("State of Hadoop job: " + mrJobID + ":" + result.getLeft() + "-" + result.getRight());
+                output.append(
+                        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(new Date()) + " - State of Hadoop job: "
+                                + mrJobID + ":" + result.getLeft() + " - " + result.getRight() + "\n");
 
-            switch (result.getRight()) {
+                switch (result.getRight()) {
                 case SUCCEEDED:
                     status = JobStepStatusEnum.FINISHED;
                     break;
@@ -206,37 +214,72 @@ public class HadoopJobStatusChecker {
                     break;
                 case UNDEFINED:
                     switch (result.getLeft()) {
-                        case NEW:
-                        case NEW_SAVING:
-                        case SUBMITTED:
-                        case ACCEPTED:
-                            status = JobStepStatusEnum.WAITING;
-                            break;
-                        case RUNNING:
-                            status = JobStepStatusEnum.RUNNING;
-                            break;
-                        case FINAL_SAVING:
-                        case FINISHING:
-                        case FINISHED:
-                        case FAILED:
-                        case KILLING:
-                        case KILLED:
-                        default:
+                    case NEW:
+                    case NEW_SAVING:
+                    case SUBMITTED:
+                    case ACCEPTED:
+                        status = JobStepStatusEnum.WAITING;
+                        break;
+                    case RUNNING:
+                        status = JobStepStatusEnum.RUNNING;
+                        break;
+                    case FINAL_SAVING:
+                    case FINISHING:
+                    case FINISHED:
+                    case FAILED:
+                    case KILLING:
+                    case KILLED:
+                    default:
                     }
                     break;
                 default:
                     break;
+                }
+            } catch (Exception e) {
+                logger.error("error check status", e);
+                output.append("Exception: " + e.getLocalizedMessage() + "\n");
+                status = JobStepStatusEnum.ERROR;
             }
-        } catch (Exception e) {
-            logger.error("error check status", e);
-            output.append("Exception: " + e.getLocalizedMessage() + "\n");
-            status = JobStepStatusEnum.ERROR;
+
+            if (status == null)
+                throw new IllegalStateException();
+
+            return status;
+        } else {
+            if (job == null || job.getJobID() == null) {
+                output.append("Skip status check with empty job id..\n");
+                return JobStepStatusEnum.WAITING;
+            }
+
+            JobStepStatusEnum status = null;
+            try {
+                switch (job.getStatus().getState()) {
+                case SUCCEEDED:
+                    status = JobStepStatusEnum.FINISHED;
+                    break;
+                case FAILED:
+                    status = JobStepStatusEnum.ERROR;
+                    break;
+                case KILLED:
+                    status = JobStepStatusEnum.KILLED;
+                    break;
+                case RUNNING:
+                    status = JobStepStatusEnum.RUNNING;
+                    break;
+                case PREP:
+                    status = JobStepStatusEnum.WAITING;
+                    break;
+                default:
+                    throw new IllegalStateException();
+                }
+            } catch (Exception e) {
+                logger.error("error check status", e);
+                output.append("Exception: " + e.getLocalizedMessage() + "\n");
+                status = JobStepStatusEnum.ERROR;
+            }
+
+            return status;
         }
-
-        if (status == null)
-            throw new IllegalStateException();
-
-        return status;
     }
 
 }
