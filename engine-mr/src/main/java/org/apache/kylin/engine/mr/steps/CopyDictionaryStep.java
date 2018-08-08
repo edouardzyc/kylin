@@ -19,6 +19,7 @@
 package org.apache.kylin.engine.mr.steps;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.cube.CubeManager;
@@ -36,6 +37,7 @@ import com.google.common.base.Preconditions;
 public class CopyDictionaryStep extends AbstractExecutable {
 
     private static final Logger logger = LoggerFactory.getLogger(CopyDictionaryStep.class);
+    private static final AtomicInteger count = new AtomicInteger(0);
 
     public CopyDictionaryStep() {
         super();
@@ -43,26 +45,39 @@ public class CopyDictionaryStep extends AbstractExecutable {
 
     @Override
     protected ExecuteResult doWork(ExecutableContext context) throws ExecuteException {
-        final CubeManager mgr = CubeManager.getInstance(context.getConfig());
-        final CubeInstance cube = mgr.getCube(CubingExecutableUtil.getCubeName(this.getParams()));
-        final CubeSegment optimizeSegment = cube.getSegmentById(CubingExecutableUtil.getSegmentId(this.getParams()));
-
-        CubeSegment oldSegment = optimizeSegment.getCubeInstance().getOriginalSegmentToOptimize(optimizeSegment);
-        Preconditions.checkNotNull(oldSegment,
-                "cannot find the original segment to be optimized by " + optimizeSegment);
-
-        // --- Copy dictionary
-        optimizeSegment.getDictionaries().putAll(oldSegment.getDictionaries());
-        optimizeSegment.getSnapshots().putAll(oldSegment.getSnapshots());
-        optimizeSegment.getRowkeyStats().addAll(oldSegment.getRowkeyStats());
+        while (count.intValue() >= context.getConfig().getBuildDictConcurrency()) {
+            try {
+                logger.debug("There are too many CopyDictDictionaryStep running: count=" + count.intValue());
+                Thread.sleep(10000L);
+            } catch (InterruptedException e) {
+                throw new ExecuteException("interrupted at count=" + count.get(), e);
+            }
+        }
 
         try {
+            count.incrementAndGet();
+
+            final CubeManager mgr = CubeManager.getInstance(context.getConfig());
+            final CubeInstance cube = mgr.getCube(CubingExecutableUtil.getCubeName(this.getParams()));
+            final CubeSegment optimizeSegment = cube.getSegmentById(CubingExecutableUtil.getSegmentId(this.getParams()));
+
+            CubeSegment oldSegment = optimizeSegment.getCubeInstance().getOriginalSegmentToOptimize(optimizeSegment);
+            Preconditions.checkNotNull(oldSegment,
+                    "cannot find the original segment to be optimized by " + optimizeSegment);
+
+            // --- Copy dictionary
+            optimizeSegment.getDictionaries().putAll(oldSegment.getDictionaries());
+            optimizeSegment.getSnapshots().putAll(oldSegment.getSnapshots());
+            optimizeSegment.getRowkeyStats().addAll(oldSegment.getRowkeyStats());
+
             CubeUpdate cubeBuilder = new CubeUpdate(cube);
             cubeBuilder.setToUpdateSegs(optimizeSegment);
             mgr.updateCube(cubeBuilder);
         } catch (IOException e) {
             logger.error("fail to merge dictionary or lookup snapshots", e);
             return ExecuteResult.createError(e);
+        } finally {
+            count.decrementAndGet();
         }
 
         return new ExecuteResult();

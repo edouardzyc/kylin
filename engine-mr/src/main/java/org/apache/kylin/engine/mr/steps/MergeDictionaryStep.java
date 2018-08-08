@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.cube.CubeInstance;
@@ -45,6 +46,7 @@ import com.google.common.collect.Lists;
 public class MergeDictionaryStep extends AbstractExecutable {
 
     private static final Logger logger = LoggerFactory.getLogger(MergeDictionaryStep.class);
+    private static final AtomicInteger count = new AtomicInteger(0);
 
     public MergeDictionaryStep() {
         super();
@@ -52,15 +54,26 @@ public class MergeDictionaryStep extends AbstractExecutable {
 
     @Override
     protected ExecuteResult doWork(ExecutableContext context) throws ExecuteException {
-        final CubeManager mgr = CubeManager.getInstance(context.getConfig());
-        final CubeInstance cube = mgr.getCube(CubingExecutableUtil.getCubeName(this.getParams()));
-        final CubeSegment newSegment = cube.getSegmentById(CubingExecutableUtil.getSegmentId(this.getParams()));
-        final List<CubeSegment> mergingSegments = getMergingSegments(cube);
-        KylinConfig conf = cube.getConfig();
-
-        Collections.sort(mergingSegments);
+        while (count.intValue() >= context.getConfig().getMergeDictConcurrency()) {
+            try {
+                logger.debug("There are too many MergeDictDictionaryStep running: count=" + count.intValue());
+                Thread.sleep(10000L);
+            } catch (InterruptedException e) {
+                throw new ExecuteException("interrupted at count=" + count.get(), e);
+            }
+        }
 
         try {
+            count.incrementAndGet();
+
+            final CubeManager mgr = CubeManager.getInstance(context.getConfig());
+            final CubeInstance cube = mgr.getCube(CubingExecutableUtil.getCubeName(this.getParams()));
+            final CubeSegment newSegment = cube.getSegmentById(CubingExecutableUtil.getSegmentId(this.getParams()));
+            final List<CubeSegment> mergingSegments = getMergingSegments(cube);
+            KylinConfig conf = cube.getConfig();
+
+            Collections.sort(mergingSegments);
+
             checkLookupSnapshotsMustIncremental(mergingSegments);
 
             // work on copy instead of cached objects
@@ -77,6 +90,8 @@ public class MergeDictionaryStep extends AbstractExecutable {
         } catch (IOException e) {
             logger.error("fail to merge dictionary or lookup snapshots", e);
             return ExecuteResult.createError(e);
+        } finally {
+            count.decrementAndGet();
         }
     }
 

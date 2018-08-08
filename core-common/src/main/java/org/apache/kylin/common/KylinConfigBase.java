@@ -1334,6 +1334,14 @@ abstract public class KylinConfigBase implements Serializable {
         return Integer.parseInt(getOptional("kylin.engine.mr.yarn-check-interval-seconds", "10"));
     }
 
+    public int getBuildDictConcurrency() {
+        return Integer.parseInt(getOptional("kylin.engine.mr.dict-build-concurrency", "999"));
+    }
+
+    public int getMergeDictConcurrency() {
+        return Integer.parseInt(getOptional("kylin.engine.mr.dict-merge-concurrency", "999"));
+    }
+
     // ============================================================================
     // ENGINE.SPARK
     // ============================================================================
