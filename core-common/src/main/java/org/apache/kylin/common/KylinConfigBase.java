@@ -228,9 +228,10 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     private String cachedHdfsWorkingDirectory;
+    private String cachedBigCellDirectory;
 
     public String getHdfsWorkingDirectoryWithoutScheme(String project) {
-        return HadoopUtil.getPathWithoutScheme(getHdfsWorkingDirectory(project));
+        return HadoopUtil.getPathWithoutSchemeAndAuthority(getHdfsWorkingDirectory(project));
     }
 
     private String getHdfsWorkingDirectory() {
@@ -267,10 +268,15 @@ abstract public class KylinConfigBase implements Serializable {
     }
 
     public String getMetastoreBigCellHdfsDirectory() {
+
+        if (cachedBigCellDirectory != null)
+            return cachedBigCellDirectory;
+
+
         String root = getOptional("kylin.env.hdfs-metastore-bigcell-dir");
 
         if (root == null) {
-            return getReadHdfsWorkingDirectory(null);
+            return getJdbcHdfsWorkingDirectory();
         }
 
         Path path = new Path(root);
@@ -291,7 +297,14 @@ abstract public class KylinConfigBase implements Serializable {
         if (!root.endsWith("/"))
             root += "/";
 
-        return root;
+        cachedBigCellDirectory = root;
+        if (cachedBigCellDirectory.startsWith("file:")) {
+            cachedBigCellDirectory = cachedBigCellDirectory.replace("file:", "file://");
+        } else if (cachedBigCellDirectory.startsWith("maprfs:")) {
+            cachedBigCellDirectory = cachedBigCellDirectory.replace("maprfs:", "maprfs://");
+        }
+
+        return cachedBigCellDirectory;
     }
 
     public String getPrefixWorkingScheme() {
@@ -302,7 +315,7 @@ abstract public class KylinConfigBase implements Serializable {
         return getPrefixScheme(getReadHdfsWorkingDirectory());
     }
 
-    public String getPrefixScheme(String path) {
+    private String getPrefixScheme(String path) {
         URI pathUri = new Path(path).toUri();
         return org.apache.commons.lang3.StringUtils.remove(pathUri.toString(), pathUri.getPath());
     }
@@ -335,7 +348,7 @@ abstract public class KylinConfigBase implements Serializable {
         return getHdfsWorkingDirectory(project);
     }
 
-    public String getJdbcHdfsWorkingDirectory() {
+    private String getJdbcHdfsWorkingDirectory() {
         if (StringUtils.isNotEmpty(getJdbcFileSystem())) {
             Path workingDir = new Path(getReadHdfsWorkingDirectory());
             return new Path(getJdbcFileSystem(), Path.getPathWithoutSchemeAndAuthority(workingDir)).toString() + "/";
@@ -352,7 +365,10 @@ abstract public class KylinConfigBase implements Serializable {
         return getOptional("kylin.storage.columnar.file-system", "");
     }
 
-    public String getJdbcFileSystem() {
+    /**
+     * Consider use kylin.env.hdfs-metastore-bigcell-dir instead of kylin.storage.columnar.jdbc.file-system
+     */
+    private String getJdbcFileSystem() {
         return getOptional("kylin.storage.columnar.jdbc.file-system", "");
     }
 

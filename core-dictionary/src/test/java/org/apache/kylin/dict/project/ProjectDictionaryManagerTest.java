@@ -46,6 +46,8 @@ public class ProjectDictionaryManagerTest extends LocalFileMetadataTestCase {
     public void before() throws Exception {
         staticCreateTestMetadata();
         projectDictionaryManager = ProjectDictionaryManager.getInstance();
+        //TODO ugly
+        projectDictionaryManager.clear();
     }
 
     @Test

@@ -55,7 +55,7 @@ public class ExecutableOutputPOSerializerTest {
     @Test
     public void testDeserializeBrokenIn() throws IOException {
         ExecutableOutputPO entity = serializer.deserialize(brokenIn);
-        assertEquals("SUCCEED", entity.getStatus());
+        assertEquals("ERROR", entity.getStatus());
         assertEquals("this is ErrorMsg", entity.getContent());
         assertEquals("testPath", entity.getUuid());
     }

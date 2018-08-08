@@ -136,7 +136,7 @@ abstract public class CachedCrudAssist<T extends RootPersistentEntity> {
         return reloadQuietlyAt(resourcePath(resourceName));
     }
 
-    private T reloadQuietlyAt(String path) {
+    public T reloadQuietlyAt(String path) {
         try {
             return reloadAt(path);
         } catch (Exception ex) {

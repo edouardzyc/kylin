@@ -96,7 +96,7 @@ public class CuboidJob extends AbstractHadoopJob {
             options.addOption(OPTION_CUBOID_MODE);
             parseOptions(options, args);
 
-            String output = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH));
+            String output = HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_OUTPUT_PATH));
             String cubeName = getOptionValue(OPTION_CUBE_NAME).toUpperCase();
             int nCuboidLevel = Integer.parseInt(getOptionValue(OPTION_NCUBOID_LEVEL));
             String segmentID = getOptionValue(OPTION_SEGMENT_ID);
@@ -169,7 +169,7 @@ public class CuboidJob extends AbstractHadoopJob {
         } else {
             // n-dimension cuboid case
             IMROutput2.IMROutputFormat outputFormat = MRUtil.getBatchCubingOutputSide2(cubeSeg).getOuputFormat();
-            input = HadoopUtil.getPathWithWorkingScheme(input);
+            input = HadoopUtil.getPathWithWorkingSchemeAndAuthority(input);
             outputFormat.configureJobInput(job, input);
             FileInputFormat.setInputPaths(job, new Path(input));
         }

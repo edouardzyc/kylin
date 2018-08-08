@@ -179,7 +179,7 @@ public class JobBuilderSupport {
     // ============================================================================
 
     public String getJobWorkingDir(String jobId) {
-        return HadoopUtil.getPathWithoutScheme(getJobWorkingDirIn(config, jobId));
+        return HadoopUtil.getPathWithoutSchemeAndAuthority(getJobWorkingDirIn(config, jobId));
     }
 
     public String getRealizationRootPath(String jobId) {

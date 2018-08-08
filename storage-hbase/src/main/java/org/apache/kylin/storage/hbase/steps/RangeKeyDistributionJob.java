@@ -76,9 +76,9 @@ public class RangeKeyDistributionJob extends AbstractHadoopJob {
 
             setJobClasspath(job, kylinConfig);
 
-            addInputDirs(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH)), job);
+            addInputDirs(HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_INPUT_PATH)), job);
 
-            Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
+            Path output = new Path(HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_OUTPUT_PATH)));
             FileOutputFormat.setOutputPath(job, output);
             // job.getConfiguration().set("dfs.block.size", "67108864");
 

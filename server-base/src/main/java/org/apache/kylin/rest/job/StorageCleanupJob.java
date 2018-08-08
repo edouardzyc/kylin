@@ -237,12 +237,12 @@ public class StorageCleanupJob extends AbstractApplication {
         List<String> allHdfsPathsNeedToBeDeleted = new ArrayList<String>();
 
         try {
-            FileStatus[] fStatus = fs.listStatus(new Path(HadoopUtil.getPathWithoutScheme(engineConfig.getHdfsWorkingDirectory(project))));
+            FileStatus[] fStatus = fs.listStatus(new Path(HadoopUtil.getPathWithoutSchemeAndAuthority(engineConfig.getHdfsWorkingDirectory(project))));
             if (fStatus != null) {
                 for (FileStatus status : fStatus) {
                     String path = status.getPath().getName();
                     if (path.startsWith("kylin-")) {
-                        String kylinJobPath = HadoopUtil.getPathWithoutScheme(engineConfig.getHdfsWorkingDirectory(project))
+                        String kylinJobPath = HadoopUtil.getPathWithoutSchemeAndAuthority(engineConfig.getHdfsWorkingDirectory(project))
                                 + path;
                         allHdfsPathsNeedToBeDeleted.add(kylinJobPath);
                     }
@@ -258,7 +258,7 @@ public class StorageCleanupJob extends AbstractApplication {
             final ExecutableState state = executableManager.getOutput(jobId).getState();
             if (!state.isFinalState()) {
                 String path = JobBuilderSupport.getJobWorkingDir(
-                        HadoopUtil.getPathWithoutScheme(engineConfig.getHdfsWorkingDirectory(project)), jobId);
+                        HadoopUtil.getPathWithoutSchemeAndAuthority(engineConfig.getHdfsWorkingDirectory(project)), jobId);
                 allHdfsPathsNeedToBeDeleted.remove(path);
                 logger.info("Skip " + path + " from deletion list, as the path belongs to job " + jobId
                         + " with status " + state);
@@ -271,7 +271,7 @@ public class StorageCleanupJob extends AbstractApplication {
                 String jobUuid = seg.getLastBuildJobID();
                 if (jobUuid != null && jobUuid.equals("") == false) {
                     String path = JobBuilderSupport.getJobWorkingDir(
-                            HadoopUtil.getPathWithoutScheme(engineConfig.getHdfsWorkingDirectory(project)), jobUuid);
+                            HadoopUtil.getPathWithoutSchemeAndAuthority(engineConfig.getHdfsWorkingDirectory(project)), jobUuid);
                     allHdfsPathsNeedToBeDeleted.remove(path);
                     logger.info("Skip " + path + " from deletion list, as the path belongs to segment " + seg
                             + " of cube " + cube.getName());
@@ -427,7 +427,7 @@ public class StorageCleanupJob extends AbstractApplication {
 
             if (segmentId2JobId.containsKey(segmentId)) {
                 String path = JobBuilderSupport.getJobWorkingDir(
-                        HadoopUtil.getPathWithoutScheme(engineConfig.getHdfsWorkingDirectory()),
+                        HadoopUtil.getPathWithoutSchemeAndAuthority(engineConfig.getHdfsWorkingDirectory()),
                         segmentId2JobId.get(segmentId)) + "/" + tableToDelete;
                 Path externalDataPath = new Path(path);
                 if (defaultFs.exists(externalDataPath)) {

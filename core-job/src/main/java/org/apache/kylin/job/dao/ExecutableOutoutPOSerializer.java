@@ -49,7 +49,7 @@ public class ExecutableOutoutPOSerializer implements Serializer<ExecutableOutput
 
             final ExecutableOutputPO result = new ExecutableOutputPO();
             result.setUuid(getUuid(brokenEntity.getResPath()));
-            result.setStatus("SUCCEED");
+            result.setStatus("ERROR");
             result.setContent(brokenEntity.getErrorMsg());
             return result;
         }

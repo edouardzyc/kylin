@@ -78,7 +78,7 @@ public class KafkaFlatTableJob extends AbstractHadoopJob {
 
             job = Job.getInstance(getConf(), getOptionValue(OPTION_JOB_NAME));
             String cubeName = getOptionValue(OPTION_CUBE_NAME);
-            Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
+            Path output = new Path(HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_OUTPUT_PATH)));
 
             String segmentId = getOptionValue(OPTION_SEGMENT_ID);
 

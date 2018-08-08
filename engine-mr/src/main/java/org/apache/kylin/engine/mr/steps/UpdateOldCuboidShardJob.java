@@ -56,8 +56,8 @@ public class UpdateOldCuboidShardJob extends AbstractHadoopJob {
             job = Job.getInstance(getConf(), getOptionValue(OPTION_JOB_NAME));
             String cubeName = getOptionValue(OPTION_CUBE_NAME).toUpperCase();
             String segmentID = getOptionValue(OPTION_SEGMENT_ID);
-            Path input = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH)));
-            Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
+            Path input = new Path(HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_INPUT_PATH)));
+            Path output = new Path(HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_OUTPUT_PATH)));
 
             CubeManager cubeMgr = CubeManager.getInstance(KylinConfig.getInstanceFromEnv());
             CubeInstance cube = cubeMgr.getCube(cubeName);

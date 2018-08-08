@@ -244,8 +244,14 @@ public class CubingJob extends DefaultChainedExecutable {
         return Pair.of(title, content);
     }
 
-    @Override
-    protected void onExecuteFinished(ExecuteResult result, ExecutableContext executableContext) {
+    protected void onStatusChange(ExecutableContext context, ExecuteResult result, ExecutableState state) {
+        super.onStatusChange(context, result, state);
+
+        updateMRWaitTime();
+        updateMetrics(context, result, state);
+    }
+
+    private void updateMRWaitTime() {
         long time = 0L;
         for (AbstractExecutable task : getTasks()) {
             final ExecutableState status = task.getStatus();
@@ -257,16 +263,9 @@ public class CubingJob extends DefaultChainedExecutable {
             }
         }
         setMapReduceWaitTime(time);
-        super.onExecuteFinished(result, executableContext);
     }
 
-    protected void onStatusChange(ExecutableContext context, ExecuteResult result, ExecutableState state) {
-        super.onStatusChange(context, result, state);
-
-        updateMetrics(context, result, state);
-    }
-
-    protected void updateMetrics(ExecutableContext context, ExecuteResult result, ExecutableState state) {
+    private void updateMetrics(ExecutableContext context, ExecuteResult result, ExecutableState state) {
         JobMetricsFacade.JobStatisticsResult jobStats = new JobMetricsFacade.JobStatisticsResult();
         jobStats.setWrapper(getSubmitter(), getProjectName(), CubingExecutableUtil.getCubeName(getParams()), getId(),
                 getJobType(), getAlgorithm() == null ? "NULL" : getAlgorithm().toString());

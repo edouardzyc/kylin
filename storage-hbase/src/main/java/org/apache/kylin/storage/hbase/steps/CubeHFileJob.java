@@ -69,7 +69,7 @@ public class CubeHFileJob extends AbstractHadoopJob {
 
             Path partitionFilePath = new Path(getOptionValue(OPTION_PARTITION_FILE_PATH));
 
-            Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
+            Path output = new Path(HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_OUTPUT_PATH)));
             String cubeName = getOptionValue(OPTION_CUBE_NAME);
 
             CubeManager cubeMgr = CubeManager.getInstance(KylinConfig.getInstanceFromEnv());
@@ -81,7 +81,7 @@ public class CubeHFileJob extends AbstractHadoopJob {
             // For separate HBase cluster, note the output is a qualified HDFS path if "kylin.storage.hbase.cluster-fs" is configured, ref HBaseMRSteps.getHFilePath()
             HBaseConnection.addHBaseClusterNNHAConfiguration(job.getConfiguration());
 
-            addInputDirs(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH)), job);
+            addInputDirs(HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_INPUT_PATH)), job);
             FileOutputFormat.setOutputPath(job, output);
 
             // set job configuration

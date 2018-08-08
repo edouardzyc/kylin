@@ -71,7 +71,7 @@ public class SaveStatisticsStep extends AbstractExecutable {
 
             FileSystem fs = HadoopUtil.getWorkingFileSystem();
             Configuration hadoopConf = HadoopUtil.getCurrentConfiguration();
-            Path statisticsDir = new Path(HadoopUtil.getPathWithWorkingScheme(CubingExecutableUtil.getStatisticsPath(this.getParams())));
+            Path statisticsDir = new Path(HadoopUtil.getPathWithWorkingSchemeAndAuthority(CubingExecutableUtil.getStatisticsPath(this.getParams())));
             Path[] statisticsFiles = HadoopUtil.getFilteredPath(fs, statisticsDir,
                     BatchConstants.CFG_OUTPUT_STATISTICS);
             if (statisticsFiles == null) {

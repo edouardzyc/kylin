@@ -197,7 +197,7 @@ public class StorageCleanupJob extends AbstractApplication {
             String path = status.getPath().getName();
             // System.out.println(path);
             if (path.startsWith("kylin-")) {
-                String kylinJobPath = HadoopUtil.getPathWithoutScheme(engineConfig.getHdfsWorkingDirectory()) + path;
+                String kylinJobPath = HadoopUtil.getPathWithoutSchemeAndAuthority(engineConfig.getHdfsWorkingDirectory()) + path;
                 allHdfsPathsNeedToBeDeleted.add(kylinJobPath);
             }
         }
@@ -207,7 +207,7 @@ public class StorageCleanupJob extends AbstractApplication {
             // only remove FINISHED and DISCARDED job intermediate files
             final ExecutableState state = executableManager.getOutput(jobId).getState();
             if (!state.isFinalState()) {
-                String path = HadoopUtil.getPathWithoutScheme(JobBuilderSupport.getJobWorkingDir(engineConfig.getHdfsWorkingDirectory(), jobId));
+                String path = HadoopUtil.getPathWithoutSchemeAndAuthority(JobBuilderSupport.getJobWorkingDir(engineConfig.getHdfsWorkingDirectory(), jobId));
                 allHdfsPathsNeedToBeDeleted.remove(path);
                 logger.info("Skip " + path + " from deletion list, as the path belongs to job " + jobId + " with status " + state);
             }
@@ -218,7 +218,7 @@ public class StorageCleanupJob extends AbstractApplication {
             for (CubeSegment seg : cube.getSegments()) {
                 String jobUuid = seg.getLastBuildJobID();
                 if (jobUuid != null && jobUuid.equals("") == false) {
-                    String path = HadoopUtil.getPathWithoutScheme(JobBuilderSupport.getJobWorkingDir(engineConfig.getHdfsWorkingDirectory(), jobUuid));
+                    String path = HadoopUtil.getPathWithoutSchemeAndAuthority(JobBuilderSupport.getJobWorkingDir(engineConfig.getHdfsWorkingDirectory(), jobUuid));
                     allHdfsPathsNeedToBeDeleted.remove(path);
                     logger.info("Skip " + path + " from deletion list, as the path belongs to segment " + seg + " of cube " + cube.getName());
                 }

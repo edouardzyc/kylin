@@ -61,9 +61,9 @@ public class RowKeyDistributionCheckerJob extends AbstractHadoopJob {
 
         setJobClasspath(job, KylinConfig.getInstanceFromEnv());
 
-        addInputDirs(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH)), job);
+        addInputDirs(HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_INPUT_PATH)), job);
 
-        Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
+        Path output = new Path(HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_OUTPUT_PATH)));
         FileOutputFormat.setOutputPath(job, output);
 
         // Mapper

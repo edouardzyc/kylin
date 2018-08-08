@@ -61,8 +61,8 @@ public class CalculateStatsFromBaseCuboidJob extends AbstractHadoopJob {
             job = Job.getInstance(getConf(), getOptionValue(OPTION_JOB_NAME));
             String cubeName = getOptionValue(OPTION_CUBE_NAME);
             String segmentID = getOptionValue(OPTION_SEGMENT_ID);
-            Path input = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH)));
-            Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
+            Path input = new Path(HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_INPUT_PATH)));
+            Path output = new Path(HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_OUTPUT_PATH)));
             String statistics_sampling_percent = getOptionValue(OPTION_STATISTICS_SAMPLING_PERCENT);
             String cuboidMode = getOptionValue(OPTION_CUBOID_MODE);
 

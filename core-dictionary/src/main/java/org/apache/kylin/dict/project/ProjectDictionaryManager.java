@@ -184,7 +184,7 @@ public class ProjectDictionaryManager {
                 }
             });
 
-    private volatile static ProjectDictionaryManager ProjectDictionaryManager;
+    private volatile static ProjectDictionaryManager projectDictionaryManager;
     private DictionaryManager dictionaryManager;
 
     // only for test to change private to public
@@ -219,19 +219,18 @@ public class ProjectDictionaryManager {
     }
 
     public static ProjectDictionaryManager getInstance() {
-        if (ProjectDictionaryManager == null) {
+        if (projectDictionaryManager == null) {
             synchronized (ProjectDictionaryManager.class) {
-                if (ProjectDictionaryManager == null) {
+                if (projectDictionaryManager == null) {
                     try {
-                        ProjectDictionaryManager = new ProjectDictionaryManager();
+                        projectDictionaryManager = new ProjectDictionaryManager();
                     } catch (IOException e) {
-                        e.printStackTrace();
-                        logger.error(e.getMessage());
+                        throw new RuntimeException(e);
                     }
                 }
             }
         }
-        return ProjectDictionaryManager;
+        return projectDictionaryManager;
     }
 
     public ProjectDictionaryVersionInfo getMaxVersion(SegProjectDict desc) {
@@ -665,9 +664,8 @@ public class ProjectDictionaryManager {
             patchCache.invalidateAll();
             weakDictCache.clear();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-
     }
 
     //  remove mvc, to be init again

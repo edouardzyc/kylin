@@ -218,7 +218,7 @@ public class HadoopUtil {
         return config;
     }
 
-    public static String getPathWithoutScheme(String path) {
+    public static String getPathWithoutSchemeAndAuthority(String path) {
         if (path.startsWith("file://") || path.startsWith("maprfs://"))
             return path;
 
@@ -232,17 +232,7 @@ public class HadoopUtil {
         return path;
     }
 
-    public static FileSystem getJdbcFileSystem() throws IOException {
-        Configuration conf = getCurrentConfiguration();
-        return getJdbcFileSystem(conf);
-    }
-
-    public static FileSystem getJdbcFileSystem(Configuration conf) throws IOException {
-        Path jdbcPath = new Path(KylinConfig.getInstanceFromEnv().getJdbcHdfsWorkingDirectory());
-        return getFileSystem(jdbcPath, conf);
-    }
-
-    public static String getPathWithReadScheme(String path) {
+    private static String getPathWithReadSchemeAndAuthority(String path) {
         String scheme = KylinConfig.getInstanceFromEnv().getPrefixReadScheme();
         if (isSpecialFs(scheme)) {
             return path;
@@ -250,15 +240,15 @@ public class HadoopUtil {
         return scheme + Path.getPathWithoutSchemeAndAuthority(new Path(path));
     }
 
-    public static String getPathWithReadScheme(String[] paths) {
+    public static String getPathWithReadSchemeAndAuthority(String[] paths) {
         List pathList = Lists.newArrayList();
         for (String path : paths) {
-            pathList.add(getPathWithReadScheme(path));
+            pathList.add(getPathWithReadSchemeAndAuthority(path));
         }
         return StringUtils.join(pathList, ",");
     }
 
-    public static String getPathWithWorkingScheme(String path) {
+    public static String getPathWithWorkingSchemeAndAuthority(String path) {
         String scheme = KylinConfig.getInstanceFromEnv().getPrefixWorkingScheme();
         if (isSpecialFs(scheme)) {
             return path;

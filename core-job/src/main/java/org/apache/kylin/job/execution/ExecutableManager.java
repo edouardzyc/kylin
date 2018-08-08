@@ -276,21 +276,6 @@ public class ExecutableManager {
         }
     }
 
-    public void updateAllRunningJobsToError() {
-        try {
-            final List<ExecutableOutputPO> jobOutputs = executableDao.getJobOutputs();
-            for (ExecutableOutputPO executableOutputPO : jobOutputs) {
-                if (executableOutputPO.getStatus().equalsIgnoreCase(ExecutableState.RUNNING.toString())) {
-                    executableOutputPO.setStatus(ExecutableState.ERROR.toString());
-                    executableDao.updateJobOutput(executableOutputPO);
-                }
-            }
-        } catch (PersistentException e) {
-            logger.error("error reset job status from RUNNING to ERROR", e);
-            throw new RuntimeException(e);
-        }
-    }
-
     public void resumeAllRunningJobs() {
         try {
             final List<ExecutableOutputPO> jobOutputs = executableDao.getJobOutputs();

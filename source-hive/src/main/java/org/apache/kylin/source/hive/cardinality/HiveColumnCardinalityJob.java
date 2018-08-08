@@ -85,7 +85,7 @@ public class HiveColumnCardinalityJob extends AbstractHadoopJob {
         job.getConfiguration().set(BatchConstants.CFG_PROJECT_NAME, project);
         job.getConfiguration().set(BatchConstants.CFG_TABLE_NAME, table);
 
-        Path output = new Path(HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH)));
+        Path output = new Path(HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_OUTPUT_PATH)));
         FileOutputFormat.setOutputPath(job, output);
         job.getConfiguration().set("dfs.blocksize", "67108864");
         job.getConfiguration().set("mapreduce.output.fileoutputformat.compress", "false");

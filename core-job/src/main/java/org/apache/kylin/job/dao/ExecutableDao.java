@@ -122,7 +122,7 @@ public class ExecutableDao {
                 if (paths != null) {
                     for (String path : paths) {
                         if (!isTaskExecutableOutput(resourceName(path)))
-                            reloadAt(path);
+                            reloadQuietlyAt(path);
                     }
 
                     logger.debug("Loaded " + executableOutputDigestMap.size() + " execute_output digest(s) out of " + paths.size()

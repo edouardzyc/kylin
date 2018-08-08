@@ -75,7 +75,7 @@ public class InMemCuboidJob extends AbstractHadoopJob {
 
             String cubeName = getOptionValue(OPTION_CUBE_NAME).toUpperCase();
             String segmentID = getOptionValue(OPTION_SEGMENT_ID);
-            String output = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH));
+            String output = HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_OUTPUT_PATH));
 
             CubeManager cubeMgr = CubeManager.getInstance(KylinConfig.getInstanceFromEnv());
             CubeInstance cube = cubeMgr.getCube(cubeName);

@@ -44,8 +44,8 @@ public class MergeCuboidJob extends CuboidJob {
             options.addOption(OPTION_OUTPUT_PATH);
             parseOptions(options, args);
 
-            String input = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_INPUT_PATH));
-            String output = HadoopUtil.getPathWithWorkingScheme(getOptionValue(OPTION_OUTPUT_PATH));
+            String input = HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_INPUT_PATH));
+            String output = HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_OUTPUT_PATH));
             String cubeName = getOptionValue(OPTION_CUBE_NAME).toUpperCase();
             String segmentID = getOptionValue(OPTION_SEGMENT_ID);
 
