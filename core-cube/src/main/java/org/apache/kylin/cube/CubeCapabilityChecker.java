@@ -80,7 +80,7 @@ public class CubeCapabilityChecker {
             //for non query-on-facttable
             CubeSnapshotChecker snapshotChecker = (CubeSnapshotChecker) ClassUtil
                     .newInstance(cube.getConfig().getSnapshotChecker());
-            if (snapshotChecker.doCheck(cube, digest.factTable)) {
+            if (snapshotChecker.doesCubeHasSnapshot(cube, digest.factTable)) {
                 Set<TblColRef> dimCols = Sets.newHashSet(cube.getModel().findFirstTable(digest.factTable).getColumns());
 
                 //1. all aggregations on lookup table can be done. For distinct count, mark them all DimensionAsMeasures

@@ -21,8 +21,9 @@ package org.apache.kylin.cube.util;
 import org.apache.kylin.cube.CubeInstance;
 
 public class CubeSnapshotChecker {
-    public boolean doCheck(CubeInstance cubeInstance, String factTable) {
+    
+    public boolean doesCubeHasSnapshot(CubeInstance cubeInstance, String lookupTable) {
         return cubeInstance.getSegments().size() > 0
-                && cubeInstance.getSegments().get(0).getSnapshots().containsKey(factTable);
+                && cubeInstance.getSegments().get(0).getSnapshots().containsKey(lookupTable);
     }
 }
