@@ -127,7 +127,7 @@ public class StorageURLTest {
     }
 
     @Test
-    public void testWitySqlServer() {
+    public void testWithSqlServer() {
         {
             final StorageURL url = new StorageURL("metadata_table@jdbc,url=jdbc:sqlserver://localhost:1433;database=metadata_db,a=b,c=d");
             assertEquals("metadata_table", url.getIdentifier());
