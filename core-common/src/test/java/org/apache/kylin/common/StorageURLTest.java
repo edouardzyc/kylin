@@ -6,15 +6,15 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 package org.apache.kylin.common;
 
@@ -102,6 +102,15 @@ public class StorageURLTest {
             assertEquals("", id.getParameter("a"));
             assertEquals("hello@hbase,a", id.toString());
         }
+
+        {
+            StorageURL id = new StorageURL("hello@hbase,");
+            assertEquals("hello", id.getIdentifier());
+            assertEquals("hbase", id.getScheme());
+            assertEquals(0, id.getAllParameters().size());
+            assertEquals(null, id.getParameter("a"));
+            assertEquals("hello@hbase", id.toString());
+        }
     }
 
     @Test
@@ -115,5 +124,87 @@ public class StorageURLTest {
         assertTrue(id1.equals(id3));
         assertTrue(id2 != id4);
         assertTrue(!id2.equals(id4));
+    }
+
+    @Test
+    public void testWitySqlServer() {
+        {
+            final StorageURL url = new StorageURL("metadata_table@jdbc,url=jdbc:sqlserver://localhost:1433;database=metadata_db,a=b,c=d");
+            assertEquals("metadata_table", url.getIdentifier());
+            assertEquals("jdbc", url.getScheme());
+            assertEquals(3, url.getAllParameters().size());
+            assertEquals("jdbc:sqlserver://localhost:1433;database=metadata_db", url.getParameter("url"));
+            assertEquals("b", url.getParameter("a"));
+            assertEquals("d", url.getParameter("c"));
+            assertEquals("metadata_table@jdbc,url=jdbc:sqlserver://localhost:1433;database=metadata_db,a=b,c=d", url.toString());
+        }
+    }
+
+    @Test
+    public void testWithMysql() {
+        {
+            final StorageURL url = new StorageURL("metadata_table@jdbc,url=jdbc:mysql://192.168.1.10:3306/metadata_db?x1=y1&x2=y2,a=b,c=d");
+            assertEquals("metadata_table", url.getIdentifier());
+            assertEquals("jdbc", url.getScheme());
+            assertEquals(3, url.getAllParameters().size());
+            assertEquals("jdbc:mysql://192.168.1.10:3306/metadata_db?x1=y1&x2=y2", url.getParameter("url"));
+            assertEquals("b", url.getParameter("a"));
+            assertEquals("d", url.getParameter("c"));
+            assertEquals("metadata_table@jdbc,url=jdbc:mysql://192.168.1.10:3306/metadata_db?x1=y1&x2=y2,a=b,c=d", url.toString());
+        }
+
+        {
+            final StorageURL url = new StorageURL("metadata_table@jdbc,url=jdbc:mysql:loadbalance://192.168.1.10:3306,192.168.1.20:3306/metadata_db?x1=y1&x2=y2,a=b,c=d");
+            assertEquals("metadata_table", url.getIdentifier());
+            assertEquals("jdbc", url.getScheme());
+            assertEquals(3, url.getAllParameters().size());
+            assertEquals("jdbc:mysql:loadbalance://192.168.1.10:3306,192.168.1.20:3306/metadata_db?x1=y1&x2=y2", url.getParameter("url"));
+            assertEquals("b", url.getParameter("a"));
+            assertEquals("d", url.getParameter("c"));
+        }
+
+        {
+            final StorageURL url = new StorageURL("metadata_table@jdbc,url=jdbc:mysql:loadbalance://192.168.1.10:3306,192.168.1.20:3306/metadata_db,a=b,c=d");
+            assertEquals("metadata_table", url.getIdentifier());
+            assertEquals("jdbc", url.getScheme());
+            assertEquals(3, url.getAllParameters().size());
+            assertEquals("jdbc:mysql:loadbalance://192.168.1.10:3306,192.168.1.20:3306/metadata_db", url.getParameter("url"));
+            assertEquals("b", url.getParameter("a"));
+            assertEquals("d", url.getParameter("c"));
+        }
+
+        {
+            final StorageURL url = new StorageURL("metadata_table@jdbc,url=jdbc:mysql:loadbalance://192.168.1.10:3306,192.168.1.20:3306/metadata_db?,a=b,c=d");
+            assertEquals("metadata_table", url.getIdentifier());
+            assertEquals("jdbc", url.getScheme());
+            assertEquals(3, url.getAllParameters().size());
+            assertEquals("jdbc:mysql:loadbalance://192.168.1.10:3306,192.168.1.20:3306/metadata_db?", url.getParameter("url"));
+            assertEquals("b", url.getParameter("a"));
+            assertEquals("d", url.getParameter("c"));
+        }
+
+        {
+            final StorageURL url = new StorageURL("metadata_table@jdbc,url=jdbc:mysql:loadbalance://192.168.1.10:3306/metadata_db?,a=b");
+            assertEquals("metadata_table", url.getIdentifier());
+            assertEquals("jdbc", url.getScheme());
+            assertEquals(2, url.getAllParameters().size());
+            assertEquals("jdbc:mysql:loadbalance://192.168.1.10:3306/metadata_db?", url.getParameter("url"));
+            assertEquals("b", url.getParameter("a"));
+        }
+
+        {
+            assertTrue(assertIllegalArgumentException("metadata_table@jdbc,url=jdbc:mysql:loadbalance://192.168.1.10:3306/metadata_db"));
+            assertTrue(assertIllegalArgumentException("metadata_table@jdbc,a=b,c=d"));
+        }
+    }
+
+    private boolean assertIllegalArgumentException(String metadataUrl) {
+        try {
+            final StorageURL url = new StorageURL(metadataUrl);
+        } catch (IllegalArgumentException ex) {
+            return "Missing or illegal \"url\" parameter, see the documentation for details".equals(ex.getMessage());
+        }
+
+        return false;
     }
 }
