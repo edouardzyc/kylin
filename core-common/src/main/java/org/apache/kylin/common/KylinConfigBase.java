@@ -275,7 +275,8 @@ abstract public class KylinConfigBase implements Serializable {
 
         Path path = new Path(root);
         if (!path.isAbsolute())
-            throw new IllegalArgumentException("kylin.env.hdfs-metastore-bigcell-dir must be absolute, but got " + root);
+            throw new IllegalArgumentException(
+                    "kylin.env.hdfs-metastore-bigcell-dir must be absolute, but got " + root);
 
         // make sure path is qualified
         try {
@@ -533,7 +534,7 @@ abstract public class KylinConfigBase implements Serializable {
         return Integer.parseInt(getOptional("kylin.dictionary.project-dictionary-patch-max-cache-entry", "200"));
     }
 
-    public int getProjectDictionaryAppendRetryTimes(){
+    public int getProjectDictionaryAppendRetryTimes() {
         return Integer.parseInt(getOptional("kylin.dictionary.project-dictionary-retry-times", "3"));
     }
 
@@ -641,7 +642,7 @@ abstract public class KylinConfigBase implements Serializable {
     public int getGTScanRequestSerializationLevel() {
         return Integer.parseInt(getOptional("kylin.cube.gtscanrequest-serialization-level", "1"));
     }
-    
+
     public String getFactInputSubstitute() {
         return getOptional("kylin.cube.fact-input-substitute");
     }
@@ -652,6 +653,10 @@ abstract public class KylinConfigBase implements Serializable {
 
     public boolean isAutoMergeGapAllowed() {
         return Boolean.parseBoolean(getOptional("kylin.cube.is-automerge-gap-allowed", "false"));
+    }
+
+    public String getSnapshotChecker() {
+        return getOptional("kylin.cube.snapshot.checker", "org.apache.kylin.cube.util.CubeSnapshotChecker");
     }
 
     // ============================================================================

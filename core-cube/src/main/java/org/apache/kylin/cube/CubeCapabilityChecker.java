@@ -26,7 +26,9 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.kylin.common.util.ClassUtil;
 import org.apache.kylin.cube.model.CubeDesc;
+import org.apache.kylin.cube.util.CubeSnapshotChecker;
 import org.apache.kylin.measure.MeasureType;
 import org.apache.kylin.measure.basic.BasicMeasureType;
 import org.apache.kylin.metadata.filter.UDF.MassInTupleFilter;
@@ -76,8 +78,9 @@ public class CubeCapabilityChecker {
             }
         } else {
             //for non query-on-facttable
-            if (cube.getSegments().get(0).getSnapshots().containsKey(digest.factTable)) {
-
+            CubeSnapshotChecker snapshotChecker = (CubeSnapshotChecker) ClassUtil
+                    .newInstance(cube.getConfig().getSnapshotChecker());
+            if (snapshotChecker.doCheck(cube, digest.factTable)) {
                 Set<TblColRef> dimCols = Sets.newHashSet(cube.getModel().findFirstTable(digest.factTable).getColumns());
 
                 //1. all aggregations on lookup table can be done. For distinct count, mark them all DimensionAsMeasures
