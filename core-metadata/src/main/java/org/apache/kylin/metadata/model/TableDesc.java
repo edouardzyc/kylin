@@ -53,7 +53,7 @@ public class TableDesc extends RootPersistentEntity implements ISourceAware {
     public static String concatRawResourcePath(String nameOnPath) {
         return ResourceStore.TABLE_RESOURCE_ROOT + "/" + nameOnPath + ".json";
     }
-    
+
     public static String makeResourceName(String tableIdentity, String prj) {
         return prj == null ? tableIdentity : tableIdentity + "--" + prj;
     }
@@ -134,7 +134,7 @@ public class TableDesc extends RootPersistentEntity implements ISourceAware {
     public String resourceName() {
         return makeResourceName(getIdentity(), getProject());
     }
-    
+
     public TableDesc appendColumns(ColumnDesc[] computedColumns, boolean makeCopy) {
         if (computedColumns == null || computedColumns.length == 0) {
             return this;
@@ -195,7 +195,7 @@ public class TableDesc extends RootPersistentEntity implements ISourceAware {
         if (isBorrowedFromGlobal()) {
             return concatResourcePath(getIdentity(), null);
         }
-        
+
         return concatResourcePath(getIdentity(), project);
     }
 
@@ -295,7 +295,7 @@ public class TableDesc extends RootPersistentEntity implements ISourceAware {
     public void init(KylinConfig config, String project) {
         this.project = project;
         this.config = config;
-        
+
         if (name != null)
             name = name.toUpperCase();
 
@@ -357,6 +357,16 @@ public class TableDesc extends RootPersistentEntity implements ISourceAware {
 
     public String getMaterializedName() {
         return materializedTableNamePrefix + database.getName() + "_" + name;
+    }
+
+    public String getMaterializedName(String uuid) {
+        if (uuid == null) {
+            if (this.getSourceType() == ID_JDBC)
+                return getMaterializedName();
+            else
+                throw new IllegalArgumentException("Materialized table should contains a uuid.");
+        } else
+            return materializedTableNamePrefix + database.getName() + "_" + name + "_" + uuid.replaceAll("-", "_");
     }
 
     @Override

@@ -67,7 +67,7 @@ public class KafkaMRInput implements IMRInput {
     }
 
     @Override
-    public IMRTableInputFormat getTableInputFormat(TableDesc table) {
+    public IMRTableInputFormat getTableInputFormat(TableDesc table, String uuid) {
 
         return new KafkaTableInputFormat(cubeSegment, null, null, null);
     }

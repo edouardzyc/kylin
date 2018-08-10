@@ -18,11 +18,15 @@
 
 package org.apache.kylin.rest.service;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.ServerMode;
@@ -49,6 +53,7 @@ import org.apache.kylin.metadata.model.FunctionDesc;
 import org.apache.kylin.metadata.model.MeasureDesc;
 import org.apache.kylin.metadata.model.SegmentRange;
 import org.apache.kylin.metadata.model.SegmentStatusEnum;
+import org.apache.kylin.metadata.model.TableDesc;
 import org.apache.kylin.metadata.project.ProjectInstance;
 import org.apache.kylin.metadata.project.ProjectManager;
 import org.apache.kylin.metadata.project.RealizationEntry;
@@ -76,14 +81,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * Stateless & lightweight service facade of cube management functions.
@@ -453,8 +455,13 @@ public class CubeService extends BasicService implements InitializingBean {
     public CubeInstance rebuildLookupSnapshot(CubeInstance cube, String segmentName, String lookupTable)
             throws IOException {
         aclEvaluate.checkProjectOperationPermission(cube);
+        Message msg = MsgPicker.getMsg();
+        TableDesc tableDesc = getTableManager().getTableDesc(lookupTable, cube.getProject());
+        if (tableDesc.isView()) {
+            throw new BadRequestException(String.format(msg.getREBUILD_SNAPSHOT_OF_VIEW(), tableDesc.getName()));
+        }
         CubeSegment seg = cube.getSegment(segmentName, SegmentStatusEnum.READY);
-        getCubeManager().buildSnapshotTable(seg, lookupTable);
+        getCubeManager().buildSnapshotTable(seg, lookupTable, null);
 
         return cube;
     }
