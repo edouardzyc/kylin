@@ -580,13 +580,13 @@ public class ExecutableManager {
         return result;
     }
 
-    private AbstractExecutable newExecutable(String type) {
+    public AbstractExecutable newExecutable(String type) {
         Class<? extends AbstractExecutable> clazz;
         try {
             clazz = ClassUtil.forName(type, AbstractExecutable.class);
         } catch (ClassNotFoundException ex) {
             clazz = BrokenExecutable.class;
-            logger.error("Unknown executable type '" + type + "', using BrokenExecutable");
+            logger.warn("Unknown executable type '" + type + "', using BrokenExecutable");
         }
         try {
             return clazz.getConstructor().newInstance();
