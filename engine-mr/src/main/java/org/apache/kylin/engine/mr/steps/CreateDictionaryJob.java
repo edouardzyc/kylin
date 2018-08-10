@@ -59,6 +59,7 @@ public class CreateDictionaryJob extends AbstractHadoopJob {
         options.addOption(OPTION_SEGMENT_ID);
         options.addOption(OPTION_INPUT_PATH);
         options.addOption(OPTION_DICT_PATH);
+        options.addOption(OPTION_CUBING_JOB_ID);
         parseOptions(options, args);
 
         final String cubeName = getOptionValue(OPTION_CUBE_NAME);
