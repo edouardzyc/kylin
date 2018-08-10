@@ -35,5 +35,6 @@
   ],
   "traceUrl": null,
   "server": null,
-  "suiteId": null
+  "suiteId": null,
+  "queryId": null
 }
