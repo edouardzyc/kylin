@@ -65,6 +65,7 @@ class testQuery(unittest.TestCase):
             del actual_result['sparderUsed']
             del actual_result['lateDecodeEnabled']
             del actual_result['timeout']
+            del actual_result['queryId']
 
             expect_result = json.loads(open(sql_file[:-4] + '.json').read().strip())
             self.assertEqual(actual_result, expect_result, 'Query result does not equal.')
@@ -118,6 +119,7 @@ class testQuery(unittest.TestCase):
             del actual_result['sparderUsed']
             del actual_result['lateDecodeEnabled']
             del actual_result['timeout']
+            del actual_result['queryId']
 
             expect_result = json.loads(open(sql_file[:-4] + '.json').read().strip())
             del expect_result['columnMetas']
