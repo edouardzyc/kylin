@@ -484,15 +484,11 @@ public class HiveMRInput implements IMRInput {
             if (StringUtils.isNotEmpty(oldHiveViewIntermediateTables)) {
                 final HiveCmdBuilder hiveCmdBuilder = new HiveCmdBuilder();
                 hiveCmdBuilder.addStatement("USE " + config.getHiveDatabaseForIntermediateTable() + ";");
-                hiveCmdBuilder.addStatement("DROP TABLE IF EXISTS ");
-                String tablesToDelete = "";
                 for (String oldHiveViewIntermediateTable : oldHiveViewIntermediateTables.split(";")) {
-                    tablesToDelete += (oldHiveViewIntermediateTable + ",");
+                    hiveCmdBuilder.addStatement("DROP TABLE IF EXISTS " + oldHiveViewIntermediateTable + ";");
                 }
-                tablesToDelete = tablesToDelete.substring(0, tablesToDelete.length() - 1);
-                hiveCmdBuilder.addStatement(tablesToDelete);
                 config.getCliCommandExecutor().execute(hiveCmdBuilder.build());
-                output.append("Hive table(s) " + tablesToDelete + " is dropped. \n");
+                output.append("Hive table(s) " + oldHiveViewIntermediateTables + " are dropped. \n");
             }
             return output.toString();
         }
