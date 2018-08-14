@@ -15,6 +15,6 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 --
-
-select seller_id, percentile(price, 0.5) from test_kylin_fact
+-- percentile's result is unstable, therefore round is added
+select seller_id, round(percentile(price, 0.5),0) from test_kylin_fact
 group by seller_id

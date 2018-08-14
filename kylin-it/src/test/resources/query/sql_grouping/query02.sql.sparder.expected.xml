@@ -8,623 +8,623 @@
     <column>TRANS_CNT</column>
     <row>
       <value>-10.2200</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>-10.6300</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>13</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>-11.4500</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>5</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>-135.2600</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>14</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>-15.1300</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>13</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>-15.1300</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>13</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>-16.0300</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>11</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>-16.0300</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>11</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>-17.6300</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>11</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>-18.2300</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>15</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>-19.3800</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>12</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>-21.1400</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>16</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>-21.1400</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>16</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>-229.1300</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>12</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>-24.7800</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>11</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>-27.1100</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>5</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>-27.1100</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>5</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>-28.0100</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>14</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>-29.4900</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>15</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>-29.5500</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>-29.8300</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>15</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>-34.5800</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>-99</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>-42.8500</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>12</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>-45.6100</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>5</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>-45.6100</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>5</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>-45.8500</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>16</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>-47.9400</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>5</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>-47.9800</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>12</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>-5.3500</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>15</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>-5.3500</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>15</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>-5.9500</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>14</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>-5.9500</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>14</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>-51.7000</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>11</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>-57.9100</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>12</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>-61.9500</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>5</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>-66.9500</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>14</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>-67.2200</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>13</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>-68.3100</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>14</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>-74.6600</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>-78.1900</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>12</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>-8.0100</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>15</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>-82.8700</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>13</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>-85.1600</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>-85.1800</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>-99</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>-85.1800</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>-99</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>-86.8700</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>12</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>-91.2600</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>15</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>-94.2800</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>12</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>-94.3200</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>15</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>1.5300</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>16</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>1.5300</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>16</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>10.2400</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>16</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>1000.8000</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>14</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>1004.7900</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>-99</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1007.6400</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>16</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1016.6900</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>5</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1024.3900</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>11</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1024.3900</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>11</value>
       <value>Others</value>
       <value>2</value>
     </row>
     <row>
       <value>1027.1100</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>12</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>103.1100</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>11</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>1033.5500</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>11</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>104.1200</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>16</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>104.1200</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>16</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>1045.5300</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>12</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1054.4300</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>16</value>
       <value>Auction</value>
       <value>2</value>
     </row>
     <row>
       <value>107.6600</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>5</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>1078.8300</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>16</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1078.8300</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>16</value>
       <value>FP-GTC</value>
       <value>2</value>
     </row>
     <row>
       <value>108.0900</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>14</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>108.2100</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>15</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>1082.7500</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>5</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1088.4000</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>-99</value>
       <value>Auction</value>
       <value>2</value>
     </row>
     <row>
       <value>1095.7000</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>11</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>11.4100</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>15</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>1106.5300</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>11</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1107.9700</value>
-      <value>1325635200</value>
+      <value>2012-01-04</value>
       <value>14</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1111.2900</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>13</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1124.2700</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>11</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1124.2700</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>1128.6000</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>1134.0200</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>5</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1136.2000</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>14</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1137.0800</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>12</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1146.9400</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>14</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1150.1000</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>5</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1152.9300</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>15</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>1159.0900</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>15</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1159.8300</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>14</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>116.0900</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>15</value>
       <value>FP-GTC</value>
       <value>1</value>
@@ -638,882 +638,882 @@
     </row>
     <row>
       <value>1162.3600</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>11</value>
       <value>Auction</value>
       <value>2</value>
     </row>
     <row>
       <value>1167.2400</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>5</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1167.5600</value>
-      <value>1325635200</value>
+      <value>2012-01-04</value>
       <value>5</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>117.2400</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>14</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>117.5300</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>14</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>118.9700</value>
-      <value>1326585600</value>
+      <value>2012-01-15</value>
       <value>16</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>1195.2600</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>14</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1196.5300</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>16</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1197.9000</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>-99</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1204.8000</value>
-      <value>1326585600</value>
+      <value>2012-01-15</value>
       <value>13</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1213.9000</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>-99</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1216.7100</value>
-      <value>1325635200</value>
+      <value>2012-01-04</value>
       <value>11</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1221.6300</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>14</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1234.6800</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>-99</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1238.9500</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>1254.0700</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>14</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>1254.0700</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>14</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1257.1700</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>12</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1257.1700</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>12</value>
       <value>FP-GTC</value>
       <value>2</value>
     </row>
     <row>
       <value>1288.4600</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>5</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1288.4600</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>5</value>
       <value>Others</value>
       <value>2</value>
     </row>
     <row>
       <value>1292.9600</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>12</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>1301.1700</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>16</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>131.7200</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>15</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>1337.0100</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>1338.9400</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>16</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1339.3300</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>12</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1343.1600</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>13</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>1343.1600</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>13</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1352.8200</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>13</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1353.8400</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>-99</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>1354.8100</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>-99</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1357.8700</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>16</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>136.5300</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>15</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>1386.6300</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>15</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1395.4100</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>-99</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>142.1000</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>16</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>1429.6400</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>11</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1439.3100</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>11</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1450.5100</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>13</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1457.9900</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>11</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1469.3100</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>-99</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>147.0600</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>1470.5600</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>16</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1481.1200</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>12</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>1494.8400</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>14</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>1495.0900</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>12</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>1499.3800</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>12</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>150.0900</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>13</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>1504.0600</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>16</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>151.0200</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>15</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>152.3000</value>
-      <value>1326585600</value>
+      <value>2012-01-15</value>
       <value>16</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>1523.6400</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>11</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>1529.0200</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>11</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>153.4000</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>13</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1536.5800</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>13</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>154.2600</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>-99</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>1546.5500</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>-99</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1548.4700</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>5</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1567.8900</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>11</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1584.2100</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>13</value>
       <value>FP-GTC</value>
       <value>2</value>
     </row>
     <row>
       <value>1584.7000</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>14</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1585.4000</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>15</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>159.7700</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>5</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>1590.9800</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>-99</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1593.7800</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>14</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1599.1400</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>16</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>160.1000</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>12</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>160.1000</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>12</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>160.1600</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>162.3600</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>11</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>162.3600</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>11</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>162.8300</value>
-      <value>1326585600</value>
+      <value>2012-01-15</value>
       <value>15</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>162.8300</value>
-      <value>1326585600</value>
+      <value>2012-01-15</value>
       <value>15</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>1630.9600</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>12</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>1641.5100</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>16</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1648.5900</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>5</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>1654.4300</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>15</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>1657.6200</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>13</value>
       <value>FP-GTC</value>
       <value>2</value>
     </row>
     <row>
       <value>168.5100</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>1680.9000</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>-99</value>
       <value>FP-GTC</value>
       <value>2</value>
     </row>
     <row>
       <value>1686.8200</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>5</value>
       <value>Others</value>
       <value>2</value>
     </row>
     <row>
       <value>1693.0700</value>
-      <value>1326585600</value>
+      <value>2012-01-15</value>
       <value>12</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>17.9600</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>15</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>17.9600</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>15</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>1702.9200</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>14</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1702.9200</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>14</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>1716.0300</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>13</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1719.6400</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>14</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1727.3200</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>12</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>174.4200</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>5</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>176.9800</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>13</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1764.5600</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>13</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>1772.1300</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>12</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1774.5200</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>13</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>1795.1500</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>5</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>3</value>
     </row>
     <row>
       <value>1795.2900</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>15</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1805.2000</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>16</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>1815.6400</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>15</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1815.6400</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>15</value>
       <value>Auction</value>
       <value>2</value>
     </row>
     <row>
       <value>182.5800</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>14</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>182.5800</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>14</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>189.4500</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>14</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>189.4500</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>14</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>1891.4600</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>13</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>1896.3300</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>11</value>
       <value>ALL</value>
       <value>5</value>
     </row>
     <row>
       <value>19.3000</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>15</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>190.3100</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>13</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>1914.7900</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>-99</value>
       <value>ALL</value>
       <value>5</value>
     </row>
     <row>
       <value>193.5800</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>14</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>1937.9900</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>12</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>194.1300</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>5</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>194.1300</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>5</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>197.9700</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>16</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>20.7900</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>-99</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>20.7900</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>-99</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>2000.7600</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>-99</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>202.1200</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>15</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>202.1200</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>15</value>
       <value>Auction</value>
       <value>2</value>
     </row>
     <row>
       <value>2055.7900</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>13</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>208.8300</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>14</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>21.7700</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>15</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>2125.1800</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>5</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>216.0400</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>5</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>2199.7200</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>12</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>221.2700</value>
-      <value>1326585600</value>
+      <value>2012-01-15</value>
       <value>13</value>
       <value>Auction</value>
       <value>1</value>
@@ -1527,350 +1527,350 @@
     </row>
     <row>
       <value>224.8000</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>14</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>2272.8800</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>15</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>228.6300</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>229.8200</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>23.6000</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>15</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>23.6000</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>15</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>230.7500</value>
-      <value>1325635200</value>
+      <value>2012-01-04</value>
       <value>11</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>2323.5500</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>13</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>233.1000</value>
-      <value>1325635200</value>
+      <value>2012-01-04</value>
       <value>15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>234.9500</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>2357.6100</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>11</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>236.5300</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>2365.0400</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>12</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>240.7600</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>16</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>244.1400</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>13</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>244.3900</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>2442.9100</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>5</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>2449.2700</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>12</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>25.0800</value>
-      <value>1325635200</value>
+      <value>2012-01-04</value>
       <value>15</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>25.6000</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>16</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>25.6000</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>16</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>251.8900</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>15</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>252.7300</value>
-      <value>1325635200</value>
+      <value>2012-01-04</value>
       <value>14</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>2525.4100</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>16</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>256.1900</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>15</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>256.1900</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>15</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>258.1800</value>
-      <value>1325635200</value>
+      <value>2012-01-04</value>
       <value>15</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>259.8500</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>260.1000</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>12</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>265.7800</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>13</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>271.5800</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>16</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>271.5800</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>16</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>275.3700</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>-99</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>276.0700</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>5</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>278.5300</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>15</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>28.8700</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>16</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>282.8200</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>-99</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>289.7600</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>13</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>289.7600</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>13</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>290.0700</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>11</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>290.5200</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>15</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>3.7700</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>14</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>301.6200</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>14</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>306.1800</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>-99</value>
       <value>Others</value>
       <value>2</value>
     </row>
     <row>
       <value>308.6600</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>12</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>308.6600</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>310.5700</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>13</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>310.5700</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>316.4500</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>5</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>316.6300</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
@@ -1884,14 +1884,14 @@
     </row>
     <row>
       <value>322.7300</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>12</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>322.7300</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
@@ -1905,63 +1905,63 @@
     </row>
     <row>
       <value>323.7700</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>13</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>3262.2700</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>5</value>
       <value>ALL</value>
       <value>5</value>
     </row>
     <row>
       <value>329.3900</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>11</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>329.8600</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>12</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>329.8600</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>33.2500</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>15</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>33.2500</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>15</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>331.2600</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>12</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>332.4100</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
@@ -1975,14 +1975,14 @@
     </row>
     <row>
       <value>34.9100</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>5</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>340.3400</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>16</value>
       <value>Auction</value>
       <value>1</value>
@@ -1996,14 +1996,14 @@
     </row>
     <row>
       <value>341.8500</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>15</value>
       <value>Auction</value>
       <value>2</value>
     </row>
     <row>
       <value>341.9600</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>13</value>
       <value>Others</value>
       <value>1</value>
@@ -2024,119 +2024,119 @@
     </row>
     <row>
       <value>348.5500</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>16</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>355.9600</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>12</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>356.1800</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>11</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>356.1800</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>11</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>361.8800</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>12</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>361.8800</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>12</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>365.1400</value>
-      <value>1326585600</value>
+      <value>2012-01-15</value>
       <value>12</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>373.4000</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>15</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>373.4000</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>15</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>374.0200</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>11</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>375.3400</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>12</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>378.1100</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>16</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>378.1100</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>16</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>382.2500</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>15</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>382.7400</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>16</value>
       <value>Auction</value>
       <value>2</value>
     </row>
     <row>
       <value>384.6600</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>14</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>384.6600</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>14</value>
       <value>ALL</value>
       <value>1</value>
@@ -2150,14 +2150,14 @@
     </row>
     <row>
       <value>387.7800</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>3890.1700</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>-99</value>
       <value>ALL</value>
       <value>5</value>
@@ -2178,7 +2178,7 @@
     </row>
     <row>
       <value>395.5700</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>15</value>
       <value>Auction</value>
       <value>1</value>
@@ -2192,7 +2192,7 @@
     </row>
     <row>
       <value>405.7700</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>14</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
@@ -2206,28 +2206,28 @@
     </row>
     <row>
       <value>408.9100</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>14</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>411.4900</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>5</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>416.8200</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>-99</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>424.5300</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
@@ -2241,42 +2241,42 @@
     </row>
     <row>
       <value>428.2500</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>432.3000</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>15</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>433.0600</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>433.8000</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>13</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>433.8000</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>433.8600</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>16</value>
       <value>Auction</value>
       <value>1</value>
@@ -2290,56 +2290,56 @@
     </row>
     <row>
       <value>437.3400</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>16</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>438.3600</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>5</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>439.8700</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>5</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>439.8700</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>5</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>440.7000</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>441.0200</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>441.9100</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>12</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>444.1700</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>13</value>
       <value>Others</value>
       <value>2</value>
@@ -2360,14 +2360,14 @@
     </row>
     <row>
       <value>453.6000</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>15</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>453.6000</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>15</value>
       <value>ALL</value>
       <value>1</value>
@@ -2381,14 +2381,14 @@
     </row>
     <row>
       <value>455.2800</value>
-      <value>1325635200</value>
+      <value>2012-01-04</value>
       <value>11</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>458.2800</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>-99</value>
       <value>Auction</value>
       <value>1</value>
@@ -2402,7 +2402,7 @@
     </row>
     <row>
       <value>459.6400</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>15</value>
       <value>Others</value>
       <value>1</value>
@@ -2423,91 +2423,91 @@
     </row>
     <row>
       <value>466.6800</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>-99</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>472.4000</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>476.6400</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>14</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>478.1300</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>13</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>478.9800</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>11</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>479.1700</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>12</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>483.3700</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>5</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>484.0700</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>14</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>487.8400</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>14</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>492.8500</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>5</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>492.8500</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>5</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>496.0500</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>11</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>496.7200</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>16</value>
       <value>Auction</value>
       <value>1</value>
@@ -2521,49 +2521,49 @@
     </row>
     <row>
       <value>5.8200</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>-99</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>500.0200</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>5</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>501.4000</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>15</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>501.4000</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>15</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>502.6000</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>16</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>503.7200</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>14</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>503.7200</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>14</value>
       <value>Auction</value>
       <value>1</value>
@@ -2577,7 +2577,7 @@
     </row>
     <row>
       <value>510.7900</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>-99</value>
       <value>ABIN</value>
       <value>1</value>
@@ -2591,49 +2591,49 @@
     </row>
     <row>
       <value>511.9500</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>16</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>515.8800</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>11</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>517.6700</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>11</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>518.3400</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>16</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>518.3400</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>16</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>525.1100</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>14</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>528.7200</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>11</value>
       <value>FP-GTC</value>
       <value>2</value>
@@ -2647,91 +2647,91 @@
     </row>
     <row>
       <value>530.6800</value>
-      <value>1325635200</value>
+      <value>2012-01-04</value>
       <value>11</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>538.6200</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>13</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>543.8100</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>13</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>545.7200</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>11</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>545.7200</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>11</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>545.7800</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>15</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>545.9500</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>16</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>546.3300</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>16</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>547.0200</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>15</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>547.0900</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>16</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>549.3800</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>14</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>55.6200</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>553.9000</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>11</value>
       <value>ABIN</value>
       <value>1</value>
@@ -2745,14 +2745,14 @@
     </row>
     <row>
       <value>555.0500</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>-99</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>555.3200</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>5</value>
       <value>Others</value>
       <value>2</value>
@@ -2766,70 +2766,70 @@
     </row>
     <row>
       <value>559.1900</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>11</value>
       <value>Others</value>
       <value>2</value>
     </row>
     <row>
       <value>56.9200</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>11</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>571.2900</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>16</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>577.3300</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>5</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>577.4500</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>-99</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>577.4500</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>-99</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>577.8300</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>579.7800</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>12</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>580.5400</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>5</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>580.7800</value>
-      <value>1325635200</value>
+      <value>2012-01-04</value>
       <value>5</value>
       <value>ABIN</value>
       <value>1</value>
@@ -2843,21 +2843,21 @@
     </row>
     <row>
       <value>581.5800</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>15</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>583.8400</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>-99</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>583.8400</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>-99</value>
       <value>Auction</value>
       <value>1</value>
@@ -2871,105 +2871,105 @@
     </row>
     <row>
       <value>586.7800</value>
-      <value>1325635200</value>
+      <value>2012-01-04</value>
       <value>5</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>587.9400</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>5</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>601.9500</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>14</value>
       <value>FP-GTC</value>
       <value>2</value>
     </row>
     <row>
       <value>603.2500</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>13</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>603.4500</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>-99</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>604.4700</value>
-      <value>1326585600</value>
+      <value>2012-01-15</value>
       <value>16</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>604.7200</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>-99</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>604.7300</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>12</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>604.7300</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>12</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>605.6000</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>14</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>607.0100</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>14</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>607.2000</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>14</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>607.2000</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>14</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>608.9800</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>13</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>609.9000</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>5</value>
       <value>Auction</value>
       <value>1</value>
@@ -2990,84 +2990,84 @@
     </row>
     <row>
       <value>619.1900</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>15</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>621.8300</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>14</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>622.0400</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>631.4700</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>14</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>631.4700</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>14</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>634.8800</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>12</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>635.8800</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>5</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>643.1200</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>12</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>643.2000</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>643.8300</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>12</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>645.8800</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>14</value>
       <value>Others</value>
       <value>2</value>
     </row>
     <row>
       <value>648.1100</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>13</value>
       <value>Others</value>
       <value>1</value>
@@ -3088,42 +3088,42 @@
     </row>
     <row>
       <value>658.8200</value>
-      <value>1326585600</value>
+      <value>2012-01-15</value>
       <value>12</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>659.0900</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>16</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>661.2400</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>-99</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>661.2400</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>-99</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>663.1800</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>13</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>665.9300</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>13</value>
       <value>Others</value>
       <value>1</value>
@@ -3137,98 +3137,98 @@
     </row>
     <row>
       <value>666.8300</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>11</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>667.3600</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>13</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>669.1100</value>
-      <value>1326585600</value>
+      <value>2012-01-15</value>
       <value>12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>673.3900</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>5</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>678.9700</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>15</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>682.0200</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>16</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>684.5600</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>16</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>685.2000</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>11</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>685.2000</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>11</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>686.8200</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>16</value>
       <value>Auction</value>
       <value>2</value>
     </row>
     <row>
       <value>687.1100</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>-99</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>688.3400</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>16</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>691.6600</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>11</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>691.6600</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>11</value>
       <value>Auction</value>
       <value>1</value>
@@ -3249,308 +3249,308 @@
     </row>
     <row>
       <value>692.0700</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>16</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>694.6900</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>16</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>695.1200</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>695.8500</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>12</value>
       <value>Others</value>
       <value>2</value>
     </row>
     <row>
       <value>697.0300</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>15</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>697.0300</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>15</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>697.2500</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>13</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>70.1800</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>-99</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>70.1800</value>
-      <value>1326412800</value>
+      <value>2012-01-13</value>
       <value>-99</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>704.4500</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>12</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>704.7100</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>13</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>706.4200</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>16</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>707.3300</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>5</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>707.4500</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>13</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>707.4500</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>13</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>710.4500</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>718.7500</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>11</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>720.6200</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>11</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>721.9700</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>-99</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>722.7600</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>5</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>726.4900</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>14</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>726.7800</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>-99</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>726.7800</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>-99</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>729.8600</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>-99</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>729.8600</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>-99</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>732.8400</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>16</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>734.0800</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>735.0400</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>16</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>735.0400</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>16</value>
       <value>FP-GTC</value>
       <value>2</value>
     </row>
     <row>
       <value>74.4400</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>13</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>743.7500</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>16</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>743.7500</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>16</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>745.8500</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>-99</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>745.8500</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>-99</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>748.0800</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>14</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>749.1700</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>11</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>750.5000</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>12</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>753.2100</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>15</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>755.7600</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>15</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>755.7600</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>15</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>761.7100</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>16</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>761.8000</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>13</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>762.0100</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>-99</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>762.0100</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>-99</value>
       <value>Auction</value>
       <value>1</value>
@@ -3564,476 +3564,476 @@
     </row>
     <row>
       <value>771.4500</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>-99</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>773.9500</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>11</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>775.1000</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>-99</value>
       <value>Auction</value>
       <value>2</value>
     </row>
     <row>
       <value>776.4000</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>-99</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>779.7200</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>14</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>779.7200</value>
-      <value>1326672000</value>
+      <value>2012-01-16</value>
       <value>14</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>78.7200</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>15</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>78.9600</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>13</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>783.0200</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>5</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>786.0000</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>16</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>79.8500</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>16</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>791.4500</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>13</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>798.7500</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>-99</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>798.7500</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>-99</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>800.6500</value>
-      <value>1327017600</value>
+      <value>2012-01-20</value>
       <value>5</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>802.2700</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>11</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>805.9100</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>5</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>806.6800</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>5</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>806.9300</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>12</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>806.9300</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>12</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>808.7100</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>13</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>809.6600</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>11</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>810.5800</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>12</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>812.7200</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>14</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>814.8500</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>15</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>816.8900</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>13</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>822.0400</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>16</value>
       <value>FP-GTC</value>
       <value>2</value>
     </row>
     <row>
       <value>825.7100</value>
-      <value>1326931200</value>
+      <value>2012-01-19</value>
       <value>5</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>83.1700</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>-99</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>83.1700</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>-99</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>833.6500</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>5</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>835.2400</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>11</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>835.2400</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>11</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>837.3100</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>14</value>
       <value>ALL</value>
       <value>3</value>
     </row>
     <row>
       <value>84.0900</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>14</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>841.7700</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>5</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>842.8700</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>11</value>
       <value>ALL</value>
       <value>5</value>
     </row>
     <row>
       <value>85.4200</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>11</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>85.4200</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>850.9000</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>-99</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>851.9200</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>12</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>851.9200</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>12</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>853.2200</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>5</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>853.3700</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>13</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>855.2400</value>
-      <value>1325635200</value>
+      <value>2012-01-04</value>
       <value>14</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>855.2700</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>16</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>855.4300</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>-99</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>856.2600</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>12</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>866.5900</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>5</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>867.8600</value>
-      <value>1328054400</value>
+      <value>2012-02-01</value>
       <value>5</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>872.5000</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>11</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>875.7400</value>
-      <value>1326585600</value>
+      <value>2012-01-15</value>
       <value>16</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>876.9800</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>12</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>880.2100</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>13</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>882.4100</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>14</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>884.1700</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>15</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>886.4100</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>5</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>886.4100</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>5</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>886.6500</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>15</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>889.7900</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>5</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>893.6100</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>16</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>898.0600</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>15</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>9.4700</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>11</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>901.2200</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>11</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>901.2200</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>11</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>907.0700</value>
-      <value>1327622400</value>
+      <value>2012-01-27</value>
       <value>16</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>909.2700</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>13</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>909.7600</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>13</value>
       <value>Auction</value>
       <value>1</value>
@@ -4047,105 +4047,105 @@
     </row>
     <row>
       <value>91.8800</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>5</value>
       <value>FP-GTC</value>
       <value>2</value>
     </row>
     <row>
       <value>910.9900</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>14</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>910.9900</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>14</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>911.5100</value>
-      <value>1326067200</value>
+      <value>2012-01-09</value>
       <value>5</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>912.3600</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>-99</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>914.2600</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>-99</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>916.5000</value>
-      <value>1325980800</value>
+      <value>2012-01-08</value>
       <value>13</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>918.4600</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>12</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>922.5300</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>11</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>922.5300</value>
-      <value>1326844800</value>
+      <value>2012-01-18</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>924.2000</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>11</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>924.5500</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>-99</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>924.5500</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>-99</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>925.3800</value>
-      <value>1325721600</value>
+      <value>2012-01-05</value>
       <value>16</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>928.7300</value>
-      <value>1326499200</value>
+      <value>2012-01-14</value>
       <value>-99</value>
       <value>FP-GTC</value>
       <value>1</value>
@@ -4159,21 +4159,21 @@
     </row>
     <row>
       <value>936.3200</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>15</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>2</value>
     </row>
     <row>
       <value>937.9900</value>
-      <value>1325548800</value>
+      <value>2012-01-03</value>
       <value>-99</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>938.5300</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>-99</value>
       <value>ABIN</value>
       <value>1</value>
@@ -4187,252 +4187,252 @@
     </row>
     <row>
       <value>942.6200</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>5</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>942.6200</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>5</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>943.2600</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>945.2100</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>13</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>947.3000</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>11</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>947.3000</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>11</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>950.6600</value>
-      <value>1327276800</value>
+      <value>2012-01-23</value>
       <value>11</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>951.0000</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>14</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>955.2200</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>15</value>
       <value>ALL</value>
       <value>4</value>
     </row>
     <row>
       <value>955.9200</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>-99</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>956.2000</value>
-      <value>1327536000</value>
+      <value>2012-01-26</value>
       <value>16</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>957.5000</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>15</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>959.9600</value>
-      <value>1325462400</value>
+      <value>2012-01-02</value>
       <value>13</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>960.3700</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>15</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>963.3600</value>
-      <value>1326758400</value>
+      <value>2012-01-17</value>
       <value>15</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>968.1500</value>
-      <value>1327968000</value>
+      <value>2012-01-31</value>
       <value>12</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>970.1600</value>
-      <value>1325894400</value>
+      <value>2012-01-07</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>980.1000</value>
-      <value>1327104000</value>
+      <value>2012-01-21</value>
       <value>15</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>980.1900</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>16</value>
       <value>ALL</value>
       <value>2</value>
     </row>
     <row>
       <value>980.4400</value>
-      <value>1325376000</value>
+      <value>2012-01-01</value>
       <value>15</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>980.4400</value>
-      <value>1327708800</value>
+      <value>2012-01-28</value>
       <value>-99</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>982.1900</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>13</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>982.7500</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>14</value>
       <value>Others</value>
       <value>1</value>
     </row>
     <row>
       <value>983.5300</value>
-      <value>1326585600</value>
+      <value>2012-01-15</value>
       <value>13</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>986.5000</value>
-      <value>1327190400</value>
+      <value>2012-01-22</value>
       <value>5</value>
       <value>Others</value>
       <value>2</value>
     </row>
     <row>
       <value>986.7700</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>14</value>
       <value>Auction</value>
       <value>2</value>
     </row>
     <row>
       <value>987.6800</value>
-      <value>1327881600</value>
+      <value>2012-01-30</value>
       <value>15</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>990.0600</value>
-      <value>1326153600</value>
+      <value>2012-01-10</value>
       <value>11</value>
       <value>FP-GTC</value>
       <value>2</value>
     </row>
     <row>
       <value>990.5000</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>-99</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>992.5900</value>
-      <value>1326326400</value>
+      <value>2012-01-12</value>
       <value>11</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
     </row>
     <row>
       <value>992.7700</value>
-      <value>1327363200</value>
+      <value>2012-01-24</value>
       <value>13</value>
       <value>ABIN</value>
       <value>2</value>
     </row>
     <row>
       <value>992.8200</value>
-      <value>1327795200</value>
+      <value>2012-01-29</value>
       <value>5</value>
       <value>FP-GTC</value>
       <value>1</value>
     </row>
     <row>
       <value>996.6500</value>
-      <value>1326240000</value>
+      <value>2012-01-11</value>
       <value>12</value>
       <value>ABIN</value>
       <value>1</value>
     </row>
     <row>
       <value>997.5600</value>
-      <value>1325808000</value>
+      <value>2012-01-06</value>
       <value>12</value>
       <value>Auction</value>
       <value>1</value>
     </row>
     <row>
       <value>998.3700</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>16</value>
       <value>ALL</value>
       <value>1</value>
     </row>
     <row>
       <value>998.3700</value>
-      <value>1327449600</value>
+      <value>2012-01-25</value>
       <value>16</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1</value>
