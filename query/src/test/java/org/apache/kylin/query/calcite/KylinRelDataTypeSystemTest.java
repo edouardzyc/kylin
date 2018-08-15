@@ -61,6 +61,24 @@ public class KylinRelDataTypeSystemTest extends LocalFileMetadataTestCase {
     }
 
     @Test
+    public void testSqlType() {
+        RelDataTypeSystem typeSystem = new KylinRelDataTypeSystem();
+        RelDataTypeFactory typeFactory = new SqlTypeFactoryImpl(typeSystem);
+        Assert.assertEquals("DECIMAL(19, 4)", OLAPTable.createSqlType(typeFactory, DataType.getType("DECIMAL"), true).toString());
+        Assert.assertEquals("CHAR(255)", OLAPTable.createSqlType(typeFactory, DataType.getType("CHAR"), true).toString());
+        Assert.assertEquals("VARCHAR(256)", OLAPTable.createSqlType(typeFactory, DataType.getType("VARCHAR"), true).toString());
+        Assert.assertEquals("INTEGER", OLAPTable.createSqlType(typeFactory, DataType.getType("INTEGER"), true).toString());
+        Assert.assertEquals("TINYINT", OLAPTable.createSqlType(typeFactory, DataType.getType("TINYINT"), true).toString());
+        Assert.assertEquals("SMALLINT", OLAPTable.createSqlType(typeFactory, DataType.getType("SMALLINT"), true).toString());
+        Assert.assertEquals("BIGINT", OLAPTable.createSqlType(typeFactory, DataType.getType("BIGINT"), true).toString());
+        Assert.assertEquals("FLOAT", OLAPTable.createSqlType(typeFactory, DataType.getType("FLOAT"), true).toString());
+        Assert.assertEquals("DOUBLE", OLAPTable.createSqlType(typeFactory, DataType.getType("DOUBLE"), true).toString());
+        Assert.assertEquals("DATE", OLAPTable.createSqlType(typeFactory, DataType.getType("DATE"), true).toString());
+        Assert.assertEquals("TIMESTAMP(0)", OLAPTable.createSqlType(typeFactory, DataType.getType("TIMESTAMP"), true).toString());
+        Assert.assertEquals("BOOLEAN", OLAPTable.createSqlType(typeFactory, DataType.getType("BOOLEAN"), true).toString());
+    }
+
+    @Test
     public void testIllegalDecimalType() {
         RelDataTypeSystem typeSystem = new KylinRelDataTypeSystem();
         RelDataTypeFactory typeFactory = new SqlTypeFactoryImpl(typeSystem);
