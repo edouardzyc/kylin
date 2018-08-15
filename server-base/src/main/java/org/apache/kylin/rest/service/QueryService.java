@@ -47,7 +47,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import com.google.common.base.Throwables;
 import org.apache.calcite.avatica.ColumnMetaData.Rep;
 import org.apache.calcite.config.CalciteConnectionConfig;
 import org.apache.calcite.jdbc.CalcitePrepare;
