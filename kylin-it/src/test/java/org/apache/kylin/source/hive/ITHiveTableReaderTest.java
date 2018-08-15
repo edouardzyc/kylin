@@ -20,8 +20,13 @@ package org.apache.kylin.source.hive;
 
 import java.io.IOException;
 
+import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.HBaseMetadataTestCase;
+import org.apache.kylin.metadata.TableMetadataManager;
+import org.apache.kylin.metadata.model.ColumnDesc;
+import org.apache.kylin.metadata.model.TableDesc;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -32,13 +37,24 @@ import org.junit.Test;
  */
 public class ITHiveTableReaderTest extends HBaseMetadataTestCase {
 
+    private ColumnDesc[] findColumnDescs() {
+        TableMetadataManager tableMetadataManager = TableMetadataManager.getInstance(KylinConfig.getInstanceFromEnv());
+        TableDesc tableDesc = tableMetadataManager.getTableDesc("TEST_KYLIN_FACT", "");
+        return tableDesc.getColumns();
+    }
+
+    @Before
+    public void setup() throws Exception {
+        super.createTestMetadata();
+    }
+
     @Test
     public void test() throws IOException {
         HiveTableReader reader = new HiveTableReader("default", "test_kylin_fact");
         int rowNumber = 0;
         while (reader.next()) {
             String[] row = reader.getRow();
-            Assert.assertEquals(11, row.length);
+            Assert.assertEquals(findColumnDescs().length, row.length);
             //System.out.println(ArrayUtils.toString(row));
             rowNumber++;
         }

@@ -24,8 +24,11 @@ import java.sql.SQLException;
 
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.LocalFileMetadataTestCase;
+import org.apache.kylin.metadata.TableMetadataManager;
+import org.apache.kylin.metadata.model.ColumnDesc;
 import org.apache.kylin.metadata.model.DataModelManager;
 import org.apache.kylin.metadata.model.ISourceAware;
+import org.apache.kylin.metadata.model.TableDesc;
 import org.apache.kylin.metadata.project.ProjectInstance;
 import org.apache.kylin.source.H2Database;
 import org.apache.kylin.source.datagen.ModelDataGenerator;
@@ -38,6 +41,12 @@ public class ITJdbcTableReaderTest extends LocalFileMetadataTestCase implements 
 
     protected KylinConfig config = null;
     protected static Connection h2Connection = null;
+
+    private ColumnDesc[] findColumnDescs() {
+        TableMetadataManager tableMetadataManager = TableMetadataManager.getInstance(KylinConfig.getInstanceFromEnv());
+        TableDesc tableDesc = tableMetadataManager.getTableDesc("TEST_KYLIN_FACT", "");
+        return tableDesc.getColumns();
+    }
 
     @Before
     public void setup() throws Exception {
@@ -91,7 +100,7 @@ public class ITJdbcTableReaderTest extends LocalFileMetadataTestCase implements 
         int rowNumber = 0;
         while (reader.next()) {
             String[] row = reader.getRow();
-            Assert.assertEquals(11, row.length);
+            Assert.assertEquals(findColumnDescs().length, row.length);
 
             rowNumber++;
         }
