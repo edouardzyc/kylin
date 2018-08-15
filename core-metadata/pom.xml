@@ -113,7 +113,13 @@
             <artifactId>commons-math3</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+            <!--MRUnit relies on older version of mockito, so cannot manage it globally-->
+            <version>${mockito.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.github.jbellis</groupId>
             <artifactId>jamm</artifactId>

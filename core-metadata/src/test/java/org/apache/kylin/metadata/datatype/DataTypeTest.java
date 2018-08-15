@@ -18,10 +18,28 @@
 
 package org.apache.kylin.metadata.datatype;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import org.apache.kylin.common.KylinConfig;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class DataTypeTest {
+    @Test
+    public void testStringFamily() {
+        KylinConfig config = mock(KylinConfig.class);
+
+        try (KylinConfig.SetAndUnsetThreadLocalConfig setAndUnset = KylinConfig.setAndUnsetThreadLocalConfig(config);) {
+            when(config.getDefaultVarcharPrecision()).thenReturn(100);
+            Assert.assertEquals(DataType.getType("varchar(100)"), DataType.getType("string"));
+            Assert.assertEquals(DataType.getType("varchar(100)"), DataType.getType("varchar"));
+
+            when(config.getDefaultVarcharPrecision()).thenReturn(200);
+            Assert.assertEquals(DataType.getType("varchar(200)"), DataType.getType("string"));
+            Assert.assertEquals(DataType.getType("varchar(200)"), DataType.getType("varchar"));
+        }
+    }
 
     @Test
     public void testComplexType() {
