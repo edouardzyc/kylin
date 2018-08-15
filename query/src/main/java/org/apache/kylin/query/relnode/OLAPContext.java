@@ -130,6 +130,7 @@ public class OLAPContext {
     public boolean limitPrecedesAggr = false;
     public boolean afterTopJoin = false;
     public boolean hasJoin = false;
+    public boolean hasPreCalcJoin = false;
     public boolean hasAgg = false;
     public boolean hasWindow = false;
     public boolean metProject = false;
