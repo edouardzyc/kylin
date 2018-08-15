@@ -245,13 +245,13 @@ public class JobService extends BasicService implements InitializingBean {
                 SourcePartition src = new SourcePartition(tsRange, segRange, sourcePartitionOffsetStart,
                         sourcePartitionOffsetEnd);
                 src = source.enrichSourcePartitionBeforeBuild(cube, src);
-                newSeg = getCubeManager().appendSegment(cube, src);
+                newSeg = getCubeManager().appendSegment(cube, src, segAddInfo);
                 job = EngineFactory.createBatchCubingJob(newSeg, submitter);
             } else if (buildType == CubeBuildTypeEnum.MERGE) {
-                newSeg = getCubeManager().mergeSegments(cube, tsRange, segRange, force);
+                newSeg = getCubeManager().mergeSegments(cube, tsRange, segRange, segAddInfo, force);
                 job = EngineFactory.createBatchMergeJob(newSeg, submitter);
             } else if (buildType == CubeBuildTypeEnum.REFRESH) {
-                newSeg = getCubeManager().refreshSegment(cube, tsRange, segRange);
+                newSeg = getCubeManager().refreshSegment(cube, tsRange, segRange, segAddInfo);
                 job = EngineFactory.createBatchCubingJob(newSeg, submitter);
             } else {
                 throw new BadRequestException(String.format(msg.getINVALID_BUILD_TYPE(), buildType));

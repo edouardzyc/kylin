@@ -94,7 +94,7 @@ public class CubeSegmentsTest extends LocalFileMetadataTestCase {
 
         // non-partitioned cannot merge, throw exception
         try {
-            mgr.mergeSegments(cube, null, new SegmentRange(0L, Long.MAX_VALUE), false);
+            mgr.mergeSegments(cube, null, new SegmentRange(0L, Long.MAX_VALUE), null, false);
             fail();
         } catch (IllegalStateException ex) {
             // good
@@ -124,7 +124,7 @@ public class CubeSegmentsTest extends LocalFileMetadataTestCase {
         assertEquals(SegmentStatusEnum.READY, cube.getSegments().get(1).getStatus()); // newer version of seg2
 
         // merge first and second
-        CubeSegment merge = mgr.mergeSegments(cube, new TSRange(0L, 2000L), null, true);
+        CubeSegment merge = mgr.mergeSegments(cube, new TSRange(0L, 2000L), null, null, true);
         assertEquals(2, cube.getSegments().size()); // older version of cube
 
         cube = mgr.getCube(cube.getName()); // get the newer version of cube
@@ -143,13 +143,13 @@ public class CubeSegmentsTest extends LocalFileMetadataTestCase {
 
         // try merge at start/end at middle of segments
         try {
-            mgr.mergeSegments(cube, new TSRange(500L, 2500L), null, true);
+            mgr.mergeSegments(cube, new TSRange(500L, 2500L), null, null, true);
             fail();
         } catch (IllegalArgumentException ex) {
             // good
         }
 
-        CubeSegment merge2 = mgr.mergeSegments(cube, new TSRange(0L, 2500L), null, true);
+        CubeSegment merge2 = mgr.mergeSegments(cube, new TSRange(0L, 2500L), null, null, true);
         cube = mgr.getCube(cube.getName()); // get the newer version of cube
         assertEquals(3, cube.getSegments().size());
         assertEquals(new TSRange(0L, 2000L), merge2.getTSRange());

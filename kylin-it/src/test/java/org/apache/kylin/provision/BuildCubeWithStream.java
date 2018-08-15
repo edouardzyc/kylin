@@ -265,7 +265,7 @@ public class BuildCubeWithStream {
     }
 
     private ExecutableState mergeSegment(String cubeName, SegmentRange segRange) throws Exception {
-        CubeSegment segment = cubeManager.mergeSegments(cubeManager.getCube(cubeName), null, segRange, false);
+        CubeSegment segment = cubeManager.mergeSegments(cubeManager.getCube(cubeName), null, segRange, null, false);
         DefaultChainedExecutable job = EngineFactory.createBatchMergeJob(segment, "TEST");
         jobService.addJob(job);
         waitForJob(job.getId());
@@ -273,7 +273,7 @@ public class BuildCubeWithStream {
     }
 
     private String refreshSegment(String cubeName, SegmentRange segRange) throws Exception {
-        CubeSegment segment = cubeManager.refreshSegment(cubeManager.getCube(cubeName), null, segRange);
+        CubeSegment segment = cubeManager.refreshSegment(cubeManager.getCube(cubeName), null, segRange, null);
         DefaultChainedExecutable job = EngineFactory.createBatchCubingJob(segment, "TEST");
         jobService.addJob(job);
         waitForJob(job.getId());
@@ -285,7 +285,7 @@ public class BuildCubeWithStream {
         ISource source = SourceManager.getSource(cubeInstance);
         SourcePartition partition = source.enrichSourcePartitionBeforeBuild(cubeInstance,
                 new SourcePartition(null, new SegmentRange(startOffset, endOffset), null, null));
-        CubeSegment segment = cubeManager.appendSegment(cubeManager.getCube(cubeName), partition);
+        CubeSegment segment = cubeManager.appendSegment(cubeManager.getCube(cubeName), partition, null);
         DefaultChainedExecutable job = EngineFactory.createBatchCubingJob(segment, "TEST");
         jobService.addJob(job);
         waitForJob(job.getId());

@@ -109,10 +109,10 @@ public class CubeManagerTest extends LocalFileMetadataTestCase {
         assertEquals(0, cube.getSegments().size());
 
         // append first
-        CubeSegment seg1 = mgr.appendSegment(cube, new TSRange(0L, 1000L), null, null, null);
+        CubeSegment seg1 = mgr.appendSegment(cube, new TSRange(0L, 1000L), null, null, null, null);
         mgr.updateCubeSegStatus(seg1, SegmentStatusEnum.READY);
 
-        CubeSegment seg2 = mgr.appendSegment(cube, new TSRange(1000L, 2000L), null, null, null);
+        CubeSegment seg2 = mgr.appendSegment(cube, new TSRange(1000L, 2000L), null, null, null, null);
         mgr.updateCubeSegStatus(seg2, SegmentStatusEnum.READY);
 
         cube = mgr.getCube(cube.getName());
@@ -143,16 +143,16 @@ public class CubeManagerTest extends LocalFileMetadataTestCase {
         m4.put(1, 4000L);
 
         // append first
-        CubeSegment seg1 = mgr.appendSegment(cube, null, new SegmentRange(0L, 1000L), null, m1);
+        CubeSegment seg1 = mgr.appendSegment(cube, null, new SegmentRange(0L, 1000L), null, m1, null);
         mgr.updateCubeSegStatus(seg1, SegmentStatusEnum.READY);
 
-        CubeSegment seg2 = mgr.appendSegment(cube, null, new SegmentRange(1000L, 2000L), m1, m2);
+        CubeSegment seg2 = mgr.appendSegment(cube, null, new SegmentRange(1000L, 2000L), m1, m2, null);
         mgr.updateCubeSegStatus(seg2, SegmentStatusEnum.READY);
 
-        CubeSegment seg3 = mgr.mergeSegments(cube, null, new SegmentRange(0L, 2000L), true);
+        CubeSegment seg3 = mgr.mergeSegments(cube, null, new SegmentRange(0L, 2000L), null, true);
         //seg3.setStatus(SegmentStatusEnum.NEW);
 
-        CubeSegment seg4 = mgr.appendSegment(cube, null, new SegmentRange(2000L, 3000L), m2, m3);
+        CubeSegment seg4 = mgr.appendSegment(cube, null, new SegmentRange(2000L, 3000L), m2, m3, null);
         seg4.setStatus(SegmentStatusEnum.NEW);
         seg4.setLastBuildJobID("test");
         seg4.setStorageLocationIdentifier("test");
@@ -160,7 +160,7 @@ public class CubeManagerTest extends LocalFileMetadataTestCase {
         update.setToUpdateSegs(seg4);
         mgr.updateCube(update);
 
-        CubeSegment seg5 = mgr.appendSegment(cube, null, new SegmentRange(3000L, 4000L), m3, m4);
+        CubeSegment seg5 = mgr.appendSegment(cube, null, new SegmentRange(3000L, 4000L), m3, m4, null);
         mgr.updateCubeSegStatus(seg5, SegmentStatusEnum.READY);
 
         mgr.promoteNewlyBuiltSegments(cube, seg4);
@@ -199,27 +199,27 @@ public class CubeManagerTest extends LocalFileMetadataTestCase {
         m4.put(1, 4000L);
 
         // append first
-        CubeSegment seg1 = mgr.appendSegment(cube, null, new SegmentRange(0L, 1000L), null, m1);
+        CubeSegment seg1 = mgr.appendSegment(cube, null, new SegmentRange(0L, 1000L), null, m1, null);
         mgr.updateCubeSegStatus(seg1, SegmentStatusEnum.READY);
 
-        CubeSegment seg2 = mgr.appendSegment(cube, null, new SegmentRange(1000L, 2000L), m1, m2);
+        CubeSegment seg2 = mgr.appendSegment(cube, null, new SegmentRange(1000L, 2000L), m1, m2, null);
         mgr.updateCubeSegStatus(seg2, SegmentStatusEnum.READY);
 
-        CubeSegment seg3 = mgr.appendSegment(cube, null, new SegmentRange(2000L, 3000L), m2, m3);
+        CubeSegment seg3 = mgr.appendSegment(cube, null, new SegmentRange(2000L, 3000L), m2, m3, null);
         mgr.updateCubeSegStatus(seg3, SegmentStatusEnum.READY);
 
-        CubeSegment seg4 = mgr.appendSegment(cube, null, new SegmentRange(3000L, 4000L), m3, m4);
+        CubeSegment seg4 = mgr.appendSegment(cube, null, new SegmentRange(3000L, 4000L), m3, m4, null);
         mgr.updateCubeSegStatus(seg4, SegmentStatusEnum.READY);
 
         cube = mgr.getCube(cube.getName());
         assertTrue(cube.getSegments().size() == 4);
         
-        CubeSegment merge1 = mgr.mergeSegments(cube, null, new SegmentRange(0L, 2000L), true);
+        CubeSegment merge1 = mgr.mergeSegments(cube, null, new SegmentRange(0L, 2000L), null, true);
         merge1.setStatus(SegmentStatusEnum.NEW);
         merge1.setLastBuildJobID("test");
         merge1.setStorageLocationIdentifier("test");
 
-        CubeSegment merge2 = mgr.mergeSegments(cube, null, new SegmentRange(2000L, 4000L), true);
+        CubeSegment merge2 = mgr.mergeSegments(cube, null, new SegmentRange(2000L, 4000L), null, true);
         merge2.setStatus(SegmentStatusEnum.NEW);
         merge2.setLastBuildJobID("test");
         merge2.setStorageLocationIdentifier("test");
@@ -419,13 +419,13 @@ public class CubeManagerTest extends LocalFileMetadataTestCase {
         CubeInstance cube = cubeManager.getCube("test_kylin_cube_with_slr_empty");
         cube.getDescriptor().setPartitionDateStart(PARTITION_DATE_START);
 
-        CubeSegment segment = cubeManager.appendSegment(cube, new TSRange(0L, FIRST_BUILD_DATE_END), null, null, null);
+        CubeSegment segment = cubeManager.appendSegment(cube, new TSRange(0L, FIRST_BUILD_DATE_END), null, null, null, null);
         assertEquals(segment._getDateRangeStart(), PARTITION_DATE_START.longValue());
         assertEquals(segment._getDateRangeEnd(), FIRST_BUILD_DATE_END.longValue());
 
         cubeManager.updateCubeSegStatus(segment, SegmentStatusEnum.READY);
 
-        segment = cubeManager.appendSegment(cube, new TSRange(0L, SECOND_BUILD_DATE_END), null, null, null);
+        segment = cubeManager.appendSegment(cube, new TSRange(0L, SECOND_BUILD_DATE_END), null, null, null, null);
         assertEquals(segment._getDateRangeStart(), FIRST_BUILD_DATE_END.longValue());
         assertEquals(segment._getDateRangeEnd(), SECOND_BUILD_DATE_END.longValue());
     }
@@ -442,13 +442,13 @@ public class CubeManagerTest extends LocalFileMetadataTestCase {
         assertEquals(0, cube.getSegments().size());
 
         // append first
-        CubeSegment seg1 = mgr.appendSegment(cube, null, new SegmentRange(1000L, 1001L), null, null);
+        CubeSegment seg1 = mgr.appendSegment(cube, null, new SegmentRange(1000L, 1001L), null, null, null);
         mgr.updateCubeSegStatus(seg1, SegmentStatusEnum.READY);
 
         List<SegmentRange> canMergedSegs = cube.getSegments().mergeConsecutiveSegmentsByFiles();
         assertTrue(canMergedSegs.size() == 0);
 
-        CubeSegment seg2 = mgr.appendSegment(cube, null, new SegmentRange(1001L, 1002L), null, null);
+        CubeSegment seg2 = mgr.appendSegment(cube, null, new SegmentRange(1001L, 1002L), null, null, null);
         mgr.updateCubeSegStatus(seg2, SegmentStatusEnum.READY);
 
         cube = mgr.getCube(cube.getName());
@@ -457,7 +457,7 @@ public class CubeManagerTest extends LocalFileMetadataTestCase {
         assertEquals(new SegmentRange(1000L, 1002L), canMergedSegs.get(0));
 
 
-        CubeSegment seg3 = mgr.appendSegment(cube, null, new SegmentRange(2000L, 2001L), null, null);
+        CubeSegment seg3 = mgr.appendSegment(cube, null, new SegmentRange(2000L, 2001L), null, null, null);
         mgr.updateCubeSegStatus(seg3, SegmentStatusEnum.READY);
 
         cube = mgr.getCube(cube.getName());
@@ -466,7 +466,7 @@ public class CubeManagerTest extends LocalFileMetadataTestCase {
         assertEquals(new SegmentRange(1000L, 1002L), canMergedSegs.get(0));
 
 
-        CubeSegment seg4 = mgr.appendSegment(cube, null, new SegmentRange(2001L, 2002L), null, null);
+        CubeSegment seg4 = mgr.appendSegment(cube, null, new SegmentRange(2001L, 2002L), null, null, null);
         mgr.updateCubeSegStatus(seg4, SegmentStatusEnum.READY);
 
         cube = mgr.getCube(cube.getName());
@@ -475,7 +475,7 @@ public class CubeManagerTest extends LocalFileMetadataTestCase {
         assertEquals(new SegmentRange(2000L, 2002L), canMergedSegs.get(1));
 
 
-        CubeSegment seg5 = mgr.appendSegment(cube, null, new SegmentRange(2002L, 3000L), null, null);
+        CubeSegment seg5 = mgr.appendSegment(cube, null, new SegmentRange(2002L, 3000L), null, null, null);
         mgr.updateCubeSegStatus(seg5, SegmentStatusEnum.READY);
 
         cube = mgr.getCube(cube.getName());
@@ -483,7 +483,7 @@ public class CubeManagerTest extends LocalFileMetadataTestCase {
         assertTrue(canMergedSegs.size() == 2);
         assertEquals(new SegmentRange(2000L, 3000L), canMergedSegs.get(1));
 
-        CubeSegment seg6 = mgr.appendSegment(cube, null, new SegmentRange(3000L, 3001L), null, null);
+        CubeSegment seg6 = mgr.appendSegment(cube, null, new SegmentRange(3000L, 3001L), null, null, null);
         mgr.updateCubeSegStatus(seg5, SegmentStatusEnum.READY);
 
         cube = mgr.getCube(cube.getName());

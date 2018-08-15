@@ -373,7 +373,7 @@ public class BuildCubeWithEngine {
     }
 
     private Boolean mergeSegment(String cubeName, long startDate, long endDate) throws Exception {
-        CubeSegment segment = cubeManager.mergeSegments(cubeManager.getCube(cubeName), new TSRange(startDate, endDate), null, true);
+        CubeSegment segment = cubeManager.mergeSegments(cubeManager.getCube(cubeName), new TSRange(startDate, endDate), null, null, true);
         DefaultChainedExecutable job = EngineFactory.createBatchMergeJob(segment, "TEST");
         jobService.addJob(job);
         ExecutableState state = waitForJob(job.getId());

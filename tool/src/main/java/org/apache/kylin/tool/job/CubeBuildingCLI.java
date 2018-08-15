@@ -109,10 +109,10 @@ public class CubeBuildingCLI extends AbstractApplication {
             CubeSegment newSeg = cubeManager.appendSegment(cube, tsRange);
             job = EngineFactory.createBatchCubingJob(newSeg, submitter);
         } else if (buildType == CubeBuildTypeEnum.MERGE) {
-            CubeSegment newSeg = cubeManager.mergeSegments(cube, tsRange, null, forceMergeEmptySeg);
+            CubeSegment newSeg = cubeManager.mergeSegments(cube, tsRange, null, null, forceMergeEmptySeg);
             job = EngineFactory.createBatchMergeJob(newSeg, submitter);
         } else if (buildType == CubeBuildTypeEnum.REFRESH) {
-            CubeSegment refreshSeg = cubeManager.refreshSegment(cube, tsRange, null);
+            CubeSegment refreshSeg = cubeManager.refreshSegment(cube, tsRange, null, null);
             job = EngineFactory.createBatchCubingJob(refreshSeg, submitter);
         } else {
             throw new JobException("invalid build type:" + buildType);

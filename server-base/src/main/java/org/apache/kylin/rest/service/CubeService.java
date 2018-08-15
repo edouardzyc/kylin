@@ -578,7 +578,7 @@ public class CubeService extends BasicService implements InitializingBean {
                 cube = getCubeManager().getCube(cubeName);
                 SegmentRange offsets = cube.autoMergeCubeSegments();
                 if (offsets != null) {
-                    CubeSegment newSeg = getCubeManager().mergeSegments(cube, null, offsets, true);
+                    CubeSegment newSeg = getCubeManager().mergeSegments(cube, null, offsets, null, true);
                     logger.debug("Will submit merge job on " + newSeg);
                     DefaultChainedExecutable job = EngineFactory.createBatchMergeJob(newSeg, "SYSTEM");
                     getExecutableManager().addJob(job);

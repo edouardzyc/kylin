@@ -503,30 +503,30 @@ public class CubeManager implements IRealizationProvider {
 
     // append a full build segment
     public CubeSegment appendSegment(CubeInstance cube) throws IOException {
-        return appendSegment(cube, null, null, null, null);
+        return appendSegment(cube, null, null, null, null, null);
     }
 
     public CubeSegment appendSegment(CubeInstance cube, TSRange tsRange) throws IOException {
-        return appendSegment(cube, tsRange, null, null, null);
+        return appendSegment(cube, tsRange, null, null, null, null);
     }
 
-    public CubeSegment appendSegment(CubeInstance cube, SourcePartition src) throws IOException {
+    public CubeSegment appendSegment(CubeInstance cube, SourcePartition src, Map<String, String> segAddInfo) throws IOException {
         return appendSegment(cube, src.getTSRange(), src.getSegRange(), src.getSourcePartitionOffsetStart(),
-                src.getSourcePartitionOffsetEnd());
+                src.getSourcePartitionOffsetEnd(), segAddInfo);
     }
 
     CubeSegment appendSegment(CubeInstance cube, TSRange tsRange, SegmentRange segRange,
-            Map<Integer, Long> sourcePartitionOffsetStart, Map<Integer, Long> sourcePartitionOffsetEnd)
+            Map<Integer, Long> sourcePartitionOffsetStart, Map<Integer, Long> sourcePartitionOffsetEnd, Map<String, String> segAddInfo)
             throws IOException {
         try (AutoLock lock = cubeMapLock.lockForWrite()) {
             return segAssist.appendSegment(cube, tsRange, segRange, sourcePartitionOffsetStart,
-                    sourcePartitionOffsetEnd);
+                    sourcePartitionOffsetEnd, segAddInfo);
         }
     }
 
-    public CubeSegment refreshSegment(CubeInstance cube, TSRange tsRange, SegmentRange segRange) throws IOException {
+    public CubeSegment refreshSegment(CubeInstance cube, TSRange tsRange, SegmentRange segRange, Map<String, String> segAddInfo) throws IOException {
         try (AutoLock lock = cubeMapLock.lockForWrite()) {
-            return segAssist.refreshSegment(cube, tsRange, segRange);
+            return segAssist.refreshSegment(cube, tsRange, segRange, segAddInfo);
         }
     }
 
@@ -536,10 +536,10 @@ public class CubeManager implements IRealizationProvider {
         }
     }
 
-    public CubeSegment mergeSegments(CubeInstance cube, TSRange tsRange, SegmentRange segRange, boolean force)
+    public CubeSegment mergeSegments(CubeInstance cube, TSRange tsRange, SegmentRange segRange, Map<String, String> segAddInfo, boolean force)
             throws IOException {
         try (AutoLock lock = cubeMapLock.lockForWrite()) {
-            return segAssist.mergeSegments(cube, tsRange, segRange, force);
+            return segAssist.mergeSegments(cube, tsRange, segRange, segAddInfo, force);
         }
     }
 
@@ -569,7 +569,7 @@ public class CubeManager implements IRealizationProvider {
     private class SegmentAssist {
 
         CubeSegment appendSegment(CubeInstance cube, TSRange tsRange, SegmentRange segRange,
-                Map<Integer, Long> sourcePartitionOffsetStart, Map<Integer, Long> sourcePartitionOffsetEnd)
+                Map<Integer, Long> sourcePartitionOffsetStart, Map<Integer, Long> sourcePartitionOffsetEnd, Map<String, String> segAddInfo)
                 throws IOException {
             CubeInstance cubeCopy = cube.latestCopyForWrite(); // get a latest copy
 
@@ -596,6 +596,9 @@ public class CubeManager implements IRealizationProvider {
             CubeSegment newSegment = newSegment(cubeCopy, tsRange, segRange);
             newSegment.setSourcePartitionOffsetStart(sourcePartitionOffsetStart);
             newSegment.setSourcePartitionOffsetEnd(sourcePartitionOffsetEnd);
+            if (segAddInfo != null && segAddInfo.size() > 0) {
+                newSegment.getAdditionalInfo().putAll(segAddInfo);
+            }
             validateNewSegments(cubeCopy, newSegment);
 
             CubeUpdate update = new CubeUpdate(cubeCopy);
@@ -604,7 +607,7 @@ public class CubeManager implements IRealizationProvider {
             return newSegment;
         }
 
-        public CubeSegment refreshSegment(CubeInstance cube, TSRange tsRange, SegmentRange segRange)
+        public CubeSegment refreshSegment(CubeInstance cube, TSRange tsRange, SegmentRange segRange, Map<String, String> segAddInfo)
                 throws IOException {
             CubeInstance cubeCopy = cube.latestCopyForWrite(); // get a latest copy
 
@@ -642,6 +645,10 @@ public class CubeManager implements IRealizationProvider {
                 newSegment.setSourcePartitionOffsetEnd(toRefreshSeg.getSourcePartitionOffsetEnd());
             }
 
+            if (segAddInfo != null && segAddInfo.size() > 0) {
+                newSegment.getAdditionalInfo().putAll(segAddInfo);
+            }
+
             CubeUpdate update = new CubeUpdate(cubeCopy);
             update.setToAddSegs(newSegment);
             updateCube(update);
@@ -669,7 +676,7 @@ public class CubeManager implements IRealizationProvider {
             return optimizeSegments;
         }
 
-        public CubeSegment mergeSegments(CubeInstance cube, TSRange tsRange, SegmentRange segRange, boolean force)
+        public CubeSegment mergeSegments(CubeInstance cube, TSRange tsRange, SegmentRange segRange, Map<String, String> segAddInfo, boolean force)
                 throws IOException {
             CubeInstance cubeCopy = cube.latestCopyForWrite(); // get a latest copy
 
@@ -735,6 +742,9 @@ public class CubeManager implements IRealizationProvider {
                 newSegment.setSegRange(null);
             }
 
+            if (segAddInfo != null && segAddInfo.size() > 0) {
+                newSegment.getAdditionalInfo().putAll(segAddInfo);
+            }
             if (force == false) {
                 List<String> emptySegment = Lists.newArrayList();
                 for (CubeSegment seg : mergingSegments) {
