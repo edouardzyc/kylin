@@ -81,6 +81,7 @@ public class ProjectDictionaryManagerTest extends LocalFileMetadataTestCase {
 
         // 2. gc
         System.gc();
+        Thread.sleep(3000);
 
         ProjectDictionaryInfo projectDictionaryInfo3 = getDictInfoByWeakCache(dictResPath);
         assertNotNull(projectDictionaryInfo3);
@@ -99,6 +100,7 @@ public class ProjectDictionaryManagerTest extends LocalFileMetadataTestCase {
         projectDictionaryInfo3 = null;
         projectDictionaryInfo4 = null;
         System.gc();
+        Thread.sleep(3000);
 
         ProjectDictionaryInfo projectDictionaryInfo5 = getDictInfoByWeakCache(dictResPath);
         assertNull(projectDictionaryInfo5);
@@ -118,6 +120,7 @@ public class ProjectDictionaryManagerTest extends LocalFileMetadataTestCase {
         projectDictionaryInfo5 = null;
         projectDictionaryInfo6 = null;
         System.gc();
+        Thread.sleep(3000);
 
         Dictionary dictionary5 = getDictObjByWeakCache(dictResPath);
         assertNull(dictionary5);
