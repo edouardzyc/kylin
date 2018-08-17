@@ -160,7 +160,7 @@ public class CreateFlatHiveTableStep extends AbstractExecutable {
             String jobWorkingDir = getWorkingDir();
             try {
                 Path path = new Path(jobWorkingDir);
-                FileSystem fileSystem = HadoopUtil.getFileSystem(path);
+                FileSystem fileSystem = HadoopUtil.getWorkingFileSystem();
                 if (!fileSystem.exists(path)) {
                     logger.info("Create jobWorkDir : " + jobWorkingDir);
                     fileSystem.mkdirs(path);
