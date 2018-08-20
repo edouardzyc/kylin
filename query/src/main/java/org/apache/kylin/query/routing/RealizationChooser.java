@@ -94,12 +94,14 @@ public class RealizationChooser {
             final DataModelDesc model = entry.getKey();
             Map<String, String> aliasMap = matches(model, context);
             if (aliasMap != null) {
+                context.fixModel(model, aliasMap);
                 model2aliasMap.put(model, aliasMap);
                 if (orderedRealizations == null) {
                     orderedRealizations = sortRealizationByCostAndType(context, entry.getValue());
                 } else {
                     orderedRealizations.addAll(sortRealizationByCostAndType(context, entry.getValue()));
                 }
+                context.unfixModel();
             }
         }
 
@@ -270,10 +272,21 @@ public class RealizationChooser {
         Set<IRealization> orderedRealizations = Sets.newTreeSet(new Comparator<IRealization>() {
             @Override
             public int compare(IRealization o1, IRealization o2) {
-                int res = Candidate.PRIORITIES.get(o1.getType()) - Candidate.PRIORITIES.get(o2.getType()) == 0
-                        ? o1.getCost(context.getSQLDigest()) - o2.getCost(context.getSQLDigest())
-                        : Candidate.PRIORITIES.get(o1.getType()) - Candidate.PRIORITIES.get(o2.getType());
-                return res == 0 ? o1.getName().compareTo(o2.getName()) : res;
+                int c0 = Candidate.PRIORITIES.get(o1.getType()) - Candidate.PRIORITIES.get(o2.getType());
+                // compare priority first.
+                // if same, compare cost.
+                if (c0 == 0) {
+                    double c1 = o1.getCost(context.getSQLDigest()) - o2.getCost(context.getSQLDigest());
+
+                    if (c1 < 0) {
+                        c0 = -1;
+                    } else if (c1 > 0) {
+                        c0 = 1;
+                    } else {
+                        c0 = o1.getName().compareTo(o2.getName());
+                    }
+                }
+                return c0;
             }
         });
 

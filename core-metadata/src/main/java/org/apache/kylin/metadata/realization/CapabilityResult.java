@@ -37,7 +37,7 @@ public class CapabilityResult {
     /**
      * The smaller the cost, the more capable the realization
      */
-    public int cost;
+    public double cost;
 
     /**
      * reason of incapable

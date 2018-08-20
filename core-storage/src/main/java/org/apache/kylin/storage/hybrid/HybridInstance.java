@@ -219,7 +219,7 @@ public class HybridInstance extends RootPersistentEntity implements IRealization
     }
 
     @Override
-    public int getCost(SQLDigest sqlDigest) {
+    public double getCost(SQLDigest sqlDigest) {
         return getCost();
     }
 

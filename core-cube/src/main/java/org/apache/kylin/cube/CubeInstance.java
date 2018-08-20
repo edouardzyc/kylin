@@ -325,19 +325,20 @@ public class CubeInstance extends RootPersistentEntity implements IRealization, 
     public int getCost() {
         if (getDescriptor() == null) {
             //in case not initialized
-            return 0;
+            return Integer.MAX_VALUE;
         }
         int countedDimensionNum = getRowKeyColumnCount();
         int c = countedDimensionNum * COST_WEIGHT_DIMENSION + getMeasures().size() * COST_WEIGHT_MEASURE;
         DataModelDesc model = getModel();
         if (model == null) {
             //in case broken cube
-            return 0;
+            return Integer.MAX_VALUE;
         }
         for (JoinTableDesc join : model.getJoinTables()) {
             if (join.getJoin().isInnerJoin())
                 c += CubeInstance.COST_WEIGHT_INNER_JOIN;
         }
+        logger.info(this.toString() + " s'cost is " + c);
         return c;
     }
 
@@ -532,7 +533,7 @@ public class CubeInstance extends RootPersistentEntity implements IRealization, 
         return result;
     }
 
-    public int getCost(SQLDigest digest) {
+    public double getCost(SQLDigest digest) {
         return getCost();
     }
 

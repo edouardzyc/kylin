@@ -66,5 +66,5 @@ public interface IRealization extends IStorageAware {
 
     public int getCost();
 
-    public int getCost(SQLDigest sqlDigest);
+    public double getCost(SQLDigest sqlDigest);
 }
