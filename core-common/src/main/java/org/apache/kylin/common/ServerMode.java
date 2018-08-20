@@ -49,6 +49,10 @@ public enum ServerMode {
         return isJobOnly(config) || isAll(config);
     }
 
+    public static boolean isJob(String serverMode) {
+        return ALL.name.equals(serverMode) || JOB.name.equals(serverMode);
+    }
+
     public static boolean isJobOnly(KylinConfig config) {
         return match(JOB, config);
     }
