@@ -77,6 +77,7 @@ public class QueryContext {
     private boolean hasAdvance;
     private boolean isLateDecodeEnabled;
     private boolean isTimeout;
+    private boolean isAsyncQuery;
     private Set<Future> allRunningTasks = new HashSet<>();
     private String project;
 
@@ -201,6 +202,14 @@ public class QueryContext {
 
     public void setTimeout(boolean timeout) {
         isTimeout = timeout;
+    }
+
+    public boolean isAsyncQuery() {
+        return isAsyncQuery;
+    }
+
+    public void setAsyncQuery() {
+        isAsyncQuery = true;
     }
 
     public boolean isSparderAppliable() {

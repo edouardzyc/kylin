@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.QueryContext;
 import org.apache.kylin.metadata.badquery.BadQueryEntry;
 import org.apache.kylin.metadata.badquery.BadQueryHistoryManager;
 import org.apache.kylin.rest.request.SQLRequest;
@@ -124,7 +125,9 @@ public class BadQueryDetector extends Thread {
     }
 
     public void queryStart(Thread thread, SQLRequest sqlRequest, String user) {
-        runningQueries.put(thread, new Entry(sqlRequest, user, thread));
+        if (!QueryContext.current().isAsyncQuery()) {
+            runningQueries.put(thread, new Entry(sqlRequest, user, thread));
+        }
     }
 
     public void queryEnd(Thread thread) {
