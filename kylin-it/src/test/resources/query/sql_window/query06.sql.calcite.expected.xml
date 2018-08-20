@@ -9,31 +9,31 @@
       <value>2012-01-01</value>
       <value>ABIN</value>
       <value>807.29</value>
-      <value>0</value>
+      <null/>
     </row>
     <row>
       <value>2012-01-01</value>
       <value>Auction</value>
       <value>893.57</value>
-      <value>0</value>
+      <null/>
     </row>
     <row>
       <value>2012-01-01</value>
       <value>FP-GTC</value>
       <value>-121.39</value>
-      <value>0</value>
+      <null/>
     </row>
     <row>
       <value>2012-01-01</value>
       <value><![CDATA[FP-non GTC]]></value>
       <value>1626.87</value>
-      <value>0</value>
+      <null/>
     </row>
     <row>
       <value>2012-01-01</value>
       <value>Others</value>
       <value>814.85</value>
-      <value>0</value>
+      <null/>
     </row>
     <row>
       <value>2012-01-02</value>
