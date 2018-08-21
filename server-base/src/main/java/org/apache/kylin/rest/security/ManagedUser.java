@@ -163,14 +163,14 @@ public class ManagedUser extends RootPersistentEntity implements UserDetails {
         }
     }
 
-    public void addAuthoritie(String auth) {
+    public void addAuthorities(String auth) {
         if (this.authorities == null) {
             this.authorities = Lists.newArrayList();
         }
         authorities.add(new SimpleGrantedAuthority(auth));
     }
 
-    public void removeAuthoritie(String auth) {
+    public void removeAuthorities(String auth) {
         Preconditions.checkNotNull(this.authorities == null);
         authorities.remove(new SimpleGrantedAuthority(auth));
     }
