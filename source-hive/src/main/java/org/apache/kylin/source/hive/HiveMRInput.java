@@ -246,8 +246,6 @@ public class HiveMRInput implements IMRInput {
         // each append must be a complete hql.
         public static String materializeViewHql(String viewName, String tableName, String jobWorkingDir) {
             StringBuilder createIntermediateTableHql = new StringBuilder();
-            createIntermediateTableHql
-                    .append("USE " + KylinConfig.getInstanceFromEnv().getHiveDatabaseForIntermediateTable() + ";");
             createIntermediateTableHql.append("DROP TABLE IF EXISTS " + viewName + ";\n");
             createIntermediateTableHql.append("CREATE TABLE IF NOT EXISTS " + viewName + " LIKE " + tableName
                     + " LOCATION '" + jobWorkingDir + "/" + viewName + "';\n");
