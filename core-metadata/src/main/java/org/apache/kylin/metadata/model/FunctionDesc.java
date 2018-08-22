@@ -165,8 +165,11 @@ public class FunctionDesc implements Serializable {
             } else if (isSum()) {
                 if (parameter.isMathExpressionType())
                     return returnDataType;
-
-                return parameter.getColRefs().get(0).getType();
+                DataType paramType = parameter.getColRefs().get(0).getType();
+                if (paramType.isIntegerFamily()) {
+                    return DataType.getType("bigint");
+                }
+                return paramType;
             } else if (isCount()) {
                 return DataType.getType("bigint");
             } else {
