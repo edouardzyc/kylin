@@ -57,12 +57,19 @@ public class MetadataCleanupJobTest {
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/PRICE/0/data.pdict",
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/PRICE/1/0-1",
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/PRICE/1/data.pdict",
+                "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/PRICE/2/0-2",
+                "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/PRICE/2/1-2",
+                "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/PRICE/2/data.pdict",
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/0/data.pdict",
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/1/0-1",
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/1/data.pdict",
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/2/0-2",
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/2/1-2",
                 "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/2/data.pdict",
+                "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/3/0-3",
+                "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/3/1-3",
+                "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/3/2-3",
+                "/dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID/3/data.pdict",
                 "/execute/d861b8b7-c773-47ab-bb1e-c8782ae8d930",
                 "/execute_output/d861b8b7-c773-47ab-bb1e-c8782ae8d930",
                 "/execute_output/d861b8b7-c773-47ab-bb1e-c8782ae8d930-00",
@@ -90,15 +97,15 @@ public class MetadataCleanupJobTest {
         Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 1, 1), 1));
         Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 2, 1), 2));
         List<String> cleanupList = metadataCleanupJob.cleanup(true, 30);
-        Assert.assertEquals(16, cleanupList.size());
+        Assert.assertEquals(23, cleanupList.size());
         manager.clear();
         Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 0, 1), 0));
         Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 1, 1), 1));
-        Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 2, 1), 2));
+        Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/PRICE", 15, 1), 15));
         Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 0, 1), 0));
         Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 1, 1), 1));
         Assert.assertNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 2, 1), 2));
-        Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 3, 1), 3));
+        Assert.assertNotNull(manager.getSpecificDictionary(new SegProjectDict("default/DEFAULT.TEST_KYLIN_FACT/TRANS_ID", 15, 1), 15));
         List<String> cleanupList2 = metadataCleanupJob.cleanup(false, 30);
         Assert.assertEquals(0, cleanupList2.size());
     }

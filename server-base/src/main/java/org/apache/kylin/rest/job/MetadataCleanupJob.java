@@ -21,12 +21,14 @@ package org.apache.kylin.rest.job;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.cube.CubeInstance;
@@ -40,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.collect.TreeMultimap;
 
@@ -101,7 +104,16 @@ public class MetadataCleanupJob {
         }
 
         // project dict
-        TreeMultimap<String, String> allProjectDict = TreeMultimap.create();
+        TreeMultimap<String, String> allProjectDict = TreeMultimap.create(Ordering.natural(), new Comparator<String>() {
+            @Override
+            // or version 15 will be front of version 2.
+            // path like that: /dict/project_dict/data/default/DEFAULT.TEST_KYLIN_FACT/ONYL_ONE_VERSION/0
+            public int compare(String s1, String s2) {
+                Integer n1 = Integer.parseInt(s1.substring(StringUtils.lastOrdinalIndexOf(s1, "/", 1) + 1, s1.length()));
+                Integer n2 = Integer.parseInt(s2.substring(StringUtils.lastOrdinalIndexOf(s2, "/", 1) + 1, s2.length()));
+                return n1.compareTo(n2);
+            }
+        });
 
         NavigableSet<String> prjs = noNull(store.listResources(ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/data"));
         removeSpecificForder(prjs, "/metadata"); // exclude "metadata" folder
