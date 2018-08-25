@@ -56,10 +56,11 @@ public class MergeDictionaryStep extends AbstractExecutable {
     protected ExecuteResult doWork(ExecutableContext context) throws ExecuteException {
         while (count.intValue() >= context.getConfig().getMergeDictConcurrency()) {
             try {
-                logger.debug("There are too many MergeDictDictionaryStep running: count=" + count.intValue());
+                logger.debug("Too many concurrent MergeDictDictionaryStep running: count={}, limit={}. Pending.",
+                        count.intValue(), context.getConfig().getMergeDictConcurrency());
                 Thread.sleep(10000L);
             } catch (InterruptedException e) {
-                throw new ExecuteException("interrupted at count=" + count.get(), e);
+                throw new ExecuteException("Pending MergeDictDictionaryStep interrupted: count=" + count.get(), e);
             }
         }
 

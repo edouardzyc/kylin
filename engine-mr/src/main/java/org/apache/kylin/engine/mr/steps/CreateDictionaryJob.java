@@ -22,6 +22,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.cli.Options;
 import org.apache.hadoop.fs.FileSystem;
@@ -43,6 +44,7 @@ import org.apache.kylin.dict.DictionaryProvider;
 import org.apache.kylin.dict.DistinctColumnValuesProvider;
 import org.apache.kylin.engine.mr.SortedColumnDFSFile;
 import org.apache.kylin.engine.mr.common.AbstractHadoopJob;
+import org.apache.kylin.job.exception.ExecuteException;
 import org.apache.kylin.metadata.model.TblColRef;
 import org.apache.kylin.source.IReadableTable;
 import org.slf4j.Logger;
@@ -51,6 +53,7 @@ import org.slf4j.LoggerFactory;
 public class CreateDictionaryJob extends AbstractHadoopJob {
 
     private static final Logger logger = LoggerFactory.getLogger(CreateDictionaryJob.class);
+    private static final AtomicInteger count = new AtomicInteger(0);
 
     @Override
     public int run(String[] args) throws Exception {
@@ -65,18 +68,20 @@ public class CreateDictionaryJob extends AbstractHadoopJob {
         final String cubeName = getOptionValue(OPTION_CUBE_NAME);
         final String segmentID = getOptionValue(OPTION_SEGMENT_ID);
         final String jobId = getOptionValue(OPTION_CUBING_JOB_ID);
-        final String factColumnsInputPath = HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_INPUT_PATH));
+        final String factColumnsInputPath = HadoopUtil
+                .getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_INPUT_PATH));
         final String dictPath = HadoopUtil.getPathWithWorkingSchemeAndAuthority(getOptionValue(OPTION_DICT_PATH));
 
         final KylinConfig config = KylinConfig.getInstanceFromEnv();
 
-        DictionaryGeneratorCLI.processSegment(config, cubeName, segmentID, jobId, new DistinctColumnValuesProvider() {
+        DistinctColumnValuesProvider factTableValueProvider = new DistinctColumnValuesProvider() {
             @Override
             public IReadableTable getDistinctValuesFor(TblColRef col) {
                 return new SortedColumnDFSFile(factColumnsInputPath + "/" + col.getIdentity(), col.getType());
             }
-        }, new DictionaryProvider() {
+        };
 
+        DictionaryProvider dictProvider = new DictionaryProvider() {
             @Override
             public Dictionary<String> getDictionary(TblColRef col) throws IOException {
                 CubeManager cubeManager = CubeManager.getInstance(config);
@@ -91,13 +96,15 @@ public class CreateDictionaryJob extends AbstractHadoopJob {
                 }
                 FileSystem fs = HadoopUtil.getWorkingFileSystem();
 
-                Path dictFile = HadoopUtil.getFilterOnlyPath(fs, colDir, col.getName() + FactDistinctColumnsReducer.DICT_FILE_POSTFIX);
+                Path dictFile = HadoopUtil.getFilterOnlyPath(fs, colDir,
+                        col.getName() + FactDistinctColumnsReducer.DICT_FILE_POSTFIX);
                 if (dictFile == null) {
                     logger.info("Dict for '" + col.getName() + "' not pre-built.");
                     return null;
                 }
 
-                try (SequenceFile.Reader reader = new SequenceFile.Reader(HadoopUtil.getCurrentConfiguration(), SequenceFile.Reader.file(dictFile))) {
+                try (SequenceFile.Reader reader = new SequenceFile.Reader(HadoopUtil.getCurrentConfiguration(),
+                        SequenceFile.Reader.file(dictFile))) {
                     NullWritable key = NullWritable.get();
                     ArrayPrimitiveWritable value = new ArrayPrimitiveWritable();
                     reader.next(key, value);
@@ -112,7 +119,25 @@ public class CreateDictionaryJob extends AbstractHadoopJob {
                     }
                 }
             }
-        });
+        };
+
+        while (count.intValue() >= config.getBuildDictConcurrency()) {
+            try {
+                logger.debug("Too many concurrent CreateDictionaryJob running: count={}, limit={}. Pending.",
+                        count.intValue(), config.getBuildDictConcurrency());
+                Thread.sleep(10000L);
+            } catch (InterruptedException e) {
+                throw new ExecuteException("Pending CreateDictionaryJob interrupted: count=" + count.get(), e);
+            }
+        }
+
+        try {
+            count.incrementAndGet();
+            DictionaryGeneratorCLI.processSegment(config, cubeName, segmentID, jobId, factTableValueProvider,
+                    dictProvider);
+        } finally {
+            count.decrementAndGet();
+        }
 
         return 0;
     }
