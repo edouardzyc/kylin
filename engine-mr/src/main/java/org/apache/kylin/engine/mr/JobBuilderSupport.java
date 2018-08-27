@@ -246,6 +246,10 @@ public class JobBuilderSupport {
         return getJobWorkingDir(conf.getHdfsWorkingDirectory(seg.getProject()), jobId);
     }
 
+    public static String getJobWorkingDirWithProject(JobEngineConfig conf, String jobId, String project) {
+        return getJobWorkingDir(conf.getHdfsWorkingDirectory(project), jobId);
+    }
+
     public static String getJobWorkingDir(String hdfsDir, String jobId) {
         if (!hdfsDir.endsWith("/")) {
             hdfsDir = hdfsDir + "/";
