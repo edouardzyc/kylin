@@ -80,6 +80,10 @@ public class HiveSource implements ISource {
     }
 
     @Override
+    public void unloadTable(String tableName, String project) throws IOException{
+    }
+
+    @Override
     public void close() throws IOException {
         // not needed
     }

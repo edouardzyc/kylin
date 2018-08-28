@@ -25,9 +25,9 @@ import org.apache.kylin.cube.model.validation.ResultLevel;
 import org.apache.kylin.cube.model.validation.ValidateContext;
 import org.apache.kylin.metadata.model.DataModelDesc;
 import org.apache.kylin.metadata.model.IEngineAware;
-import org.apache.kylin.metadata.model.ISourceAware;
 
 import org.apache.kylin.metadata.model.TblColRef;
+import org.apache.kylin.source.SourceManager;
 
 /**
  *
@@ -45,7 +45,7 @@ public class StreamingCubeRule implements IValidatorRule<CubeDesc> {
     public void validate(CubeDesc cube, ValidateContext context) {
         DataModelDesc model = cube.getModel();
         
-        if (model.getRootFactTable().getTableDesc().getSourceType() != ISourceAware.ID_STREAMING) {
+        if (!SourceManager.isStreamingSource(model.getRootFactTable().getTableDesc().getSourceType())) {
             return;
         }
 

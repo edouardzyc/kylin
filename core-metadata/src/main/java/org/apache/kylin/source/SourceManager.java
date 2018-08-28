@@ -151,4 +151,8 @@ public class SourceManager {
     public static List<String> getMRDependentResources(TableDesc table) {
         return getSource(table).getSourceMetadataExplorer().getRelatedKylinResources(table);
     }
+
+    public static boolean isStreamingSource(int sourceType){
+        return sourceType == ISourceAware.ID_STREAMING || sourceType == ISourceAware.ID_LOGHUB;
+    }
 }

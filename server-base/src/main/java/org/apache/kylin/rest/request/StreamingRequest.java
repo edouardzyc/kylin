@@ -28,6 +28,8 @@ public class StreamingRequest {
 
     private String kafkaConfig;
 
+    private String loghubConfig;
+
     private boolean successful;
 
     private String message;
@@ -80,4 +82,11 @@ public class StreamingRequest {
         this.kafkaConfig = kafkaConfig;
     }
 
+    public String getLoghubConfig() {
+        return loghubConfig;
+    }
+
+    public void setLoghubConfig(String loghubConfig) {
+        this.loghubConfig = loghubConfig;
+    }
 }

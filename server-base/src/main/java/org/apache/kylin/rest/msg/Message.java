@@ -312,6 +312,10 @@ public class Message {
         return "The kafkaConfig named '%s' already exists.";
     }
 
+    public String getLOGHUB_CONFIG_ALREADY_EXIST() {
+        return "The loghubConfig named '%s' already exists.";
+    }
+
     public String getCREATE_KAFKA_CONFIG_FAIL() {
         return "StreamingConfig is created, but failed to create KafkaConfig.";
     }
