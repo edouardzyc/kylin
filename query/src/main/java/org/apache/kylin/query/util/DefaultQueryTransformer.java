@@ -33,8 +33,8 @@ public class DefaultQueryTransformer implements IQueryTransformer {
     private static final Pattern PTN_HAVING_COUNT_GREATER_THAN_ZERO = Pattern.compile(S1 + "HAVING" + SM + "[(]?" + S0
             + "COUNT" + S0 + "[(]" + S0 + "1" + S0 + "[)]" + S0 + ">" + S0 + "0" + S0 + "[)]?",
             Pattern.CASE_INSENSITIVE);
-    private static final Pattern PTN_SUM_1 = Pattern.compile(S0 + "SUM" + S0 + "[(]" + S0 + "[1]" + S0 + "[)]" + S0,
-            Pattern.CASE_INSENSITIVE);
+    private static final Pattern PTN_SUM = Pattern
+            .compile(S0 + "SUM" + S0 + "[(]" + S0 + "\\d+(\\.\\d+)?" + S0 + "[)]" + S0, Pattern.CASE_INSENSITIVE);
     private static final Pattern PTN_MIN_1 = Pattern.compile(S0 + "MIN" + S0 + "[(]" + S0 + "[1]" + S0 + "[)]" + S0,
             Pattern.CASE_INSENSITIVE);
     private static final Pattern PTN_MAX_1 = Pattern.compile(S0 + "MAX" + S0 + "[(]" + S0 + "[1]" + S0 + "[)]" + S0,
@@ -50,10 +50,20 @@ public class DefaultQueryTransformer implements IQueryTransformer {
     public static final Pattern PIN_SUM_OF_FN_CONVERT = Pattern
             .compile(S0 + "SUM" + S0 + "\\(" + S0 + "\\{\\s*fn" + SM + "convert" + S0 + "\\(" + S0 + "([^\\s,]+)" + S0
                     + "," + S0 + "(SQL_DOUBLE|DOUBLE)" + S0 + "\\)" + S0 + "\\}" + S0 + "\\)", Pattern.CASE_INSENSITIVE);
+    public static final Pattern PTN_PI = Pattern.compile(S0 + "PI" + S0 + "\\(" + S0 + "\\)", Pattern.CASE_INSENSITIVE);
 
     @Override
     public String transform(String sql, String project, String defaultSchema) {
         Matcher m;
+
+        // Case: PI() -> PI
+        while (true) {
+            m = PTN_PI.matcher(sql);
+            if (!m.find())
+                break;
+
+            sql = sql.substring(0, m.start()) + " PI" + sql.substring(m.end());
+        }
 
         // Case: SUM(CAST (column_name AS DOUBLE))
         while (true) {
@@ -94,13 +104,14 @@ public class DefaultQueryTransformer implements IQueryTransformer {
             sql = sql.substring(0, m.start()) + " " + sql.substring(m.end());
         }
 
-        // Case: SUM(1)
-        // Replace it with COUNT(1)
+        // Case: SUM(N)
+        // Replace it with N * COUNT(1)
         while (true) {
-            m = PTN_SUM_1.matcher(sql);
+            m = PTN_SUM.matcher(sql);
             if (!m.find())
                 break;
-            sql = sql.substring(0, m.start()) + " COUNT(1) " + sql.substring(m.end());
+            String val = m.group().toUpperCase().replace("SUM(", "").replace(")", "");
+            sql = sql.substring(0, m.start()) + " " + val.trim() + " * COUNT(1) " + sql.substring(m.end());
         }
 
         // Case: MIN(1) or MAX(1)
@@ -137,7 +148,6 @@ public class DefaultQueryTransformer implements IQueryTransformer {
             int value = (int) Math.floor(Double.valueOf(m.group(2)));
             sql = sql.substring(0, m.start(1)) + "'" + value + "'" + sql.substring(m.end(3));
         }
-
 
         return sql;
     }

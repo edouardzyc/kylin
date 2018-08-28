@@ -95,6 +95,21 @@ public class DefaultQueryTransformerTest {
         correctSql = transformer.transform(fnConvertSumSql, "", "");
         assertTrue("select sum(LSTG_SITE_ID), sum(price) from KYLIN_SALES group by LSTG_SITE_ID"
                 .equalsIgnoreCase(correctSql));
+
+        // test sum(N) -> N * count(1)
+        fnConvertSumSql = "select sum(3.14) from KYLIN_SALES";
+        correctSql = transformer.transform(fnConvertSumSql, "", "");
+        assertTrue("select 3.14 * count(1) from kylin_sales".equalsIgnoreCase(correctSql));
+    }
+
+    @Test
+    public void piCastTransform() throws Exception {
+        DefaultQueryTransformer transformer = new DefaultQueryTransformer();
+
+        // test pi() -> PI
+        String fnConvertSumSql = "select  pi() from KYLIN_SALES";
+        String correctSql = transformer.transform(fnConvertSumSql, "", "");
+        assertTrue("select PI from KYLIN_SALES".equalsIgnoreCase(correctSql));
     }
 
     @Test
