@@ -121,11 +121,7 @@ public class BuildCubeWithEngine {
         }
 
         String specifiedEngineType = System.getProperty("engineType");
-        if (StringUtils.isNotEmpty(specifiedEngineType)) {
-            engineType = Integer.parseInt(specifiedEngineType);
-        } else {
-            engineType = 2;
-        }
+        engineType = StringUtils.isNotEmpty(specifiedEngineType) ? Integer.parseInt(specifiedEngineType) : 2;
 
         System.setProperty(KylinConfig.KYLIN_CONF, confDir);
         System.setProperty("SPARK_HOME", "/usr/local/spark"); // need manually create and put spark to this folder on Jenkins
@@ -199,6 +195,7 @@ public class BuildCubeWithEngine {
         testCase("testInnerJoinCube");
         testCase("testLeftJoinCube");
         testCase("testTableExt");
+        testCase("testViewExt");
         testCase("testModel");
         testCase("testCALCTDVTCube");
         System.setProperty("kylin.storage.hbase.hfile-size-gb", "0.0f");
@@ -271,6 +268,10 @@ public class BuildCubeWithEngine {
     }
 
     protected boolean testTableExt() throws Exception {
+        return true;
+    }
+
+    protected boolean testViewExt() throws Exception {
         return true;
     }
 
