@@ -114,14 +114,13 @@ public class OLAPToEnumerableConverter extends ConverterImpl implements Enumerab
         return impl.visitChild(this, 0, inputAsEnum, pref);
     }
 
-     protected List<OLAPContext> listContextsHavingScan() {
+    protected List<OLAPContext> listContextsHavingScan() {
         // Context has no table scan is created by OLAPJoinRel which looks like
         //     (sub-query) as A join (sub-query) as B
         // No realization needed for such context.
         int size = OLAPContext.getThreadLocalContexts().size();
         List<OLAPContext> result = Lists.newArrayListWithCapacity(size);
-        for (int i = 0; i < size; i++) {
-            OLAPContext ctx = OLAPContext.getThreadLocalContextById(i);
+        for (OLAPContext ctx : OLAPContext.getThreadLocalContexts()) {
             if (ctx.firstTableScan != null)
                 result.add(ctx);
         }
@@ -132,7 +131,8 @@ public class OLAPToEnumerableConverter extends ConverterImpl implements Enumerab
         KylinConfig config = KylinConfig.getInstanceFromEnv();
         String controllerCls = config.getQueryAccessController();
         if (null != controllerCls && !controllerCls.isEmpty()) {
-            OLAPContext.IAccessController accessController = (OLAPContext.IAccessController) ClassUtil.newInstance(controllerCls);
+            OLAPContext.IAccessController accessController = (OLAPContext.IAccessController) ClassUtil
+                    .newInstance(controllerCls);
             accessController.check(contexts, tree, config);
         }
     }

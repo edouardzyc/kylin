@@ -95,6 +95,12 @@ public class OLAPContext {
         _localContexts.remove();
     }
 
+    public static void clearThreadLocalContextById(int id) {
+        Map<Integer, OLAPContext> map = _localContexts.get();
+        map.remove(id);
+        _localContexts.set(map);
+    }
+
     public OLAPContext(int seq) {
         this.id = seq;
         this.storageContext = new StorageContext(seq);
@@ -139,6 +145,7 @@ public class OLAPContext {
     public IRealization realization;
     public RealizationCheck realizationCheck;
     public boolean fixedModel;
+    public boolean hasSelected = false;
 
     public Set<TblColRef> allColumns = new HashSet<>();
     public List<TblColRef> groupByColumns = new ArrayList<>();
@@ -236,6 +243,15 @@ public class OLAPContext {
             tableScan.unfixColumnRowTypeWithModel();
         }
         fixedModel = false;
+    }
+
+    public void clearColInfo() {
+        this.filterColumns.clear();
+        this.allColumns.clear();
+        this.groupByColumns.clear();
+        this.aggrOutCols.clear();
+        this.sortColumns.clear();
+        this.metricsColumns.clear();
     }
 
     public void bindVariable(DataContext dataContext) {

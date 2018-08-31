@@ -311,7 +311,6 @@ public class OLAPJoinRel extends EnumerableJoin implements OLAPRel {
 
     @Override
     public Result implement(EnumerableRelImplementor implementor, Prefer pref) {
-
         context.setReturnTupleInfo(rowType, columnRowType);
 
         PhysType physType = PhysTypeImpl.of(implementor.getTypeFactory(), getRowType(), pref.preferArray());

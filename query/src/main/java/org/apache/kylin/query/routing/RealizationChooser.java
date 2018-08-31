@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.debug.BackdoorToggles;
 import org.apache.kylin.common.util.Pair;
@@ -68,6 +69,7 @@ public class RealizationChooser {
     }
 
     private static void attemptSelectRealization(OLAPContext context) {
+        context.hasSelected = true;
         // step1: collect realization info
         Map<DataModelDesc, Set<IRealization>> modelMap = makeOrderedModelMap(context);
         if (modelMap.size() == 0) {
@@ -108,6 +110,8 @@ public class RealizationChooser {
         // step3: select realization order by cost
         if (orderedRealizations == null)
             throw new NoRealizationFoundException("No realization found for " + toErrorMsg(context));
+        logger.info("Find candidates order by cost：" + StringUtils.join(orderedRealizations, ","));
+
         for (IRealization realization : orderedRealizations) {
             context.fixModel(realization.getModel(), model2aliasMap.get(realization.getModel()));
             IRealization candidate = QueryRouter.selectRealization(context, Sets.newHashSet(realization));

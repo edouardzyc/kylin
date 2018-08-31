@@ -21,7 +21,6 @@ package org.apache.kylin.query.routing;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.kylin.metadata.model.FunctionDesc;
 import org.apache.kylin.metadata.realization.CapabilityResult;
 import org.apache.kylin.metadata.realization.CapabilityResult.CapabilityInfluence;
@@ -54,9 +53,6 @@ public class QueryRouter {
             if (real.isReady())
                 candidates.add(new Candidate(real, sqlDigest));
         }
-
-        logger.info("Find candidates by table " + factTableName + " and project=" + projectName + " : "
-                + StringUtils.join(candidates, ","));
 
         List<Candidate> originCandidates = Lists.newArrayList(candidates);
 

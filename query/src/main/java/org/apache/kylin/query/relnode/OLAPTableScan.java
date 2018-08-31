@@ -427,6 +427,10 @@ public class OLAPTableScan extends TableScan implements OLAPRel, EnumerableRel {
         return columnRowType;
     }
 
+    public void setColumnRowType(ColumnRowType columnRowType) {
+        this.columnRowType = columnRowType;
+    }
+
     @Override
     public void implementRewrite(RewriteImplementor implementor) {
         Map<String, RelDataType> rewriteFields = this.context.rewriteFields;
