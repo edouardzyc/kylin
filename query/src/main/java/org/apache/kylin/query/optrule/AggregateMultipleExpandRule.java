@@ -18,8 +18,12 @@
 
 package org.apache.kylin.query.optrule;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelOptRuleOperand;
@@ -33,10 +37,8 @@ import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.tools.RelBuilder;
 import org.apache.calcite.util.ImmutableBitSet;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Supoort grouping query. Expand the non-simple aggregate to more than one simple aggregates.
@@ -101,23 +103,6 @@ public class AggregateMultipleExpandRule extends RelOptRule {
                     groupKey = groupKeyIter.next();
                 } else {
                     rexNodes.add(rexBuilder.makeNullLiteral(type));
-                }
-            }
-
-            // fill indicators if need, false when key is present and true if key is rolled up
-            if (aggr.indicator) {
-                groupSetIter = aggr.getGroupSet().iterator();
-                groupKeyIter = groupSet.iterator();
-                groupKey = groupKeyIter.next();
-                while (groupSetIter.hasNext()) {
-                    Integer aggrGroupKey = groupSetIter.next();
-                    RelDataType type = typeIterator.next().getType();
-                    if (groupKey == aggrGroupKey) {
-                        rexNodes.add(rexBuilder.makeLiteral(false, type, true));
-                        groupKey = groupKeyIter.next();
-                    } else {
-                        rexNodes.add(rexBuilder.makeLiteral(true, type, true));
-                    }
                 }
             }
 

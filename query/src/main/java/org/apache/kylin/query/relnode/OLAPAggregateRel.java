@@ -84,6 +84,7 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
         AGGR_FUNC_MAP.put("COUNT_DISTINCT", "COUNT_DISTINCT");
         AGGR_FUNC_MAP.put("MAX", "MAX");
         AGGR_FUNC_MAP.put("MIN", "MIN");
+        AGGR_FUNC_MAP.put("GROUPING", "GROUPING");
 
         Map<String, MeasureTypeFactory> udafFactories = MeasureTypeFactory.getUDAFFactories();
         for (Map.Entry<String, MeasureTypeFactory> entry : udafFactories.entrySet()) {
@@ -111,7 +112,7 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
 
     public static String getAggrFuncName(AggregateCall aggCall) {
         // issue 4337
-        if(aggCall.getAggregation().kind.equals(SqlKind.SINGLE_VALUE)){
+        if (aggCall.getAggregation().kind.equals(SqlKind.SINGLE_VALUE)) {
             return SqlKind.SINGLE_VALUE.sql;
         }
         String sqlName = getSqlFuncName(aggCall);
@@ -283,6 +284,7 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
                     parameter = ParameterDesc.newInstance(columns.toArray(new TblColRef[columns.size()]));
                 }
             }
+
             String expression = getAggrFuncName(aggCall);
             FunctionDesc aggFunc = FunctionDesc.newInstance(expression, parameter, null);
             this.aggregations.add(aggFunc);
@@ -495,7 +497,8 @@ public class OLAPAggregateRel extends Aggregate implements OLAPRel {
             typeFamilies.add(Util.first(type.getSqlTypeName().getFamily(), SqlTypeFamily.ANY));
         }
         return new SqlUserDefinedAggFunction(sqlIdentifier, ReturnTypes.explicit(returnType),
-                InferTypes.explicit(argTypes), OperandTypes.family(typeFamilies), aggFunction, false, false);
+                InferTypes.explicit(argTypes), OperandTypes.family(typeFamilies), aggFunction, false, false,
+                typeFactory);
     }
 
     @Override

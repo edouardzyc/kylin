@@ -73,6 +73,7 @@ public class CubeCapabilityChecker {
             //1. dimension as measure
 
             if (!unmatchedAggregations.isEmpty()) {
+                removeUnmatchedGroupingAgg(unmatchedAggregations);
                 tryDimensionAsMeasures(unmatchedAggregations, result,
                         cube.getDescriptor().listDimensionColumnsIncludingDerived(), true);
             }
@@ -250,6 +251,18 @@ public class CubeCapabilityChecker {
         if (influencingMeasures.size() != 0)
             logger.info("Cube {} CapabilityInfluences: {}", cube.getCanonicalName(),
                     StringUtils.join(influencingMeasures, ","));
+    }
+
+    private static void removeUnmatchedGroupingAgg(Collection<FunctionDesc> unmatchedAggregations) {
+        if (CollectionUtils.isEmpty(unmatchedAggregations))
+            return;
+
+        Iterator<FunctionDesc> iterator = unmatchedAggregations.iterator();
+        while (iterator.hasNext()) {
+            if (FunctionDesc.FUNC_GROUPING.equalsIgnoreCase(iterator.next().getExpression())) {
+                iterator.remove();
+            }
+        }
     }
 
 }
