@@ -272,7 +272,6 @@ abstract public class KylinConfigBase implements Serializable {
         if (cachedBigCellDirectory != null)
             return cachedBigCellDirectory;
 
-
         String root = getOptional("kylin.env.hdfs-metastore-bigcell-dir");
 
         if (root == null) {
@@ -480,6 +479,13 @@ abstract public class KylinConfigBase implements Serializable {
     public String[] getRealizationProviders() {
         return getOptionalStringArray("kylin.metadata.realization-providers", //
                 new String[] { "org.apache.kylin.cube.CubeManager", "org.apache.kylin.storage.hybrid.HybridManager" });
+    }
+
+    public String[] getRoutingRules() {
+        return getOptionalStringArray("kylin.query.routing-rules", //
+                new String[] { "org.apache.kylin.query.routing.rules.RemoveBlackoutRealizationsRule",
+                        "org.apache.kylin.query.routing.rules.RemoveUncapableRealizationsRule",
+                        "org.apache.kylin.query.routing.rules.RealizationSortRule" });
     }
 
     public String[] getCubeDimensionCustomEncodingFactories() {

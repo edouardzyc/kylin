@@ -21,11 +21,10 @@ package org.apache.kylin.query.routing;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.util.ClassUtil;
 import org.apache.kylin.metadata.realization.IRealization;
 import org.apache.kylin.metadata.realization.RealizationType;
-import org.apache.kylin.query.routing.rules.RealizationSortRule;
-import org.apache.kylin.query.routing.rules.RemoveBlackoutRealizationsRule;
-import org.apache.kylin.query.routing.rules.RemoveUncapableRealizationsRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +37,11 @@ public abstract class RoutingRule {
     private static List<RoutingRule> rules = Lists.newLinkedList();
 
     static {
-        rules.add(new RemoveBlackoutRealizationsRule());
-        rules.add(new RemoveUncapableRealizationsRule());
-        rules.add(new RealizationSortRule());
+        KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
+        String[] routingRules = kylinConfig.getRoutingRules();
+        for (String routingRule : routingRules) {
+            rules.add((RoutingRule) ClassUtil.newInstance(routingRule));
+        }
     }
 
     public static void applyRules(List<Candidate> candidates) {
@@ -48,7 +49,8 @@ public abstract class RoutingRule {
             String before = getPrintableText(candidates);
             rule.apply(candidates);
             String after = getPrintableText(candidates);
-            logger.info("Applying rule: " + rule + ", realizations before: " + before + ", realizations after: " + after);
+            logger.info(
+                    "Applying rule: " + rule + ", realizations before: " + before + ", realizations after: " + after);
         }
     }
 
@@ -73,7 +75,8 @@ public abstract class RoutingRule {
      */
     public static void registerRule(RoutingRule rule, int applyOrder) {
         if (applyOrder > rules.size()) {
-            logger.warn("apply order " + applyOrder + "  is larger than rules size " + rules.size() + ", will put the new rule at the end");
+            logger.warn("apply order " + applyOrder + "  is larger than rules size " + rules.size()
+                    + ", will put the new rule at the end");
             rules.add(rule);
         }
 
