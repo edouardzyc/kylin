@@ -223,8 +223,7 @@ public class OLAPProjectRel extends Project implements OLAPRel {
     protected TblColRef translateRexCall(RexCall call, ColumnRowType inputColumnRowType, String fieldName,
             Set<TblColRef> sourceCollector) {
         SqlOperator operator = call.getOperator();
-        if (operator == SqlStdOperatorTable.EXTRACT_DATE
-                || operator instanceof SqlUserDefinedFunction && ("QUARTER").equals(operator.getName())) {
+        if (operator instanceof SqlUserDefinedFunction && ("QUARTER").equals(operator.getName())) {
             return translateFirstRexInputRef(call, inputColumnRowType, fieldName, sourceCollector);
         }
 
