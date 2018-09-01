@@ -937,6 +937,10 @@ abstract public class KylinConfigBase implements Serializable {
         return Boolean.parseBoolean(this.getOptional("kylin.source.hive.redistribute-flat-table", "true"));
     }
 
+    public String getHiveDefaultFS() {
+        return getOptional("kylin.source.hive.defaultfs", "");
+    }
+
     public String getHiveClientMode() {
         return getOptional("kylin.source.hive.client", "cli");
     }

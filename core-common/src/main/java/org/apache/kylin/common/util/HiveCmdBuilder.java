@@ -106,7 +106,11 @@ public class HiveCmdBuilder {
     }
 
     private String parseProps() {
-        hiveConfProps.put("fs.defaultFS", kylinConfig.getPrefixWorkingScheme());
+        if (StringUtils.isBlank(kylinConfig.getHiveDefaultFS())) {
+            hiveConfProps.put("fs.defaultFS", kylinConfig.getPrefixWorkingScheme());
+        } else {
+            hiveConfProps.put("fs.defaultFS", kylinConfig.getHiveDefaultFS());
+        }
 
         StringBuilder s = new StringBuilder();
         for (Map.Entry<String, String> prop : hiveConfProps.entrySet()) {
