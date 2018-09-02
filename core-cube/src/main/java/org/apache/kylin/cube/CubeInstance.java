@@ -211,12 +211,8 @@ public class CubeInstance extends RootPersistentEntity implements IRealization, 
         return getStatus() == RealizationStatusEnum.READY;
     }
 
-    // if cube is not online and has no data or any building job, we allow its descriptor to be
-    // in a temporary broken state, so that user can edit and fix it. Broken state is often due to
-    // schema changes at source.
-    public boolean allowBrokenDescriptor() {
-        return (getStatus() == RealizationStatusEnum.DISABLED || getStatus() == RealizationStatusEnum.DESCBROKEN)
-                && segments.isEmpty();
+    public boolean isDescBroken() {
+        return getStatus() == RealizationStatusEnum.DESCBROKEN;
     }
 
     @Override
@@ -236,7 +232,7 @@ public class CubeInstance extends RootPersistentEntity implements IRealization, 
     public String toString() {
         return getCanonicalName();
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;

@@ -18,11 +18,16 @@
 
 package org.apache.kylin.rest.msg;
 
+import static java.lang.String.format;
+
+import java.util.List;
+
 /**
  * Created by luwei on 17-4-12.
  */
 public class Message {
 
+    private static final int MAX_SHOW_USER = 5;
     private static Message instance = null;
 
     protected Message() {
@@ -274,6 +279,31 @@ public class Message {
         return "Table is already in use by models '%s'.";
     }
 
+    public String getLOAD_HIVE_TABLES_FAILED(boolean isLookupTblChanged, List<String> brokenCols,
+            List<String> brokenModels) {
+
+        StringBuilder buf = new StringBuilder();
+        if (isLookupTblChanged) {
+            buf.append("is used as Lookup Table but changed in hive , ");
+        }
+        if (brokenCols.size() > 0) {
+            if (brokenCols.size() > MAX_SHOW_USER)
+                buf.append(format("has %d Column(s) changed : %s ... , ", brokenCols.size(),
+                        brokenCols.subList(0, MAX_SHOW_USER).toString()));
+            else
+                buf.append(format("has %d Column(s) changed : %s , ", brokenCols.size(), brokenCols.toString()));
+        }
+        if (brokenModels.size() > 0) {
+            if (brokenModels.size() > MAX_SHOW_USER)
+                buf.append(format("influence %d Model(s) : %s ... , ", brokenModels.size(),
+                        brokenModels.subList(0, MAX_SHOW_USER).toString()));
+            else
+                buf.append(format("influence %d Model(s) : %s , ", brokenModels.size(), brokenModels.toString()));
+        }
+        buf.append("Please purge and delete related Cube(s) , then modify related Model(s)");
+        return buf.toString();
+    }
+
     // Cube Desc
     public String getCUBE_DESC_NOT_FOUND() {
         return "Cannot find cube desc '%s'.";
@@ -440,7 +470,7 @@ public class Message {
         return "HBase failed.";
     }
 
-    public String getPath_NOT_EXIST(){
+    public String getPath_NOT_EXIST() {
         return "File '%s' doesn’t exist, please contact your administrator to create it.";
     }
 }

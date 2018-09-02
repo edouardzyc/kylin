@@ -29,6 +29,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.util.ClassUtil;
 import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.common.util.Pair;
 import org.apache.kylin.cube.CubeManager;
@@ -39,6 +40,7 @@ import org.apache.kylin.job.execution.ExecutableManager;
 import org.apache.kylin.job.execution.ExecutableState;
 import org.apache.kylin.metadata.TableMetadataManager;
 import org.apache.kylin.metadata.model.ColumnDesc;
+import org.apache.kylin.metadata.model.DataModelManager;
 import org.apache.kylin.metadata.model.TableDesc;
 import org.apache.kylin.metadata.model.TableExtDesc;
 import org.apache.kylin.metadata.project.ProjectInstance;
@@ -130,7 +132,8 @@ public class TableService extends BasicService {
         // do schema check
         TableMetadataManager metaMgr = getTableManager();
         CubeManager cubeMgr = getCubeManager();
-        TableSchemaUpdateChecker checker = new TableSchemaUpdateChecker(metaMgr, cubeMgr);
+        DataModelManager modelMgr = getDataModelManager();
+        TableSchemaUpdateChecker checker = getTableSchemaUpdateChecker(metaMgr, modelMgr, cubeMgr);
         for (Pair<TableDesc, TableExtDesc> pair : allMeta) {
             TableDesc tableDesc = pair.getFirst();
             TableSchemaUpdateChecker.CheckResult result = checker.allowReload(tableDesc, project);
@@ -381,5 +384,20 @@ public class TableService extends BasicService {
     public String normalizeHiveTableName(String tableName) {
         String[] dbTableName = HadoopUtil.parseHiveTableName(tableName);
         return (dbTableName[0] + "." + dbTableName[1]).toUpperCase();
+    }
+
+    private TableSchemaUpdateChecker getTableSchemaUpdateChecker(TableMetadataManager metaMgr,
+            DataModelManager modelMgr, CubeManager cubeMgr) {
+        TableSchemaUpdateChecker tableSchemaUpdateChecker = null;
+        KylinConfig config = KylinConfig.getInstanceFromEnv();
+        String cls = config.getReloadHiveTableChecker();
+        try {
+            tableSchemaUpdateChecker = ClassUtil.forName(cls, TableSchemaUpdateChecker.class)
+                    .getConstructor(TableMetadataManager.class, DataModelManager.class, CubeManager.class)
+                    .newInstance(metaMgr, modelMgr, cubeMgr);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return tableSchemaUpdateChecker;
     }
 }

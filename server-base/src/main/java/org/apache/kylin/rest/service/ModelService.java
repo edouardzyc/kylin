@@ -365,6 +365,20 @@ public class ModelService extends BasicService {
         }
     }
 
+    //if broken model not used by cubes, return true, allow update broken model
+    public boolean allowModelUpdate(String model, String project) throws IOException {
+        DataModelDesc origModel = getModel(model, project);
+        if (origModel != null && origModel.getStatus().equals(DataModelDesc.BROKEN_STATUS)) {
+            List<CubeDesc> cubeDescs = getCubeDescManager().listAllDesc();
+            for (CubeDesc cubeDesc : cubeDescs) {
+                if (cubeDesc.getModelName().equals(model)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public DataModelDesc updateModelToResourceStore(DataModelDesc modelDesc, String projectName) throws IOException {
 
         aclEvaluate.checkProjectWritePermission(projectName);

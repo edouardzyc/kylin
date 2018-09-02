@@ -18,11 +18,16 @@
 
 package org.apache.kylin.rest.msg;
 
+import static java.lang.String.format;
+
+import java.util.List;
+
 /**
  * Created by luwei on 17-4-12.
  */
 public class CnMessage extends Message {
 
+    private static final int MAX_SHOW_USER = 5;
     private static CnMessage instance = null;
 
     protected CnMessage() {
@@ -274,6 +279,31 @@ public class CnMessage extends Message {
         return "表已被模型 '%s' 使用";
     }
 
+    public String getLOAD_HIVE_TABLES_FAILED(boolean isLookupTblChanged, List<String> brokenCols,
+            List<String> brokenModels) {
+
+        StringBuilder buf = new StringBuilder();
+        if (isLookupTblChanged) {
+            buf.append("被作为维度表引用，但该表结构在hive中已经改变。");
+        }
+        if (brokenCols.size() > 0) {
+            if (brokenCols.size() > MAX_SHOW_USER)
+                buf.append(
+                        format("有%d个列改变：%s ...，", brokenCols.size(), brokenCols.subList(0, MAX_SHOW_USER).toString()));
+            else
+                buf.append(format("有%d个列改变：%s，", brokenCols.size(), brokenCols.toString()));
+        }
+        if (brokenModels.size() > 0) {
+            if (brokenModels.size() > MAX_SHOW_USER)
+                buf.append(format("影响%d个模型：%s...，", brokenModels.size(),
+                        brokenModels.subList(0, MAX_SHOW_USER).toString()));
+            else
+                buf.append(format("影响%d个模型：%s，", brokenModels.size(), brokenModels.toString()));
+        }
+        buf.append("请先清理与删除相关cube，并修改相关模型。");
+        return buf.toString();
+    }
+
     // Cube Desc
     public String getCUBE_DESC_NOT_FOUND() {
         return "找不到 cube '%s'";
@@ -428,7 +458,7 @@ public class CnMessage extends Message {
         return "HBase 遇到错误";
     }
 
-    public String getPath_NOT_EXIST(){
+    public String getPath_NOT_EXIST() {
         return "文件 '%s' 目录不存在，请联系管理员创建!";
     }
 }

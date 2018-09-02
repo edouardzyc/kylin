@@ -19,7 +19,6 @@
 package org.apache.kylin.cube.model;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.lang.reflect.Method;
@@ -637,7 +636,7 @@ public class CubeDesc extends RootPersistentEntity implements IEngineAware {
                 this.rowkey.getRowKeyColumns().length);
 
         this.model = DataModelManager.getInstance(config).getDataModelDesc(modelName);
-        checkNotNull(this.model, "DateModelDesc(%s) not found", modelName);
+        checkState(!model.getStatus().equals(DataModelDesc.BROKEN_STATUS), "DateModelDesc(%s) is broken", modelName);
 
         for (DimensionDesc dim : dimensions) {
             dim.init(this);

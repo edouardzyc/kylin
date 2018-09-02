@@ -88,7 +88,15 @@ public class DataModelManager {
             protected DataModelDesc initEntityAfterReload(DataModelDesc model, String resourceName) {
                 String prj = ProjectManager.getInstance(config).getProjectOfModel(model.getName()).getName();
                 if (!model.isDraft()) {
-                    model.init(config, getAllTablesMap(prj), getModels(prj), true);
+                    try {
+                        model.init(config, getAllTablesMap(prj), getModels(prj), true);
+                    } catch (Exception e) {
+                        logger.warn("Broken Model " + model.getName(), e);
+                        model.addError(e.getMessage(), true);
+                    }
+                    if (!model.getError().isEmpty()) {
+                        model.setStatus(DataModelDesc.BROKEN_STATUS);
+                    }
                 }
                 return model;
             }

@@ -55,6 +55,7 @@ import com.google.common.collect.Sets;
 @JsonAutoDetect(fieldVisibility = Visibility.NONE, getterVisibility = Visibility.NONE, isGetterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
 public class DataModelDesc extends RootPersistentEntity {
     private static final Logger logger = LoggerFactory.getLogger(DataModelDesc.class);
+    public static final String BROKEN_STATUS = "broken";
 
     public static enum TableKind implements Serializable {
         FACT, LOOKUP
@@ -74,6 +75,9 @@ public class DataModelDesc extends RootPersistentEntity {
 
     @JsonProperty("is_draft")
     private boolean isDraft;
+
+    @JsonProperty("status")
+    private String status = "";
 
     @JsonProperty("description")
     private String description;
@@ -155,6 +159,14 @@ public class DataModelDesc extends RootPersistentEntity {
 
     public void setDraft(boolean isDraft) {
         this.isDraft = isDraft;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getDescription() {
@@ -253,6 +265,10 @@ public class DataModelDesc extends RootPersistentEntity {
         return false;
     }
 
+    public boolean isBroken() {
+        return status.equals(BROKEN_STATUS);
+    }
+
     public boolean containsTable(TableDesc table) {
         for (TableRef t : allTableRefs) {
             if (t.getTableIdentity().equals(table.getIdentity())
@@ -316,6 +332,27 @@ public class DataModelDesc extends RootPersistentEntity {
             throw new IllegalArgumentException("Column not found by " + input);
 
         return result;
+    }
+
+    public Set<String> getAllDimsAndMetricsWithTable(String table) {
+        Set<String> allUsedColumns = new HashSet<>();
+        List<ModelDimensionDesc> dimensions = getDimensions();
+        for (ModelDimensionDesc dimension : dimensions) {
+            //get table true name
+            TableRef realTable = findTable(dimension.getTable());
+            if (realTable.getTableName().equals(table)) {
+                Collections.addAll(allUsedColumns, dimension.getColumns());
+            }
+        }
+        String[] metrics = getMetrics();
+        for (String metric : metrics) {
+            String metricTable = metric.substring(0, metric.lastIndexOf("."));
+            String metricColumn = metric.substring(metric.lastIndexOf(".") + 1);
+            if (metricTable.equals(table)) {
+                allUsedColumns.add(metricColumn);
+            }
+        }
+        return allUsedColumns;
     }
 
     // find by unique name, that must uniquely identifies a table in the model
@@ -784,7 +821,7 @@ public class DataModelDesc extends RootPersistentEntity {
     public static DataModelDesc getCopyOf(DataModelDesc orig) {
         return copy(orig, new DataModelDesc());
     }
-    
+
     public static DataModelDesc copy(DataModelDesc orig, DataModelDesc copy) {
         copy.config = orig.config;
         copy.name = orig.name;

@@ -156,6 +156,10 @@ public class ColumnDesc implements Serializable {
         this.comment = comment;
     }
 
+    public void setType(DataType type) {
+        this.type = type;
+    }
+
     public DataType getType() {
         return type;
     }
@@ -212,6 +216,25 @@ public class ColumnDesc implements Serializable {
             this.setDatatype(null);
         } else {
             this.setDatatype(normalized.toString());
+        }
+    }
+
+    public boolean isColumnCompatible(ColumnDesc column) {
+        if (!column.getName().equalsIgnoreCase(this.getName())) {
+            return false;
+        }
+
+        if (column.getType().isIntegerFamily()) {
+            // OLAPTable.listSourceColumns converts some integer columns to bigint,
+            // therefore strict type comparison won't work.
+            // changing from one integer type to another should be fine.
+            return this.getType().isIntegerFamily();
+        } else if (column.getType().isNumberFamily()) {
+            // Both are float/double should be fine.
+            return this.getType().isNumberFamily();
+        } else {
+            // only compare base type name, changing precision or scale should be fine
+            return column.getTypeName().equals(this.getTypeName());
         }
     }
 

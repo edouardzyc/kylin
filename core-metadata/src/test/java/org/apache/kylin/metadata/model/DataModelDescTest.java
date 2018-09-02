@@ -22,10 +22,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.kylin.common.util.JsonUtil;
 import org.apache.kylin.common.util.LocalFileMetadataTestCase;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -87,5 +91,21 @@ public class DataModelDescTest extends LocalFileMetadataTestCase {
         String copyStr = JsonUtil.writeValueAsIndentString(copyDesc);
 
         assertEquals(descStr, copyStr);
+    }
+
+    @Test
+    public void testGetAllDimsAndMetricsWithTable() {
+        DataModelDesc model = DataModelManager.getInstance(getTestConfig()).getDataModelDesc("ci_inner_join_model");
+        Set<String> usedCols = model.getAllDimsAndMetricsWithTable("TEST_ACCOUNT");
+
+        Set<String> test_account_cols = new HashSet<>();
+        test_account_cols.add("ACCOUNT_ID");
+        test_account_cols.add("ACCOUNT_BUYER_LEVEL");
+        test_account_cols.add("ACCOUNT_SELLER_LEVEL");
+        test_account_cols.add("ACCOUNT_COUNTRY");
+        test_account_cols.add("ACCOUNT_CONTACT");
+
+        Assert.assertEquals(usedCols.size(), 5);
+        Assert.assertTrue(usedCols.containsAll(test_account_cols));
     }
 }

@@ -1014,6 +1014,11 @@ abstract public class KylinConfigBase implements Serializable {
         }
     }
 
+    public String getReloadHiveTableChecker() {
+        return getOptional("kylin.source.hive.reload-table-checker-impl",
+                "org.apache.kylin.rest.service.TableSchemaUpdateChecker");
+    }
+
     // ============================================================================
     // SOURCE.KAFKA
     // ============================================================================
