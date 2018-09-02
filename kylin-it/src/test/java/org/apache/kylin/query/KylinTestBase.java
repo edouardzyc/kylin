@@ -836,8 +836,8 @@ public class KylinTestBase {
         if (h2Connection != null)
             closeConnection(h2Connection);
 
-        HBaseMetadataTestCase.staticCleanupTestMetadata();
         RemoveBlackoutRealizationsRule.blackList.clear();
+        HBaseMetadataTestCase.staticCleanupTestMetadata();
 
     }
 
