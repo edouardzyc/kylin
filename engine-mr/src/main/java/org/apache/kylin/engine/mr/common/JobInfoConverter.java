@@ -28,6 +28,7 @@ import org.apache.kylin.engine.mr.CubingJob;
 import org.apache.kylin.engine.mr.steps.CubingExecutableUtil;
 import org.apache.kylin.job.JobInstance;
 import org.apache.kylin.job.JobSearchResult;
+import org.apache.kylin.job.common.HiveCommandExecutable;
 import org.apache.kylin.job.common.ShellExecutable;
 import org.apache.kylin.job.constant.JobStatusEnum;
 import org.apache.kylin.job.constant.JobStepStatusEnum;
@@ -173,6 +174,9 @@ public class JobInfoConverter {
         result.setExecEndTime(AbstractExecutable.getEndTime(stepOutput));
         if (task instanceof ShellExecutable) {
             result.setExecCmd(((ShellExecutable) task).getCmd());
+        }
+        if (task instanceof HiveCommandExecutable) {
+            result.setExecCmd(((HiveCommandExecutable) task).getStatement());
         }
         if (task instanceof MapReduceExecutable) {
             result.setExecCmd(((MapReduceExecutable) task).getMapReduceParams());

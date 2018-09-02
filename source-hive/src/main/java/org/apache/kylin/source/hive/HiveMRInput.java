@@ -41,8 +41,8 @@ import org.apache.kylin.engine.mr.IMRInput;
 import org.apache.kylin.engine.mr.JobBuilderSupport;
 import org.apache.kylin.engine.mr.steps.CubingExecutableUtil;
 import org.apache.kylin.job.JoinedFlatTable;
+import org.apache.kylin.job.common.HiveCommandExecutable;
 import org.apache.kylin.job.common.PatternedLogger;
-import org.apache.kylin.job.common.ShellExecutable;
 import org.apache.kylin.job.constant.ExecutableConstants;
 import org.apache.kylin.job.exception.ExecuteException;
 import org.apache.kylin.job.execution.AbstractExecutable;
@@ -202,9 +202,9 @@ public class HiveMRInput implements IMRInput {
             return step;
         }
 
-        private ShellExecutable createLookupHiveViewMaterializationStep(String hiveInitStatements, String jobWorkingDir,
-                String uuid) {
-            ShellExecutable step = new ShellExecutable();
+        private HiveCommandExecutable createLookupHiveViewMaterializationStep(String hiveStatements,
+                                                                              String jobWorkingDir, String uuid) {
+            HiveCommandExecutable step = new HiveCommandExecutable();
             step.setName(ExecutableConstants.STEP_NAME_MATERIALIZE_HIVE_VIEW_IN_LOOKUP);
 
             KylinConfig kylinConfig = ((CubeSegment) flatDesc.getSegment()).getConfig();
@@ -223,23 +223,21 @@ public class HiveMRInput implements IMRInput {
                 return null;
             }
 
-            HiveCmdBuilder hiveCmdBuilder = new HiveCmdBuilder();
-            hiveCmdBuilder.overwriteHiveProps(kylinConfig.getHiveConfigOverride());
-            hiveCmdBuilder.addStatement(hiveInitStatements);
             for (TableDesc lookUpTableDesc : lookupViewsTables) {
                 String identity = lookUpTableDesc.getIdentity();
                 if (lookUpTableDesc.isView()) {
                     String intermediate = lookUpTableDesc.getMaterializedName(uuid);
                     String materializeViewHql = materializeViewHql(intermediate, identity, jobWorkingDir);
-                    hiveCmdBuilder.addStatement(materializeViewHql);
+                    hiveStatements = hiveStatements + materializeViewHql;
                     hiveViewIntermediateTables = hiveViewIntermediateTables + intermediate + ";";
                 }
             }
 
+            step.setStatement(hiveStatements);
+
             hiveViewIntermediateTables = hiveViewIntermediateTables.substring(0,
                     hiveViewIntermediateTables.length() - 1);
 
-            step.setCmd(hiveCmdBuilder.build());
             return step;
         }
 
