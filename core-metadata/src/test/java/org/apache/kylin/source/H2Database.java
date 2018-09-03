@@ -145,6 +145,9 @@ public class H2Database {
 
         for (int i = 0; i < tableDesc.getColumns().length; i++) {
             ColumnDesc col = tableDesc.getColumns()[i];
+            if (col.isComputedColumn()) {
+                continue;
+            }
             if (i > 0) {
                 ddl.append(",");
                 csvColumns.append(",");
