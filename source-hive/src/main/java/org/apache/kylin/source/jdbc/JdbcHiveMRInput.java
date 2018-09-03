@@ -19,10 +19,8 @@
 package org.apache.kylin.source.jdbc;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.kylin.common.KylinConfig;
-import org.apache.kylin.common.util.SourceConfigurationUtil;
 import org.apache.kylin.engine.mr.steps.CubingExecutableUtil;
 import org.apache.kylin.job.JoinedFlatTable;
 import org.apache.kylin.job.constant.ExecutableConstants;
@@ -37,16 +35,13 @@ import org.apache.kylin.metadata.model.TableExtDesc.ColumnStats;
 import org.apache.kylin.metadata.model.TableRef;
 import org.apache.kylin.metadata.model.TblColRef;
 import org.apache.kylin.source.hive.HiveMRInput;
+import org.apache.kylin.source.jdbc.sqoop.SqoopCmdStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Maps;
 
 public class JdbcHiveMRInput extends HiveMRInput {
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcHiveMRInput.class);
-    private static final String MR_OVERRIDE_QUEUE_KEY = "mapreduce.job.queuename";
-    private static final String DEFAULT_QUEUE = "default";
 
     public IMRBatchCubingInputSide getBatchCubingInputSide(IJoinedFlatTableDesc flatDesc) {
         return new BatchCubingInputSide(flatDesc);
@@ -139,14 +134,6 @@ public class JdbcHiveMRInput extends HiveMRInput {
             return splitColumn;
         }
 
-        protected String getSqoopJobQueueName(KylinConfig config) {
-            Map<String, String> mrConfigOverride = config.getMRConfigOverride();
-            if (mrConfigOverride.containsKey(MR_OVERRIDE_QUEUE_KEY)) {
-                return mrConfigOverride.get(MR_OVERRIDE_QUEUE_KEY);
-            }
-            return DEFAULT_QUEUE;
-        }
-
         protected AbstractExecutable createSqoopToFlatHiveStep(String jobWorkingDir, String cubeName) {
             KylinConfig config = getConfig();
             PartitionDesc partitionDesc = flatDesc.getDataModel().getPartitionDesc();
@@ -191,16 +178,15 @@ public class JdbcHiveMRInput extends HiveMRInput {
                 }
             }
 
-            String cmd = String.format("%s/sqoop import -Dorg.apache.sqoop.splitter.allow_text_splitter=true "
-                    + generateSqoopConfigArgString()
-                    + "--connect \"%s\" --driver %s --username %s --password %s --query \"%s AND \\$CONDITIONS\" "
-                    + "--target-dir %s/%s --split-by %s.%s --boundary-query \"%s\" --null-string '' "
-                    + "--fields-terminated-by '%s' --num-mappers %d", sqoopHome, connectionUrl, driverClass, jdbcUser,
-                    jdbcPass, selectSql, jobWorkingDir, hiveTable, splitTable, splitColumn, bquery, filedDelimiter,
-                    mapperNum);
+            String cmd = String.format(
+                    "--connect \"%s\" --driver %s --username %s --password %s --query \"%s AND \\$CONDITIONS\" "
+                            + "--target-dir %s/%s --split-by %s.%s --boundary-query \"%s\" --null-string '' "
+                            + "--fields-terminated-by '%s' --num-mappers %d",
+                    sqoopHome, connectionUrl, driverClass, jdbcUser, jdbcPass, selectSql, jobWorkingDir, hiveTable,
+                    splitTable, splitColumn, bquery, filedDelimiter, mapperNum);
             logger.debug("sqoop cmd: {}", cmd);
 
-            CmdStep step = new CmdStep();
+            SqoopCmdStep step = new SqoopCmdStep();
             step.setCmd(cmd);
             step.setName(ExecutableConstants.STEP_NAME_SQOOP_TO_FLAT_HIVE_TABLE);
             return step;
@@ -209,20 +195,6 @@ public class JdbcHiveMRInput extends HiveMRInput {
         @Override
         protected void addStepPhase1_DoMaterializeLookupTable(DefaultChainedExecutable jobFlow) {
             // skip
-        }
-
-        protected String generateSqoopConfigArgString() {
-            KylinConfig kylinConfig = getConfig();
-            Map<String, String> config = Maps.newHashMap();
-            config.put("mapreduce.job.queuename", getSqoopJobQueueName(kylinConfig)); // override job queue from mapreduce config
-            config.putAll(SourceConfigurationUtil.loadSqoopConfiguration());
-            config.putAll(kylinConfig.getSqoopConfigOverride());
-
-            StringBuilder args = new StringBuilder();
-            for (Map.Entry<String, String> entry : config.entrySet()) {
-                args.append(" -D" + entry.getKey() + "=" + entry.getValue() + " ");
-            }
-            return args.toString();
         }
     }
 }
