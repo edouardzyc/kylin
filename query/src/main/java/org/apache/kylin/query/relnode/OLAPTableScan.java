@@ -71,7 +71,6 @@ import org.apache.kylin.metadata.model.ColumnDesc;
 import org.apache.kylin.metadata.model.DataModelDesc;
 import org.apache.kylin.metadata.model.TableRef;
 import org.apache.kylin.metadata.model.TblColRef;
-import org.apache.kylin.query.optrule.AggregateMultipleExpandRule;
 import org.apache.kylin.query.optrule.AggregateProjectReduceRule;
 import org.apache.kylin.query.optrule.OLAPAggregateRule;
 import org.apache.kylin.query.optrule.OLAPFilterRule;
@@ -162,7 +161,6 @@ public class OLAPTableScan extends TableScan implements OLAPRel, EnumerableRel {
         planner.addRule(OLAPValuesRule.INSTANCE);
 
         // Support translate the grouping aggregate into union of simple aggregates
-        planner.addRule(AggregateMultipleExpandRule.INSTANCE);
         planner.addRule(AggregateProjectReduceRule.INSTANCE);
 
         // CalcitePrepareImpl.CONSTANT_REDUCTION_RULES
