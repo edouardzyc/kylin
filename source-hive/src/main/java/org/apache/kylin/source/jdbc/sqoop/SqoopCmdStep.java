@@ -52,7 +52,7 @@ public class SqoopCmdStep extends AbstractExecutable {
 
     protected void sqoopFlatHiveTable(KylinConfig config) throws IOException {
         String cmd = getParam("cmd");
-        cmd = String.format("%s/sqoop import -Dorg.apache.sqoop.splitter.allow_text_splitter=true "
+        cmd = String.format("%s/bin/sqoop import -Dorg.apache.sqoop.splitter.allow_text_splitter=true "
                 + generateSqoopConfigArgString() + cmd, config.getSqoopHome());
         stepLogger.log(String.format("exe cmd:%s", cmd));
         Pair<Integer, String> response = config.getCliCommandExecutor().execute(cmd, stepLogger);
