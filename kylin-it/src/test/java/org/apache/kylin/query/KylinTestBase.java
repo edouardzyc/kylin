@@ -672,10 +672,6 @@ public class KylinTestBase {
     }
 
     protected void execAndVerifyResult(String queryFolder) throws Exception {
-        if(!isVerifyTestResultEnabled()) {
-            batchExecuteQuery(queryFolder);
-            return;
-        }
         List<File> sqlFiles = getFilesFromFolder(new File(queryFolder), ".sql");
         IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
         for (File sqlFile : sqlFiles) {
@@ -874,12 +870,12 @@ public class KylinTestBase {
         return  ".expected.xml";
     }
 
-    protected boolean isDumpTestQueryStatsEnabled() {
+    protected boolean isDumpQueryStatsAndResultsEnabled() {
         return false;
     }
 
     private void dumpTestQueryStats(File sqlFile, QueryContext queryContext) {
-        if (!isDumpTestQueryStatsEnabled()) {
+        if (!isDumpQueryStatsAndResultsEnabled()) {
             return;
         }
         try {
@@ -894,7 +890,7 @@ public class KylinTestBase {
     }
 
     protected void dumpResult(ITable kylinTable, File expectResultFile) throws Exception{
-        if (!isDumpTestQueryStatsEnabled()) {
+        if (!isDumpQueryStatsAndResultsEnabled()) {
             return;
         }
         if (!expectResultFile.exists()) {
@@ -917,7 +913,7 @@ public class KylinTestBase {
         return false;
     }
 
-    private void verifyTestQueryStats(File sqlFile, QueryContext queryContext) {
+    private void verifyTestQueryStats(File sqlFile, QueryContext queryContext) throws IOException {
         if (!isVerifyTestQueryStatsEnabled()) {
             return;
         }
@@ -941,6 +937,7 @@ public class KylinTestBase {
             Assert.assertEquals(expected, actual);
         } catch (IOException e) {
             logger.error("Fail to compare query stats of {}", sqlFile.getPath(), e);
+            throw e;
         }
     }
 
