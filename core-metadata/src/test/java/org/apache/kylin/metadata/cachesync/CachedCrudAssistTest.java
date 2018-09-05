@@ -53,7 +53,7 @@ public class CachedCrudAssistTest extends LocalFileMetadataTestCase {
 
     @After
     public void after() throws Exception {
-        cleanAfterClass();
+        staticCleanupTestMetadata();
     }
 }
 

@@ -92,6 +92,6 @@ public class MultiNodeManagerTestBase extends LocalFileMetadataTestCase {
     @After
     public void after() throws Exception {
         server.stop();
-        cleanAfterClass();
+        staticCleanupTestMetadata();
     }
 }

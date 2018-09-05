@@ -19,7 +19,7 @@
 package org.apache.kylin.rest.job;
 
 import static org.apache.kylin.common.util.LocalFileMetadataTestCase.LOCALMETA_TEMP_DATA;
-import static org.apache.kylin.common.util.LocalFileMetadataTestCase.cleanAfterClass;
+import static org.apache.kylin.common.util.LocalFileMetadataTestCase.staticCleanupTestMetadata;
 import static org.apache.kylin.common.util.LocalFileMetadataTestCase.staticCreateTestMetadata;
 
 import java.io.File;
@@ -42,7 +42,7 @@ public class MetadataCleanupJobTest {
 
     @After
     public void after() throws Exception {
-        cleanAfterClass();
+        staticCleanupTestMetadata();
     }
 
     @Test

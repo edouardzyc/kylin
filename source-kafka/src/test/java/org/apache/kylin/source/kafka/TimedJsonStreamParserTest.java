@@ -57,7 +57,7 @@ public class TimedJsonStreamParserTest extends LocalFileMetadataTestCase {
 
     @AfterClass
     public static void after() throws Exception {
-        cleanAfterClass();
+        staticCleanupTestMetadata();
     }
 
     @Test

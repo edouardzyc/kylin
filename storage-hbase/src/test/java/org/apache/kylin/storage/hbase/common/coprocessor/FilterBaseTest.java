@@ -60,7 +60,7 @@ public class FilterBaseTest extends LocalFileMetadataTestCase {
 
     @AfterClass
     public static void after() throws Exception {
-        cleanAfterClass();
+        staticCleanupTestMetadata();
     }
 
     @SuppressWarnings("rawtypes")

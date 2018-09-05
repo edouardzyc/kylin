@@ -60,4 +60,7 @@ public class HBaseMetadataTestCase extends AbstractKylinTestCase {
 
     }
 
+    public static void staticCleanupTestMetadata() {
+        clearTestConfig();
+    }
 }

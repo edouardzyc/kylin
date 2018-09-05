@@ -56,7 +56,7 @@ public class AggregatorMemEstimateTest extends LocalFileMetadataTestCase {
 
     @AfterClass
     public static void after() throws Exception {
-        cleanAfterClass();
+        staticCleanupTestMetadata();
     }
 
     private List<? extends MeasureAggregator> basicAggregators() {

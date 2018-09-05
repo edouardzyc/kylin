@@ -63,7 +63,7 @@ public class LocalFileMetadataTestCase extends AbstractKylinTestCase {
         }
     }
 
-    public static void cleanAfterClass() {
+    public static void staticCleanupTestMetadata() {
         File directory = new File(LOCALMETA_TEMP_DATA);
         try {
             FileUtils.deleteDirectory(directory);
@@ -71,12 +71,13 @@ public class LocalFileMetadataTestCase extends AbstractKylinTestCase {
             if (directory.exists() && directory.list().length > 0)
                 throw new IllegalStateException("Can't delete directory " + directory, e);
         }
-        staticCleanupTestMetadata();
+
+        clearTestConfig();
     }
 
     @Override
     public void cleanupTestMetadata() {
-        cleanAfterClass();
+        staticCleanupTestMetadata();
     }
 
     protected String getLocalWorkingDirectory() {

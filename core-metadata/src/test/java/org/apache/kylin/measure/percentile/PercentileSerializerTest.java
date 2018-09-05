@@ -41,7 +41,7 @@ public class PercentileSerializerTest extends LocalFileMetadataTestCase {
 
     @After
     public void after() throws Exception {
-        cleanAfterClass();
+        cleanupTestMetadata();
     }
 
     @Test

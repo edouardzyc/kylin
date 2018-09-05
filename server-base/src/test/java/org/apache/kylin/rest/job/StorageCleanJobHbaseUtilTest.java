@@ -18,7 +18,7 @@
 
 package org.apache.kylin.rest.job;
 
-import static org.apache.kylin.common.util.LocalFileMetadataTestCase.cleanAfterClass;
+import static org.apache.kylin.common.util.LocalFileMetadataTestCase.staticCleanupTestMetadata;
 import static org.apache.kylin.common.util.LocalFileMetadataTestCase.staticCreateTestMetadata;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -46,7 +46,7 @@ public class StorageCleanJobHbaseUtilTest {
 
     @After
     public void after() {
-        cleanAfterClass();
+        staticCleanupTestMetadata();
     }
 
     @Test

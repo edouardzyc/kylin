@@ -65,7 +65,7 @@ public class SCCreatorTest extends LocalFileMetadataTestCase {
         if (tempMetadataDir != null && tempMetadataDir.exists()) {
             FileUtils.forceDelete(tempMetadataDir.getParentFile());
         }
-        staticCleanupTestMetadata();
+        this.cleanupTestMetadata();
     }
 
     @Test

@@ -142,7 +142,7 @@ public class CacheServiceTest extends LocalFileMetadataTestCase {
     @AfterClass
     public static void afterClass() throws Exception {
         server.stop();
-        cleanAfterClass();
+        staticCleanupTestMetadata();
     }
 
     private void waitForCounterAndClear(long count) {

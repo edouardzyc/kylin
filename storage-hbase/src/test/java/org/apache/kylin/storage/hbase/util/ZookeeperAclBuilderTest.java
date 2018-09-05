@@ -45,7 +45,7 @@ public class ZookeeperAclBuilderTest extends LocalFileMetadataTestCase {
 
     @AfterClass
     public static void tearDownResource() {
-        cleanAfterClass();
+        staticCleanupTestMetadata();
     }
 
     @Test

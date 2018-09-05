@@ -76,7 +76,7 @@ public class ITDoggedCubeBuilderTest extends LocalFileMetadataTestCase {
 
     @AfterClass
     public static void after() throws Exception {
-        cleanAfterClass();
+        staticCleanupTestMetadata();
     }
 
     @Test
