@@ -116,7 +116,7 @@ public class OLAPWindowRel extends Window implements OLAPRel {
                 ((OLAPRel) input).replaceTraitSet(EnumerableConvention.INSTANCE);
             }
         }
-        return EnumerableWindowBridge.createEnumerableWindow(getCluster(), traitSet, inputs.get(0), constants, rowType,
+        return EnumerableWindowBridge.createEnumerableWindow(getCluster(), getCluster().traitSetOf(EnumerableConvention.INSTANCE), inputs.get(0), constants, rowType,
                 groups);
     }
 
