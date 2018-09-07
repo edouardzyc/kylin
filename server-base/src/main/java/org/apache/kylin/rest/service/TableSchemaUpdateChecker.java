@@ -184,7 +184,8 @@ public class TableSchemaUpdateChecker {
         Set<String> usedColumns = model.getAllDimsAndMetricsWithTable(origTable.getName());
         //get partition column to check existed and type changed
         String partitionTblCol = model.getPartitionDesc().getPartitionDateColumn();
-        String partitionColName = partitionTblCol.substring(partitionTblCol.lastIndexOf(".") + 1);
+        String partitionColName = partitionTblCol == null ? ""
+                : partitionTblCol.substring(partitionTblCol.lastIndexOf(".") + 1);
 
         for (ColumnDesc origColumn : origTable.getColumns()) {
             //check if used origColumn exists
