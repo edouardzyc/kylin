@@ -50,6 +50,7 @@ import org.apache.kylin.metadata.model.tool.CalciteParser;
 import org.apache.kylin.metadata.project.ProjectManager;
 import org.apache.kylin.metadata.querymeta.SelectedColumnMeta;
 import org.apache.kylin.metadata.realization.NoRealizationFoundException;
+import org.apache.kylin.metadata.realization.NotSupportedSQLException;
 import org.apache.kylin.metadata.realization.RoutingIndicatorException;
 import org.apache.kylin.source.adhocquery.IPushDownRunner;
 import org.slf4j.Logger;
@@ -74,7 +75,8 @@ public class PushDownUtil {
     private static Pair<List<List<String>>, List<SelectedColumnMeta>> tryPushDownQuery(String project, String sql,
             String defaultSchema, SQLException sqlException, boolean isSelect, boolean isPrepare) {
 
-        KylinConfig kylinConfig = ProjectManager.getInstance(KylinConfig.getInstanceFromEnv()).getProject(project).getConfig();
+        KylinConfig kylinConfig = ProjectManager.getInstance(KylinConfig.getInstanceFromEnv()).getProject(project)
+                .getConfig();
 
         if (!kylinConfig.isPushDownEnabled())
             return null;
@@ -135,12 +137,14 @@ public class PushDownUtil {
         if (!isPushDownUpdateEnabled) {
             return rootCause != null //
                     && (rootCause instanceof NoRealizationFoundException //
-                            || rootCause instanceof RoutingIndicatorException); //
+                            || rootCause instanceof RoutingIndicatorException
+                            || rootCause instanceof NotSupportedSQLException); //
         } else {
             return (rootCause != null //
                     && (rootCause instanceof NoRealizationFoundException //
                             || rootCause instanceof SqlValidatorException //
-                            || rootCause instanceof RoutingIndicatorException)); //
+                            || rootCause instanceof RoutingIndicatorException
+                            || rootCause instanceof NotSupportedSQLException)); //
         }
     }
 
