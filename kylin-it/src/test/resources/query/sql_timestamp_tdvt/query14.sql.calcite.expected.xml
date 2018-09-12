@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <table name="query result of query14">
+    <column>LSTG_FORMAT_NAME</column>
+    <column>BIGINT0</column>
+    <column>BIGINT1</column>
+    <column>DOUBLE1</column>
+    <column>DECIMAL1</column>
+    <column>DAT1</column>
+    <column>TIME1</column>
+    <row>
+      <value>ABIN</value>
+      <value>3.1</value>
+      <value>0.9</value>
+      <value>2.2</value>
+      <value>2.2</value>
+      <value><![CDATA[1971-01-02 00:00:00.0]]></value>
+      <value><![CDATA[1998-12-31 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value>Auction</value>
+      <value>3.1</value>
+      <value>0.9</value>
+      <value>2.2</value>
+      <value>2.2</value>
+      <value><![CDATA[1971-01-02 00:00:00.0]]></value>
+      <value><![CDATA[1998-12-31 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value>FP-GTC</value>
+      <value>3.1</value>
+      <value>0.9</value>
+      <value>2.2</value>
+      <value>2.2</value>
+      <value><![CDATA[1971-01-02 00:00:00.0]]></value>
+      <value><![CDATA[1998-12-31 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value><![CDATA[FP-non GTC]]></value>
+      <value>3.1</value>
+      <value>0.9</value>
+      <value>2.2</value>
+      <value>2.2</value>
+      <value><![CDATA[1971-01-02 00:00:00.0]]></value>
+      <value><![CDATA[1998-12-31 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value>Others</value>
+      <value>3.1</value>
+      <value>0.9</value>
+      <value>2.2</value>
+      <value>2.2</value>
+      <value><![CDATA[1971-01-02 00:00:00.0]]></value>
+      <value><![CDATA[1998-12-31 00:00:00.0]]></value>
+    </row>
+    <row>
+      <value>extra</value>
+      <null/>
+      <null/>
+      <null/>
+      <null/>
+      <null/>
+      <null/>
+    </row>
+  </table>
+</dataset>
