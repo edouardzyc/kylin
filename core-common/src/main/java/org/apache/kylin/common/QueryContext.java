@@ -88,6 +88,8 @@ public class QueryContext {
     private List<RPCStatistics> rpcStatisticsList = Lists.newCopyOnWriteArrayList();
     private Map<Integer, CubeSegmentStatisticsResult> cubeSegmentStatisticsResultMap = Maps.newTreeMap();
 
+    private Throwable errorCause;
+
     private QueryContext() {
         // use QueryContext.current() instead
         queryStartMillis = System.currentTimeMillis();
@@ -258,6 +260,15 @@ public class QueryContext {
 
     public void setHasAdvance(boolean hasAdvance) {
         this.hasAdvance = hasAdvance;
+    }
+
+    public Throwable getErrorCause() {
+        return errorCause;
+    }
+
+    public QueryContext setErrorCause(Throwable errorCause) {
+        this.errorCause = errorCause;
+        return this;
     }
 
     public void addContext(int ctxId, String type, boolean ifCube) {

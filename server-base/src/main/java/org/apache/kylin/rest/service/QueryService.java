@@ -88,6 +88,7 @@ import org.apache.kylin.rest.constant.Constant;
 import org.apache.kylin.rest.exception.BadRequestException;
 import org.apache.kylin.rest.exception.InternalErrorException;
 import org.apache.kylin.rest.metrics.QueryMetrics2Facade;
+import org.apache.kylin.rest.metrics.QueryMetricsCollector;
 import org.apache.kylin.rest.metrics.QueryMetricsFacade;
 import org.apache.kylin.rest.model.Query;
 import org.apache.kylin.rest.msg.Message;
@@ -327,9 +328,11 @@ public class QueryService extends BasicService {
         stringBuilder.append("Message: ").append(response.getExceptionMessage()).append(newLine);
         stringBuilder.append("==========================[QUERY]===============================").append(newLine);
 
+        if (QueryMetricsCollector.isStarted()) {
+            QueryMetricsCollector.log(stringBuilder.toString());
+        }
+
         logger.info(stringBuilder.toString());
-        if (response.getIsException())
-            logger.error(response.getExceptionMessage());
     }
 
     public SQLResponse doQueryWithCache(SQLRequest sqlRequest) {
@@ -355,6 +358,7 @@ public class QueryService extends BasicService {
             BackdoorToggles.addToggles(sqlRequest.getBackdoorToggles());
 
         final QueryContext queryContext = QueryContext.current();
+        QueryMetricsCollector.start(queryContext.getQueryId());
 
         TraceScope scope = null;
         if (kylinConfig.isHtraceTracingEveryQuery() || BackdoorToggles.getHtraceEnabled()) {
@@ -365,7 +369,7 @@ public class QueryService extends BasicService {
         String traceUrl = getTraceUrl(scope);
 
         try (SetThreadName ignored = new SetThreadName("Query %s", queryContext.getQueryId())) {
-            long startTime = System.currentTimeMillis();
+            final long startTime = queryContext.getQueryStartMillis();
 
             SQLResponse sqlResponse = null;
             String sql = sqlRequest.getSql();
@@ -406,12 +410,6 @@ public class QueryService extends BasicService {
             sqlResponse.setQueryId(QueryContext.current().getQueryId());
             sqlResponse.setDuration(System.currentTimeMillis() - startTime);
             sqlResponse.setTraceUrl(traceUrl);
-            logQuery(sqlRequest, sqlResponse);
-            try {
-                recordMetric(sqlRequest, sqlResponse);
-            } catch (Throwable th) {
-                logger.warn("Write metric error.", th);
-            }
 
             String suiteId = kylinConfig.getSuiteId();
             if (suiteId != null && !suiteId.equals("")) {
@@ -419,11 +417,19 @@ public class QueryService extends BasicService {
             }
             sqlResponse.setServer(restAddress);
 
+            logQuery(sqlRequest, sqlResponse);
+            try {
+                recordMetric(sqlRequest, sqlResponse);
+            } catch (Throwable th) {
+                logger.warn("Write metric error.", th);
+            }
+
             return sqlResponse;
 
         } finally {
             BackdoorToggles.cleanToggles();
             QueryContext.reset();
+            QueryMetricsCollector.reset();
             if (scope != null) {
                 scope.close();
             }
@@ -481,6 +487,7 @@ public class QueryService extends BasicService {
 
             sqlResponse = new SQLResponse(null, null, null, 0, true, errMsg, false, false);
             QueryContext queryContext = QueryContext.current();
+            queryContext.setErrorCause(e);
             sqlResponse.setQueryId(queryContext.getQueryId());
             sqlResponse.setTotalScanCount(queryContext.getScannedRows());
             sqlResponse.setTotalScanBytes(queryContext.getScannedBytes());
