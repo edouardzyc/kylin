@@ -245,13 +245,42 @@ public class OLAPContext {
         fixedModel = false;
     }
 
-    public void clearColInfo() {
-        this.filterColumns.clear();
+    public void clearCtxInfo() {
+        //query info
+        this.afterAggregate = false;
+        this.afterHavingClauseFilter = false;
+        this.afterLimit = false;
+        this.limitPrecedesAggr = false;
+        this.afterTopJoin = false;
+        this.hasJoin = false;
+        this.hasPreCalcJoin = false;
+        this.hasAgg = false;
+        this.hasWindow = false;
+        this.metProject = false;
+
         this.allColumns.clear();
         this.groupByColumns.clear();
         this.aggrOutCols.clear();
-        this.sortColumns.clear();
+        this.subqueryJoinParticipants.clear();
         this.metricsColumns.clear();
+        this.involvedMeasure.clear();
+        this.allOlapJoins.clear();
+        this.joins.clear();
+        this.allTableScans.clear();
+        this.filter = null;
+        this.havingFilter = null;
+        this.filterColumns.clear();
+
+        this.aggregations.clear();
+        this.aggrSqlCalls.clear();
+
+        this.sortColumns.clear();
+        this.sortOrders.clear();
+
+        this.joinsGraph = null;
+        this.joinsTree = null;
+
+        this.sqlDigest = null;
     }
 
     public void bindVariable(DataContext dataContext) {
