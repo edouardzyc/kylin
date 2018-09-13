@@ -252,30 +252,29 @@ public class StorageCleanupJob extends AbstractApplication {
             logger.error("Working Directory does not exist on HDFS.", e);
         }
 
-        // only remove FINISHED and DISCARDED job intermediate files
+        // skip intermediate files used by unfinished jobs
         List<String> allJobs = executableManager.getAllJobIds();
         for (String jobId : allJobs) {
             final ExecutableState state = executableManager.getOutput(jobId).getState();
             if (!state.isFinalState()) {
                 String path = JobBuilderSupport.getJobWorkingDir(
                         HadoopUtil.getPathWithoutSchemeAndAuthority(engineConfig.getHdfsWorkingDirectory(project)), jobId);
-                allHdfsPathsNeedToBeDeleted.remove(path);
-                logger.info("Skip " + path + " from deletion list, as the path belongs to job " + jobId
-                        + " with status " + state);
+                if (allHdfsPathsNeedToBeDeleted.remove(path))
+                    logger.debug("Skip " + path + " from deletion list, as the path belongs to job " + jobId
+                            + " with status " + state);
             }
         }
 
-        // remove every segment working dir from deletion list
+        // skip files referenced by segments
         for (CubeInstance cube : cubeMgr.listAllCubes()) {
             for (CubeSegment seg : cube.getSegments()) {
                 String jobUuid = seg.getLastBuildJobID();
-                if (jobUuid != null && jobUuid.equals("") == false) {
-                    String path = JobBuilderSupport.getJobWorkingDir(
-                            HadoopUtil.getPathWithoutSchemeAndAuthority(engineConfig.getHdfsWorkingDirectory(project)), jobUuid);
-                    allHdfsPathsNeedToBeDeleted.remove(path);
-                    logger.info("Skip " + path + " from deletion list, as the path belongs to segment " + seg
+                
+                String path = JobBuilderSupport.getJobWorkingDir(
+                        HadoopUtil.getPathWithoutSchemeAndAuthority(engineConfig.getHdfsWorkingDirectory(project)), jobUuid);
+                if (allHdfsPathsNeedToBeDeleted.remove(path))
+                    logger.debug("Skip " + path + " from deletion list, as the path belongs to segment " + seg
                             + " of cube " + cube.getName());
-                }
             }
         }
 
@@ -283,7 +282,7 @@ public class StorageCleanupJob extends AbstractApplication {
         for (String path : allHdfsPathsNeedToBeDeleted)
             collector.add(fs, path);
     }
-
+    
     private void cleanUnusedIntermediateHiveTable() throws Exception {
         try {
             cleanUnusedIntermediateHiveTableInternal();
