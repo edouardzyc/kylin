@@ -75,6 +75,10 @@ public class FunctionDescTest extends LocalFileMetadataTestCase {
         Assert.assertEquals(DataType.getType("bigint"), sum.getReturnDataType());
         Assert.assertEquals(DataType.getType("bigint"), sum.getRewriteFieldType());
 
+        FunctionDesc sum1 = FunctionDesc.newInstance("SUM", ParameterDesc.newInstance("1"), "bigint");
+        Assert.assertEquals(DataType.getType("bigint"), sum1.getReturnDataType());
+        Assert.assertEquals(DataType.getType("bigint"), sum1.getRewriteFieldType());
+
         FunctionDesc max = FunctionDesc.newInstance("MAX",
                 ParameterDesc.newInstance(TblColRef.mockup(null, 0, "col", "integer")), "bigint");
         Assert.assertEquals(DataType.getType("bigint"), max.getReturnDataType());
