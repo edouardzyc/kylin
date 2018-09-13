@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeSet;
 
+import org.apache.kylin.common.util.Bytes;
 import org.apache.kylin.dict.utils.RandomStrings;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -889,7 +890,7 @@ public class TrieDictionaryForestTest {
 
             assertEquals(id, dict.getIdFromValue(value));
             assertEquals(value, dict.getValueFromId(id));
-            assertArrayEquals(value.getBytes(), dict.getValueByteFromId(id));
+            assertArrayEquals(Bytes.toBytes(value), dict.getValueByteFromId(id));
         }
 
         //test not found value
