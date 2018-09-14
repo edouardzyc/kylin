@@ -58,6 +58,7 @@ import org.apache.kylin.job.exception.SchedulerException;
 import org.apache.kylin.job.execution.AbstractExecutable;
 import org.apache.kylin.job.execution.CheckpointExecutable;
 import org.apache.kylin.job.execution.DefaultChainedExecutable;
+import org.apache.kylin.job.execution.ExecutableManager;
 import org.apache.kylin.job.execution.ExecutableState;
 import org.apache.kylin.job.execution.Output;
 import org.apache.kylin.job.lock.JobLock;
@@ -288,7 +289,8 @@ public class JobService extends BasicService implements InitializingBean {
     private void checkCubeSegmentAddInfo(Map<String, String> segAddInfo, CubeSegment newSeg) {
         if (newSeg == null || newSeg.getAdditionalInfo() == null || newSeg.getAdditionalInfo().size() == 0
                 || segAddInfo.size() != newSeg.getAdditionalInfo().size()) {
-            logger.error("CheckCubeSegmentAddInfo failed, addInfo of this newSeg {} is incomplete", newSeg == null ? "NULL" : newSeg.getName());
+            logger.error("CheckCubeSegmentAddInfo failed, addInfo of this newSeg {} is incomplete",
+                    newSeg == null ? "NULL" : newSeg.getName());
             throw new RuntimeException("CheckCubeSegmentAddInfo failed, addInfo of this newSeg is incomplete");
         }
     }
@@ -598,18 +600,18 @@ public class JobService extends BasicService implements InitializingBean {
     }
 
     public static void cancelJobById(String id) throws IOException {
-        AbstractExecutable executable = getExecutableManager().getJob(id);
+        AbstractExecutable executable = executableManager().getJob(id);
         if (executable instanceof CubingJob) {
             cancelCubingJobInner((CubingJob) executable);
         } else if (executable instanceof CheckpointExecutable) {
             cancelCheckpointJobInner((CheckpointExecutable) executable);
         } else {
-            getExecutableManager().discardJob(executable.getId());
+            executableManager().discardJob(executable.getId());
         }
     }
 
     private static void cancelCubingJobInner(CubingJob cubingJob) throws IOException {
-        CubeInstance cubeInstance = getCubeManager().getCube(CubingExecutableUtil.getCubeName(cubingJob.getParams()));
+        CubeInstance cubeInstance = cubeManager().getCube(CubingExecutableUtil.getCubeName(cubingJob.getParams()));
         // might not a cube job
         final String segmentIds = CubingExecutableUtil.getSegmentId(cubingJob.getParams());
         if (!StringUtils.isEmpty(segmentIds)) {
@@ -618,11 +620,11 @@ public class JobService extends BasicService implements InitializingBean {
                 if (segment != null
                         && (segment.getStatus() == SegmentStatusEnum.NEW || segment.getTSRange().end.v == 0)) {
                     // Remove this segment
-                    getCubeManager().updateCubeDropSegments(cubeInstance, segment);
+                    cubeManager().updateCubeDropSegments(cubeInstance, segment);
                 }
             }
         }
-        getExecutableManager().discardJob(cubingJob.getId());
+        executableManager().discardJob(cubingJob.getId());
     }
 
     private static void cancelCheckpointJobInner(CheckpointExecutable checkpointExecutable) throws IOException {
@@ -631,7 +633,7 @@ public class JobService extends BasicService implements InitializingBean {
         jobIdList.add(checkpointExecutable.getId());
         setRelatedIdList(checkpointExecutable, segmentIdList, jobIdList);
 
-        CubeInstance cubeInstance = getCubeManager()
+        CubeInstance cubeInstance = cubeManager()
                 .getCube(CubingExecutableUtil.getCubeName(checkpointExecutable.getParams()));
         if (!segmentIdList.isEmpty()) {
             List<CubeSegment> toRemoveSegments = Lists.newLinkedList();
@@ -645,16 +647,16 @@ public class JobService extends BasicService implements InitializingBean {
             CubeUpdate cubeBuilder = new CubeUpdate(cubeInstance);
             cubeBuilder.setToRemoveSegs(toRemoveSegments.toArray(new CubeSegment[toRemoveSegments.size()]));
             cubeBuilder.setCuboidsRecommend(Sets.<Long> newHashSet()); //Set recommend cuboids to be null
-            getCubeManager().updateCube(cubeBuilder);
+            cubeManager().updateCube(cubeBuilder);
         }
 
         for (String jobId : jobIdList) {
-            getExecutableManager().discardJob(jobId);
+            executableManager().discardJob(jobId);
         }
     }
 
     private static void setRelatedIdList(CheckpointExecutable checkpointExecutable, List<String> segmentIdList,
-                                         List<String> jobIdList) {
+            List<String> jobIdList) {
         for (AbstractExecutable taskForCheck : checkpointExecutable.getSubTasksForCheck()) {
             jobIdList.add(taskForCheck.getId());
             if (taskForCheck instanceof CubingJob) {
@@ -664,6 +666,14 @@ public class JobService extends BasicService implements InitializingBean {
                 setRelatedIdList((CheckpointExecutable) taskForCheck, segmentIdList, jobIdList);
             }
         }
+    }
+
+    private static ExecutableManager executableManager() {
+        return ExecutableManager.getInstance(KylinConfig.getInstanceFromEnv());
+    }
+
+    private static CubeManager cubeManager() {
+        return CubeManager.getInstance(KylinConfig.getInstanceFromEnv());
     }
 
     public JobInstance pauseJob(JobInstance job) {

@@ -37,7 +37,7 @@ import org.apache.kylin.storage.hybrid.HybridManager;
 
 public abstract class BasicService {
 
-    public static KylinConfig getConfig() {
+    public KylinConfig getConfig() {
         KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
 
         if (kylinConfig == null) {
@@ -47,55 +47,55 @@ public abstract class BasicService {
         return kylinConfig;
     }
 
-    public static TableMetadataManager getTableManager() {
+    public TableMetadataManager getTableManager() {
         return TableMetadataManager.getInstance(getConfig());
     }
     
-    public static DataModelManager getDataModelManager() {
+    public DataModelManager getDataModelManager() {
         return DataModelManager.getInstance(getConfig());
     }
 
-    public static CubeManager getCubeManager() {
+    public CubeManager getCubeManager() {
         return CubeManager.getInstance(getConfig());
     }
 
-    public static StreamingManager getStreamingManager() {
+    public StreamingManager getStreamingManager() {
         return StreamingManager.getInstance(getConfig());
     }
 
-    public static KafkaConfigManager getKafkaManager() throws IOException {
+    public KafkaConfigManager getKafkaManager() throws IOException {
         return KafkaConfigManager.getInstance(getConfig());
     }
 
-    public static CubeDescManager getCubeDescManager() {
+    public CubeDescManager getCubeDescManager() {
         return CubeDescManager.getInstance(getConfig());
     }
 
-    public static ProjectManager getProjectManager() {
+    public ProjectManager getProjectManager() {
         return ProjectManager.getInstance(getConfig());
     }
 
-    public static HybridManager getHybridManager() {
+    public HybridManager getHybridManager() {
         return HybridManager.getInstance(getConfig());
     }
 
-    public static ExecutableManager getExecutableManager() {
+    public ExecutableManager getExecutableManager() {
         return ExecutableManager.getInstance(getConfig());
     }
 
-    public static BadQueryHistoryManager getBadQueryHistoryManager() {
+    public BadQueryHistoryManager getBadQueryHistoryManager() {
         return BadQueryHistoryManager.getInstance(getConfig());
     }
     
-    public static DraftManager getDraftManager() {
+    public DraftManager getDraftManager() {
         return DraftManager.getInstance(getConfig());
     }
 
-    public static TableACLManager getTableACLManager() {
+    public TableACLManager getTableACLManager() {
         return TableACLManager.getInstance(getConfig());
     }
 
-    public static MetricsManager getMetricsManager() {
+    public MetricsManager getMetricsManager() {
         return MetricsManager.getInstance();
     }
 }
