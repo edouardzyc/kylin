@@ -18,12 +18,13 @@
 
 package org.apache.kylin.rest.security;
 
+import static org.apache.kylin.rest.constant.Constant.GROUP_ALL_USERS;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.common.base.Preconditions;
 import org.apache.kylin.common.persistence.RootPersistentEntity;
 import org.apache.kylin.rest.service.UserGrantedAuthority;
 import org.springframework.security.core.GrantedAuthority;
@@ -41,9 +42,8 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-
-import static org.apache.kylin.rest.constant.Constant.GROUP_ALL_USERS;
 
 @SuppressWarnings("serial")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
@@ -67,11 +67,14 @@ public class ManagedUser extends RootPersistentEntity implements UserDetails {
     private long lockedTime = 0L;
     @JsonProperty
     private int wrongTime = 0;
+    @JsonProperty
+    private long firstLoginFailedTime = 0L;
 
     //DISABLED_ROLE is a ancient way to represent disabled user
     //now we no longer support such way, however legacy metadata may still contain it
     private static final String DISABLED_ROLE = "--disabled--";
     private static final SimpleGrantedAuthority DEFAULT_GROUP = new SimpleGrantedAuthority(GROUP_ALL_USERS);
+    private static final int CHECK_TIME = 900000; //15 minutes
 
     public ManagedUser() {
     }
@@ -79,7 +82,7 @@ public class ManagedUser extends RootPersistentEntity implements UserDetails {
     public ManagedUser(@JsonProperty String username, @JsonProperty String password,
             @JsonProperty List<SimpleGrantedAuthority> authorities, @JsonProperty boolean disabled,
             @JsonProperty boolean defaultPassword, @JsonProperty boolean locked, @JsonProperty long lockedTime,
-            @JsonProperty int wrongTime) {
+            @JsonProperty int wrongTime, @JsonProperty long firstLoginFailedTime) {
         this.username = username;
         this.password = password;
         this.authorities = authorities;
@@ -88,6 +91,7 @@ public class ManagedUser extends RootPersistentEntity implements UserDetails {
         this.locked = locked;
         this.lockedTime = lockedTime;
         this.wrongTime = wrongTime;
+        this.firstLoginFailedTime = firstLoginFailedTime;
 
         caterLegacy();
     }
@@ -207,15 +211,35 @@ public class ManagedUser extends RootPersistentEntity implements UserDetails {
         return lockedTime;
     }
 
+    public long getFirstLoginFailedTime() {
+        return this.firstLoginFailedTime;
+    }
+
     public void increaseWrongTime() {
         int wrongTime = this.getWrongTime();
-        if (wrongTime == 2) {
+        if (wrongTime >= 2) {
             this.setLocked(true);
             this.lockedTime = System.currentTimeMillis();
-            this.wrongTime = 0;
-        } else {
-            this.wrongTime = wrongTime + 1;
         }
+        this.wrongTime = wrongTime + 1;
+    }
+
+    public void clearAuthenticateFailedRecord() {
+        this.firstLoginFailedTime = 0;
+        this.wrongTime = 0;
+        this.locked = false;
+        this.lockedTime = 0;
+    }
+
+    public void authenticateFail() {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - this.firstLoginFailedTime > CHECK_TIME) {
+            clearAuthenticateFailedRecord();
+        }
+        if (this.firstLoginFailedTime == 0) {
+            this.firstLoginFailedTime = currentTime;
+        }
+        increaseWrongTime();
     }
 
     @Override
