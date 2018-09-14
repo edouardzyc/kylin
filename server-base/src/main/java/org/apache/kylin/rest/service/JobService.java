@@ -597,7 +597,18 @@ public class JobService extends BasicService implements InitializingBean {
         return job;
     }
 
-    private void cancelCubingJobInner(CubingJob cubingJob) throws IOException {
+    public static void cancelJobById(String id) throws IOException {
+        AbstractExecutable executable = getExecutableManager().getJob(id);
+        if (executable instanceof CubingJob) {
+            cancelCubingJobInner((CubingJob) executable);
+        } else if (executable instanceof CheckpointExecutable) {
+            cancelCheckpointJobInner((CheckpointExecutable) executable);
+        } else {
+            getExecutableManager().discardJob(executable.getId());
+        }
+    }
+
+    private static void cancelCubingJobInner(CubingJob cubingJob) throws IOException {
         CubeInstance cubeInstance = getCubeManager().getCube(CubingExecutableUtil.getCubeName(cubingJob.getParams()));
         // might not a cube job
         final String segmentIds = CubingExecutableUtil.getSegmentId(cubingJob.getParams());
@@ -614,7 +625,7 @@ public class JobService extends BasicService implements InitializingBean {
         getExecutableManager().discardJob(cubingJob.getId());
     }
 
-    private void cancelCheckpointJobInner(CheckpointExecutable checkpointExecutable) throws IOException {
+    private static void cancelCheckpointJobInner(CheckpointExecutable checkpointExecutable) throws IOException {
         List<String> segmentIdList = Lists.newLinkedList();
         List<String> jobIdList = Lists.newLinkedList();
         jobIdList.add(checkpointExecutable.getId());
@@ -642,8 +653,8 @@ public class JobService extends BasicService implements InitializingBean {
         }
     }
 
-    private void setRelatedIdList(CheckpointExecutable checkpointExecutable, List<String> segmentIdList,
-            List<String> jobIdList) {
+    private static void setRelatedIdList(CheckpointExecutable checkpointExecutable, List<String> segmentIdList,
+                                         List<String> jobIdList) {
         for (AbstractExecutable taskForCheck : checkpointExecutable.getSubTasksForCheck()) {
             jobIdList.add(taskForCheck.getId());
             if (taskForCheck instanceof CubingJob) {
