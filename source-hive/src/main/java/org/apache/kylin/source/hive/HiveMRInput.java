@@ -203,7 +203,7 @@ public class HiveMRInput implements IMRInput {
         }
 
         private HiveCommandExecutable createLookupHiveViewMaterializationStep(String hiveStatements,
-                                                                              String jobWorkingDir, String uuid) {
+                String jobWorkingDir, String uuid) {
             HiveCommandExecutable step = new HiveCommandExecutable();
             step.setName(ExecutableConstants.STEP_NAME_MATERIALIZE_HIVE_VIEW_IN_LOOKUP);
 
@@ -458,13 +458,10 @@ public class HiveMRInput implements IMRInput {
         }
 
         private String cleanUpIntermediateFlatTable(KylinConfig config) throws IOException {
-            StringBuffer output = new StringBuffer();
+            StringBuilder output = new StringBuilder();
             final String hiveTable = this.getIntermediateTableIdentity();
-            if (config.isHiveKeepFlatTable() == false && StringUtils.isNotEmpty(hiveTable)) {
-                final HiveCmdBuilder hiveCmdBuilder = new HiveCmdBuilder();
-                hiveCmdBuilder.addStatement("USE " + config.getHiveDatabaseForIntermediateTable() + ";");
-                hiveCmdBuilder.addStatement("DROP TABLE IF EXISTS  " + hiveTable + ";");
-                config.getCliCommandExecutor().execute(hiveCmdBuilder.build());
+            if (!config.isHiveKeepFlatTable() && StringUtils.isNotEmpty(hiveTable)) {
+                config.getCliCommandExecutor().execute(getCleanUpHql(config, hiveTable));
                 output.append("Hive table " + hiveTable + " is dropped. \n");
                 rmdirOnHDFS(getExternalDataPath());
                 output.append(
@@ -474,16 +471,11 @@ public class HiveMRInput implements IMRInput {
         }
 
         private String cleanUpHiveViewIntermediateTables(KylinConfig config) throws IOException {
-            StringBuffer output = new StringBuffer();
+            StringBuilder output = new StringBuilder();
             final String oldHiveViewIntermediateTables = this.getHiveViewIntermediateTableIdentities();
 
             if (StringUtils.isNotEmpty(oldHiveViewIntermediateTables)) {
-                final HiveCmdBuilder hiveCmdBuilder = new HiveCmdBuilder();
-                hiveCmdBuilder.addStatement("USE " + config.getHiveDatabaseForIntermediateTable() + ";");
-                for (String oldHiveViewIntermediateTable : oldHiveViewIntermediateTables.split(";")) {
-                    hiveCmdBuilder.addStatement("DROP TABLE IF EXISTS " + oldHiveViewIntermediateTable + ";");
-                }
-                config.getCliCommandExecutor().execute(hiveCmdBuilder.build());
+                config.getCliCommandExecutor().execute(getCleanUpHql(config, oldHiveViewIntermediateTables));
                 output.append("Hive table(s) " + oldHiveViewIntermediateTables + " are dropped. \n");
             }
             return output.toString();
@@ -495,6 +487,15 @@ public class HiveMRInput implements IMRInput {
             if (fs.exists(externalDataPath)) {
                 fs.delete(externalDataPath, true);
             }
+        }
+
+        String getCleanUpHql(KylinConfig config, String oldHiveTables) {
+            final HiveCmdBuilder hiveCmdBuilder = new HiveCmdBuilder();
+            hiveCmdBuilder.addStatement("USE " + config.getHiveDatabaseForIntermediateTable() + ";");
+            for (String oldHiveViewIntermediateTable : oldHiveTables.split(";")) {
+                hiveCmdBuilder.addStatement("DROP TABLE IF EXISTS " + oldHiveViewIntermediateTable + ";");
+            }
+            return hiveCmdBuilder.build();
         }
 
         public void setIntermediateTableIdentity(String tableIdentity) {
