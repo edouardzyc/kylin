@@ -231,6 +231,7 @@ public class BeelineHiveClient implements IHiveClient {
         }
     }
 
+    @Override
     public void close() {
         DBUtils.closeQuietly(stmt);
         DBUtils.closeQuietly(cnct);

@@ -128,6 +128,12 @@ public class CLIHiveClient implements IHiveClient {
         return getBasicStatForTable(new org.apache.hadoop.hive.ql.metadata.Table(table), StatsSetupConst.ROW_COUNT);
     }
 
+    @Override
+    public void close() {
+        if (this.metaStoreClient != null)
+            this.metaStoreClient.close();
+    }
+
     private HiveMetaStoreClient getMetaStoreClient() throws Exception {
         if (metaStoreClient == null) {
             metaStoreClient = new HiveMetaStoreClient(hiveConf);

@@ -314,13 +314,21 @@ public class HiveMRInput implements IMRInput {
 
         private long computeRowCount(String database, String table) throws Exception {
             IHiveClient hiveClient = HiveClientFactory.getHiveClient();
-            return hiveClient.getHiveTableRows(database, table);
+            try {
+                return hiveClient.getHiveTableRows(database, table);
+            } finally {
+                hiveClient.close();
+            }
         }
 
         private long getDataSize(String database, String table) throws Exception {
             IHiveClient hiveClient = HiveClientFactory.getHiveClient();
-            long size = hiveClient.getHiveTableMeta(database, table).fileSize;
-            return size;
+            try {
+                long size = hiveClient.getHiveTableMeta(database, table).fileSize;
+                return size;
+            } finally {
+                hiveClient.close();
+            }
         }
 
         private void redistributeTable(KylinConfig config, int numReducers) throws IOException {

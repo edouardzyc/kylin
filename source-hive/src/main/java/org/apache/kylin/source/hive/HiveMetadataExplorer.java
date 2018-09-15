@@ -40,16 +40,24 @@ public class HiveMetadataExplorer implements ISourceMetadataExplorer, ISampleDat
 
     private static final Logger logger = LoggerFactory.getLogger(HiveClientFactory.class);
 
-    IHiveClient hiveClient = HiveClientFactory.getHiveClient();
-
     @Override
     public List<String> listDatabases() throws Exception {
-        return hiveClient.getHiveDbNames();
+        IHiveClient hiveClient = HiveClientFactory.getHiveClient();
+        try {
+            return hiveClient.getHiveDbNames();
+        } finally {
+            hiveClient.close();
+        }
     }
 
     @Override
     public List<String> listTables(String database) throws Exception {
-        return hiveClient.getHiveTableNames(database);
+        IHiveClient hiveClient = HiveClientFactory.getHiveClient();
+        try {
+            return hiveClient.getHiveTableNames(database);
+        } finally {
+            hiveClient.close();
+        }
     }
 
     @Override
@@ -58,10 +66,13 @@ public class HiveMetadataExplorer implements ISourceMetadataExplorer, ISampleDat
         TableMetadataManager metaMgr = TableMetadataManager.getInstance(config);
 
         HiveTableMeta hiveTableMeta;
+        IHiveClient hiveClient = HiveClientFactory.getHiveClient();
         try {
             hiveTableMeta = hiveClient.getHiveTableMeta(database, tableName);
         } catch (Exception e) {
             throw new RuntimeException("cannot get HiveTableMeta", e);
+        } finally {
+            hiveClient.close();
         }
 
         TableDesc tableDesc = metaMgr.getTableDesc(database + "." + tableName, prj);
@@ -116,7 +127,12 @@ public class HiveMetadataExplorer implements ISourceMetadataExplorer, ISampleDat
 
     @Override
     public void createSampleDatabase(String database) throws Exception {
-        hiveClient.executeHQL(generateCreateSchemaSql(database));
+        IHiveClient hiveClient = HiveClientFactory.getHiveClient();
+        try {
+            hiveClient.executeHQL(generateCreateSchemaSql(database));
+        } finally {
+            hiveClient.close();
+        }
     }
 
     private String generateCreateSchemaSql(String schemaName) {
@@ -125,7 +141,12 @@ public class HiveMetadataExplorer implements ISourceMetadataExplorer, ISampleDat
 
     @Override
     public void createSampleTable(TableDesc table) throws Exception {
-        hiveClient.executeHQL(generateCreateTableSql(table));
+        IHiveClient hiveClient = HiveClientFactory.getHiveClient();
+        try {
+            hiveClient.executeHQL(generateCreateTableSql(table));
+        } finally {
+            hiveClient.close();
+        }
     }
 
     private String[] generateCreateTableSql(TableDesc tableDesc) {
@@ -154,7 +175,12 @@ public class HiveMetadataExplorer implements ISourceMetadataExplorer, ISampleDat
 
     @Override
     public void loadSampleData(String tableName, String tmpDataDir) throws Exception {
-        hiveClient.executeHQL(generateLoadDataSql(tableName, tmpDataDir));
+        IHiveClient hiveClient = HiveClientFactory.getHiveClient();
+        try {
+            hiveClient.executeHQL(generateLoadDataSql(tableName, tmpDataDir));
+        } finally {
+            hiveClient.close();
+        }
     }
 
     private String generateLoadDataSql(String tableName, String tableFileDir) {
@@ -163,7 +189,12 @@ public class HiveMetadataExplorer implements ISourceMetadataExplorer, ISampleDat
 
     @Override
     public void createWrapperView(String origTableName, String viewName) throws Exception {
-        hiveClient.executeHQL(generateCreateViewSql(viewName, origTableName));
+        IHiveClient hiveClient = HiveClientFactory.getHiveClient();
+        try {
+            hiveClient.executeHQL(generateCreateViewSql(viewName, origTableName));
+        } finally {
+            hiveClient.close();
+        }
     }
 
     private String[] generateCreateViewSql(String viewName, String tableName) {
@@ -195,7 +226,7 @@ public class HiveMetadataExplorer implements ISourceMetadataExplorer, ISampleDat
 
         String dropViewSql = "DROP VIEW IF EXISTS " + tmpDatabase + "." + tmpView;
         String evalViewSql = "CREATE VIEW " + tmpDatabase + "." + tmpView + " as " + query;
-
+        IHiveClient hiveClient = HiveClientFactory.getHiveClient();
         try {
             logger.debug("Removing duplicate view {}", tmpView);
             hiveClient.executeHQL(dropViewSql);
@@ -212,6 +243,8 @@ public class HiveMetadataExplorer implements ISourceMetadataExplorer, ISampleDat
                 hiveClient.executeHQL(dropViewSql);
             } catch (Exception e) {
                 logger.warn("Cannot drop temp view of query: {}", query, e);
+            } finally {
+                hiveClient.close();
             }
         }
     }

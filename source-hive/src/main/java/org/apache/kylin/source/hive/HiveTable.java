@@ -20,7 +20,6 @@ package org.apache.kylin.source.hive;
 
 import java.io.IOException;
 
-
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.Pair;
 import org.apache.kylin.engine.mr.DFSFileTable;
@@ -38,16 +37,18 @@ public class HiveTable implements IReadableTable {
     final private String database;
     final private String hiveTable;
 
-    private IHiveClient hiveClient;
     private HiveTableMeta hiveTableMeta;
 
     public HiveTable(TableDesc tableDesc) {
         this.database = tableDesc.getDatabase();
         this.hiveTable = tableDesc.getName();
+        IHiveClient hiveClient = HiveClientFactory.getHiveClient();
         try {
-            this.hiveTableMeta = getHiveClient().getHiveTableMeta(database, hiveTable);
+            this.hiveTableMeta = hiveClient.getHiveTableMeta(database, hiveTable);
         } catch (Exception e) {
             throw new RuntimeException("cannot get HiveTableMeta", e);
+        } finally {
+            hiveClient.close();
         }
     }
 
@@ -78,7 +79,7 @@ public class HiveTable implements IReadableTable {
                 throw new IOException(e);
         }
     }
-    
+
     @Override
     public boolean exists() {
         return true;
@@ -93,14 +94,6 @@ public class HiveTable implements IReadableTable {
         }
 
         return this.hiveTableMeta.sdLocation;
-    }
-
-    public IHiveClient getHiveClient() {
-
-        if (hiveClient == null) {
-            hiveClient = HiveClientFactory.getHiveClient();
-        }
-        return hiveClient;
     }
 
     @Override
