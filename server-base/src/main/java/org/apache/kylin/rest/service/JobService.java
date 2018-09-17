@@ -588,14 +588,7 @@ public class JobService extends BasicService implements InitializingBean {
             return job;
         }
 
-        AbstractExecutable executable = getExecutableManager().getJob(job.getId());
-        if (executable instanceof CubingJob) {
-            cancelCubingJobInner((CubingJob) executable);
-        } else if (executable instanceof CheckpointExecutable) {
-            cancelCheckpointJobInner((CheckpointExecutable) executable);
-        } else {
-            getExecutableManager().discardJob(executable.getId());
-        }
+        cancelJobById(job.getId());
         return job;
     }
 
