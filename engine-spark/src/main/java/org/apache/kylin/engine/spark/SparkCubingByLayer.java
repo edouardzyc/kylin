@@ -101,8 +101,8 @@ public class SparkCubingByLayer extends AbstractApplication implements Serializa
             .isRequired(true).withDescription("Cube output path").create(BatchConstants.ARG_OUTPUT);
     public static final Option OPTION_INPUT_TABLE = OptionBuilder.withArgName("hiveTable").hasArg().isRequired(true)
             .withDescription("Hive Intermediate Table").create("hiveTable");
-    public static final Option OPTION_INPUT_PATH = OptionBuilder.withArgName(BatchConstants.ARG_INPUT).hasArg().isRequired(true)
-            .withDescription("Hive Intermediate Table PATH").create(BatchConstants.ARG_INPUT);
+    public static final Option OPTION_INPUT_PATH = OptionBuilder.withArgName(BatchConstants.ARG_INPUT).hasArg()
+            .isRequired(true).withDescription("Hive Intermediate Table PATH").create(BatchConstants.ARG_INPUT);
 
     private Options options;
 
@@ -186,7 +186,11 @@ public class SparkCubingByLayer extends AbstractApplication implements Serializa
                         @Override
                         public String[] call(Text text) throws Exception {
                             String s = Bytes.toString(text.getBytes(), 0, text.getLength());
-                            return s.split(SEQUENCEFILE_DELIMITER);
+                            String[] arr = s.split(SEQUENCEFILE_DELIMITER);
+                            for (int i = 0; i < arr.length; i++) {
+                                arr[i] = (arr[i] == null || "\\N".equals(arr[i])) ? null : arr[i];
+                            }
+                            return arr;
                         }
                     }).mapToPair(new EncodeBaseCuboid(cubeName, segmentId, metaUrl, sConf));
         } else {
@@ -198,7 +202,7 @@ public class SparkCubingByLayer extends AbstractApplication implements Serializa
                     String[] result = new String[row.size()];
                     for (int i = 0; i < row.size(); i++) {
                         final Object o = row.get(i);
-                        if (o != null) {
+                        if (o != null && !"\\N".equals(o)) {
                             result[i] = o.toString();
                         } else {
                             result[i] = null;
