@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-public class HDFSResourceStore extends ResourceStore {
+public class HDFSResourceStore extends PushDownDFSResourceStore {
 
     private static final Logger logger = LoggerFactory.getLogger(HDFSResourceStore.class);
 
@@ -163,8 +163,7 @@ public class HDFSResourceStore extends ResourceStore {
                 logger.warn("Zero length file: " + p.toString());
             }
             FSDataInputStream in = fs.open(p);
-            long t = in.readLong();
-            return new RawResource(in, t);
+            return new RawResource(in, fs.getFileStatus(p).getModificationTime());
         } else {
             return null;
         }
@@ -176,15 +175,10 @@ public class HDFSResourceStore extends ResourceStore {
         if (!fs.exists(p) || !fs.isFile(p)) {
             return 0;
         }
-        FSDataInputStream in = null;
         try {
-            in = fs.open(p);
-            long t = in.readLong();
-            return t;
+            return fs.getFileStatus(p).getModificationTime();
         } catch (Exception e) {
             throw new IOException("Put resource fail", e);
-        } finally {
-            IOUtils.closeQuietly(in);
         }
 
     }
@@ -197,14 +191,40 @@ public class HDFSResourceStore extends ResourceStore {
         FSDataOutputStream out = null;
         try {
             out = fs.create(p, true);
-            out.writeLong(ts);
             IOUtils.copy(content, out);
-
         } catch (Exception e) {
             throw new IOException("Put resource fail", e);
         } finally {
             IOUtils.closeQuietly(out);
+            fs.setTimes(p, ts, -1);
         }
+    }
+
+    @Override
+    protected void commitChange(String tmpPath, String resPath, long ts) throws IOException {
+        Path tmpRealPath = resourcePath(tmpPath);
+        Path resRealPath = resourcePath(resPath);
+        if (fs.exists(resRealPath)) {
+            logger.info("Real resource file exists, delete it. Resource file: {} .", resRealPath);
+            fs.delete(resRealPath, true);
+        }
+        if (fs.exists(tmpRealPath)) {
+            if (fs.rename(tmpRealPath, resRealPath)) {
+                logger.info("Commit change success. Rename temp file: {} to resource file: {} .", tmpRealPath,
+                        resRealPath);
+                fs.setTimes(resourcePath(resPath), ts, -1);
+            } else {
+                throw new IOException(String.format("Rename temp file failed. Temp file: %s . Resource file: %s .",
+                        tmpRealPath, resRealPath));
+            }
+        } else {
+            throw new IOException(String.format("Temp file not exists. File name: %s .", tmpRealPath));
+        }
+    }
+
+    @Override
+    public Path resourcePath(String resPath) {
+        return getRealHDFSPath(resPath);
     }
 
     @Override
@@ -239,7 +259,6 @@ public class HDFSResourceStore extends ResourceStore {
             throw new IOException("Delete resource fail", e);
         }
     }
-
     @Override
     protected String getReadableResourcePathImpl(String resPath) {
         return getRealHDFSPath(resPath).toString();

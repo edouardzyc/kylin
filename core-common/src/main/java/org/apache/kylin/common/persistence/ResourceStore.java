@@ -38,10 +38,13 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.fs.Path;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.StorageURL;
+import org.apache.kylin.common.util.BytesUtil;
 import org.apache.kylin.common.util.ClassUtil;
 import org.apache.kylin.common.util.OptionsHelper;
+import org.apache.kylin.common.util.ThrowableUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -444,6 +447,53 @@ abstract public class ResourceStore {
             throw e;
         }
     }
+
+    final public <T extends RootPersistentEntity> long putResourceStreaming(String resPath, T obj,
+            Serializer<T> serializer) throws IOException {
+        return putResourceStreaming(resPath, obj, System.currentTimeMillis(), serializer);
+    }
+
+    final public <T extends RootPersistentEntity> long putResourceStreaming(String resPath, T obj, long newTS,
+            Serializer<T> serializer) throws IOException {
+        long oldTS = obj.getLastModified();
+        resPath = norm(resPath);
+        String tmpPath = resPath + ".tmp";
+        Path tmpRealPath = resourcePath(tmpPath);
+        obj.setLastModified(newTS);
+        try {
+            try (DataOutputStream out = getStreamImpl(tmpPath)) {
+                logger.info("Start writing data to temp file {} .", tmpRealPath);
+                serializer.serialize(obj, out);
+
+            } catch (Throwable e) {
+                ThrowableUtils.logError(logger,
+                        String.format("Wrong in close DataOutputStream in temp file : %s .", tmpRealPath), e);
+                throw e;
+            }
+            logger.info("Write data to temp file done.");
+
+            // trick: write empty content through old API so that metadata will be written to resource store
+            logger.info("Start writing metadata to resource store.");
+            newTS = checkAndPutResourceCheckpoint(resPath, BytesUtil.EMPTY_BYTE_ARRAY, oldTS, newTS);
+            logger.info("Write metadata to resource store done.");
+            commitChange(tmpPath, resPath, newTS);
+            obj.setLastModified(newTS); // update again the confirmed TS
+            return newTS;
+        } catch (Throwable e) {
+            obj.setLastModified(oldTS); // roll back TS when write fail
+            deleteTempResourceFile(tmpRealPath);
+            ThrowableUtils.logError(logger, String.format("Wrong in put Resource Streaming : %s .", resPath), e);
+            throw e;
+        }
+    }
+
+    abstract protected DataOutputStream getStreamImpl(String path) throws IOException;
+
+    abstract protected void commitChange(String tmpPath, String resPath, long ts) throws IOException;
+
+    abstract public Path resourcePath(String resPath);
+
+    abstract protected void deleteTempResourceFile(Path tmpRealPath) throws IOException;
 
     private long checkAndPutResourceCheckpoint(String resPath, byte[] content, long oldTS, long newTS)
             throws IOException, WriteConflictException {

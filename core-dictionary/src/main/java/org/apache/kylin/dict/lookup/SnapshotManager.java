@@ -65,9 +65,10 @@ public class SnapshotManager {
         this.snapshotCache = CacheBuilder.newBuilder().removalListener(new RemovalListener<String, SnapshotTable>() {
             @Override
             public void onRemoval(RemovalNotification<String, SnapshotTable> notification) {
-                SnapshotManager.logger.info("Snapshot with resource path " + notification.getKey() + " is removed due to " + notification.getCause());
+                SnapshotManager.logger.info("Snapshot with resource path " + notification.getKey()
+                        + " is removed due to " + notification.getCause());
             }
-        }).maximumSize(config.getCachedSnapshotMaxEntrySize())//
+        }).softValues().maximumSize(config.getCachedSnapshotMaxEntrySize())//
                 .expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, SnapshotTable>() {
                     @Override
                     public SnapshotTable load(String key) throws Exception {
@@ -100,8 +101,17 @@ public class SnapshotManager {
         snapshotCache.invalidate(resourcePath);
     }
 
-    public SnapshotTable buildSnapshot(IReadableTable table, TableDesc tableDesc, KylinConfig cubeConfig) throws IOException {
-        SnapshotTable snapshot = new SnapshotTable(table, tableDesc.getIdentity());
+    /**
+     *
+     * @param table source table
+     * @param tableDesc table desc
+     * @param cubeConfig cube config
+     * @return Return snapshotTable is empty, if you need use it, please reload it by SnapshotManager#getSnapshotTable(java.lang.String).
+     * @throws IOException
+     */
+    public SnapshotTable buildSnapshot(IReadableTable table, TableDesc tableDesc, KylinConfig cubeConfig)
+            throws IOException {
+        SnapshotTable snapshot = SnapshotTableFactory.create(table, tableDesc.getIdentity(), cubeConfig);
         snapshot.updateRandomUuid();
 
         String dup = checkDupByInfo(snapshot);
@@ -111,26 +121,27 @@ public class SnapshotManager {
         }
 
         if ((float) snapshot.getSignature().getSize() / 1024 / 1024 > cubeConfig.getTableSnapshotMaxMB()) {
-            throw new IllegalStateException("Table snapshot should be no greater than " + cubeConfig.getTableSnapshotMaxMB() //
-                    + " MB, but " + tableDesc + " size is " + snapshot.getSignature().getSize());
+            throw new IllegalStateException(
+                    "Table snapshot should be no greater than " + cubeConfig.getTableSnapshotMaxMB() //
+                            + " MB, but " + tableDesc + " size is " + snapshot.getSignature().getSize());
         }
 
-        snapshot.takeSnapshot(table, tableDesc);
+        snapshot.init(table, tableDesc);
 
         return trySaveNewSnapshot(snapshot);
     }
 
-    public SnapshotTable rebuildSnapshot(IReadableTable table, TableDesc tableDesc, String overwriteUUID) throws IOException {
-        SnapshotTable snapshot = new SnapshotTable(table, tableDesc.getIdentity());
+    public SnapshotTable rebuildSnapshot(IReadableTable table, TableDesc tableDesc, String overwriteUUID,
+            KylinConfig conf) throws IOException {
+        SnapshotTable snapshot = SnapshotTableFactory.create(table, tableDesc.getIdentity(), conf);
         snapshot.setUuid(overwriteUUID);
 
-        snapshot.takeSnapshot(table, tableDesc);
+        snapshot.init(table, tableDesc);
 
         SnapshotTable existing = getSnapshotTable(snapshot.getResourcePath());
         snapshot.setLastModified(existing.getLastModified());
 
         save(snapshot);
-        snapshotCache.put(snapshot.getResourcePath(), snapshot);
 
         return snapshot;
     }
@@ -144,7 +155,6 @@ public class SnapshotManager {
         }
 
         save(snapshotTable);
-        snapshotCache.put(snapshotTable.getResourcePath(), snapshotTable);
 
         return snapshotTable;
     }
@@ -158,10 +168,10 @@ public class SnapshotManager {
 
         TableSignature sig = snapshot.getSignature();
         for (String existing : existings) {
-            SnapshotTable existingTable = load(existing, false); // skip cache,
-            // direct load from store
+            SnapshotTable existingTable = load(existing, false);
             if (existingTable != null && sig.equals(existingTable.getSignature()))
-                return existing;
+                if (snapshot.getClass().equals(existingTable.getClass()))
+                    return existing;
         }
 
         return null;
@@ -174,8 +184,13 @@ public class SnapshotManager {
         if (existings == null)
             return null;
 
+        // SnapshotTableV1 need data to compare row by row, SnapshotTableV2 compare by info
+        boolean loadData = false;
+        if (snapshot instanceof SnapshotTableV1) {
+            loadData = true;
+        }
         for (String existing : existings) {
-            SnapshotTable existingTable = load(existing, true); // skip cache, direct load from store
+            SnapshotTable existingTable = load(existing, loadData);
             if (existingTable != null && existingTable.equals(snapshot))
                 return existing;
         }
@@ -186,14 +201,15 @@ public class SnapshotManager {
     private void save(SnapshotTable snapshot) throws IOException {
         ResourceStore store = getStore();
         String path = snapshot.getResourcePath();
-        store.putResource(path, snapshot, SnapshotTableSerializer.FULL_SERIALIZER);
+        store.putResourceStreaming(path, snapshot, SnapshotTableSerializer.FULL_SERIALIZER);
     }
 
     private SnapshotTable load(String resourcePath, boolean loadData) throws IOException {
         logger.info("Loading snapshotTable from " + resourcePath + ", with loadData: " + loadData);
         ResourceStore store = getStore();
 
-        SnapshotTable table = store.getResource(resourcePath, SnapshotTable.class, loadData ? SnapshotTableSerializer.FULL_SERIALIZER : SnapshotTableSerializer.INFO_SERIALIZER);
+        SnapshotTable table = store.getResource(resourcePath, SnapshotTable.class,
+                loadData ? SnapshotTableSerializer.FULL_SERIALIZER : SnapshotTableSerializer.INFO_SERIALIZER);
 
         if (loadData)
             logger.debug("Loaded snapshot at " + resourcePath);

@@ -20,6 +20,7 @@ package org.apache.kylin.common.persistence;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -33,6 +34,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.fs.Path;
 import org.apache.kylin.common.KylinConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,6 +179,55 @@ public class FileResourceStore extends ResourceStore {
 
             f.setLastModified(ts);
         }
+    }
+
+    @Override
+    public Path resourcePath(String resPath) {
+        File f = file(resPath);
+        try {
+            return new Path(f.getCanonicalPath());
+        } catch (IOException e) {
+            logger.error("Fail to get resource path in FileResourceStore: resPath" + resPath, e);
+        }
+        return null;
+    }
+
+    @Override
+    protected void commitChange(String tmpPath, String resPath, long ts) throws IOException {
+        File tmpFile = file(tmpPath);
+        File resFile = file(resPath);
+        String resAbsolutePath = resFile.getAbsolutePath();
+        FileUtils.forceDelete(resFile);
+
+        FileUtils.moveFile(tmpFile, resFile);
+        if (file(resPath).setLastModified(ts)) {
+            logger.info("Rewrite resource file last modified time success. Resource file: {} .", resAbsolutePath);
+        } else {
+            throw new IOException(String.format("Rewrite resource file last modified time failed. Resource file: %s .",
+                    resAbsolutePath));
+        }
+    }
+
+    @Override
+    protected void deleteTempResourceFile(Path tmpRealPath) throws IOException {
+        logger.info("Delete tmp file {} .", tmpRealPath);
+        File file = new File(tmpRealPath.toString());
+        if (file.exists()) {
+            FileUtils.forceDelete(file);
+            logger.info("Delete temp file success. Temp file: {} .", tmpRealPath);
+        } else {
+            logger.warn("{} is not exists.", tmpRealPath);
+        }
+    }
+
+    @Override
+    protected DataOutputStream getStreamImpl(String path) throws IOException {
+        File file = file(path);
+        if (file.exists()) {
+            logger.info("File already exists {}, delete it.", file.getCanonicalPath());
+            FileUtils.forceDelete(file);
+        }
+        return new DataOutputStream(FileUtils.openOutputStream(file));
     }
 
     @Override

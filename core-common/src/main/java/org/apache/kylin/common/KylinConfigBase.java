@@ -600,6 +600,18 @@ abstract public class KylinConfigBase implements Serializable {
         return Integer.parseInt(getOptional("kylin.snapshot.max-mb", "300"));
     }
 
+    public String getSnapshotTableClass() {
+        return getOptional("kylin.snapshot.impl-class", "org.apache.kylin.dict.lookup.SnapshotTableV1");
+    }
+
+    public boolean isSnapshotTableCompressEnabled() {
+        return Boolean.parseBoolean(getOptional("kylin.snapshot.compression-enabled", "true"));
+    }
+
+    public String getSnapshotTableDelimiter(){
+        return getOptional("kylin.snapshot.delimiter", "\u0001");
+    }
+
     // ============================================================================
     // CUBE
     // ============================================================================

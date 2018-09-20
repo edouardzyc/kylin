@@ -102,7 +102,8 @@ public class HBaseConnection {
             int coreThreads = config.getHBaseCoreConnectionThreads();
             long keepAliveTime = config.getHBaseConnectionThreadPoolAliveSeconds();
             LinkedBlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>(maxThreads * 100);
-            ThreadPoolExecutor tpe = new ThreadPoolExecutor(coreThreads, maxThreads, keepAliveTime, TimeUnit.SECONDS, workQueue, //
+            ThreadPoolExecutor tpe = new ThreadPoolExecutor(coreThreads, maxThreads, keepAliveTime, TimeUnit.SECONDS,
+                    workQueue, //
                     Threads.newDaemonThreadFactory("kylin-coproc-"));
             tpe.allowCoreThreadTimeOut(true);
 
@@ -126,11 +127,11 @@ public class HBaseConnection {
             coprocessorPool.shutdownNow();
         }
     }
-    
+
     private static Thread closeAndRestConnPool() {
         final List<Connection> copy = new ArrayList<>(connPool.values());
         connPool.clear();
-        
+
         Thread t = new Thread() {
             public void run() {
                 logger.info("Closing HBase connections...");
@@ -160,10 +161,17 @@ public class HBaseConnection {
         return configThreadLocal.get();
     }
 
+    // for test
+    public static void setHBaseConfiguration(Configuration configuration) {
+        Configuration conf = HBaseConfiguration.create(configuration);
+        configThreadLocal.set(conf);
+    }
+
     private static Configuration newHBaseConfiguration(StorageURL url) {
         // using a hbase:xxx URL is deprecated, instead hbase config is always loaded from hbase-site.xml in classpath
         if (!"hbase".equals(url.getScheme()))
-            throw new IllegalArgumentException("to use hbase storage, pls set 'kylin.storage.url=hbase' in kylin.properties");
+            throw new IllegalArgumentException(
+                    "to use hbase storage, pls set 'kylin.storage.url=hbase' in kylin.properties");
 
         Configuration conf = HBaseConfiguration.create(HadoopUtil.getCurrentConfiguration());
         addHBaseClusterNNHAConfiguration(conf);
@@ -190,7 +198,7 @@ public class HBaseConnection {
         if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
             conf.set("hbase.fs.tmp.dir", "/tmp");
         }
-        
+
         for (Entry<String, String> entry : url.getAllParameters().entrySet()) {
             conf.set(entry.getKey(), entry.getValue());
         }
@@ -287,7 +295,8 @@ public class HBaseConnection {
         return tableExists(HBaseConnection.get(hbaseUrl), tableName);
     }
 
-    public static void createHTableIfNeeded(StorageURL hbaseUrl, String tableName, String... families) throws IOException {
+    public static void createHTableIfNeeded(StorageURL hbaseUrl, String tableName, String... families)
+            throws IOException {
         createHTableIfNeeded(HBaseConnection.get(hbaseUrl), tableName, families);
     }
 
@@ -300,7 +309,7 @@ public class HBaseConnection {
         TableName tableName = TableName.valueOf(table);
         DistributedLock lock = null;
         String lockPath = getLockPath(table);
-        
+
         try {
             if (tableExists(conn, table)) {
                 logger.debug("HTable '" + table + "' already exists");
