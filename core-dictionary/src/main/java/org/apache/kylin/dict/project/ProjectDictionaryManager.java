@@ -41,6 +41,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.persistence.WriteConflictException;
+import org.apache.kylin.common.util.AutoReadWriteLock;
 import org.apache.kylin.common.util.Dictionary;
 import org.apache.kylin.common.util.HadoopUtil;
 import org.apache.kylin.dict.DictionaryInfo;
@@ -165,6 +166,7 @@ public class ProjectDictionaryManager {
                     })
             .build();
 
+    private AutoReadWriteLock lock = new AutoReadWriteLock();
     private CaseInsensitiveStringCache<ProjectDictionaryVersionInfo> versionCache;
     private CachedCrudAssist<ProjectDictionaryVersionInfo> crud;
     // only use by  job node
@@ -193,7 +195,7 @@ public class ProjectDictionaryManager {
         this.dictionaryManager = DictionaryManager.getInstance(kylinConfig);
         this.versionCache = new CaseInsensitiveStringCache<>(kylinConfig, "project_dictionary_version");
         this.crud = new CachedCrudAssist<ProjectDictionaryVersionInfo>(getStore(),
-                ResourceStore.PROJECT_DICT_RESOURCE_ROOT + "/version_info", MetadataConstants.TYPE_VERSION,
+                ResourceStore.PROJECT_DICT_VERSION_RESOURCE_ROOT, MetadataConstants.TYPE_VERSION,
                 ProjectDictionaryVersionInfo.class, versionCache, false) {
             @Override
             protected ProjectDictionaryVersionInfo initEntityAfterReload(
@@ -214,7 +216,14 @@ public class ProjectDictionaryManager {
         @Override
         public void onEntityChange(Broadcaster broadcaster, String entity, Broadcaster.Event event, String cacheKey)
                 throws IOException {
-            crud.reload(cacheKey);
+            try (AutoReadWriteLock.AutoLock l = lock.lockForWrite()) {
+                crud.reload(cacheKey);
+            }
+        }
+
+        @Override
+        public void onClearAll(Broadcaster broadcaster) throws IOException {
+            clear();
         }
     }
 
@@ -477,9 +486,13 @@ public class ProjectDictionaryManager {
         if (projectDictionaryVersion != null) {
             ProjectDictionaryVersionInfo copy = projectDictionaryVersion.copy();
             copy.setProjectDictionaryVersion(version);
-            crud.save(copy);
+            try (AutoReadWriteLock.AutoLock l = lock.lockForWrite()) {
+                crud.save(copy);
+            }
         } else {
-            crud.save(new ProjectDictionaryVersionInfo(sourceIdentify, version, sizeOfId));
+            try (AutoReadWriteLock.AutoLock l = lock.lockForWrite()) {
+                crud.save(new ProjectDictionaryVersionInfo(sourceIdentify, version, sizeOfId));
+            }
         }
     }
 
@@ -658,7 +671,7 @@ public class ProjectDictionaryManager {
     // only for Migration
     public void clear() {
         shutdown();
-        try {
+        try (AutoReadWriteLock.AutoLock l = lock.lockForWrite()) {
             crud.reloadAll();
             dictionaryInfoCache.invalidateAll();
             patchCache.invalidateAll();

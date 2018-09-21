@@ -19,20 +19,27 @@ package org.apache.kylin.dict.project;
 
 import com.google.common.cache.LoadingCache;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.persistence.JsonSerializer;
+import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.util.Dictionary;
 import org.apache.kylin.common.util.LocalFileMetadataTestCase;
 import org.apache.kylin.dict.DictionaryInfo;
 import org.apache.kylin.dict.DictionaryManager;
 import org.apache.kylin.dict.MockupReadableTable;
+import org.apache.kylin.metadata.MetadataConstants;
+import org.apache.kylin.metadata.cachesync.Broadcaster;
 import org.apache.kylin.metadata.model.DataModelDesc;
 import org.apache.kylin.metadata.model.DataModelManager;
 import org.apache.kylin.metadata.model.TblColRef;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -59,13 +66,15 @@ public class ProjectDictionaryManagerTest extends LocalFileMetadataTestCase {
         DataModelDesc model = metaMgr.getDataModelDesc("test_kylin_inner_join_model_desc");
         TblColRef col = model.findColumn("lstg_format_name");
 
-        DictionaryInfo dictionaryInfo = dictMgr.buildDictionary(col, MockupReadableTable.newSingleColumnTable("/a/path", "1", "2", "3"));
+        DictionaryInfo dictionaryInfo = dictMgr.buildDictionary(col,
+                MockupReadableTable.newSingleColumnTable("/a/path", "1", "2", "3"));
         SegProjectDict segProjectDict = projectDictionaryManager.append(project, dictionaryInfo);
         dictMgr.removeDictionary(dictionaryInfo.getResourcePath());
         dictionaryInfo = null;
 
         String sourceIdentifier = segProjectDict.getSourceIdentifier();
-        String dictResPath = ProjectDictionaryHelper.PathBuilder.dataPath(sourceIdentifier, segProjectDict.getCurrentVersion());
+        String dictResPath = ProjectDictionaryHelper.PathBuilder.dataPath(sourceIdentifier,
+                segProjectDict.getCurrentVersion());
 
         ProjectDictionaryInfo projectDictionaryInfo = projectDictionaryManager.getDictionary(dictResPath);
         Dictionary dictionary = projectDictionaryInfo.getDictionaryObject();
@@ -131,13 +140,44 @@ public class ProjectDictionaryManagerTest extends LocalFileMetadataTestCase {
         ProjectDictionaryInfo projectDictionaryInfo8 = projectDictionaryManager.getDictionary(dictResPath);
         assertNotNull(projectDictionaryInfo8);
 
+    }
+
+    @Test
+    public void testClearAllListener() throws Exception {
+        String project = "test";
+        KylinConfig config = KylinConfig.getInstanceFromEnv();
+        DictionaryManager dictMgr = DictionaryManager.getInstance(config);
+        DataModelManager metaMgr = DataModelManager.getInstance(config);
+        DataModelDesc model = metaMgr.getDataModelDesc("test_kylin_inner_join_model_desc");
+        TblColRef col = model.findColumn("lstg_format_name");
+
+        DictionaryInfo dictionaryInfo = dictMgr.buildDictionary(col,
+                MockupReadableTable.newSingleColumnTable("/a/path", "1", "2", "3"));
+        SegProjectDict segProjectDict = projectDictionaryManager.append(project, dictionaryInfo);
+        ProjectDictionaryVersionInfo versionInfo = projectDictionaryManager.getMaxVersion(segProjectDict);
+
+        ResourceStore resourceStore = ResourceStore.getStore(KylinConfig.getInstanceFromEnv());
+        JsonSerializer<ProjectDictionaryVersionInfo> serializer = new JsonSerializer<>(
+                ProjectDictionaryVersionInfo.class);
+        ProjectDictionaryVersionInfo resource = resourceStore
+                .getResource(ResourceStore.PROJECT_DICT_VERSION_RESOURCE_ROOT + "/" + versionInfo.getKey()
+                        + MetadataConstants.TYPE_VERSION, ProjectDictionaryVersionInfo.class, serializer);
+        long newTs = System.currentTimeMillis() / 1000 * 1000 + 3000;
+        resourceStore.putResource(ResourceStore.PROJECT_DICT_VERSION_RESOURCE_ROOT + "/" + versionInfo.getKey()
+                + MetadataConstants.TYPE_VERSION, resource, newTs, serializer);
+
+        ProjectDictionaryVersionInfo newInfo1 = projectDictionaryManager.getMaxVersion(segProjectDict);
+        Assert.assertNotEquals(newTs, newInfo1.getLastModified());
+        Broadcaster.getInstance(config).notifyListener("all", Broadcaster.Event.UPDATE, "all");
+        ProjectDictionaryVersionInfo newInfo2 = projectDictionaryManager.getMaxVersion(segProjectDict);
+        Assert.assertEquals(newTs, newInfo2.getLastModified());
 
     }
 
-    private void releaseDictionary(ProjectDictionaryManager projectDictionaryManager, String dictResPath) throws NoSuchFieldException, IllegalAccessException {
+    private void releaseDictionary(ProjectDictionaryManager projectDictionaryManager, String dictResPath)
+            throws NoSuchFieldException, IllegalAccessException {
         getDictCache(projectDictionaryManager).invalidate(dictResPath);
     }
-
 
     private ProjectDictionaryInfo getDictInfoByWeakCache(String resourcePath) throws Exception {
         Map<String, WeakReference<Object>> weakCache = getWeakCache(projectDictionaryManager);
@@ -159,14 +199,16 @@ public class ProjectDictionaryManagerTest extends LocalFileMetadataTestCase {
         return (Dictionary) reference.get();
     }
 
-    private Map<String, WeakReference<Object>> getWeakCache(ProjectDictionaryManager dictMgr) throws NoSuchFieldException, IllegalAccessException {
+    private Map<String, WeakReference<Object>> getWeakCache(ProjectDictionaryManager dictMgr)
+            throws NoSuchFieldException, IllegalAccessException {
         Class<?> clazz = dictMgr.getClass();
         Field field = clazz.getDeclaredField("weakDictCache");
         field.setAccessible(true);
         return (Map<String, WeakReference<Object>>) field.get(dictMgr);
     }
 
-    private LoadingCache<String, ProjectDictionaryInfo> getDictCache(ProjectDictionaryManager dictMgr) throws NoSuchFieldException, IllegalAccessException {
+    private LoadingCache<String, ProjectDictionaryInfo> getDictCache(ProjectDictionaryManager dictMgr)
+            throws NoSuchFieldException, IllegalAccessException {
         Class<?> clazz = dictMgr.getClass();
         Field field = clazz.getDeclaredField("dictionaryInfoCache");
         field.setAccessible(true);
