@@ -17,7 +17,14 @@
  */
 package org.apache.kylin.dict.project;
 
-import com.google.common.cache.LoadingCache;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.util.Map;
+
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.persistence.JsonSerializer;
 import org.apache.kylin.common.persistence.ResourceStore;
@@ -35,15 +42,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import com.google.common.cache.LoadingCache;
 
 public class ProjectDictionaryManagerTest extends LocalFileMetadataTestCase {
 
