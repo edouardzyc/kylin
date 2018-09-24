@@ -20,12 +20,16 @@ package org.apache.kylin.common.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.persistence.ResourceStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LocalFileMetadataTestCase extends AbstractKylinTestCase {
+    private static final Logger logger = LoggerFactory.getLogger(LocalFileMetadataTestCase.class);
 
     public static final String LOCALMETA_TEST_DATA = "../examples/test_case_data/localmeta";
     public static final String LOCALMETA_TEMP_DATA = "../examples/test_metadata/";
@@ -65,14 +69,43 @@ public class LocalFileMetadataTestCase extends AbstractKylinTestCase {
 
     public static void staticCleanupTestMetadata() {
         File directory = new File(LOCALMETA_TEMP_DATA);
-        try {
-            FileUtils.deleteDirectory(directory);
-        } catch (IOException e) {
-            if (directory.exists() && directory.list().length > 0)
-                throw new IllegalStateException("Can't delete directory " + directory, e);
-        }
+        deleteDirectoryWithErrMsg(directory);
 
         clearTestConfig();
+    }
+    
+    public static void deleteDirectoryWithErrMsg(File dir) {
+        int retry = 3;
+        String msg = null;
+        IOException ioe = null;
+        
+        while (retry > 0) {
+            msg = null;
+            ioe = null;
+            
+            try {
+                FileUtils.deleteDirectory(dir);
+                break;
+            } catch (IOException e) {
+                Collection<File> remaining = FileUtils.listFiles(dir, null, true);
+                if (remaining.size() == 0)
+                    break;
+                
+                ioe = e;
+                msg = "Can't delete directory " + dir + ", remaining: " + remaining;
+                logger.error(msg, e);
+            }
+        
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+            retry--;
+        }
+        
+        if (ioe != null)
+            throw new IllegalStateException(msg, ioe);
     }
 
     @Override

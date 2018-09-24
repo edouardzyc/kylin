@@ -18,6 +18,9 @@
 
 package org.apache.kylin.common.persistence;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.LocalFileMetadataTestCase;
@@ -25,9 +28,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
 
 public class ResourceToolTest extends LocalFileMetadataTestCase {
     private static final String dstPath = "../examples/test_metadata2/";
@@ -42,12 +42,7 @@ public class ResourceToolTest extends LocalFileMetadataTestCase {
     @After
     public void after() throws Exception {
         File directory = new File(dstPath);
-        try {
-            FileUtils.deleteDirectory(directory);
-        } catch (IOException e) {
-            if (directory.exists() && directory.list().length > 0)
-                throw new IllegalStateException("Can't delete directory " + directory, e);
-        }
+        deleteDirectoryWithErrMsg(directory);
         this.cleanupTestMetadata();
     }
 
