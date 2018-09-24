@@ -42,7 +42,6 @@ public class BadQueryDetectorTest extends LocalFileMetadataTestCase {
         super.cleanupTestMetadata();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void test() throws InterruptedException {
         int alertMB = BadQueryDetector.getSystemAvailMB() * 2;
@@ -63,6 +62,7 @@ public class BadQueryDetectorTest extends LocalFileMetadataTestCase {
             Thread.sleep(1000);
 
             SQLRequest sqlRequest = new SQLRequest();
+            sqlRequest.setProject("default");
             sqlRequest.setSql(mockSql);
             badQueryDetector.queryStart(Thread.currentThread(), sqlRequest, "user");
 
