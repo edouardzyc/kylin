@@ -19,9 +19,8 @@
 package org.apache.kylin.rest.response;
 
 import org.apache.kylin.cube.CubeInstance;
-import org.apache.kylin.metadata.model.ISourceAware;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.kylin.source.SourceManager;
 
 /**
  */
@@ -73,8 +72,8 @@ public class CubeInstanceResponse extends CubeInstance {
         if (cube.getModel() != null) {
             this.partitionDateColumn = cube.getModel().getPartitionDesc().getPartitionDateColumn();
             this.isStandardPartitioned = cube.getModel().isStandardPartitionedDateColumn();
-            this.isStreaming = cube.getModel().getRootFactTable().getTableDesc()
-                    .getSourceType() == ISourceAware.ID_STREAMING;
+            this.isStreaming = SourceManager
+                    .isStreamingSource(cube.getModel().getRootFactTable().getTableDesc().getSourceType());
         }
 
         initSizeKB();
