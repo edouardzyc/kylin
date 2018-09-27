@@ -510,7 +510,7 @@ public class CubeService extends BasicService implements InitializingBean {
      * @throws IOException
      * @throws JobException
      */
-    private void releaseAllSegments(CubeInstance cube) throws IOException {
+    public void releaseAllSegments(CubeInstance cube) throws IOException {
         releaseAllJobs(cube);
 
         CubeUpdate update = new CubeUpdate(cube.latestCopyForWrite());
