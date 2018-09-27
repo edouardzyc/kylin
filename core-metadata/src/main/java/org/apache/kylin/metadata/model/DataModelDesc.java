@@ -830,6 +830,7 @@ public class DataModelDesc extends RootPersistentEntity {
         copy.description = orig.description;
         copy.rootFactTable = orig.rootFactTable;
         copy.joinTables = orig.joinTables;
+        copy.deprecatedLookups = orig.deprecatedLookups;
         copy.dimensions = orig.dimensions;
         copy.metrics = orig.metrics;
         copy.filterCondition = orig.filterCondition;
