@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.calcite.DataContext;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeField;
 import org.apache.kylin.common.KylinConfig;
@@ -283,24 +282,24 @@ public class OLAPContext {
         this.sqlDigest = null;
     }
 
-    public void bindVariable(DataContext dataContext) {
-        bindVariable(this.filter, dataContext);
+    public void bindVariable(Map<String, Object> prepareParams) {
+        bindVariable(this.filter, prepareParams);
     }
 
-    private void bindVariable(TupleFilter filter, DataContext dataContext) {
+    private void bindVariable(TupleFilter filter, Map<String, Object> prepareParams) {
         if (filter == null) {
             return;
         }
 
         for (TupleFilter childFilter : filter.getChildren()) {
-            bindVariable(childFilter, dataContext);
+            bindVariable(childFilter, prepareParams);
         }
 
-        if (filter instanceof CompareTupleFilter && dataContext != null) {
+        if (filter instanceof CompareTupleFilter && prepareParams != null) {
             CompareTupleFilter compFilter = (CompareTupleFilter) filter;
             for (Map.Entry<String, Object> entry : compFilter.getVariables().entrySet()) {
                 String variable = entry.getKey();
-                Object value = dataContext.get(variable);
+                Object value = prepareParams.get(variable);
                 if (value != null) {
                     String str = value.toString();
                     if (compFilter.getColumn().getType().isDateTimeFamily())
@@ -312,6 +311,7 @@ public class OLAPContext {
             }
         }
     }
+
     // ============================================================================
 
     public interface IAccessController {
