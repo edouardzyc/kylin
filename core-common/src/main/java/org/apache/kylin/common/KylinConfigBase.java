@@ -1918,4 +1918,15 @@ abstract public class KylinConfigBase implements Serializable {
     public String getQueryVIPRole() {
         return String.valueOf(getOptional("kap.query.vip-role", ""));
     }
+
+    /**
+     * Diagnosis graph
+     */
+    public String diagnosisMetricWriterType() {
+        return getOptional("kap.metric.diagnosis.graph-writer-type", "BLACK_HOLE");
+    }
+
+    public String influxdbAddress() {
+        return getOptional("kap.metric.diagnosis.influxDB-address");
+    }
 }

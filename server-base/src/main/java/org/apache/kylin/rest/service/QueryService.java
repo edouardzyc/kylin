@@ -88,7 +88,7 @@ import org.apache.kylin.rest.constant.Constant;
 import org.apache.kylin.rest.exception.BadRequestException;
 import org.apache.kylin.rest.exception.InternalErrorException;
 import org.apache.kylin.rest.metrics.QueryMetrics2Facade;
-import org.apache.kylin.rest.metrics.QueryMetricsCollector;
+import org.apache.kylin.rest.metrics.QueryMetricsContext;
 import org.apache.kylin.rest.metrics.QueryMetricsFacade;
 import org.apache.kylin.rest.model.Query;
 import org.apache.kylin.rest.msg.Message;
@@ -328,8 +328,8 @@ public class QueryService extends BasicService {
         stringBuilder.append("Message: ").append(response.getExceptionMessage()).append(newLine);
         stringBuilder.append("==========================[QUERY]===============================").append(newLine);
 
-        if (QueryMetricsCollector.isStarted()) {
-            QueryMetricsCollector.log(stringBuilder.toString());
+        if (QueryMetricsContext.isStarted()) {
+            QueryMetricsContext.log(stringBuilder.toString());
         }
 
         logger.info(stringBuilder.toString());
@@ -358,7 +358,7 @@ public class QueryService extends BasicService {
             BackdoorToggles.addToggles(sqlRequest.getBackdoorToggles());
 
         final QueryContext queryContext = QueryContext.current();
-        QueryMetricsCollector.start(queryContext.getQueryId());
+        QueryMetricsContext.start(queryContext.getQueryId());
 
         TraceScope scope = null;
         if (kylinConfig.isHtraceTracingEveryQuery() || BackdoorToggles.getHtraceEnabled()) {
@@ -429,7 +429,9 @@ public class QueryService extends BasicService {
         } finally {
             BackdoorToggles.cleanToggles();
             QueryContext.reset();
-            QueryMetricsCollector.reset();
+            if (QueryMetricsContext.isStarted()) {
+                QueryMetricsContext.reset();
+            }
             if (scope != null) {
                 scope.close();
             }
