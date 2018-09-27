@@ -61,7 +61,6 @@ public class QueryContext {
     
     private long queryStartMillis;
 
-    private Map<String, Object> prepareParams;
     private String queryId;
     private String username;
     private Set<String> groups;
@@ -93,14 +92,6 @@ public class QueryContext {
         // use QueryContext.current() instead
         queryStartMillis = System.currentTimeMillis();
         queryId = UUID.randomUUID().toString();
-    }
-
-    public Map<String, Object> getPrepareParams() {
-        return prepareParams;
-    }
-
-    public void setPrepareParams(Map<String, Object> prepareParams) {
-        this.prepareParams = prepareParams;
     }
 
     public Set<Future> getAllRunningTasks() {

@@ -115,6 +115,8 @@ public class OLAPEnumerator implements Enumerator<Object[]> {
     private ITupleIterator queryStorage() {
 
         logger.debug("query storage...");
+        // bind dynamic variables
+        olapContext.bindVariable(optiqContext);
 
         olapContext.resetSQLDigest();
         SQLDigest sqlDigest = olapContext.getSQLDigest();

@@ -130,11 +130,9 @@ public class CompareTupleFilter extends TupleFilter implements IOptimizeableTupl
     }
 
     public void bindVariable(String variable, Object value) {
-        if (this.dynamicVariables.get(variable) == null) {
-            this.dynamicVariables.put(variable, value);
-            this.conditionValues.add(value);
-            this.firstCondValue = this.conditionValues.iterator().next();
-        }
+        this.dynamicVariables.put(variable, value);
+        this.conditionValues.add(value);
+        this.firstCondValue = this.conditionValues.iterator().next();
     }
 
     @Override
