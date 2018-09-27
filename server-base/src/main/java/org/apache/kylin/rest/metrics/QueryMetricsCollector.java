@@ -72,7 +72,7 @@ public class QueryMetricsCollector {
 
     private static final String LOG_METRIC = "log";
 
-    private static final InheritableThreadLocal<MetricsContext> metricsContexts = new InheritableThreadLocal<>();
+    private static final InheritableThreadLocal<QueryMetrics> queryMetrics = new InheritableThreadLocal<>();
 
     private QueryMetricsCollector() {
     }
@@ -80,19 +80,16 @@ public class QueryMetricsCollector {
     public static void start(final String queryId) {
         Preconditions.checkState(!isStarted(),
                 "Query metric collector already started in thread named " + Thread.currentThread().getName());
-        metricsContexts.set(new MetricsContext(queryId));
+        queryMetrics.set(new QueryMetrics(queryId));
     }
 
     public static boolean isStarted() {
-        return metricsContexts.get() != null;
+        return queryMetrics.get() != null;
     }
 
-    public static MetricsContext collect(final SQLRequest request, final SQLResponse response,
-            final QueryContext context) {
-        final MetricsContext current = obtainCurrentMetricsContext();
-        if (!current.queryId.equals(context.getQueryId())) {
-            throw new IllegalStateException("");
-        }
+    public static QueryMetrics collect(final SQLRequest request, final SQLResponse response,
+                                       final QueryContext context) {
+        final QueryMetrics current = obtainCurrentQueryMetrics();
 
         current.collect(request, response, context);
 
@@ -100,20 +97,20 @@ public class QueryMetricsCollector {
     }
 
     public static void log(final String log) {
-        obtainCurrentMetricsContext().log = log;
+        obtainCurrentQueryMetrics().log = log;
     }
 
     public static void reset() {
-        metricsContexts.remove();
+        queryMetrics.remove();
     }
 
-    private static MetricsContext obtainCurrentMetricsContext() {
-        final MetricsContext current;
-        Preconditions.checkState((current = metricsContexts.get()) != null, "Query metric collector is not started.");
+    private static QueryMetrics obtainCurrentQueryMetrics() {
+        final QueryMetrics current;
+        Preconditions.checkState((current = queryMetrics.get()) != null, "Query metric collector is not started.");
         return current;
     }
 
-    public static class MetricsContext {
+    public static class QueryMetrics {
         private final String queryId;
 
         private String sql;
@@ -134,7 +131,7 @@ public class QueryMetricsCollector {
 
         private String log;
 
-        private MetricsContext(String queryId) {
+        private QueryMetrics(String queryId) {
             this.queryId = queryId;
         }
 
