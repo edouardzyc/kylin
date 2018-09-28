@@ -72,7 +72,7 @@ public class RowKeyEncoderTest extends LocalFileMetadataTestCase {
         byte[] cuboidId = Arrays.copyOfRange(encodedKey, RowConstants.ROWKEY_SHARDID_LEN, rowKeyEncoder.getHeaderLength());
         byte[] rest = Arrays.copyOfRange(encodedKey, rowKeyEncoder.getHeaderLength(), encodedKey.length);
         assertEquals(255, Bytes.toLong(cuboidId));
-        assertArrayEquals(new byte[] { 11, 55, -13, 13, 22, 34, 121, 70, 80, 45, 71, 84, 67, 9, 9, 9, 9, 9, 9, 0, 10, 5 }, rest);
+        assertArrayEquals(new byte[] { 11, 55, -13, 13, 22, 34, 121, 70, 80, 45, 71, 84, 67, 0, 0, 0, 0, 0, 0, 0, 10, 5 }, rest);
     }
 
     @Ignore

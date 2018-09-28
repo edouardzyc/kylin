@@ -51,12 +51,18 @@ public class RowKeyDecoderTest extends LocalFileMetadataTestCase {
         CubeInstance cube = CubeManager.getInstance(getTestConfig()).getCube("TEST_KYLIN_CUBE_WITHOUT_SLR_READY");
 
         RowKeyDecoder rowKeyDecoder = new RowKeyDecoder(cube.getFirstSegment());
+        String expectedResult = "[" + millis("2012-12-15") + ", 11848, Health & Beauty, Fragrances, Women, FP-GTC, 0, 15]";
+        byte[] keyDeprecated = { 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 11, 55, -13, 13, 22, 34, 121, 70, 80, 45, 71, 84, 67, 9, 9, 9, 9, 9, 9, 0, 10, 5 };
 
-        byte[] key = { 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 11, 55, -13, 13, 22, 34, 121, 70, 80, 45, 71, 84, 67, 9, 9, 9, 9, 9, 9, 0, 10, 5 };
-
-        rowKeyDecoder.decode(key);
+        rowKeyDecoder.decode(keyDeprecated);
         List<String> values = rowKeyDecoder.getValues();
-        assertEquals("[" + millis("2012-12-15") + ", 11848, Health & Beauty, Fragrances, Women, FP-GTC, 0, 15]", values.toString());
+        assertEquals(expectedResult, values.toString());
+
+        byte[] keyNow = { 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 11, 55, -13, 13, 22, 34, 121, 70, 80, 45, 71, 84, 67, 0, 0, 0, 0, 0, 0, 0, 10, 5 };
+
+        rowKeyDecoder.decode(keyNow);
+        List<String> valuesNow = rowKeyDecoder.getValues();
+        assertEquals(expectedResult, valuesNow.toString());
     }
 
     @Ignore

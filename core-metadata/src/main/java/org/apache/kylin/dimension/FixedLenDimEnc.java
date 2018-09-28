@@ -36,7 +36,9 @@ public class FixedLenDimEnc extends DimensionEncoding implements Serializable{
     private static Logger logger = LoggerFactory.getLogger(FixedLenDimEnc.class);
 
     // row key fixed length place holder
-    public static final byte ROWKEY_PLACE_HOLDER_BYTE = 9;
+    public static final byte ROWKEY_PLACE_HOLDER_BYTE_DEPRECATED = 9;
+
+    public static final byte ROWKEY_PLACE_HOLDER_BYTE = 0;
 
     public static final String ENCODING_NAME = "fixed_length";
 
@@ -117,10 +119,11 @@ public class FixedLenDimEnc extends DimensionEncoding implements Serializable{
         if (isNull(bytes, offset, len)) {
             return null;
         }
-
-        while (len > 0 && bytes[offset + len - 1] == ROWKEY_PLACE_HOLDER_BYTE)
+        int end = offset + len - 1;
+        while (len > 0 && (bytes[end] == ROWKEY_PLACE_HOLDER_BYTE || bytes[end] == ROWKEY_PLACE_HOLDER_BYTE_DEPRECATED)) {
             len--;
-
+            end--;
+        }
         return Bytes.toString(bytes, offset, len);
     }
 
