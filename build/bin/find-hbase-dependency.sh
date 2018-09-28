@@ -19,7 +19,7 @@
 
 source $(cd -P -- "$(dirname -- "$0")" && pwd -P)/header.sh
 
-echo Retrieving hbase dependency...
+echo Retrieving HBase dependency...
 
 hbase_classpath=`hbase classpath`
 

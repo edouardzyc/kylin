@@ -22,7 +22,7 @@ source $(cd -P -- "$(dirname -- "$0")" && pwd -P)/header.sh
 ## ${dir} assigned to $KYLIN_HOME/bin in header.sh
 source ${dir}/load-hive-conf.sh
 
-echo Retrieving hive dependency...
+echo Retrieving Hive dependency...
 
 ## FusionInsight platform C70.
 if [ -n "$BIGDATA_CLIENT_HOME" ]
