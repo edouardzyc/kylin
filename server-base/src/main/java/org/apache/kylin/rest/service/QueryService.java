@@ -47,6 +47,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.google.common.collect.Maps;
 import org.apache.calcite.avatica.ColumnMetaData.Rep;
 import org.apache.calcite.config.CalciteConnectionConfig;
 import org.apache.calcite.jdbc.CalcitePrepare;
@@ -717,7 +718,13 @@ public class QueryService extends BasicService {
             }
 
             if (isPrepareStatementWithParams(sqlRequest)) {
+                //put variable into QueryContext
+                Map<String, Object> prepareParams = Maps.newHashMap();
+                for (int i = 0; i < ((PrepareSqlRequest) sqlRequest).getParams().length; i++) {
+                    prepareParams.put("?" + i, ((PrepareSqlRequest) sqlRequest).getParams()[i].getValue());
+                }
 
+                QueryContext.current().setPrepareParams(prepareParams);
                 stat = conn.prepareStatement(correctedSql); // to be closed in the finally
                 PreparedStatement prepared = (PreparedStatement) stat;
                 processStatementAttr(prepared, sqlRequest);

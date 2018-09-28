@@ -42,10 +42,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.LogManager;
 
+import com.google.common.collect.Maps;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
 import org.apache.calcite.sql.SqlNode;
@@ -324,6 +326,12 @@ public class KylinTestBase {
             List<String> parameters, boolean needSort) throws Exception {
 
         QueryContext.reset();
+
+        Map<String, Object> prepareParams = Maps.newHashMap();
+        for (int j = 1; j <= parameters.size(); ++j) {
+            prepareParams.put("?" + (j-1), parameters.get(j - 1).trim());
+        }
+        QueryContext.current().setPrepareParams(prepareParams);
 
         // change join type to match current setting
         sql = changeJoinType(sql, joinType);
