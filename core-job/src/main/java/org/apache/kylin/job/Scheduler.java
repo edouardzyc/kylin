@@ -18,6 +18,8 @@
 
 package org.apache.kylin.job;
 
+import java.io.IOException;
+
 import org.apache.kylin.job.engine.JobEngineConfig;
 import org.apache.kylin.job.exception.SchedulerException;
 import org.apache.kylin.job.execution.Executable;
@@ -27,7 +29,7 @@ import org.apache.kylin.job.lock.JobLock;
  */
 public interface Scheduler<T extends Executable> {
 
-    void init(JobEngineConfig jobEngineConfig, JobLock jobLock) throws SchedulerException;
+    void init(JobEngineConfig jobEngineConfig, JobLock jobLock) throws SchedulerException, IOException;
 
     void shutdown() throws SchedulerException;
 

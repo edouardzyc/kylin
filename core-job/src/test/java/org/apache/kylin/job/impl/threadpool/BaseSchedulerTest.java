@@ -18,6 +18,7 @@
 
 package org.apache.kylin.job.impl.threadpool;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -50,7 +51,7 @@ public abstract class BaseSchedulerTest extends LocalFileMetadataTestCase {
         startScheduler();
     }
 
-    protected void startScheduler() throws SchedulerException {
+    protected void startScheduler() throws SchedulerException, IOException {
         scheduler = DefaultScheduler.createInstance();
         scheduler.init(new JobEngineConfig(KylinConfig.getInstanceFromEnv()), new MockJobLock());
         if (!scheduler.hasStarted()) {

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.persistence.JsonSerializer;
@@ -110,8 +111,9 @@ public class ExecutableDao {
         this.executableDigestCrud.reloadAll();
 
         this.executableOutputDigestMap = new CaseInsensitiveStringCache<>(config, "execute_output");
-        this.executableOutputDigestCrud = new CachedCrudAssist<ExecutableOutputPO>(store, ResourceStore.EXECUTE_OUTPUT_RESOURCE_ROOT,
-                "", ExecutableOutputPO.class, executableOutputDigestMap, false) {
+        this.executableOutputDigestCrud = new CachedCrudAssist<ExecutableOutputPO>(store,
+                ResourceStore.EXECUTE_OUTPUT_RESOURCE_ROOT, "", ExecutableOutputPO.class, executableOutputDigestMap,
+                false) {
             @Override
             public void reloadAll() throws IOException {
                 logger.debug("Reloading execute_output from " + ResourceStore.EXECUTE_OUTPUT_RESOURCE_ROOT);
@@ -125,8 +127,8 @@ public class ExecutableDao {
                             reloadQuietlyAt(path);
                     }
 
-                    logger.debug("Loaded " + executableOutputDigestMap.size() + " execute_output digest(s) out of " + paths.size()
-                            + " resource");
+                    logger.debug("Loaded " + executableOutputDigestMap.size() + " execute_output digest(s) out of "
+                            + paths.size() + " resource");
                 }
             }
 
@@ -243,6 +245,10 @@ public class ExecutableDao {
         }
     }
 
+    public ExecutableOutputPO getJobOutputDigest(String uuid) {
+        return executableOutputDigestMap.get(uuid);
+    }
+
     public List<ExecutableOutputPO> getJobOutputDigests(long timeStart, long timeEndExclusive) {
         List<ExecutableOutputPO> jobOutputDigests = Lists.newArrayList();
         for (ExecutableOutputPO po : executableOutputDigestMap.values()) {
@@ -271,6 +277,10 @@ public class ExecutableDao {
         }
     }
 
+    public ExecutablePO getJobDigest(String uuid) {
+        return executableDigestMap.get(uuid);
+    }
+
     public List<ExecutablePO> getJobDigests(long timeStart, long timeEndExclusive) {
         List<ExecutablePO> jobDigests = Lists.newArrayList();
         for (ExecutablePO po : executableDigestMap.values()) {
@@ -295,6 +305,11 @@ public class ExecutableDao {
             logger.error("error get all Jobs:", e);
             throw new PersistentException(e);
         }
+    }
+
+    public List<String> getJobIdsInCache() {
+        Set<String> idSet = executableDigestMap.keySet();
+        return Lists.newArrayList(idSet);
     }
 
     public ExecutablePO getJob(String uuid) throws PersistentException {
@@ -394,4 +409,14 @@ public class ExecutableDao {
             throw new PersistentException(e);
         }
     }
+
+    public void reloadAll() throws IOException {
+        try (AutoReadWriteLock.AutoLock lock = executableDigestMapLock.lockForWrite()) {
+            executableDigestCrud.reloadAll();
+        }
+        try (AutoReadWriteLock.AutoLock lock = executableOutputDigestMapLock.lockForRead()) {
+            executableOutputDigestCrud.reloadAll();
+        }
+    }
+
 }

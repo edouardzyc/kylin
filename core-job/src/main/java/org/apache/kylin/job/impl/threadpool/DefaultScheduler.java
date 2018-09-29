@@ -18,6 +18,7 @@
 
 package org.apache.kylin.job.impl.threadpool;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +91,6 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
     // ============================================================================
 
     private JobLock jobLock;
-    private ExecutableManager executableManager;
     private Runnable fetcher;
     private ScheduledExecutorService fetcherPool;
     private ExecutorService jobPool;
@@ -106,6 +106,10 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
         if (INSTANCE != null) {
             throw new IllegalStateException("DefaultScheduler has been initiated.");
         }
+    }
+
+    public ExecutableManager getExecutableManager() {
+        return ExecutableManager.getInstance(jobEngineConfig.getConfig());
     }
 
     private class FetcherRunnerWithPriority implements Runnable {
@@ -168,18 +172,19 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
                 }
 
                 int nRunning = 0, nReady = 0, nStopped = 0, nOthers = 0, nError = 0, nDiscarded = 0, nSUCCEED = 0;
-                for (final String id : executableManager.getAllJobIds()) {
+                for (final String id : getExecutableManager().getAllJobIdsInCache()) {
                     if (runningJobs.containsKey(id)) {
                         // logger.debug("Job id:" + id + " is already running");
                         nRunning++;
                         continue;
                     }
 
-                    AbstractExecutable executable = executableManager.getJob(id);
+                    final AbstractExecutable executableDigest = getExecutableManager().getJobDigest(id);
+                    final Output outputDigest = getExecutableManager().getOutputDigest(id);
 
                     if (jobEngineConfig.getConfig().isMultiTenancyMode()) {
                         SuiteInfoManager suiteInfoManager = SuiteInfoManager.getInstance(jobEngineConfig.getConfig());
-                        String projectName = executable.getParam(CheckpointExecutable.PROJECT_INSTANCE_NAME);
+                        String projectName = executableDigest.getParam(CheckpointExecutable.PROJECT_INSTANCE_NAME);
 
                         if (projectName != null) {
                             List<String> projects = suiteInfoManager
@@ -189,8 +194,8 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
                             }
                         }
                     }
-                    if (!executable.isReady()) {
-                        final Output output = executableManager.getOutput(id);
+                    if (outputDigest.getState() != ExecutableState.READY) {
+                        final Output output = getExecutableManager().getOutput(id);
                         // logger.debug("Job id:" + id + " not runnable");
                         if (output.getState() == ExecutableState.DISCARDED) {
                             nDiscarded++;
@@ -207,6 +212,7 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
                     }
 
                     nReady++;
+                    final AbstractExecutable executable = getExecutableManager().getJob(id);
                     Integer priority = leftJobPriorities.get(id);
                     if (priority == null) {
                         priority = executable.getDefaultPriority();
@@ -246,7 +252,7 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
                 }
 
                 int nRunning = 0, nReady = 0, nStopped = 0, nOthers = 0, nError = 0, nDiscarded = 0, nSUCCEED = 0;
-                for (final String id : executableManager.getAllJobIds()) {
+                for (final String id : getExecutableManager().getAllJobIdsInCache()) {
                     if (isJobPoolFull()) {
                         return;
                     }
@@ -255,11 +261,12 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
                         nRunning++;
                         continue;
                     }
-                    final AbstractExecutable executable = executableManager.getJob(id);
+                    final AbstractExecutable executableDigest = getExecutableManager().getJobDigest(id);
+                    final Output outputDigest = getExecutableManager().getOutputDigest(id);
 
                     if (jobEngineConfig.getConfig().isMultiTenancyMode()) {
                         SuiteInfoManager suiteInfoManager = SuiteInfoManager.getInstance(jobEngineConfig.getConfig());
-                        String projectName = executable.getParam(CheckpointExecutable.PROJECT_INSTANCE_NAME);
+                        String projectName = executableDigest.getParam(CheckpointExecutable.PROJECT_INSTANCE_NAME);
 
                         if (projectName != null) {
                             SuiteInfoInstance suiteInfoInstance = suiteInfoManager
@@ -269,20 +276,19 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
                             }
                         }
                     }
-                    if (!executable.isReady()) {
-                        final Output output = executableManager.getOutput(id);
+                    if (outputDigest.getState() != ExecutableState.READY) {
                         // logger.debug("Job id:" + id + " not runnable");
-                        if (output.getState() == ExecutableState.DISCARDED) {
+                        if (outputDigest.getState() == ExecutableState.DISCARDED) {
                             nDiscarded++;
-                        } else if (output.getState() == ExecutableState.ERROR) {
+                        } else if (outputDigest.getState() == ExecutableState.ERROR) {
                             nError++;
-                        } else if (output.getState() == ExecutableState.SUCCEED) {
+                        } else if (outputDigest.getState() == ExecutableState.SUCCEED) {
                             nSUCCEED++;
-                        } else if (output.getState() == ExecutableState.STOPPED) {
+                        } else if (outputDigest.getState() == ExecutableState.STOPPED) {
                             nStopped++;
                         } else {
                             if (fetchFailed) {
-                                executableManager.forceKillJob(id);
+                                getExecutableManager().forceKillJob(id);
                                 nError++;
                             } else {
                                 nOthers++;
@@ -292,6 +298,7 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
                     }
                     nReady++;
                     String jobDesc = null;
+                    final AbstractExecutable executable = getExecutableManager().getJob(id);
                     try {
                         jobDesc = executable.toString();
                         logger.info(jobDesc + " prepare to schedule");
@@ -364,7 +371,8 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
     }
 
     @Override
-    public synchronized void init(JobEngineConfig jobEngineConfig, JobLock lock) throws SchedulerException {
+    public synchronized void init(JobEngineConfig jobEngineConfig, JobLock lock)
+            throws SchedulerException, IOException {
         jobLock = lock;
 
         KylinConfig kylinConfig = jobEngineConfig.getConfig();
@@ -386,8 +394,6 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
             throw new IllegalStateException("Cannot start job scheduler due to lack of job lock");
         }
 
-        executableManager = ExecutableManager.getInstance(jobEngineConfig.getConfig());
-        //load all executable, set them to a consistent status
         fetcherPool = Executors.newScheduledThreadPool(1);
         int corePoolSize = jobEngineConfig.getMaxConcurrentJobLimit();
         jobPool = new ThreadPoolExecutor(corePoolSize, corePoolSize, Long.MAX_VALUE, TimeUnit.DAYS,
@@ -395,6 +401,8 @@ public class DefaultScheduler implements Scheduler<AbstractExecutable>, Connecti
         context = new DefaultContext(Maps.<String, Executable> newConcurrentMap(), jobEngineConfig.getConfig());
 
         logger.info("Staring resume all running jobs.");
+        ExecutableManager executableManager = getExecutableManager();
+        executableManager.reloadAll();
         executableManager.resumeAllRunningJobs();
         logger.info("Finishing resume all running jobs.");
 
