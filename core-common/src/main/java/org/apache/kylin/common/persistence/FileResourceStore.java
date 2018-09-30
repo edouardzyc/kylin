@@ -72,11 +72,11 @@ public class FileResourceStore extends ResourceStore {
                 Collection<File> files = FileUtils.listFiles(file, null, true);
                 for (File f : files) {
                     String path = f.getAbsolutePath();
-                    
+
                     // fix path on windows
                     if (path.length() > 2 && path.charAt(1) == ':' && path.charAt(2) == '\\')
                         path = path.replace('\\', '/');
-                    
+
                     String[] split = path.split(prefix);
                     Preconditions.checkArgument(split.length == 2);
                     r.add(prefix + split[1]);
@@ -99,8 +99,8 @@ public class FileResourceStore extends ResourceStore {
     }
 
     @Override
-    protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive)
-            throws IOException {
+    protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive,
+            boolean isAllowBroken) throws IOException {
         synchronized (FileResourceStore.class) {
 
             NavigableSet<String> resources = listResources(folderPath);
@@ -112,7 +112,7 @@ public class FileResourceStore extends ResourceStore {
                 for (String res : resources) {
                     long ts = getResourceTimestampImpl(res);
                     if (timeStart <= ts && ts < timeEndExclusive) {
-                        RawResource resource = getResourceImpl(res);
+                        RawResource resource = getResourceImpl(res, isAllowBroken);
                         if (resource != null) // can be null if is a sub-folder
                             result.add(resource);
                     }
@@ -128,7 +128,7 @@ public class FileResourceStore extends ResourceStore {
     }
 
     @Override
-    protected RawResource getResourceImpl(String resPath) throws IOException {
+    protected RawResource getResourceImpl(String resPath, boolean isAllowBroken) throws IOException {
         synchronized (FileResourceStore.class) {
 
             File f = file(resPath);
@@ -213,7 +213,7 @@ public class FileResourceStore extends ResourceStore {
     }
 
     private File file(String resPath) {
-         if (resPath.equals("/"))
+        if (resPath.equals("/"))
             return root;
         else
             return new File(root, resPath);

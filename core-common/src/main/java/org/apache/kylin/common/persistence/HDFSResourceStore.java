@@ -56,18 +56,18 @@ public class HDFSResourceStore extends ResourceStore {
     public HDFSResourceStore(KylinConfig kylinConfig) throws Exception {
         this(kylinConfig, kylinConfig.getMetadataUrl());
     }
-    
+
     public HDFSResourceStore(KylinConfig kylinConfig, StorageURL metadataUrl) throws Exception {
         super(kylinConfig);
         Preconditions.checkState(HDFS_SCHEME.equals(metadataUrl.getScheme()));
-        
+
         String path = metadataUrl.getParameter("path");
         if (path == null) {
             // missing path is not expected, but don't fail it
             path = kylinConfig.getHdfsWorkingDirectory(null) + "tmp_metadata";
             logger.warn("Missing path, fall back to " + path);
         }
-        
+
         fs = HadoopUtil.getFileSystem(path);
         Path metadataPath = new Path(path);
         if (fs.exists(metadataPath) == false) {
@@ -131,7 +131,8 @@ public class HDFSResourceStore extends ResourceStore {
     }
 
     @Override
-    protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive) throws IOException {
+    protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive,
+            boolean isAllowBroken) throws IOException {
         NavigableSet<String> resources = listResources(folderPath);
         if (resources == null)
             return Collections.emptyList();
@@ -140,7 +141,7 @@ public class HDFSResourceStore extends ResourceStore {
             for (String res : resources) {
                 long ts = getResourceTimestampImpl(res);
                 if (timeStart <= ts && ts < timeEndExclusive) {
-                    RawResource resource = getResourceImpl(res);
+                    RawResource resource = getResourceImpl(res, isAllowBroken);
                     if (resource != null) // can be null if is a sub-folder
                         result.add(resource);
                 }
@@ -155,7 +156,7 @@ public class HDFSResourceStore extends ResourceStore {
     }
 
     @Override
-    protected RawResource getResourceImpl(String resPath) throws IOException {
+    protected RawResource getResourceImpl(String resPath, boolean isAllowBroken) throws IOException {
         Path p = getRealHDFSPath(resPath);
         if (fs.exists(p) && fs.isFile(p)) {
             if (fs.getFileStatus(p).getLen() == 0) {
@@ -207,17 +208,20 @@ public class HDFSResourceStore extends ResourceStore {
     }
 
     @Override
-    protected long checkAndPutResourceImpl(String resPath, byte[] content, long oldTS, long newTS) throws IOException, WriteConflictException {
+    protected long checkAndPutResourceImpl(String resPath, byte[] content, long oldTS, long newTS)
+            throws IOException, WriteConflictException {
         Path p = getRealHDFSPath(resPath);
         if (!fs.exists(p)) {
             if (oldTS != 0) {
-                throw new IllegalStateException("For not exist file. OldTS have to be 0. but Actual oldTS is : " + oldTS);
+                throw new IllegalStateException(
+                        "For not exist file. OldTS have to be 0. but Actual oldTS is : " + oldTS);
             }
 
         } else {
             long realLastModify = getResourceTimestamp(resPath);
             if (realLastModify != oldTS) {
-                throw new WriteConflictException("Overwriting conflict " + resPath + ", expect old TS " + oldTS + ", but found " + realLastModify);
+                throw new WriteConflictException("Overwriting conflict " + resPath + ", expect old TS " + oldTS
+                        + ", but found " + realLastModify);
             }
         }
         putResourceImpl(resPath, new ByteArrayInputStream(content), newTS);

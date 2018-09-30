@@ -22,6 +22,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,7 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.RetriesExhaustedException;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.CompareFilter;
@@ -51,12 +54,12 @@ import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.StorageURL;
+import org.apache.kylin.common.persistence.BrokenEntity;
+import org.apache.kylin.common.persistence.BrokenInputStream;
 import org.apache.kylin.common.persistence.RawResource;
 import org.apache.kylin.common.persistence.ResourceStore;
 import org.apache.kylin.common.persistence.StringEntity;
 import org.apache.kylin.common.persistence.WriteConflictException;
-import org.apache.kylin.common.persistence.BrokenEntity;
-import org.apache.kylin.common.persistence.BrokenInputStream;
 import org.apache.kylin.common.util.Bytes;
 import org.apache.kylin.common.util.BytesUtil;
 import org.apache.kylin.common.util.HadoopUtil;
@@ -215,12 +218,6 @@ public class HBaseResourceStore extends ResourceStore {
     }
 
     @Override
-    protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive)
-            throws IOException {
-        return getAllResourcesImpl(folderPath, timeStart, timeEndExclusive, false);
-    }
-
-    @Override
     protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive,
             final boolean isAllowBroken) throws IOException {
         FilterList filter = generateTimeFilterList(timeStart, timeEndExclusive);
@@ -302,10 +299,6 @@ public class HBaseResourceStore extends ResourceStore {
     }
 
     @Override
-    protected RawResource getResourceImpl(String resPath) throws IOException {
-        return getResourceImpl(resPath, false);
-    }
-
     protected RawResource getResourceImpl(String resPath, final boolean isAllowBroken) throws IOException {
         Result r = getFromHTable(resPath, true, true);
         if (r == null)
@@ -478,6 +471,12 @@ public class HBaseResourceStore extends ResourceStore {
         put.addColumn(B_FAMILY, B_COLUMN_TS, Bytes.toBytes(ts));
 
         return put;
+    }
+
+    @Override
+    protected boolean isUnreachableException(Throwable ex) {
+        return (super.isUnreachableException(ex) || ex instanceof SocketTimeoutException
+                || ex instanceof ConnectException || ex instanceof RetriesExhaustedException);
     }
 
     @Override

@@ -135,7 +135,7 @@ abstract public class ResourceStore {
      */
     final public NavigableSet<String> listResources(String folderPath) throws IOException {
         String path = norm(folderPath);
-        return listResourcesImpl(path, false);
+        return listResourcesWithRetry(path, false);
     }
 
     /**
@@ -143,13 +143,34 @@ abstract public class ResourceStore {
      */
     final public NavigableSet<String> listResourcesRecursively(String folderPath) throws IOException {
         String path = norm(folderPath);
-        return listResourcesImpl(path, true);
+        return listResourcesWithRetry(path, true);
     }
 
     /**
      * return null if given path is not a folder or not exists
      */
     abstract protected NavigableSet<String> listResourcesImpl(String folderPath, boolean recursive) throws IOException;
+
+    private NavigableSet<String> listResourcesWithRetry(String folderPath, boolean recursive) throws IOException {
+        ExponentialBackoffRetryPolicy retryPolicy = new ExponentialBackoffRetryPolicy(
+                kylinConfig.getResourceStoreReconnectBaseMs(), kylinConfig.getResourceStoreReconnectMaxMs());
+        NavigableSet<String> resources = null;
+        boolean done = false;
+
+        while (!done) {
+            try {
+                resources = listResourcesImpl(folderPath, recursive);
+                done = true;
+            } catch (Throwable ex) {
+                boolean shouldRetry = checkIfAllowRetry(retryPolicy, ex);
+                if (!shouldRetry) {
+                    throw ex;
+                }
+            }
+        }
+
+        return resources;
+    }
 
     protected String createMetaStoreUUID() throws IOException {
         return UUID.randomUUID().toString();
@@ -185,7 +206,7 @@ abstract public class ResourceStore {
     final public <T extends RootPersistentEntity> T getResource(String resPath, Class<T> clz, Serializer<T> serializer,
             final boolean isAllowBroken) throws IOException {
         resPath = norm(resPath);
-        RawResource res = getResourceImpl(resPath, isAllowBroken);
+        RawResource res = getResourceWithRetry(resPath, isAllowBroken);
         if (res == null)
             return null;
 
@@ -201,15 +222,15 @@ abstract public class ResourceStore {
     }
 
     final public RawResource getResource(String resPath) throws IOException {
-        return getResourceImpl(norm(resPath), false);
+        return getResourceWithRetry(norm(resPath), false);
     }
 
     final public RawResource getResource(String resPath, boolean isAllowBroken) throws IOException {
-        return getResourceImpl(norm(resPath), isAllowBroken);
+        return getResourceWithRetry(norm(resPath), isAllowBroken);
     }
 
     final public long getResourceTimestamp(String resPath) throws IOException {
-        return getResourceTimestampImpl(norm(resPath));
+        return getResourceTimestampWithRetry(norm(resPath));
     }
 
     /**
@@ -235,7 +256,7 @@ abstract public class ResourceStore {
 
     final public <T extends RootPersistentEntity> List<T> getAllResources(String folderPath, long timeStart,
             long timeEndExclusive, Class<T> clazz, Serializer<T> serializer, boolean isAllowBroken) throws IOException {
-        final List<RawResource> allResources = getAllResourcesImpl(folderPath, timeStart, timeEndExclusive,
+        final List<RawResource> allResources = getAllResourcesWithRetry(folderPath, timeStart, timeEndExclusive,
                 isAllowBroken);
         if (allResources == null || allResources.isEmpty()) {
             return Collections.emptyList();
@@ -259,27 +280,81 @@ abstract public class ResourceStore {
     /**
      * return empty list if given path is not a folder or not exists
      */
-    abstract protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive)
-            throws IOException;
+    abstract protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive,
+            boolean isAllowBroken) throws IOException;
 
-    protected List<RawResource> getAllResourcesImpl(String folderPath, long timeStart, long timeEndExclusive,
+    private List<RawResource> getAllResourcesWithRetry(String folderPath, long timeStart, long timeEndExclusive,
             boolean isAllowBroken) throws IOException {
-        return getAllResourcesImpl(folderPath, timeStart, timeEndExclusive);
+        ExponentialBackoffRetryPolicy retryPolicy = new ExponentialBackoffRetryPolicy(
+                kylinConfig.getResourceStoreReconnectBaseMs(), kylinConfig.getResourceStoreReconnectMaxMs());
+        List<RawResource> allResources = null;
+        boolean done = false;
+
+        while (!done) {
+            try {
+                allResources = getAllResourcesImpl(folderPath, timeStart, timeEndExclusive, isAllowBroken);
+                done = true;
+            } catch (Throwable ex) {
+                boolean shouldRetry = checkIfAllowRetry(retryPolicy, ex);
+                if (!shouldRetry) {
+                    throw ex;
+                }
+            }
+        }
+        return allResources;
     }
 
     /**
      * returns null if not exists
      */
-    abstract protected RawResource getResourceImpl(String resPath) throws IOException;
+    abstract protected RawResource getResourceImpl(String resPath, boolean isAllowBroken) throws IOException;
 
-    protected RawResource getResourceImpl(String resPath, boolean isAllowBroken) throws IOException {
-        return getResourceImpl(resPath);
+    private RawResource getResourceWithRetry(String resPath, boolean isAllowBroken) throws IOException {
+        ExponentialBackoffRetryPolicy retryPolicy = new ExponentialBackoffRetryPolicy(
+                kylinConfig.getResourceStoreReconnectBaseMs(), kylinConfig.getResourceStoreReconnectMaxMs());
+        RawResource rawResource = null;
+        boolean done = false;
+
+        while (!done) {
+            try {
+                rawResource = getResourceImpl(resPath, isAllowBroken);
+                done = true;
+            } catch (Throwable ex) {
+                boolean shouldRetry = checkIfAllowRetry(retryPolicy, ex);
+                if (!shouldRetry) {
+                    throw ex;
+                }
+            }
+        }
+
+        return rawResource;
     }
 
     /**
      * returns 0 if not exists
      */
     abstract protected long getResourceTimestampImpl(String resPath) throws IOException;
+
+    final public long getResourceTimestampWithRetry(String resPath) throws IOException {
+        long timeStamp = 0;
+        ExponentialBackoffRetryPolicy retryPolicy = new ExponentialBackoffRetryPolicy(
+                kylinConfig.getResourceStoreReconnectBaseMs(), kylinConfig.getResourceStoreReconnectMaxMs());
+        boolean done = false;
+
+        while (!done) {
+            try {
+                timeStamp = getResourceTimestampImpl(norm(resPath));
+                done = true;
+            } catch (Throwable ex) {
+                boolean shouldRetry = checkIfAllowRetry(retryPolicy, ex);
+                if (!shouldRetry) {
+                    throw ex;
+                }
+            }
+        }
+
+        return timeStamp;
+    }
 
     /**
      * overwrite a resource without write conflict check
@@ -309,10 +384,28 @@ abstract public class ResourceStore {
 
     private void putResourceCheckpoint(String resPath, InputStream content, long ts) throws IOException {
         beforeChange(resPath);
-        putResourceImpl(resPath, content, ts);
+        putResourceWithRetry(resPath, content, ts);
     }
 
     abstract protected void putResourceImpl(String resPath, InputStream content, long ts) throws IOException;
+
+    private void putResourceWithRetry(String resPath, InputStream content, long ts) throws IOException {
+        ExponentialBackoffRetryPolicy retryPolicy = new ExponentialBackoffRetryPolicy(
+                kylinConfig.getResourceStoreReconnectBaseMs(), kylinConfig.getResourceStoreReconnectMaxMs());
+        boolean done = false;
+
+        while (!done) {
+            try {
+                putResourceImpl(resPath, content, ts);
+                done = true;
+            } catch (Throwable ex) {
+                boolean shouldRetry = checkIfAllowRetry(retryPolicy, ex);
+                if (!shouldRetry) {
+                    throw ex;
+                }
+            }
+        }
+    }
 
     /**
      * check & set, overwrite a resource
@@ -355,7 +448,7 @@ abstract public class ResourceStore {
     private long checkAndPutResourceCheckpoint(String resPath, byte[] content, long oldTS, long newTS)
             throws IOException, WriteConflictException {
         beforeChange(resPath);
-        return checkAndPutResourceImpl(resPath, content, oldTS, newTS);
+        return checkAndPutResourceWithRetry(resPath, content, oldTS, newTS);
     }
 
     /**
@@ -363,6 +456,28 @@ abstract public class ResourceStore {
      */
     abstract protected long checkAndPutResourceImpl(String resPath, byte[] content, long oldTS, long newTS)
             throws IOException, WriteConflictException;
+
+    protected long checkAndPutResourceWithRetry(String resPath, byte[] content, long oldTS, long newTS)
+            throws IOException, WriteConflictException {
+        ExponentialBackoffRetryPolicy retryPolicy = new ExponentialBackoffRetryPolicy(
+                kylinConfig.getResourceStoreReconnectBaseMs(), kylinConfig.getResourceStoreReconnectMaxMs());
+        long timeStamp = 0;
+        boolean done = false;
+
+        while (!done) {
+            try {
+                timeStamp = checkAndPutResourceImpl(resPath, content, oldTS, newTS);
+                done = true;
+            } catch (Throwable ex) {
+                boolean shouldRetry = checkIfAllowRetry(retryPolicy, ex);
+                if (!shouldRetry) {
+                    throw ex;
+                }
+            }
+        }
+
+        return timeStamp;
+    }
 
     /**
      * delete a resource, does nothing on a folder
@@ -374,10 +489,28 @@ abstract public class ResourceStore {
 
     private void deleteResourceCheckpoint(String resPath) throws IOException {
         beforeChange(resPath);
-        deleteResourceImpl(resPath);
+        deleteResourceWithRetry(resPath);
     }
 
     abstract protected void deleteResourceImpl(String resPath) throws IOException;
+
+    private void deleteResourceWithRetry(String resPath) throws IOException {
+        ExponentialBackoffRetryPolicy retryPolicy = new ExponentialBackoffRetryPolicy(
+                kylinConfig.getResourceStoreReconnectBaseMs(), kylinConfig.getResourceStoreReconnectMaxMs());
+        boolean done = false;
+
+        while (!done) {
+            try {
+                deleteResourceImpl(resPath);
+                done = true;
+            } catch (Throwable ex) {
+                boolean shouldRetry = checkIfAllowRetry(retryPolicy, ex);
+                if (!shouldRetry) {
+                    throw ex;
+                }
+            }
+        }
+    }
 
     /**
      * get a readable string of a resource path
@@ -397,6 +530,35 @@ abstract public class ResourceStore {
         if (resPath.startsWith("/") == false)
             resPath = "/" + resPath;
         return resPath;
+    }
+
+    // ============================================================================
+    protected boolean isUnreachableException(Throwable ex) {
+        List<String> connectionExceptions = Lists
+                .newArrayList(kylinConfig.getResourceStoreConnectionExceptions().split(","));
+        return connectionExceptions.contains(ex.getClass().getName());
+    }
+
+    private boolean checkIfAllowRetry(ExponentialBackoffRetryPolicy retryPolicy, Throwable ex) throws IOException {
+        if (kylinConfig.isResourceStoreReconnectEnabled() && isUnreachableException(ex)) {
+            if (retryPolicy.getCurrentSleptMs() >= kylinConfig.getResourceStoreReconnectTimeoutMs()) {
+                logger.error("Reconnect to resource store timeout, abandoning...", ex);
+                return false;
+            }
+
+            long waitMs = retryPolicy.getSleepTimeMs();
+            logger.info("Will try to re-connect after " + waitMs / 1000 + " seconds.");
+            try {
+                Thread.sleep(waitMs);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Current thread for resource store's CRUD is interrupted, abandoning...");
+            }
+            retryPolicy.increaseSleptTime(waitMs);
+            retryPolicy.increaseRetryCount();
+            return true;
+        }
+
+        return false;
     }
 
     // ============================================================================
@@ -428,7 +590,7 @@ abstract public class ResourceStore {
             if (origResData.containsKey(resPath))
                 return;
 
-            RawResource raw = getResourceImpl(resPath);
+            RawResource raw = getResourceWithRetry(resPath, false);
             if (raw == null) {
                 origResData.put(resPath, null);
                 origResTimestamp.put(resPath, null);
@@ -455,9 +617,9 @@ abstract public class ResourceStore {
                     byte[] data = origResData.get(resPath);
                     Long ts = origResTimestamp.get(resPath);
                     if (data == null || ts == null)
-                        deleteResourceImpl(resPath);
+                        deleteResourceWithRetry(resPath);
                     else
-                        putResourceImpl(resPath, new ByteArrayInputStream(data), ts);
+                        putResourceWithRetry(resPath, new ByteArrayInputStream(data), ts);
                 } catch (IOException ex) {
                     logger.error("Failed to rollback " + resPath, ex);
                 }

@@ -464,6 +464,26 @@ abstract public class KylinConfigBase implements Serializable {
         return r;
     }
 
+    public boolean isResourceStoreReconnectEnabled() {
+        return Boolean.parseBoolean(getOptional("kylin.resourcestore.reconnect-enabled", "false"));
+    }
+
+    public int getResourceStoreReconnectBaseMs() {
+        return Integer.parseInt(getOptional("kylin.resourcestore.reconnect-base-ms", "1000"));
+    }
+
+    public int getResourceStoreReconnectMaxMs() {
+        return Integer.parseInt(getOptional("kylin.resourcestore.reconnect-max-ms", "60000"));
+    }
+
+    public int getResourceStoreReconnectTimeoutMs() {
+        return Integer.parseInt(getOptional("kylin.resourcestore.reconnect-timeout-ms", "3600000"));
+    }
+
+    public String getResourceStoreConnectionExceptions() {
+        return getOptional("kylin.resourcestore.connection-exceptions", "");
+    }
+
     public String getDataModelImpl() {
         return getOptional("kylin.metadata.data-model-impl", null);
     }
