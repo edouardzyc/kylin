@@ -536,7 +536,27 @@ abstract public class ResourceStore {
     protected boolean isUnreachableException(Throwable ex) {
         List<String> connectionExceptions = Lists
                 .newArrayList(kylinConfig.getResourceStoreConnectionExceptions().split(","));
-        return connectionExceptions.contains(ex.getClass().getName());
+        boolean hasException = false;
+        for (String exception : connectionExceptions) {
+            hasException = containsException(ex, exception);
+
+            if (hasException)
+                break;
+        }
+        return hasException;
+    }
+
+    private boolean containsException(Throwable ex, String targetException) {
+        Throwable t = ex;
+        int depth = 0;
+        while (t != null && depth < 5) {
+            depth++;
+            if (t.getClass().getName().equals(targetException)) {
+                return true;
+            }
+            t = t.getCause();
+        }
+        return false;
     }
 
     private boolean checkIfAllowRetry(ExponentialBackoffRetryPolicy retryPolicy, Throwable ex) throws IOException {
