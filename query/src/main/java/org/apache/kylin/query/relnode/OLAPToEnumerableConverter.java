@@ -19,6 +19,7 @@
 package org.apache.kylin.query.relnode;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.calcite.adapter.enumerable.EnumerableRel;
 import org.apache.calcite.adapter.enumerable.EnumerableRelImplementor;
@@ -76,6 +77,14 @@ public class OLAPToEnumerableConverter extends ConverterImpl implements Enumerab
 
         // identify model & realization
         List<OLAPContext> contexts = listContextsHavingScan();
+
+        //bind dynamic variable before choose realization because of replacing MRMasterCube to MRCube need this variable
+        Map<String, Object> prepareParams = QueryContext.current().getPrepareParams();
+        if (prepareParams != null && prepareParams.size() > 0) {
+            for (OLAPContext context : contexts) {
+                context.bindVariable(prepareParams);
+            }
+        }
 
         // intercept query
         if (contexts.size() > 0) {
