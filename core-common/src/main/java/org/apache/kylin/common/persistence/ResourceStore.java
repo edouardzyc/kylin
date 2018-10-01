@@ -561,7 +561,7 @@ abstract public class ResourceStore {
 
     private boolean checkIfAllowRetry(ExponentialBackoffRetryPolicy retryPolicy, Throwable ex) throws IOException {
         if (kylinConfig.isResourceStoreReconnectEnabled() && isUnreachableException(ex)) {
-            if (retryPolicy.getCurrentSleptMs() >= kylinConfig.getResourceStoreReconnectTimeoutMs()) {
+            if (retryPolicy.isTimeOut(kylinConfig.getResourceStoreReconnectTimeoutMs())) {
                 logger.error("Reconnect to resource store timeout, abandoning...", ex);
                 return false;
             }
@@ -573,7 +573,6 @@ abstract public class ResourceStore {
             } catch (InterruptedException e) {
                 throw new RuntimeException("Current thread for resource store's CRUD is interrupted, abandoning...");
             }
-            retryPolicy.increaseSleptTime(waitMs);
             retryPolicy.increaseRetryCount();
             return true;
         }

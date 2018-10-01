@@ -21,18 +21,19 @@ package org.apache.kylin.common.persistence;
 public class ExponentialBackoffRetryPolicy {
     private final int baseSleepTimeMs;
     private final int maxSleepTimeMs;
-
+    private long firstSleepTime;
     private int retryCount;
-    private int currentSleptMs;
 
     public ExponentialBackoffRetryPolicy(int baseSleepTimeMs, int maxSleepTimeMs) {
         this.baseSleepTimeMs = baseSleepTimeMs;
         this.maxSleepTimeMs = maxSleepTimeMs;
         this.retryCount = 0;
-        this.currentSleptMs = 0;
     }
 
     long getSleepTimeMs() {
+        if (retryCount == 0)
+            firstSleepTime = System.currentTimeMillis();
+
         long ms = baseSleepTimeMs * (1 << retryCount);
 
         if (ms > maxSleepTimeMs)
@@ -40,19 +41,11 @@ public class ExponentialBackoffRetryPolicy {
         return ms;
     }
 
-    public int getRetryCount() {
-        return retryCount;
-    }
-
     void increaseRetryCount() {
         retryCount++;
     }
 
-    void increaseSleptTime(long sleepTime) {
-        currentSleptMs += sleepTime;
-    }
-
-    int getCurrentSleptMs() {
-        return currentSleptMs;
+    boolean isTimeOut(long timeoutMs) {
+        return retryCount != 0 && (System.currentTimeMillis() - firstSleepTime >= timeoutMs);
     }
 }
