@@ -25,11 +25,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import javax.annotation.Nullable;
+
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.validate.SqlValidatorException;
 import org.apache.commons.lang3.StringUtils;
@@ -43,9 +40,12 @@ import org.apache.kylin.rest.response.SQLResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-
-import javax.annotation.Nullable;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 public class QueryMetricsContext {
 
@@ -141,8 +141,8 @@ public class QueryMetricsContext {
     }
 
     private static QueryMetricsContext obtainCurrentQueryMetrics() {
-        final QueryMetricsContext current;
-        Preconditions.checkState((current = contexts.get()) != null, "Query metric context is not started.");
+        final QueryMetricsContext current = contexts.get();
+        Preconditions.checkState(current != null, "Query metric context is not started.");
         return current;
     }
 

@@ -25,8 +25,6 @@ import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.KylinConfig.SetAndUnsetThreadLocalConfig;
 import org.apache.kylin.common.QueryContext;
 import org.apache.kylin.job.exception.JobException;
-import org.apache.kylin.metadata.project.ProjectInstance;
-import org.apache.kylin.query.QueryConnection;
 import org.apache.kylin.rest.request.SQLRequest;
 import org.apache.kylin.rest.response.SQLResponse;
 import org.junit.Assert;
@@ -52,7 +50,6 @@ public class QueryServiceTest extends ServiceTestBase {
         Assert.assertNotNull(queryService.getConfig());
         Assert.assertNotNull(queryService.getConfig());
         Assert.assertNotNull(queryService.getDataModelManager());
-        Assert.assertNotNull(QueryConnection.getConnection(ProjectInstance.DEFAULT_PROJECT_NAME));
 
         //        Assert.assertTrue(queryService.getQueries("ADMIN").size() == 0);
         //

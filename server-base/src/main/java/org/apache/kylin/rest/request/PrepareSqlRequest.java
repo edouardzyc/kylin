@@ -18,15 +18,16 @@
 
 package org.apache.kylin.rest.request;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.kylin.query.QueryConnection.StateParam;
+
 /**
  * @author xduo
- * 
  */
+@SuppressWarnings("serial")
 public class PrepareSqlRequest extends SQLRequest {
 
     public PrepareSqlRequest() {
@@ -41,61 +42,6 @@ public class PrepareSqlRequest extends SQLRequest {
 
     public void setParams(StateParam[] params) {
         this.params = params;
-    }
-
-    public static class StateParam implements Serializable {
-        private String className;
-        private String value;
-
-        public StateParam() {
-        }
-
-        public String getClassName() {
-            return className;
-        }
-
-        public void setClassName(String className) {
-            this.className = className;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((className == null) ? 0 : className.hashCode());
-            result = prime * result + ((value == null) ? 0 : value.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            StateParam other = (StateParam) obj;
-            if (className == null) {
-                if (other.className != null)
-                    return false;
-            } else if (!className.equals(other.className))
-                return false;
-            if (value == null) {
-                if (other.value != null)
-                    return false;
-            } else if (!value.equals(other.value))
-                return false;
-            return true;
-        }
     }
 
     @Override

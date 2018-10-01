@@ -18,7 +18,6 @@
 
 package org.apache.kylin.query;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
@@ -31,6 +30,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.DBUtils;
+import org.apache.kylin.metadata.project.ProjectInstance;
 
 public class QueryCli {
 
@@ -53,11 +53,11 @@ public class QueryCli {
         KylinConfig config = KylinConfig.createInstanceFromUri(commandLine.getOptionValue(OPTION_METADATA.getOpt()));
         String sql = commandLine.getOptionValue(OPTION_SQL.getOpt());
 
-        Connection conn = null;
+        QueryConnection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            conn = QueryConnection.getConnection(null);
+            conn = new QueryConnection(ProjectInstance.DEFAULT_PROJECT_NAME);
 
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);

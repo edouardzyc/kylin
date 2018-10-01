@@ -25,15 +25,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,8 +44,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import com.google.common.collect.Maps;
-import org.apache.calcite.avatica.ColumnMetaData.Rep;
 import org.apache.calcite.config.CalciteConnectionConfig;
 import org.apache.calcite.jdbc.CalcitePrepare;
 import org.apache.calcite.prepare.CalcitePrepareImpl;
@@ -87,7 +82,6 @@ import org.apache.kylin.query.util.QueryUtil;
 import org.apache.kylin.query.util.TempStatementUtil;
 import org.apache.kylin.rest.constant.Constant;
 import org.apache.kylin.rest.exception.BadRequestException;
-import org.apache.kylin.rest.exception.InternalErrorException;
 import org.apache.kylin.rest.metrics.QueryMetrics2Facade;
 import org.apache.kylin.rest.metrics.QueryMetricsContext;
 import org.apache.kylin.rest.metrics.QueryMetricsFacade;
@@ -153,7 +147,7 @@ public class QueryService extends BasicService {
         queryStore = ResourceStore.getStore(getConfig());
     }
 
-    protected static void close(ResultSet resultSet, Statement stat, Connection conn) {
+    protected static void close(ResultSet resultSet, Statement stat, QueryConnection conn) {
         OLAPContext.clearParameter();
         DBUtils.closeQuietly(resultSet);
         DBUtils.closeQuietly(stat);
@@ -204,9 +198,9 @@ public class QueryService extends BasicService {
     public SQLResponse update(SQLRequest sqlRequest) throws Exception {
         // non select operations, only supported when enable pushdown
         logger.debug("Query pushdown enabled, redirect the non-select query to pushdown engine.");
-        Connection conn = null;
+        QueryConnection conn = null;
         try {
-            conn = QueryConnection.getConnection(sqlRequest.getProject());
+            conn = new QueryConnection(sqlRequest.getProject());
             Pair<List<List<String>>, List<SelectedColumnMeta>> r = PushDownUtil.tryPushDownNonSelectQuery(
                     sqlRequest.getProject(), sqlRequest.getSql(), conn.getSchema(), BackdoorToggles.getPrepareOnly());
 
@@ -568,10 +562,10 @@ public class QueryService extends BasicService {
     }
 
     private SQLResponse queryWithSqlMassage(SQLRequest sqlRequest) throws Exception {
-        Connection conn = null;
+        QueryConnection conn = null;
 
         try {
-            conn = QueryConnection.getConnection(sqlRequest.getProject());
+            conn = new QueryConnection(sqlRequest.getProject());
 
             String userInfo = SecurityContextHolder.getContext().getAuthentication().getName();
             QueryContext context = QueryContext.current();
@@ -617,7 +611,7 @@ public class QueryService extends BasicService {
 
     protected List<TableMeta> getMetadata(CubeManager cubeMgr, String project) throws SQLException {
 
-        Connection conn = null;
+        QueryConnection conn = null;
         ResultSet columnMeta = null;
         List<TableMeta> tableMetas = null;
         if (StringUtils.isBlank(project)) {
@@ -625,7 +619,7 @@ public class QueryService extends BasicService {
         }
         ResultSet JDBCTableMeta = null;
         try {
-            conn = QueryConnection.getConnection(project);
+            conn = new QueryConnection(project);
             DatabaseMetaData metaData = conn.getMetaData();
 
             JDBCTableMeta = metaData.getTables(null, null, null, null);
@@ -702,7 +696,7 @@ public class QueryService extends BasicService {
      * @return
      * @throws Exception
      */
-    private SQLResponse execute(String correctedSql, SQLRequest sqlRequest, Connection conn) throws Exception {
+    private SQLResponse execute(String correctedSql, SQLRequest sqlRequest, QueryConnection conn) throws Exception {
         Statement stat = null;
         ResultSet resultSet = null;
         boolean isPushDown = false;
@@ -718,20 +712,9 @@ public class QueryService extends BasicService {
             }
 
             if (isPrepareStatementWithParams(sqlRequest)) {
-                //put variable into QueryContext
-                Map<String, Object> prepareParams = Maps.newHashMap();
-                for (int i = 0; i < ((PrepareSqlRequest) sqlRequest).getParams().length; i++) {
-                    prepareParams.put("?" + i, ((PrepareSqlRequest) sqlRequest).getParams()[i].getValue());
-                }
-
-                QueryContext.current().setPrepareParams(prepareParams);
-                stat = conn.prepareStatement(correctedSql); // to be closed in the finally
-                PreparedStatement prepared = (PreparedStatement) stat;
-                processStatementAttr(prepared, sqlRequest);
-                for (int i = 0; i < ((PrepareSqlRequest) sqlRequest).getParams().length; i++) {
-                    setParam(prepared, i + 1, ((PrepareSqlRequest) sqlRequest).getParams()[i]);
-                }
-                resultSet = prepared.executeQuery();
+                stat = conn.prepareStatement(correctedSql, ((PrepareSqlRequest) sqlRequest).getParams()); // to be closed in the finally
+                processStatementAttr(stat, sqlRequest);
+                resultSet = ((PreparedStatement) stat).executeQuery();
             } else {
                 stat = conn.createStatement();
                 processStatementAttr(stat, sqlRequest);
@@ -799,14 +782,14 @@ public class QueryService extends BasicService {
         return QueryUtil.makeErrorMsgUserFriendly(e);
     }
 
-    private SQLResponse getPrepareOnlySqlResponse(String correctedSql, Connection conn, Boolean isPushDown,
+    private SQLResponse getPrepareOnlySqlResponse(String correctedSql, QueryConnection conn, Boolean isPushDown,
             List<List<String>> results, List<SelectedColumnMeta> columnMetas) throws SQLException {
 
         CalcitePrepareImpl.KYLIN_ONLY_PREPARE.set(true);
 
         PreparedStatement preparedStatement = null;
         try {
-            preparedStatement = conn.prepareStatement(correctedSql);
+            preparedStatement = conn.prepareStatement(correctedSql, new Object[0]);
             throw new IllegalStateException("Should have thrown OnlyPrepareEarlyAbortException");
         } catch (Exception e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
@@ -883,73 +866,6 @@ public class QueryService extends BasicService {
         response.setLateDecodeEnabled(QueryContext.current().isLateDecodeEnabled());
         response.setIsSparderUsed(QueryContext.current().isSparderUsed());
         return response;
-    }
-
-    /**
-     * @param preparedState
-     * @param param
-     * @throws SQLException
-     */
-    private void setParam(PreparedStatement preparedState, int index, PrepareSqlRequest.StateParam param)
-            throws SQLException {
-        boolean isNull = (null == param.getValue());
-
-        Class<?> clazz;
-        try {
-            clazz = Class.forName(param.getClassName());
-        } catch (ClassNotFoundException e) {
-            throw new InternalErrorException(e);
-        }
-
-        Rep rep = Rep.of(clazz);
-
-        switch (rep) {
-        case PRIMITIVE_CHAR:
-        case CHARACTER:
-        case STRING:
-            preparedState.setString(index, isNull ? null : String.valueOf(param.getValue()));
-            break;
-        case PRIMITIVE_INT:
-        case INTEGER:
-            preparedState.setInt(index, isNull ? 0 : Integer.valueOf(param.getValue()));
-            break;
-        case PRIMITIVE_SHORT:
-        case SHORT:
-            preparedState.setShort(index, isNull ? 0 : Short.valueOf(param.getValue()));
-            break;
-        case PRIMITIVE_LONG:
-        case LONG:
-            preparedState.setLong(index, isNull ? 0 : Long.valueOf(param.getValue()));
-            break;
-        case PRIMITIVE_FLOAT:
-        case FLOAT:
-            preparedState.setFloat(index, isNull ? 0 : Float.valueOf(param.getValue()));
-            break;
-        case PRIMITIVE_DOUBLE:
-        case DOUBLE:
-            preparedState.setDouble(index, isNull ? 0 : Double.valueOf(param.getValue()));
-            break;
-        case PRIMITIVE_BOOLEAN:
-        case BOOLEAN:
-            preparedState.setBoolean(index, !isNull && Boolean.parseBoolean(param.getValue()));
-            break;
-        case PRIMITIVE_BYTE:
-        case BYTE:
-            preparedState.setByte(index, isNull ? 0 : Byte.valueOf(param.getValue()));
-            break;
-        case JAVA_UTIL_DATE:
-        case JAVA_SQL_DATE:
-            preparedState.setDate(index, isNull ? null : java.sql.Date.valueOf(param.getValue()));
-            break;
-        case JAVA_SQL_TIME:
-            preparedState.setTime(index, isNull ? null : Time.valueOf(param.getValue()));
-            break;
-        case JAVA_SQL_TIMESTAMP:
-            preparedState.setTimestamp(index, isNull ? null : Timestamp.valueOf(param.getValue()));
-            break;
-        default:
-            preparedState.setObject(index, isNull ? null : param.getValue());
-        }
     }
 
     protected int getInt(String content) {

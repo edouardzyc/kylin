@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
@@ -32,14 +33,13 @@ import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.KylinVersion;
 import org.apache.kylin.common.debug.BackdoorToggles;
 import org.apache.kylin.common.exceptions.KylinTimeoutException;
+import org.apache.kylin.common.util.DBUtils;
 import org.apache.kylin.gridtable.StorageSideBehavior;
 import org.apache.kylin.metadata.realization.RealizationType;
 import org.apache.kylin.query.routing.Candidate;
 import org.apache.kylin.query.routing.rules.RemoveBlackoutRealizationsRule;
 import org.apache.kylin.rest.response.SQLResponse;
 import org.apache.kylin.rest.util.TableauInterceptor;
-import org.dbunit.database.DatabaseConnection;
-import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.ITable;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -159,9 +159,8 @@ public class ITKylinQueryTest extends KylinTestBase {
 
         File sqlFile = new File(queryFileName);
         String sql = getTextFromFile(sqlFile);
-        IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
 
-        executeQuery(kylinConn, queryFileName, sql, true);
+        executeQuery(cubeConnection, queryFileName, sql, true);
     }
 
     @Test
@@ -346,13 +345,14 @@ public class ITKylinQueryTest extends KylinTestBase {
             String queryName = StringUtils.split(sqlFile.getName(), '.')[0];
             logger.info("Testing Query " + queryName);
             String sql = getTextFromFile(sqlFile);
-            IDatabaseConnection cubeConn = new DatabaseConnection(cubeConnection);
+            Statement stat = null;
             try {
-                cubeConn.createQueryTable(queryName, sql);
+                stat = cubeConnection.createStatement();
+                stat.execute(sql);
             } catch (Throwable t) {
                 continue;
             } finally {
-                cubeConn.close();
+                DBUtils.closeQuietly(stat);
             }
             throw new IllegalStateException(queryName + " should be error!");
         }
@@ -414,8 +414,7 @@ public class ITKylinQueryTest extends KylinTestBase {
 
         // execute Kylin
         logger.info("Query Result from Kylin - " + queryName);
-        IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
-        ITable kylinTable = executeQuery(kylinConn, queryName, sql, false);
+        ITable kylinTable = executeQuery(cubeConnection, queryName, sql, false);
         String queriedVersion = String.valueOf(kylinTable.getValue(0, "version"));
 
         // compare the result

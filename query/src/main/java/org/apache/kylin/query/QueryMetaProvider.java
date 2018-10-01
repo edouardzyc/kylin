@@ -18,7 +18,6 @@
 
 package org.apache.kylin.query;
 
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -53,7 +52,7 @@ public class QueryMetaProvider {
     public static List<TableMetaWithType> getQueryMeta(KylinConfig kylinConfig, String project) throws SQLException {
         //Message msg = MsgPicker.getMsg();
 
-        Connection conn = null;
+        QueryConnection conn = null;
         ResultSet columnMeta = null;
         List<TableMetaWithType> tableMetas = null;
         Map<String, TableMetaWithType> tableMap = null;
@@ -66,7 +65,7 @@ public class QueryMetaProvider {
         }
         ResultSet JDBCTableMeta = null;
         try {
-            conn = QueryConnection.getConnection(project);
+            conn = new QueryConnection(project);
             DatabaseMetaData metaData = conn.getMetaData();
 
             JDBCTableMeta = metaData.getTables(null, null, null, null);
@@ -220,7 +219,7 @@ public class QueryMetaProvider {
         }
     }
 
-    private static void close(ResultSet resultSet, Statement stat, Connection conn) {
+    private static void close(ResultSet resultSet, Statement stat, QueryConnection conn) {
         OLAPContext.clearParameter();
         DBUtils.closeQuietly(resultSet);
         DBUtils.closeQuietly(stat);

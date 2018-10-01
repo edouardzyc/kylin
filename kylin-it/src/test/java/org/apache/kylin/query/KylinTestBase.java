@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -42,12 +43,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.LogManager;
 
-import com.google.common.collect.Maps;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
 import org.apache.calcite.sql.SqlNode;
@@ -143,7 +142,7 @@ public class KylinTestBase {
 
     protected static final String resultTableName = "query result of ";
     protected static KylinConfig config = null;
-    protected static Connection cubeConnection = null;
+    protected static QueryConnection cubeConnection = null;
     protected static Connection h2Connection = null;
     protected static String joinType = "default";
     protected static int h2InstanceCount = 0;
@@ -162,6 +161,16 @@ public class KylinTestBase {
         }
     }
 
+    protected static void closeConnection(QueryConnection connection) {
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
     private static class FileByNameComparator implements Comparator<File> {
         @Override
         public int compare(File o1, File o2) {
@@ -245,6 +254,12 @@ public class KylinTestBase {
     // ////////////////////////////////////////////////////////////////////////////////////////
     // execute
 
+    protected ITable executeQuery(QueryConnection conn, String queryName, String sql, boolean needSort)
+            throws Exception {
+        IDatabaseConnection dbConn = makeDatabaseConnection(conn);
+        return executeQuery(dbConn, queryName, sql, needSort);
+    }
+
     protected ITable executeQuery(IDatabaseConnection dbConn, String queryName, String sql, boolean needSort)
             throws Exception {
         
@@ -254,18 +269,7 @@ public class KylinTestBase {
         sql = changeJoinType(sql, joinType);
 
         ITable queryTable = dbConn.createQueryTable(resultTableName + queryName, sql);
-        if (needSort) {
-            String[] columnNames = new String[queryTable.getTableMetaData().getColumns().length];
-            for (int i = 0; i < columnNames.length; i++) {
-                columnNames[i] = queryTable.getTableMetaData().getColumns()[i].getColumnName();
-            }
-
-            queryTable = new SortedTable(queryTable, columnNames);
-        }
-        if (PRINT_RESULT)
-            printResult(queryTable);
-
-        return queryTable;
+        return sortAndPrint(queryTable, needSort);
     }
 
     protected int executeQuery(String sql, boolean needDisplay) throws Exception {
@@ -310,28 +314,26 @@ public class KylinTestBase {
         }
     }
 
-    protected Pair<List<List<String>>, List<SelectedColumnMeta>> tryPushDownSelectQuery(String sql) throws Exception {
-        SQLException mockException = new SQLException("", new NoRealizationFoundException(""));
-
-        return PushDownUtil.tryPushDownSelectQuery(ProjectInstance.DEFAULT_PROJECT_NAME, sql, "DEFAULT", mockException,
-                BackdoorToggles.getPrepareOnly());
+    protected ITable executeDynamicQuery(QueryConnection conn, String queryName, String sql,
+            List<String> parameters, boolean needSort) throws Exception {
+        
+        QueryContext.reset();
+        
+        // change join type to match current setting
+        sql = changeJoinType(sql, joinType);
+        
+        // parameters are set inside the QueryConnection.prepareStatement()
+        PreparedStatement prepStat = conn.prepareStatement(sql, parameters.toArray());
+        
+        IDatabaseConnection dbConn = makeDatabaseConnection(conn);
+        ITable queryTable = dbConn.createTable(resultTableName + queryName, prepStat);
+        return sortAndPrint(queryTable, needSort);
     }
-
-    protected Pair<List<List<String>>, List<SelectedColumnMeta>> tryPushDownNonSelectQuery(String sql,
-            boolean isPrepare) throws Exception {
-        return PushDownUtil.tryPushDownNonSelectQuery(ProjectInstance.DEFAULT_PROJECT_NAME, sql, "DEFAULT", isPrepare);
-    }
-
+    
     protected ITable executeDynamicQuery(IDatabaseConnection dbConn, String queryName, String sql,
             List<String> parameters, boolean needSort) throws Exception {
 
         QueryContext.reset();
-
-        Map<String, Object> prepareParams = Maps.newHashMap();
-        for (int j = 1; j <= parameters.size(); ++j) {
-            prepareParams.put("?" + (j-1), parameters.get(j - 1).trim());
-        }
-        QueryContext.current().setPrepareParams(prepareParams);
 
         // change join type to match current setting
         sql = changeJoinType(sql, joinType);
@@ -342,16 +344,45 @@ public class KylinTestBase {
         }
 
         ITable queryTable = dbConn.createTable(resultTableName + queryName, prepStat);
-        String[] columnNames = new String[queryTable.getTableMetaData().getColumns().length];
-        for (int i = 0; i < columnNames.length; i++) {
-            columnNames[i] = queryTable.getTableMetaData().getColumns()[i].getColumnName();
-        }
+        return sortAndPrint(queryTable, needSort);
+    }
+
+    private ITable sortAndPrint(ITable queryTable, boolean needSort) throws DataSetException {
         if (needSort) {
+            String[] columnNames = new String[queryTable.getTableMetaData().getColumns().length];
+            for (int i = 0; i < columnNames.length; i++) {
+                columnNames[i] = queryTable.getTableMetaData().getColumns()[i].getColumnName();
+            }
             queryTable = new SortedTable(queryTable, columnNames);
         }
         if (PRINT_RESULT)
             printResult(queryTable);
         return queryTable;
+    }
+    
+    private DatabaseConnection makeDatabaseConnection(QueryConnection queryConn) {
+        // QueryConnection is right to protect its internal jdbc Connection, don't open it up
+        // Here is a very special case where access to Connection is needed just for test
+        try {
+            Field field = QueryConnection.class.getDeclaredField("conn");
+            field.setAccessible(true);
+            Connection jdbcConn = (Connection) field.get(queryConn);
+            return new DatabaseConnection(jdbcConn);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected Pair<List<List<String>>, List<SelectedColumnMeta>> tryPushDownSelectQuery(String sql) throws Exception {
+        SQLException mockException = new SQLException("", new NoRealizationFoundException(""));
+
+        return PushDownUtil.tryPushDownSelectQuery(ProjectInstance.DEFAULT_PROJECT_NAME, sql, "DEFAULT", mockException,
+                BackdoorToggles.getPrepareOnly());
+    }
+
+    protected Pair<List<List<String>>, List<SelectedColumnMeta>> tryPushDownNonSelectQuery(String sql,
+            boolean isPrepare) throws Exception {
+        return PushDownUtil.tryPushDownNonSelectQuery(ProjectInstance.DEFAULT_PROJECT_NAME, sql, "DEFAULT", isPrepare);
     }
 
     // end of execute
@@ -409,8 +440,7 @@ public class KylinTestBase {
 
             // execute Kylin
             logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
-            IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
-            ITable kylinTable = executeQuery(kylinConn, queryName, sql, false);
+            ITable kylinTable = executeQuery(cubeConnection, queryName, sql, false);
 
             // compare the result
             if (BackdoorToggles.getPrepareOnly())
@@ -454,8 +484,7 @@ public class KylinTestBase {
 
             // execute Kylin
             logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
-            IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
-            ITable kylinTable = executeQuery(kylinConn, queryName, sql, false);
+            ITable kylinTable = executeQuery(cubeConnection, queryName, sql, false);
 
             // compare the result
             assertTableEquals(expectTable, kylinTable);
@@ -477,8 +506,7 @@ public class KylinTestBase {
 
             // execute Kylin
             logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
-            IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
-            ITable kylinTable = executeQuery(kylinConn, queryName, sql, needSort);
+            ITable kylinTable = executeQuery(cubeConnection, queryName, sql, needSort);
 
             // execute H2
             logger.info("Query Result from H2 - " + queryName);
@@ -506,8 +534,7 @@ public class KylinTestBase {
         for (String sql : sqlSet) {
             // execute Kylin
             logger.info("Query Result from Kylin - " + sql);
-            IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
-            ITable kylinTable = executeQuery(kylinConn, sql, sql, false);
+            ITable kylinTable = executeQuery(cubeConnection, sql, sql, false);
 
             try {
                 // compare the result
@@ -538,8 +565,7 @@ public class KylinTestBase {
 
             // execute Kylin
             logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
-            IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
-            ITable kylinTable = executeQuery(kylinConn, queryName, sqlWithLimit, false);
+            ITable kylinTable = executeQuery(cubeConnection, queryName, sqlWithLimit, false);
 
             // execute H2
             logger.info("Query Result from H2 - " + queryName);
@@ -588,6 +614,7 @@ public class KylinTestBase {
 
     }
 
+    @SuppressWarnings("deprecation")
     protected void execAndCompPlan(String queryFolder, String[] exclusiveQuerys, boolean needSort,
             ICompareQueryTranslator translator) throws Exception {
         logger.info("---------- test folder: " + new File(queryFolder).getAbsolutePath());
@@ -610,8 +637,7 @@ public class KylinTestBase {
 
             // execute Kylin
             logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
-            IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
-            ITable kylinTable = executeQuery(kylinConn, queryName, sql1, needSort);
+            ITable kylinTable = executeQuery(cubeConnection, queryName, sql1, needSort);
 
             try {
                 // compare the result
@@ -657,8 +683,7 @@ public class KylinTestBase {
 
             // execute Kylin
             logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
-            IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
-            ITable kylinTable = executeQuery(kylinConn, queryName, sql1, needSort);
+            ITable kylinTable = executeQuery(cubeConnection, queryName, sql1, needSort);
 
             try {
                 // compare the result
@@ -681,14 +706,13 @@ public class KylinTestBase {
 
     protected void execAndVerifyResult(String queryFolder) throws Exception {
         List<File> sqlFiles = getFilesFromFolder(new File(queryFolder), ".sql");
-        IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
         for (File sqlFile : sqlFiles) {
             String queryName = StringUtils.split(sqlFile.getName(), '.')[0];
             String sql = getTextFromFile(sqlFile);
             // execute Kylin
             logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
             QueryContext.reset();
-            ITable kylinTable = executeQuery(kylinConn, queryName, sql, true);
+            ITable kylinTable = executeQuery(cubeConnection, queryName, sql, true);
             File expectResultFile = new File(sqlFile.getParent(), sqlFile.getName() + getTestResultFilePostFix());
             dumpResult(kylinTable, expectResultFile);
             verifyResult(kylinTable, queryName, expectResultFile);
@@ -715,8 +739,7 @@ public class KylinTestBase {
 
             // execute Kylin
             logger.info("Query Result from Kylin - " + queryName + "  (" + queryFolder + ")");
-            IDatabaseConnection kylinConn = new DatabaseConnection(cubeConnection);
-            ITable kylinTable = executeDynamicQuery(kylinConn, queryName, sql, parameters, needSort);
+            ITable kylinTable = executeDynamicQuery(cubeConnection, queryName, sql, parameters, needSort);
 
             // execute H2
             logger.info("Query Result from H2 - " + queryName);
@@ -824,7 +847,7 @@ public class KylinTestBase {
 
         //setup cube conn
         String project = ProjectInstance.DEFAULT_PROJECT_NAME;
-        cubeConnection = QueryConnection.getConnection(project);
+        cubeConnection = new QueryConnection(project);
 
         //setup h2
         h2Connection = DriverManager.getConnection("jdbc:h2:mem:db" + (h2InstanceCount++) + ";CACHE_SIZE=32072", "sa",

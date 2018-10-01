@@ -24,14 +24,12 @@ import java.util.List;
 
 import org.apache.kylin.cube.CubeInstance;
 import org.apache.kylin.job.exception.JobException;
-import org.apache.kylin.metadata.project.ProjectInstance;
-import org.apache.kylin.query.QueryConnection;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * @author xduo
@@ -51,7 +49,6 @@ public class CubeServiceTest extends ServiceTestBase {
         Assert.assertNotNull(cubeService.getConfig());
         Assert.assertNotNull(cubeService.getConfig());
         Assert.assertNotNull(cubeService.getDataModelManager());
-        Assert.assertNotNull(QueryConnection.getConnection(ProjectInstance.DEFAULT_PROJECT_NAME));
 
         List<CubeInstance> cubes = cubeService.listAllCubes(null, null, null, true);
         Assert.assertNotNull(cubes);

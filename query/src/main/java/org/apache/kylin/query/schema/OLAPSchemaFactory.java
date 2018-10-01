@@ -60,7 +60,7 @@ public class OLAPSchemaFactory implements SchemaFactory {
                 .isPushDownEnabled();
     }
 
-    public static File createTempOLAPJson(String project, KylinConfig config) {
+    public static File getOrCreateTempOLAPJson(String project, KylinConfig config) {
 
         ProjectManager projectManager = ProjectManager.getInstance(config);
         KylinConfig projConfig = projectManager.getProject(project).getConfig();

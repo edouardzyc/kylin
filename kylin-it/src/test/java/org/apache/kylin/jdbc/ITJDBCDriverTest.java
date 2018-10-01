@@ -27,13 +27,10 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 
-import com.google.common.collect.Maps;
 import org.apache.commons.io.FileUtils;
-import org.apache.kylin.common.QueryContext;
 import org.apache.kylin.common.util.HBaseMetadataTestCase;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -225,10 +222,6 @@ public class ITJDBCDriverTest extends HBaseMetadataTestCase {
     public void testPreparedStatement() throws Exception {
         Connection conn = getConnection();
 
-        Map<String, Object> prepareParams = Maps.newHashMap();
-        prepareParams.put("?0", "FP-GTC");
-        QueryContext.current().setPrepareParams(prepareParams);
-
         PreparedStatement statement = conn.prepareStatement(
                 "select LSTG_FORMAT_NAME, sum(price) as GMV, count(1) as TRANS_CNT from test_kylin_fact "
                         + "where LSTG_FORMAT_NAME = ? group by LSTG_FORMAT_NAME");
@@ -312,10 +305,6 @@ public class ITJDBCDriverTest extends HBaseMetadataTestCase {
     public void testPreparedStatementWithCache() throws Exception {
         Connection conn = getConnection();
 
-        Map<String, Object> prepareParams = Maps.newHashMap();
-        prepareParams.put("?0", "%");
-        QueryContext.current().setPrepareParams(prepareParams);
-
         PreparedStatement statement = conn
                 .prepareStatement("select count(1) as TRANS_CNT from test_kylin_fact where LSTG_FORMAT_NAME like ?");
 
@@ -325,9 +314,6 @@ public class ITJDBCDriverTest extends HBaseMetadataTestCase {
         Object object = rs.getObject(1);
         long countFirst = (long) object;
 
-        Map<String, Object> prepare = Maps.newHashMap();
-        prepare.put("?0", "0%");
-        QueryContext.current().setPrepareParams(prepare);
         statement.setString(1, "O%");
         rs = statement.executeQuery();
         Assert.assertTrue(rs.next());
