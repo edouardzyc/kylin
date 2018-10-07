@@ -586,9 +586,9 @@ public class ProjectDictionaryManager {
                 String beforePatch = PathBuilder.patchPath(sourceIdentify, currentVersion, beforeVersion);
                 DictPatch dictPatch = loadDictPatch(beforePatch);
                 int[] patch = dictPatch.genNewOffset(lastPatch);
-                savePatch(sourceIdentify, currentVersion, toVersion, patch);
+                saveVersionPatch(sourceIdentify, currentVersion, toVersion, patch);
             } else {
-                savePatch(sourceIdentify, currentVersion, toVersion, lastPatch);
+                saveVersionPatch(sourceIdentify, currentVersion, toVersion, lastPatch);
 
             }
         }
@@ -608,34 +608,33 @@ public class ProjectDictionaryManager {
         int[] offset = ProjectDictionaryHelper.genOffset(originDict, mergedDictionary);
         // different version has different patch
         String path = PathBuilder.segmentPatchPath(sourceIdentify, originDict.getUuid(), version);
-        savePatchToPath(offset, path);
+        saveSegmentPatch(offset, path);
         return path;
     }
 
-    private void savePatch(String sourceIdentify, long currentVersion, long toVersion, int[] value)
+    private void saveVersionPatch(String sourceIdentify, long currentVersion, long toVersion, int[] value)
             throws IOException, InterruptedException {
         checkInterrupted(sourceIdentify);
         String path = PathBuilder.patchPath(sourceIdentify, currentVersion, toVersion);
         ResourceStore store = getStore();
-        if (store.listResources(path) == null) {
-            logger.info("Saving patch at " + sourceIdentify + "version is " + currentVersion + " to " + toVersion);
-            patchCache.put(path, new DictPatch(value));
-
-            savePatch(value, path, store);
-        } else {
-            logger.info("Patch is exist, skip save patch : " + path);
+        if (store.getResource(path) != null) {
+            store.deleteResource(path);
+            logger.info("Patch is exist, delete patch : " + path);
         }
+        logger.info("Saving patch at " + sourceIdentify + "version is " + currentVersion + " to " + toVersion);
+
+        patchCache.put(path, new DictPatch(value));
+        savePatch(value, path, store);
     }
 
-    private void savePatchToPath(int[] value, String path) throws IOException, InterruptedException {
+    private void saveSegmentPatch(int[] value, String path) throws IOException, InterruptedException {
         ResourceStore store = getStore();
-        if (store.listResources(path) == null) {
-            logger.info("Saving patch at " + path);
-            patchCache.put(path, new DictPatch(value));
-            savePatch(value, path, store);
-        } else {
-            logger.info("Patch is exist, skip save patch : " + path);
+        if (store.getResource(path) != null) {
+            store.deleteResource(path);
+            logger.info("Patch is exist, delete patch : " + path);
         }
+        patchCache.put(path, new DictPatch(value));
+        savePatch(value, path, store);
     }
 
     private void savePatch(int[] value, String path, ResourceStore store) throws IOException, InterruptedException {
