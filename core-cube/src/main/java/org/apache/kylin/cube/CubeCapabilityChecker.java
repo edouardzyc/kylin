@@ -101,9 +101,6 @@ public class CubeCapabilityChecker {
                 if (!unmatchedDimensions.isEmpty()) {
                     unmatchedDimensions.removeAll(dimCols);
                 }
-            } else {
-                logger.info("cube {} does not touch lookup table {} at all", cube.getName(), digest.factTable);
-                return result;
             }
         }
 
