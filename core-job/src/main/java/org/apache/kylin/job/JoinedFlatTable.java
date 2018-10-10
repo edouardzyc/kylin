@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.cube.CubeSegment;
@@ -83,8 +84,8 @@ public class JoinedFlatTable {
             ddl.append(colName(col) + " " + getHiveDataType(col.getDatatype()) + "\n");
         }
         ddl.append(")" + "\n");
-        if ("TEXTFILE".equals(storageFormat)) {
-            ddl.append("ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\" + fieldDelimiter + "'\n");
+        if ("TEXTFILE".equals(storageFormat.toUpperCase())) {
+            ddl.append("ROW FORMAT DELIMITED FIELDS TERMINATED BY '" + StringEscapeUtils.escapeJava(fieldDelimiter) + "'\n");
         }
         ddl.append("STORED AS " + storageFormat + "\n");
         ddl.append("LOCATION '" + getTableDir(flatDesc, storageDfsDir) + "';").append("\n");
@@ -223,7 +224,7 @@ public class JoinedFlatTable {
         if (flatDesc.getSegment() != null //
                 && partDesc != null && partDesc.getPartitionDateColumn() != null //
                 && segRange != null && !segRange.isInfinite()) {
-            
+
             IPartitionConditionBuilder builder = getPartitionConditionBuilderConcerningSubstitute(flatDesc);
             if (builder != null) {
                 whereBuilder.append(" AND (");
@@ -237,7 +238,7 @@ public class JoinedFlatTable {
 
     private static IPartitionConditionBuilder getPartitionConditionBuilderConcerningSubstitute(
             IJoinedFlatTableDesc flatDesc) {
-        
+
         FactInputSubstitute sub = FactInputSubstitute.getInstance(flatDesc.getSegment());
         if (sub == null)
             return flatDesc.getDataModel().getPartitionDesc().getPartitionConditionBuilder();
