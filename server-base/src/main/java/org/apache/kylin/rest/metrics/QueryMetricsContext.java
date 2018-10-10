@@ -53,7 +53,7 @@ public class QueryMetricsContext {
 
     protected static final KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();
 
-    public static final String DB_NAME = "KAP_METRIC";
+    public static final String DB_NAME = "KE_METRIC";
     public static final String QUERY_MEASUREMENT = "query_metric";
     public static final String REALIZATION_MEASUREMENT = "realization_metric";
 
