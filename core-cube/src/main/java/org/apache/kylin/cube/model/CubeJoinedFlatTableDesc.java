@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.cube.CubeSegment;
 import org.apache.kylin.metadata.model.DataModelDesc;
 import org.apache.kylin.metadata.model.FunctionDesc;
@@ -170,6 +171,11 @@ public class CubeJoinedFlatTableDesc implements IJoinedFlatTableDesc, Serializab
     @Override
     public ISegment getSegment() {
         return cubeSegment;
+    }
+
+    @Override
+    public KylinConfig getConfig() {
+        return cubeDesc.getConfig();
     }
 
     @Override

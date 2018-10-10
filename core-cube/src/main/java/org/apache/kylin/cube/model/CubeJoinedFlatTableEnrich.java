@@ -21,6 +21,7 @@ package org.apache.kylin.cube.model;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.cube.cuboid.Cuboid;
 import org.apache.kylin.metadata.model.DataModelDesc;
 import org.apache.kylin.metadata.model.FunctionDesc;
@@ -127,6 +128,11 @@ public class CubeJoinedFlatTableEnrich implements IJoinedFlatTableDesc, Serializ
     @Override
     public ISegment getSegment() {
         return flatDesc.getSegment();
+    }
+
+    @Override
+    public KylinConfig getConfig() {
+        return cubeDesc.getConfig();
     }
 
     @Override

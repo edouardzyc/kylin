@@ -59,13 +59,13 @@ public class JoinedFlatTable {
     }
 
     public static String generateCreateTableStatement(IJoinedFlatTableDesc flatDesc, String storageDfsDir) {
-        String storageFormat = flatDesc.getDataModel().getConfig().getFlatTableStorageFormat();
+        String storageFormat = flatDesc.getConfig().getFlatTableStorageFormat();
         return generateCreateTableStatement(flatDesc, storageDfsDir, storageFormat);
     }
 
     public static String generateCreateTableStatement(IJoinedFlatTableDesc flatDesc, String storageDfsDir,
             String storageFormat) {
-        String fieldDelimiter = flatDesc.getDataModel().getConfig().getFlatTableFieldDelimiter();
+        String fieldDelimiter = flatDesc.getConfig().getFlatTableFieldDelimiter();
         return generateCreateTableStatement(flatDesc, storageDfsDir, storageFormat, fieldDelimiter);
     }
 

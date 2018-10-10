@@ -53,10 +53,6 @@ public class JdbcHiveMRInput extends HiveMRInput {
             super(flatDesc);
         }
 
-        protected KylinConfig getConfig() {
-            return flatDesc.getDataModel().getConfig();
-        }
-
         @Override
         public void addStepPhase1_DoCreateFlatTable(DefaultChainedExecutable jobFlow) {
             final String cubeName = CubingExecutableUtil.getCubeName(jobFlow.getParams());
@@ -69,7 +65,7 @@ public class JdbcHiveMRInput extends HiveMRInput {
 
         private AbstractExecutable createFlatHiveTableFromFiles(String hiveInitStatements, String jobWorkingDir) {
             final String dropTableHql = JoinedFlatTable.generateDropTableStatement(flatDesc);
-            String filedDelimiter = getConfig().getJdbcSourceFieldDelimiter();
+            String filedDelimiter = flatDesc.getConfig().getJdbcSourceFieldDelimiter();
             // Sqoop does not support exporting SEQUENSEFILE to Hive now SQOOP-869
             final String createTableHql = JoinedFlatTable.generateCreateTableStatement(flatDesc, jobWorkingDir,
                     "TEXTFILE", filedDelimiter);
@@ -103,7 +99,7 @@ public class JdbcHiveMRInput extends HiveMRInput {
                 return partitionDesc.getPartitionDateColumnRef();
             }
             TblColRef splitColumn = null;
-            TableMetadataManager tblManager = TableMetadataManager.getInstance(getConfig());
+            TableMetadataManager tblManager = TableMetadataManager.getInstance(flatDesc.getConfig());
             long maxCardinality = 0;
             for (TableRef tableRef : flatDesc.getDataModel().getAllTables()) {
                 TableExtDesc tableExtDesc = tblManager.getTableExt(tableRef.getTableDesc());
@@ -135,7 +131,7 @@ public class JdbcHiveMRInput extends HiveMRInput {
         }
 
         protected AbstractExecutable createSqoopToFlatHiveStep(String jobWorkingDir, String cubeName) {
-            KylinConfig config = getConfig();
+            KylinConfig config = flatDesc.getConfig();
             PartitionDesc partitionDesc = flatDesc.getDataModel().getPartitionDesc();
             String partCol = null;
 

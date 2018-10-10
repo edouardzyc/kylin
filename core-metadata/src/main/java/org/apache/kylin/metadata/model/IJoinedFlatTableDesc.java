@@ -20,6 +20,8 @@ package org.apache.kylin.metadata.model;
 
 import java.util.List;
 
+import org.apache.kylin.common.KylinConfig;
+
 /**
  */
 public interface IJoinedFlatTableDesc {
@@ -40,5 +42,7 @@ public interface IJoinedFlatTableDesc {
 
     // optionally present
     ISegment getSegment();
+
+    KylinConfig getConfig();
 
 }
