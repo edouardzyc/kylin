@@ -283,8 +283,11 @@ public class OLAPFilterRel extends Filter implements OLAPRel {
         @Override
         public TupleFilter visitInputRef(RexInputRef inputRef) {
             TblColRef column = inputRowType.getColumnByIndex(inputRef.getIndex());
-            ColumnTupleFilter filter = new ColumnTupleFilter(column);
-            return filter;
+            if (column.isInnerColumn() && column.getOperator() != null) {
+                return new UnsupportedTupleFilter(FilterOperatorEnum.UNSUPPORTED);
+            } else {
+                return new ColumnTupleFilter(column);
+            }
         }
 
         @SuppressWarnings("unused")
