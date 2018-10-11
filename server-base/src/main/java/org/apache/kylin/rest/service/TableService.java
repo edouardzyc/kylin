@@ -41,6 +41,7 @@ import org.apache.kylin.job.execution.ExecutableState;
 import org.apache.kylin.metadata.TableMetadataManager;
 import org.apache.kylin.metadata.model.ColumnDesc;
 import org.apache.kylin.metadata.model.DataModelManager;
+import org.apache.kylin.metadata.model.ISourceAware;
 import org.apache.kylin.metadata.model.TableDesc;
 import org.apache.kylin.metadata.model.TableExtDesc;
 import org.apache.kylin.metadata.project.ProjectInstance;
@@ -322,6 +323,11 @@ public class TableService extends BasicService {
     }
 
     public void calculateCardinalityIfNotPresent(String[] tables, String submitter, String prj) throws Exception {
+        // calculate cardinality for Hive source
+        ProjectInstance projectInstance = getProjectManager().getProject(prj);
+        if (projectInstance == null || projectInstance.getSourceType() != ISourceAware.ID_HIVE){
+            return;
+        }
         TableMetadataManager metaMgr = getTableManager();
         ExecutableManager exeMgt = ExecutableManager.getInstance(getConfig());
         for (String table : tables) {
