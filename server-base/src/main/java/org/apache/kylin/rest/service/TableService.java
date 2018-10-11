@@ -21,12 +21,15 @@ package org.apache.kylin.rest.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import org.apache.commons.lang.StringUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.ClassUtil;
@@ -45,6 +48,7 @@ import org.apache.kylin.metadata.model.ISourceAware;
 import org.apache.kylin.metadata.model.TableDesc;
 import org.apache.kylin.metadata.model.TableExtDesc;
 import org.apache.kylin.metadata.project.ProjectInstance;
+import org.apache.kylin.metadata.project.ProjectManager;
 import org.apache.kylin.rest.exception.BadRequestException;
 import org.apache.kylin.rest.msg.Message;
 import org.apache.kylin.rest.msg.MsgPicker;
@@ -66,6 +70,8 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.SetMultimap;
 
+import javax.annotation.Nullable;
+
 @Component("tableService")
 public class TableService extends BasicService {
 
@@ -85,6 +91,46 @@ public class TableService extends BasicService {
 
     @Autowired
     private AclEvaluate aclEvaluate;
+
+    public List<TableDesc> getTableDescWithFuzzy(String project, final String database, final String tableName,
+            boolean withExt) throws IOException {
+        aclEvaluate.checkProjectReadPermission(project);
+        ProjectManager projectManager = getProjectManager();
+
+        List<TableDesc> tables = Lists.newArrayList(
+                FluentIterable.from(projectManager.listDefinedTables(project)).filter(new Predicate<TableDesc>() {
+                    @Override
+                    public boolean apply(@Nullable TableDesc tableDesc) {
+                        if (StringUtils.isEmpty(database)) {
+                            return true;
+                        }
+
+                        return tableDesc.getDatabase().equals(database);
+                    }
+                }).filter(new Predicate<TableDesc>() {
+                    @Override
+                    public boolean apply(@Nullable TableDesc tableDesc) {
+                        if (StringUtils.isEmpty(tableName)) {
+                            return true;
+                        }
+
+                        return tableDesc.getName().toLowerCase().contains(tableName.toLowerCase());
+                    }
+                }).toSortedList(new Comparator<TableDesc>() {
+                    @Override
+                    public int compare(TableDesc tableDesc1, TableDesc tableDesc2) {
+                        String tableName1 = tableDesc1.getName();
+                        String tableName2 = tableDesc2.getName();
+                        return tableName1.compareTo(tableName2);
+                    }
+                }));
+
+        if (withExt) {
+            aclEvaluate.checkProjectWritePermission(project);
+            tables = cloneTableDesc(tables, project);
+        }
+        return tables;
+    }
 
     public List<TableDesc> getTableDescByProject(String project, boolean withExt) throws IOException {
         aclEvaluate.checkProjectReadPermission(project);
@@ -126,10 +172,11 @@ public class TableService extends BasicService {
     public String[] loadTableToProject(TableDesc tableDesc, TableExtDesc extDesc, String project) throws IOException {
         return loadTablesToProject(Lists.newArrayList(Pair.newPair(tableDesc, extDesc)), project);
     }
-    
-    private String[] loadTablesToProject(List<Pair<TableDesc, TableExtDesc>> allMeta, String project) throws IOException {
+
+    private String[] loadTablesToProject(List<Pair<TableDesc, TableExtDesc>> allMeta, String project)
+            throws IOException {
         aclEvaluate.checkProjectAdminPermission(project);
-        
+
         // do schema check
         TableMetadataManager metaMgr = getTableManager();
         CubeManager cubeMgr = getCubeManager();
@@ -364,7 +411,8 @@ public class TableService extends BasicService {
         job.setName("Hive Column Cardinality calculation for table '" + tableName + "'");
         job.setSubmitter(submitter);
 
-        String outPath = getConfig().getHdfsWorkingDirectory(table.getProject()) + "cardinality/" + job.getId() + "/" + tableName;
+        String outPath = getConfig().getHdfsWorkingDirectory(table.getProject()) + "cardinality/" + job.getId() + "/"
+                + tableName;
         String param = "-table " + tableName + " -output " + outPath + " -project " + prj;
 
         MapReduceExecutable step1 = new MapReduceExecutable();
