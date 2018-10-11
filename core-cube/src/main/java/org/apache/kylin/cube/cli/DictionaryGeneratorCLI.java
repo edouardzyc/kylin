@@ -90,12 +90,17 @@ public class DictionaryGeneratorCLI {
             cubeMgr.buildSnapshotTable(cubeSeg, tableIdentity, uuid);
         }
 
-        CubeInstance updatedCube = cubeMgr.getCube(cubeSeg.getCubeInstance().getName());
-        cubeSeg = updatedCube.getSegmentById(cubeSeg.getUuid());
-        for (TableRef lookup : toCheckLookup) {
-            logger.info("Checking snapshot of " + lookup);
-            JoinDesc join = cubeSeg.getModel().getJoinsTree().getJoinByPKSide(lookup);
-            cubeMgr.getLookupTable(cubeSeg, join);
+        if (config.isNeedCheckLookupTable()) {
+            CubeInstance updatedCube = cubeMgr.getCube(cubeSeg.getCubeInstance().getName());
+            cubeSeg = updatedCube.getSegmentById(cubeSeg.getUuid());
+            for (TableRef lookup : toCheckLookup) {
+                logger.info("Checking snapshot of " + lookup);
+                JoinDesc join = cubeSeg.getModel().getJoinsTree().getJoinByPKSide(lookup);
+                cubeMgr.getLookupTable(cubeSeg, join);
+            }
+        } else {
+            logger.info(
+                    "Property kylin.snapshot.lookup-primary-key-check-enabled is false. Skip check lookup table primary key.");
         }
     }
 

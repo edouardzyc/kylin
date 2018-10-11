@@ -53,7 +53,9 @@ public class SnapshotTableV2 extends SnapshotTable {
     private TableDesc sourceTableDesc;
     private String hashAlgorithm = "MD5";
     private GzipCodec codec = new GzipCodec();
-    private String standByDelimiter = "\u0001\u0002\u0003";
+    private String standbyDelimiter = "\u0002\u0003";
+    private boolean existsStandbyDelimiter = false;
+    private boolean existsDelimiter = false;
 
     public static String VERSION_ID = "V2";
 
@@ -107,8 +109,11 @@ public class SnapshotTableV2 extends SnapshotTable {
                 for (ColumnDesc column : this.sourceTableDesc.getColumns()) {
                     String cell = rawRow[column.getZeroBasedIndex()];
                     if (cell != null) {
+                        if (cell.contains(standbyDelimiter)) {
+                            existsStandbyDelimiter = true;
+                        }
                         if (cell.contains(delimiter)) {
-                            delimiter = standByDelimiter;
+                            existsDelimiter = true;
                         }
                         digest.update(cell.getBytes());
                     } else {
@@ -116,6 +121,15 @@ public class SnapshotTableV2 extends SnapshotTable {
                     }
                 }
             }
+            if (existsStandbyDelimiter && existsDelimiter) {
+                throw new RuntimeException(String.format(
+                        "Source data contains current delimiter %s and standby delimiter %s. Please change property kylin.snapshot.delimiter.",
+                        delimiter, standbyDelimiter));
+            } else if (existsDelimiter) {
+                delimiter = standbyDelimiter;
+            }
+            logger.info("Current delimiter is set to {}.", delimiter);
+
             setRowCount(rowCount);
             setMD5(Hex.encodeHexString(digest.digest()));
         } catch (Throwable e) {

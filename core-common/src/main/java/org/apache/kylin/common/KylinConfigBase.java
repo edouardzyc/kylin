@@ -608,8 +608,12 @@ abstract public class KylinConfigBase implements Serializable {
         return Boolean.parseBoolean(getOptional("kylin.snapshot.compression-enabled", "true"));
     }
 
-    public String getSnapshotTableDelimiter(){
+    public String getSnapshotTableDelimiter() {
         return getOptional("kylin.snapshot.delimiter", "\u0001");
+    }
+
+    public boolean isNeedCheckLookupTable() {
+        return Boolean.parseBoolean(getOptional("kylin.snapshot.lookup-primary-key-check-enabled", "true"));
     }
 
     // ============================================================================
