@@ -253,7 +253,7 @@ public class TableService extends BasicService {
         // remove streaming info
         SourceManager sourceManager = SourceManager.getInstance(KylinConfig.getInstanceFromEnv());
         ISource source = sourceManager.getCachedSource(desc);
-        source.unloadTable(tableName, project);
+        source.onUnloadTable(tableName, project);
         return rtn;
     }
 

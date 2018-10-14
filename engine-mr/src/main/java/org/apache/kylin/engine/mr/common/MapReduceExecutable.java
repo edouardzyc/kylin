@@ -208,6 +208,7 @@ public class MapReduceExecutable extends AbstractExecutable {
         info.put(ExecutableConstants.SOURCE_RECORDS_COUNT, hadoopCmdOutput.getMapInputRecords());
         info.put(ExecutableConstants.SOURCE_RECORDS_SIZE, hadoopCmdOutput.getRawInputBytesRead());
         info.put(ExecutableConstants.HDFS_BYTES_WRITTEN, hadoopCmdOutput.getHdfsBytesWritten());
+        info.put(ExecutableConstants.SOURCE_COLUMNS_BYTES, hadoopCmdOutput.getSourceColumnsBytes());
 
         String saveAs = getParam(KEY_COUNTER_SAVEAS);
         if (saveAs != null) {
@@ -215,6 +216,7 @@ public class MapReduceExecutable extends AbstractExecutable {
             saveCounterAs(hadoopCmdOutput.getMapInputRecords(), saveAsNames, 0, info);
             saveCounterAs(hadoopCmdOutput.getRawInputBytesRead(), saveAsNames, 1, info);
             saveCounterAs(hadoopCmdOutput.getHdfsBytesWritten(), saveAsNames, 2, info);
+            saveCounterAs(hadoopCmdOutput.getSourceColumnsBytes(), saveAsNames, 3, info);
         }
     }
 

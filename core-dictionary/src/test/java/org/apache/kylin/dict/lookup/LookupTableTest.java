@@ -154,6 +154,11 @@ public class LookupTableTest extends LocalFileMetadataTestCase {
             public boolean exists() throws IOException {
                 return false;
             }
+
+            @Override
+            public long getRowCount() throws IOException {
+                return 0;
+            }
         };
 
         SnapshotManager snapshotManager = getSnapshotManager();

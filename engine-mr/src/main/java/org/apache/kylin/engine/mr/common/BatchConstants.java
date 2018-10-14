@@ -101,6 +101,8 @@ public interface BatchConstants {
      * logger and counter
      */
     String MAPREDUCE_COUNTER_GROUP_NAME = "Cube Builder";
+    String COLUMN_COUNTER_GROUP_NAME = "Column Counter";
+
     int NORMAL_RECORD_LOG_THRESHOLD = 100000;
 
     /**

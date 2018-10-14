@@ -78,6 +78,8 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
     private long sourceOffsetEnd;
     @JsonProperty("status")
     private SegmentStatusEnum status;
+    @JsonProperty("column_source_bytes")
+    private Map<String, Long> columnSourceBytes = Maps.newHashMap();
     @JsonProperty("size_kb")
     private long sizeKB;
     @JsonProperty("input_records")
@@ -332,6 +334,13 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
 
     public void setStorageLocationIdentifier(String storageLocationIdentifier) {
         this.storageLocationIdentifier = storageLocationIdentifier;
+    }
+
+    public Map<String, Long> getColumnSourceBytes() {
+        return columnSourceBytes;
+    }
+    public void setColumnSourceBytes(Map<String, Long> columnSourceBytes) {
+        this.columnSourceBytes = columnSourceBytes;
     }
 
     public Map<TblColRef, Dictionary<String>> buildDictionaryMap() {
@@ -607,6 +616,7 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
     public void clearProjectDict() {
         projectDictionaries.clear();
     }
+
     public SegProjectDict getProjectDict(String key) {
         return projectDictionaries.get(key);
     }
@@ -618,6 +628,7 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
     public Map<String, DimensionRangeInfo> getDimensionRangeInfoMap() {
         return dimensionRangeInfoMap;
     }
+
     public Map<String, Integer> getColumnLengthMap() {
         return columnLengthMap;
     }
@@ -625,6 +636,7 @@ public class CubeSegment implements IBuildable, ISegment, Serializable {
     public void setDimensionRangeInfoMap(Map<String, DimensionRangeInfo> dimensionRangeInfoMap) {
         this.dimensionRangeInfoMap = dimensionRangeInfoMap;
     }
+
     public void setColumnLengthMap(Map<String, Integer> columnLengthMap) {
         this.columnLengthMap = columnLengthMap;
     }

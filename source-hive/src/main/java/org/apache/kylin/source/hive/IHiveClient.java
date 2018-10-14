@@ -18,9 +18,10 @@
 
 package org.apache.kylin.source.hive;
 
+import java.io.Closeable;
 import java.util.List;
 
-public interface IHiveClient {
+public interface IHiveClient extends Closeable {
 
     void executeHQL(String hql) throws Exception;
 

@@ -177,6 +177,24 @@ public class SnapshotManager {
         return null;
     }
 
+    public SnapshotTable getSnapshotTable(String tableName, boolean loadData) throws IOException {
+        ResourceStore store = getStore();
+        String resourceDir = ResourceStore.SNAPSHOT_RESOURCE_ROOT + "/" + tableName;
+        NavigableSet<String> existings = store.listResources(resourceDir);
+        if (existings == null)
+            return null;
+        SnapshotTable existingTable = null;
+        long maxLastModified = 0L;
+        for (String existing : existings) {
+            SnapshotTable snapshotTable = load(existing, loadData);
+            if (snapshotTable.getLastModified() > maxLastModified) {
+                maxLastModified = snapshotTable.getLastModified();
+                existingTable = snapshotTable;
+            }
+        }
+        return existingTable;
+    }
+
     private String checkDupByContent(SnapshotTable snapshot) throws IOException {
         ResourceStore store = getStore();
         String resourceDir = snapshot.getResourceDir();

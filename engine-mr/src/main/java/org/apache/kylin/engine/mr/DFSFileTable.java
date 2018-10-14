@@ -109,4 +109,9 @@ public class DFSFileTable implements IReadableTable {
         return Pair.newPair(size, lastModified);
     }
 
+    @Override
+    public long getRowCount() throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
 }

@@ -42,6 +42,11 @@ public interface IReadableTable {
     public TableSignature getSignature() throws IOException;
 
     public boolean exists() throws IOException;
+    
+    /**
+     * Table row count is often cheap to get. However full table scan is possible in the worst case.
+     */
+    public long getRowCount() throws IOException;
 
     public interface TableReader extends Closeable {
 

@@ -461,6 +461,7 @@ public class CubeService extends BasicService implements InitializingBean {
             throw new BadRequestException(String.format(msg.getREBUILD_SNAPSHOT_OF_VIEW(), tableDesc.getName()));
         }
         CubeSegment seg = cube.getSegment(segmentName, SegmentStatusEnum.READY);
+        // FIXME #6541: fix this along the way..
         getCubeManager().buildSnapshotTable(seg, lookupTable, null);
 
         return cube;

@@ -23,11 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.FileSystemCounter;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TaskCounter;
 import org.apache.kylin.common.KylinConfig;
+import org.apache.kylin.common.util.JsonUtil;
 import org.apache.kylin.engine.mr.steps.FactDistinctColumnsMapper.RawDataCounter;
 import org.apache.kylin.job.constant.ExecutableConstants;
 import org.slf4j.Logger;
@@ -74,6 +76,7 @@ public class HadoopCmdOutput {
     private String mapInputRecords;
     private String hdfsBytesWritten;
     private String rawInputBytesRead;
+    private String sourceColumnBytes;
 
     public String getMapInputRecords() {
         return mapInputRecords;
@@ -85,6 +88,10 @@ public class HadoopCmdOutput {
 
     public String getRawInputBytesRead() {
         return rawInputBytesRead;
+    }
+
+    public String getSourceColumnsBytes() {
+        return sourceColumnBytes;
     }
 
     public void updateJobCounter() {
@@ -113,6 +120,13 @@ public class HadoopCmdOutput {
                 bytesWritten = counters.findCounter("FileSystemCounters", "HDFS_BYTES_WRITTEN").getValue();
             }
             hdfsBytesWritten = String.valueOf(bytesWritten);
+
+            HashMap<String, Long> columnsDataBytes = new HashMap<>();
+            for (Counter counter : counters.getGroup(BatchConstants.COLUMN_COUNTER_GROUP_NAME)) {
+                columnsDataBytes.put(counter.getName(), counter.getValue());
+            }
+
+            sourceColumnBytes = JsonUtil.writeValueAsString(columnsDataBytes);
 
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);

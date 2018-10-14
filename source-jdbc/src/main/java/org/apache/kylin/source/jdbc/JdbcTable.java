@@ -19,7 +19,6 @@ package org.apache.kylin.source.jdbc;
 
 import java.io.IOException;
 
-
 import org.apache.kylin.metadata.model.TableDesc;
 import org.apache.kylin.source.IReadableTable;
 import org.slf4j.Logger;
@@ -29,6 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JdbcTable implements IReadableTable {
 
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(JdbcTable.class);
 
     final private String database;
@@ -56,6 +56,23 @@ public class JdbcTable implements IReadableTable {
     @Override
     public boolean exists() {
         return true;
+    }
+
+    @Override
+    public long getRowCount() throws IOException {
+        // FIXME #6541: super slow implementation
+        TableReader reader = getReader();
+        try {
+            
+            long count = 0;
+            while (reader.next())
+                count++;
+            
+            return count;
+            
+        } finally {
+            reader.close();
+        }
     }
 
     @Override

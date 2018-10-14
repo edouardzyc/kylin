@@ -1057,8 +1057,8 @@ public class CubeManager implements IRealizationProvider {
         return dictAssist.getMVDictMeta(desc);
     }
 
-    public SnapshotTable buildSnapshotTable(CubeSegment cubeSeg, String lookupTable, String uuid) throws IOException {
-        return dictAssist.buildSnapshotTable(cubeSeg, lookupTable, uuid);
+    public SnapshotTable buildSnapshotTable(CubeSegment cubeSeg, String lookupTable, String jobUuid) throws IOException {
+        return dictAssist.buildSnapshotTable(cubeSeg, lookupTable, jobUuid);
     }
 
     public LookupStringTable getLookupTable(CubeSegment cubeSegment, JoinDesc join) {
@@ -1154,7 +1154,7 @@ public class CubeManager implements IRealizationProvider {
             return ProjectDictionaryManager.getInstance().getPatchMetaStore(projectDictDesc);
         }
 
-        public SnapshotTable buildSnapshotTable(CubeSegment cubeSeg, String lookupTable, String uuid) throws IOException {
+        public SnapshotTable buildSnapshotTable(CubeSegment cubeSeg, String lookupTable, String jobUuid) throws IOException {
             // work on copy instead of cached objects
             CubeInstance cubeCopy = cubeSeg.getCubeInstance().latestCopyForWrite(); // get a latest copy
             CubeSegment segCopy = cubeCopy.getSegmentById(cubeSeg.getUuid());
@@ -1163,7 +1163,7 @@ public class CubeManager implements IRealizationProvider {
             SnapshotManager snapshotMgr = getSnapshotManager();
 
             TableDesc tableDesc = new TableDesc(metaMgr.getTableDesc(lookupTable, segCopy.getProject()));
-            IReadableTable hiveTable = SourceManager.createReadableTable(tableDesc, uuid);
+            IReadableTable hiveTable = SourceManager.getSource(tableDesc).createReadableTable(tableDesc, jobUuid);
             SnapshotTable snapshot = snapshotMgr.buildSnapshot(hiveTable, tableDesc, cubeSeg.getConfig());
 
             segCopy.putSnapshotResPath(lookupTable, snapshot.getResourcePath());

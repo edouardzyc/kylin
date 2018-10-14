@@ -42,8 +42,10 @@ public interface ISource extends Closeable {
 
     /**
      * Return a ReadableTable that can iterate through the rows of given table.
+     * 
+     * @param jobUuid - only used by Hive to mark the materialization of a view (happened during build time)
      */
-    IReadableTable createReadableTable(TableDesc tableDesc, String uuid);
+    IReadableTable createReadableTable(TableDesc tableDesc, String jobUuid);
 
     /**
      * Give the source a chance to enrich a SourcePartition before build start.
@@ -57,9 +59,8 @@ public interface ISource extends Closeable {
      */
     ISampleDataDeployer getSampleDataDeployer();
 
-
     /**
-     * Unload table.
+     * Give implementation a chance to clean up related metadata after a table is removed from project.
      */
-    void unloadTable(String tableName, String project) throws IOException;
+    void onUnloadTable(String tableName, String project) throws IOException;
 }

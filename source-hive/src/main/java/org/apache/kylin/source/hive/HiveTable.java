@@ -20,6 +20,7 @@ package org.apache.kylin.source.hive;
 
 import java.io.IOException;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.Pair;
 import org.apache.kylin.engine.mr.DFSFileTable;
@@ -37,19 +38,9 @@ public class HiveTable implements IReadableTable {
     final private String database;
     final private String hiveTable;
 
-    private HiveTableMeta hiveTableMeta;
-
     public HiveTable(TableDesc tableDesc) {
         this.database = tableDesc.getDatabase();
         this.hiveTable = tableDesc.getName();
-        IHiveClient hiveClient = HiveClientFactory.getHiveClient();
-        try {
-            this.hiveTableMeta = hiveClient.getHiveTableMeta(database, hiveTable);
-        } catch (Exception e) {
-            throw new RuntimeException("cannot get HiveTableMeta", e);
-        } finally {
-            hiveClient.close();
-        }
     }
 
     @Override
@@ -59,14 +50,24 @@ public class HiveTable implements IReadableTable {
 
     @Override
     public TableSignature getSignature() throws IOException {
+        HiveTableMeta hiveTableMeta;
+        IHiveClient hiveClient = HiveClientFactory.getHiveClient();
         try {
-            String path = computeHDFSLocation();
+            hiveTableMeta = hiveClient.getHiveTableMeta(database, hiveTable);
+        } catch (Exception e) {
+            throw new IOException("Cannot get HiveTableMeta for " + database + "." + hiveTable, e);
+        } finally {
+            IOUtils.closeQuietly(hiveClient);
+        }
+
+        try {
+            String path = computeHDFSLocation(hiveTableMeta);
             Pair<Long, Long> sizeAndLastModified = DFSFileTable.getSizeAndLastModified(path);
             long size = sizeAndLastModified.getFirst();
             long lastModified = sizeAndLastModified.getSecond();
 
             // for non-native hive table, cannot rely on size & last modified on HDFS
-            if (this.hiveTableMeta.isNative == false) {
+            if (hiveTableMeta.isNative == false) {
                 lastModified = System.currentTimeMillis(); // assume table is ever changing
             }
 
@@ -80,12 +81,7 @@ public class HiveTable implements IReadableTable {
         }
     }
 
-    @Override
-    public boolean exists() {
-        return true;
-    }
-
-    private String computeHDFSLocation() throws Exception {
+    private String computeHDFSLocation(HiveTableMeta hiveTableMeta) throws Exception {
 
         String override = KylinConfig.getInstanceFromEnv().getOverrideHiveTableLocation(hiveTable);
         if (override != null) {
@@ -93,7 +89,25 @@ public class HiveTable implements IReadableTable {
             return override;
         }
 
-        return this.hiveTableMeta.sdLocation;
+        return hiveTableMeta.sdLocation;
+    }
+
+    @Override
+    public boolean exists() {
+        return true;
+    }
+
+    @Override
+    public long getRowCount() throws IOException {
+        IHiveClient hiveClient = HiveClientFactory.getHiveClient();
+        try {
+            return hiveClient.getHiveTableRows(database, hiveTable);
+            
+        } catch (Exception ex) {
+            throw new IOException("Cannot get row count for hive table " + database + "." + hiveTable, ex);
+        } finally {
+            IOUtils.closeQuietly(hiveClient);
+        }
     }
 
     @Override

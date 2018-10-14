@@ -297,7 +297,7 @@ public class SnapshotTableV1 extends SnapshotTable {
     }
 
     @Override
-    public int getRowCount() {
+    public long getRowCount() {
         return rowIndices.size();
     }
 

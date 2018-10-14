@@ -50,7 +50,7 @@ public class TableExtDesc extends RootPersistentEntity {
     public static Pair<String, String> parseResourcePath(String path) {
         return TableDesc.parseResourcePath(path);
     }
-    
+
     // ============================================================================
 
     @JsonProperty("table_name")
@@ -74,9 +74,9 @@ public class TableExtDesc extends RootPersistentEntity {
     private List<Long> mapRecords = new ArrayList<>();
     @JsonProperty("data_source_properties")
     private Map<String, String> dataSourceProps = new HashMap<>();
-
     private String project;
-
+    @JsonProperty("row_count_status")
+    private TableExtDesc.RowCountStatus rowCountStatus;
     public TableExtDesc() {
     }
 
@@ -84,7 +84,7 @@ public class TableExtDesc extends RootPersistentEntity {
     public String resourceName() {
         return TableDesc.makeResourceName(getIdentity(), getProject());
     }
-    
+
     public String getResourcePath() {
         return concatResourcePath(getIdentity(), getProject());
     }
@@ -216,6 +216,28 @@ public class TableExtDesc extends RootPersistentEntity {
     public boolean isPartitioned() {
         return this.dataSourceProps.get("partition_column") == null ? false
                 : !this.dataSourceProps.get("partition_column").isEmpty();
+    }
+
+    public RowCountStatus getRowCountStatus() {
+        return rowCountStatus;
+    }
+
+    public void setRowCountStatus(RowCountStatus rowCountStatus) {
+        this.rowCountStatus = rowCountStatus;
+    }
+
+    public enum RowCountStatus {
+        OK("ok"), TENTATIVE("tentative");
+
+        private String status;
+
+        private RowCountStatus(String status) {
+            this.status = status;
+        }
+
+        public String getStatus() {
+            return status;
+        }
     }
 
     @Override

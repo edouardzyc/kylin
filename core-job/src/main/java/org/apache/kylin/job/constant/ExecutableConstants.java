@@ -31,6 +31,7 @@ public final class ExecutableConstants {
     public static final String HDFS_BYTES_WRITTEN = "hdfs_bytes_written";
     public static final String SOURCE_RECORDS_COUNT = "source_records_count";
     public static final String SOURCE_RECORDS_SIZE = "source_records_size";
+    public static final String SOURCE_COLUMNS_BYTES = "source_columns_bytes";
 
     public static final String STEP_NAME_BUILD_DICTIONARY = "Build Dimension Dictionary";
     public static final String STEP_NAME_BUILD_UHC_DICTIONARY = "Build UHC Dictionary";

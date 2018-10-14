@@ -33,7 +33,9 @@ import org.apache.kylin.source.IReadableTable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
 
+@SuppressWarnings("serial")
 abstract public class SnapshotTable extends RootPersistentEntity implements IReadableTable {
+    
     @JsonProperty("tableName")
     protected String tableName;
 
@@ -62,8 +64,6 @@ abstract public class SnapshotTable extends RootPersistentEntity implements IRea
     abstract public void writeData(DataOutputStream out) throws IOException;
 
     abstract public void readData(DataInputStream in) throws IOException;
-
-    abstract public int getRowCount();
 
     abstract public int hashCode();
 

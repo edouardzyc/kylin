@@ -20,6 +20,8 @@ package org.apache.kylin.source.hive;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.hive.common.StatsSetupConst;
 import org.apache.hadoop.hive.conf.HiveConf;
@@ -52,6 +54,19 @@ public class CLIHiveClient implements IHiveClient {
      */
     @Override
     public void executeHQL(String hql) throws Exception {
+        execute(hql);
+    }
+
+    /**
+     * Hive Cli Util
+     * return command response
+     * @throws Exception
+     */
+    private String executeHQLWithResponse(String hql) throws Exception {
+        return execute(hql).getSecond();
+    }
+
+    private Pair<Integer, String> execute(String hql) throws Exception {
         final HiveCmdBuilder hiveCmdBuilder = new HiveCmdBuilder();
         hiveCmdBuilder.addStatement(hql.replaceAll("\\`", "\\\\`"));
         Pair<Integer, String> response = KylinConfig.getInstanceFromEnv().getCliCommandExecutor()
@@ -59,7 +74,7 @@ public class CLIHiveClient implements IHiveClient {
         if (response.getFirst() != 0) {
             throw new IllegalArgumentException("Failed to execute hql [" + hql + "], error message is: " + response.getSecond());
         }
-
+        return response;
     }
 
     /**
@@ -125,7 +140,7 @@ public class CLIHiveClient implements IHiveClient {
     @Override
     public long getHiveTableRows(String database, String tableName) throws Exception {
         Table table = getMetaStoreClient().getTable(database, tableName);
-        return getBasicStatForTable(new org.apache.hadoop.hive.ql.metadata.Table(table), StatsSetupConst.ROW_COUNT);
+        return getTableRows(new org.apache.hadoop.hive.ql.metadata.Table(table));
     }
 
     @Override
@@ -163,5 +178,26 @@ public class CLIHiveClient implements IHiveClient {
             }
         }
         return result;
+    }
+
+    private long getTableRows(org.apache.hadoop.hive.ql.metadata.Table table) {
+        long rowCount;
+        try {
+            rowCount = getBasicStatForTable(table, StatsSetupConst.ROW_COUNT);
+            if (rowCount == 0) {
+                String response = executeHQLWithResponse("select count(*) totalCount from " + table.getDbName() + "." + table.getTableName());
+                Pattern compile = Pattern.compile("(\\n)(\\d+)(\\n)");
+                Matcher matcher = compile.matcher(response);
+                if (matcher.find()) {
+                    String rowNums = matcher.group(2);
+                    rowCount = Long.parseLong(rowNums);
+                } else {
+                    throw new RuntimeException("Cannot match results from regular expressions(" + compile.toString() + "):" + response);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return rowCount;
     }
 }

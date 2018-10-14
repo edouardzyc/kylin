@@ -42,16 +42,16 @@ public class DictionaryGeneratorCLI {
 
     private static final Logger logger = LoggerFactory.getLogger(DictionaryGeneratorCLI.class);
 
-    public static void processSegment(KylinConfig config, String cubeName, String segmentID, String uuid,
+    public static void processSegment(KylinConfig config, String cubeName, String segmentID, String jobUuid,
             DistinctColumnValuesProvider factTableValueProvider, DictionaryProvider dictProvider) throws IOException {
         CubeInstance cube = CubeManager.getInstance(config).getCube(cubeName);
         CubeSegment segment = cube.getSegmentById(segmentID);
 
-        processSegment(config, segment, factTableValueProvider, uuid, dictProvider);
+        processSegment(config, segment, factTableValueProvider, jobUuid, dictProvider);
     }
 
     private static void processSegment(KylinConfig config, CubeSegment cubeSeg,
-            DistinctColumnValuesProvider factTableValueProvider, String uuid, DictionaryProvider dictProvider)
+            DistinctColumnValuesProvider factTableValueProvider, String jobUuid, DictionaryProvider dictProvider)
             throws IOException {
         CubeManager cubeMgr = CubeManager.getInstance(config);
 
@@ -87,7 +87,7 @@ public class DictionaryGeneratorCLI {
 
         for (String tableIdentity : toSnapshot) {
             logger.info("Building snapshot of " + tableIdentity);
-            cubeMgr.buildSnapshotTable(cubeSeg, tableIdentity, uuid);
+            cubeMgr.buildSnapshotTable(cubeSeg, tableIdentity, jobUuid);
         }
 
         if (config.isNeedCheckLookupTable()) {

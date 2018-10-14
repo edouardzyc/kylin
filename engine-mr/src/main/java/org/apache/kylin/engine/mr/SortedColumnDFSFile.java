@@ -33,8 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by xiefan on 16-11-22.
- *
  * Read values from multi col files and ensure their order using a K-Way merge algorithm
  *
  * You need to ensure that values inside each file is sorted
@@ -129,7 +127,13 @@ public class SortedColumnDFSFile implements IReadableTable {
     }
 
     @Override
+    public long getRowCount() throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String toString() {
         return dfsPath;
     }
+
 }

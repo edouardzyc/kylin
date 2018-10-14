@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -34,6 +35,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -59,12 +61,17 @@ import org.apache.kylin.job.execution.DefaultChainedExecutable;
 import org.apache.kylin.job.execution.ExecutableManager;
 import org.apache.kylin.job.execution.ExecutableState;
 import org.apache.kylin.job.impl.threadpool.DefaultScheduler;
+import org.apache.kylin.metadata.TableMetadataManager;
+import org.apache.kylin.metadata.model.IJoinedFlatTableDesc;
 import org.apache.kylin.metadata.model.SegmentRange.TSRange;
+import org.apache.kylin.metadata.model.TableExtDesc;
+import org.apache.kylin.metadata.model.TableRef;
 import org.apache.kylin.metadata.model.TblColRef;
 import org.apache.kylin.rest.job.StorageCleanupJob;
 import org.apache.kylin.storage.hbase.HBaseConnection;
 import org.apache.kylin.storage.hbase.util.HBaseRegionSizeCalculator;
 import org.apache.kylin.storage.hbase.util.ZookeeperJobLock;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -300,24 +307,32 @@ public class BuildCubeWithEngine {
         long date5 = f.parse("2023-01-01").getTime();
         long date6 = f.parse("2024-01-01").getTime();
 
-        if (fastBuildMode)
-            return buildSegment(cubeName, date1, date4);
+        if (fastBuildMode) {
+            Boolean buildSegment = buildSegment(cubeName, date1, date4);
+            checkNormalRowCount(cubeManager.getCube(cubeName));
+            return buildSegment;
+        }
 
         if (!buildSegment(cubeName, date1, date2))
             return false;
         checkNormalSegRangeInfo(cubeManager.getCube(cubeName));
+        checkNormalRowCount(cubeManager.getCube(cubeName));
         if (!buildSegment(cubeName, date2, date3))
             return false;
         checkNormalSegRangeInfo(cubeManager.getCube(cubeName));
+        checkNormalRowCount(cubeManager.getCube(cubeName));
         if (!buildSegment(cubeName, date3, date4))
             return false;
         checkNormalSegRangeInfo(cubeManager.getCube(cubeName));
+        checkNormalRowCount(cubeManager.getCube(cubeName));
         if (!buildSegment(cubeName, date4, date5)) // one empty segment
             return false;
         checkEmptySegRangeInfo(cubeManager.getCube(cubeName));
+        checkNormalRowCount(cubeManager.getCube(cubeName));
         if (!buildSegment(cubeName, date5, date6)) // another empty segment
             return false;
         checkEmptySegRangeInfo(cubeManager.getCube(cubeName));
+        checkNormalRowCount(cubeManager.getCube(cubeName));
 
 
         if (!mergeSegment(cubeName, date2, date4)) // merge 2 normal segments
@@ -466,5 +481,41 @@ public class BuildCubeWithEngine {
                 return Long.compare(o1.getLastBuildTime(), o2.getLastBuildTime());
             }
         });
+    }
+
+    protected void checkNormalRowCount(CubeInstance cube) {
+        CubeSegment segment = getLastModifiedSegment(cube);
+        IJoinedFlatTableDesc joinedFlatTableDesc = EngineFactory.getJoinedFlatTableDesc(segment);
+        List<TblColRef> allColumns = joinedFlatTableDesc.getAllColumns();
+        Set<TableRef> tableRefs = Sets.newHashSet();
+        for (TblColRef tblColRef : allColumns) {
+            tableRefs.add(tblColRef.getTableRef());
+        }
+        Map<String, String> snapshots = segment.getSnapshots();
+        String project = segment.getProject();
+        TableMetadataManager tableMetadataManager = TableMetadataManager.getInstance(KylinConfig.getInstanceFromEnv());
+        for (TableRef tableRef : tableRefs) {
+            if (tableRef.getTableIdentity().equals(cube.getRootFactTable())) {
+                continue;
+            }
+            if (checkNeedToCalculate(tableRef, snapshots)) {
+                TableExtDesc tableDescFromMetadata = tableMetadataManager.getTableExt(tableRef.getTableName(), project);
+                Assert.assertNotNull(tableDescFromMetadata.getTotalRows());
+                Assert.assertNotNull(tableDescFromMetadata.getRowCountStatus());
+                Assert.assertNotNull(tableDescFromMetadata.getLastModifiedTime());
+            }
+        }
+    }
+
+    private boolean checkNeedToCalculate(TableRef tableRef, Map<String, String> snapshots) {
+        if (snapshots == null) {
+            return true;
+        }
+        for (String key : snapshots.keySet()) {
+            if (tableRef.getTableIdentity().equals(key)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -68,7 +68,6 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
     private int rowCount = 0;
     private int samplingPercentage;
     private ByteBuffer tmpbuf;
-    
     private DictColDeduper dictColDeduper;
     private Map<Integer, DimensionRangeInfo> dimensionRangeInfoMap = Maps.newHashMap();
 
@@ -141,7 +140,7 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
             cuboidStatCalculators[i] = calculator;
             calculator.start();
         }
-        
+
         // setup dict col deduper
         dictColDeduper = new DictColDeduper();
         Set<TblColRef> dictCols = cubeDesc.getAllColumnsNeedDictionaryBuilt();
@@ -173,6 +172,15 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
 
         for (String[] row : rowCollection) {
             context.getCounter(RawDataCounter.BYTES).increment(countSizeInBytes(row));
+
+            for (TblColRef columnRef : intermediateTableDesc.getAllColumns()) {
+                int columnIndex = intermediateTableDesc.getColumnIndex(columnRef);
+                String fieldValue = row[columnIndex];
+
+                long fieldBytes = fieldValue == null ? 1 : StringUtil.utf8Length(fieldValue);
+                context.getCounter(BatchConstants.COLUMN_COUNTER_GROUP_NAME, columnRef.getIdentity()).increment(fieldBytes + 1);  // +1 for delimiter
+            }
+
             for (int i = 0; i < allCols.size(); i++) {
                 String fieldValue = row[columnIndex[i]];
                 if (fieldValue == null)
@@ -200,7 +208,6 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
             if (rowCount % 100 < samplingPercentage) {
                 putRowKeyToHLL(row);
             }
-            
             if (rowCount % 100 == 0) {
                 dictColDeduper.resetIfShortOfMem();
             }
@@ -208,7 +215,7 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
             rowCount++;
         }
     }
-    
+
     private void putRowKeyToHLL(String[] row) {
         for (CuboidStatCalculator cuboidStatCalculator : cuboidStatCalculators) {
             cuboidStatCalculator.putRow(row);
@@ -415,27 +422,27 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
             }
         }
     }
-    
+
     public static class DictColDeduper {
 
         final boolean enabled;
         final int resetThresholdMB;
         final Map<Integer, Set<String>> colValueSets = Maps.newHashMap();
-        
+
         public DictColDeduper() {
             this(200, 100);
         }
-        
+
         public DictColDeduper(int enableThresholdMB, int resetThresholdMB) {
             // only enable when there is sufficient memory
             this.enabled = MemoryBudgetController.getSystemAvailMB() >= enableThresholdMB;
             this.resetThresholdMB = resetThresholdMB;
         }
-        
+
         public void setIsDictCol(int i) {
             colValueSets.put(i, new HashSet<String>());
         }
-        
+
         public boolean isDictCol(int i) {
             return colValueSets.containsKey(i);
         }
@@ -443,7 +450,7 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
         public boolean add(int i, String fieldValue) {
             return colValueSets.get(i).add(fieldValue);
         }
-        
+
         public Set<String> getValueSet(int i) {
             return colValueSets.get(i);
         }
@@ -454,6 +461,6 @@ public class FactDistinctColumnsMapper<KEYIN> extends FactDistinctColumnsMapperB
                     set.clear();
             }
         }
-        
+
     }
 }

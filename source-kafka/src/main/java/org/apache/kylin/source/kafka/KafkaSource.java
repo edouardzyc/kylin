@@ -56,7 +56,6 @@ public class KafkaSource implements ISource {
     public KafkaSource(KylinConfig config) {
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <I> I adaptToBuildEngine(Class<I> engineInterface) {
         if (engineInterface == IMRInput.class) {
@@ -247,7 +246,7 @@ public class KafkaSource implements ISource {
     }
 
     @Override
-    public void unloadTable(String tableName, String project) throws IOException {
+    public void onUnloadTable(String tableName, String project) throws IOException {
         StreamingConfig config;
         KafkaConfig kafkaConfig;
         KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();

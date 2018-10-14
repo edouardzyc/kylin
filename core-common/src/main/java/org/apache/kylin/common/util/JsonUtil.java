@@ -93,6 +93,12 @@ public class JsonUtil {
         return mapper.readValue(content, typeRef);
     }
 
+    public static Map<String, Long> readLongValueAsMap(String content) throws IOException {
+        TypeReference<HashMap<String, Long>> typeRef = new TypeReference<HashMap<String, Long>>() {
+        };
+        return mapper.readValue(content, typeRef);
+    }
+
     public static JsonNode readValueAsTree(String content) throws IOException {
         return mapper.readTree(content);
     }

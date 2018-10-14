@@ -85,4 +85,9 @@ public class MockupReadableTable implements IReadableTable {
         return exists;
     }
 
+    @Override
+    public long getRowCount() throws IOException {
+        return content.size();
+    }
+
 }

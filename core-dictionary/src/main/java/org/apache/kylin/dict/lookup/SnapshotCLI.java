@@ -23,6 +23,7 @@ import java.io.IOException;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.metadata.TableMetadataManager;
 import org.apache.kylin.metadata.model.TableDesc;
+import org.apache.kylin.source.IReadableTable;
 import org.apache.kylin.source.SourceManager;
 
 public class SnapshotCLI {
@@ -42,8 +43,8 @@ public class SnapshotCLI {
         if (tableDesc == null)
             throw new IllegalArgumentException("Not table found by " + table);
 
-        SnapshotTable snapshot = snapshotMgr.rebuildSnapshot(SourceManager.createReadableTable(tableDesc, null),
-                tableDesc, overwriteUUID, conf);
+        IReadableTable sourceTable = SourceManager.getSource(tableDesc).createReadableTable(tableDesc, null);
+        SnapshotTable snapshot = snapshotMgr.rebuildSnapshot(sourceTable, tableDesc, overwriteUUID, conf);
         System.out.println("resource path updated: " + snapshot.getResourcePath());
     }
 }

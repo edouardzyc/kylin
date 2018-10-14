@@ -264,7 +264,7 @@ public class SnapshotTableV2 extends SnapshotTable {
     }
 
     @Override
-    public int getRowCount() {
+    public long getRowCount() {
         return contentsCache.size();
     }
 
