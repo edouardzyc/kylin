@@ -414,7 +414,7 @@ public class ExecutableDao {
         try (AutoReadWriteLock.AutoLock lock = executableDigestMapLock.lockForWrite()) {
             executableDigestCrud.reloadAll();
         }
-        try (AutoReadWriteLock.AutoLock lock = executableOutputDigestMapLock.lockForRead()) {
+        try (AutoReadWriteLock.AutoLock lock = executableOutputDigestMapLock.lockForWrite()) {
             executableOutputDigestCrud.reloadAll();
         }
     }
